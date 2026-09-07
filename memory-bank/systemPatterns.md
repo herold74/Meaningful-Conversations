@@ -218,3 +218,14 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** When a stale Docker image lacks `dist/avatars/`, the old fallback served HTML for `/avatars/*.png`, breaking coach portraits silently. Explicit 404 makes deploy/asset gaps obvious in DevTools and curl.
 - **Implementation:** `server.js` — regex test on `req.path` before `sendFile(index.html)`.
 
+### 26. Admin tab bar at capacity — no more icon tabs (2026-09-06)
+- **Decision:** The Admin Console icon tab bar in `AdminView.tsx` is **full** (7 tabs admin, 8 developer). **Do not add another top-level icon tab** without redesigning navigation first.
+- **Reasoning:** Below `lg`, tabs are icon-only (`flex-1`); at ~320px width with 8 tabs, touch targets are ~40px — already below Apple’s 44pt guideline. Another tab would worsen usability; labels only appear from 1024px up.
+- **Future options (when needed):** horizontal scroll on mobile; grouped sections (Operations / Analytics / Developer); overflow „Mehr“ menu; secondary nav inside a tab.
+- **Current tabs:** users, feedback, tickets, codes, [runner dev-only], practice-analytics, connector-analytics, api-usage.
+
+### 27. Connector SSE holdback must flush for streaming TTS (2026-09-07)
+- **Decision:** When stripping `[CONNECTOR_END]` from Connector SSE chunks, **flush the holdback tail** as a final chunk before `done: true`, not only in the final `done.text` payload.
+- **Reasoning:** Client streaming TTS enqueues sentences from SSE chunks; tail text left in the holdback buffer never reached TTS, so the last sentence was often silent. Coaching/practice streams have no holdback — unaffected.
+- **Implementation:** `routes/gemini/connector.js` — after the generator loop, emit `pending` (marker stripped) as one last SSE chunk. Frontend: `reconcileStreamingWithFinalText()` as safety net in `ChatView` + streaming playback wait in `useTts.ts`.
+

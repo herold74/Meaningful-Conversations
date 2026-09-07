@@ -26,6 +26,16 @@
 - **Connector QA Lab:** Admin Session Simulator tab; scripted optimal turns (`utils/connectorLabScripts.ts`), `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md` + print PDF (`npm run generate:connector-pdf`).
 - **Connector Analytics (GDPR):** `connector_run_stats` (scores only, no userId/text); `GET /api/admin/connector-stats`; `AdminConnectorAnalyticsView` tab; k=5; 12mo retention. Stats from next completed evaluate onward.
 - **Commits:** `307963df` (analytics + PDF) · `ec3848e9` (build 10 sync).
+- **Admin UX constraint:** Icon tab bar at capacity (7/8 tabs) — no further top-level tabs without nav redesign (`systemPatterns.md` Decision #26).
+
+## Session handoff (2026-09-07) — Connector voice mode TTS fix (committed, not deployed)
+
+- **Problem:** Connector Live cut off last sentence(s) in TTS; persona voice did not reliably switch between vignettes.
+- **Root cause:** SSE `[CONNECTOR_END]` holdback tail never flushed to client; shared streaming playback could stop before all sentences synthesized; opening line used generic first-message auto-speak without persona voice reset.
+- **Fix (committed, not deployed):** `connector.js` flush holdback tail; `useTts.ts` streaming reconcile/wait + `skipAutoFirstMessage` + `resetFirstMessageSpoken` on gender change; `ChatView.tsx` dedicated Connector opening effect + `reconcileStreamingWithFinalText` after stream.
+- **Copy:** Connector Practice cross-sell text scoped to coaching trainees (DE/EN).
+- **Coaching/practice:** Shared streaming improvements only; holdback fix is Connector-only.
+- **Next:** Staging QA in voice mode → deploy Build 11.
 
 ## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
 

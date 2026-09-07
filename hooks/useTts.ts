@@ -33,11 +33,25 @@ export interface UseTtsParams {
   t: (key: string) => string;
   /** Practice coachee voice gender (maps to gender-specific TTS bot id). */
   genderOverride?: 'male' | 'female';
+  /** Connector handles its own opening TTS when vignette changes. */
+  skipAutoFirstMessage?: boolean;
 }
 
 export type TtsStatus = 'idle' | 'speaking' | 'paused';
 
-export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, isNewSession, t, genderOverride }: UseTtsParams) {
+function cleanTextForTts(text: string): string {
+  return text
+    .replace(/#{1,6}\s/g, '')
+    .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+    .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
+    .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
+    .replace(/^>\s?/gm, '')
+    .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
+    .trim();
+}
+
+export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, isNewSession, t, genderOverride, skipAutoFirstMessage }: UseTtsParams) {
   const ttsBotId = useMemo(
     () => resolveTtsBotId(bot.id, genderOverride),
     [bot.id, genderOverride],
@@ -318,29 +332,12 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [isVoiceMode, bot.name]);
 
   useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      if (currentAudioUrlRef.current) {
-        URL.revokeObjectURL(currentAudioUrlRef.current);
-        currentAudioUrlRef.current = null;
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
-      if (audioLoadingTimeoutRef.current) {
-        clearTimeout(audioLoadingTimeoutRef.current);
-        audioLoadingTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     hasSpokenFirstMessageRef.current = false;
-  }, [bot.id, isNewSession]);
+  }, [bot.id, isNewSession, genderOverride]);
+
+  const resetFirstMessageSpoken = useCallback(() => {
+    hasSpokenFirstMessageRef.current = false;
+  }, []);
 
   const unlockAudioSession = useCallback(() => {
     if (!audioContextRef.current) {
@@ -393,6 +390,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [isIOS]);
 
   const stopTts = useCallback(() => {
+    if (streamingTtsRef.current) {
+      streamingTtsRef.current.resolvedUrls.forEach((u) => u && URL.revokeObjectURL(u));
+      streamingTtsRef.current = null;
+    }
     if (sentenceQueueRef.current) {
       sentenceQueueRef.current.active = false;
       sentenceQueueRef.current.urls.forEach(u => u && URL.revokeObjectURL(u));
@@ -400,6 +401,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     }
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.src = '';
     }
     if (gongAudioRef.current) {
       gongAudioRef.current.pause();
@@ -412,7 +414,61 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       clearInterval(speechPollingRef.current);
       speechPollingRef.current = null;
     }
+    isSpeakingRef.current = false;
+    setIsLoadingAudio(false);
     setTtsStatus('idle');
+  }, [setIsLoadingAudio]);
+
+  useEffect(() => {
+    return () => {
+      stopTts();
+      if (currentAudioUrlRef.current) {
+        URL.revokeObjectURL(currentAudioUrlRef.current);
+        currentAudioUrlRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      if (audioLoadingTimeoutRef.current) {
+        clearTimeout(audioLoadingTimeoutRef.current);
+        audioLoadingTimeoutRef.current = null;
+      }
+    };
+  }, [stopTts]);
+
+  const resumeStreamingPlaybackIfNeeded = useCallback(() => {
+    const s = streamingTtsRef.current;
+    const queue = sentenceQueueRef.current;
+    if (!s?.active || !queue?.active || !s.hasStartedPlaying) return;
+
+    const audio = s.audio ?? audioRef.current;
+    if (!audio) return;
+
+    const idx = queue.currentIndex;
+    if (idx >= s.synthQueue.length) return;
+
+    const playAt = (index: number) => {
+      const url = queue.urls[index];
+      if (url === 'skip') {
+        queue.currentIndex = index + 1;
+        if (queue.currentIndex < s.synthQueue.length) playAt(queue.currentIndex);
+        return;
+      }
+      if (url) {
+        queue.currentIndex = index;
+        audio.src = url;
+        audio.play().catch(() => {
+          setTtsStatus('idle');
+          setIsLoadingAudio(false);
+          isSpeakingRef.current = false;
+        });
+      }
+    };
+
+    if (audio.paused || audio.ended || !audio.src) {
+      playAt(idx);
+    }
   }, []);
 
   const processStreamingSynthQueue = useCallback(async () => {
@@ -466,6 +522,42 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           const totalSentences = streaming ? streaming.synthQueue.length : queue.urls.length;
 
           if (queue.currentIndex >= totalSentences) {
+            if (streaming && !streaming.streamComplete) {
+              const pollId = window.setInterval(() => {
+                const st = streamingTtsRef.current;
+                const q = sentenceQueueRef.current;
+                if (!q?.active || !st) {
+                  window.clearInterval(pollId);
+                  return;
+                }
+                const total = st.synthQueue.length;
+                if (q.currentIndex < total) {
+                  window.clearInterval(pollId);
+                  const nextUrl = q.urls[q.currentIndex];
+                  if (nextUrl === 'skip') {
+                    audio.dispatchEvent(new Event('ended'));
+                    return;
+                  }
+                  if (nextUrl) {
+                    audio.src = nextUrl;
+                    audio.play().catch(() => {
+                      setTtsStatus('idle');
+                      setIsLoadingAudio(false);
+                      isSpeakingRef.current = false;
+                    });
+                  }
+                  return;
+                }
+                if (st.streamComplete && q.currentIndex >= total) {
+                  window.clearInterval(pollId);
+                  st.active = false;
+                  setTtsStatus('idle');
+                  isSpeakingRef.current = false;
+                  sentenceQueueRef.current = null;
+                }
+              }, 100);
+              return;
+            }
             if (!streaming || streaming.streamComplete) {
               if (streaming) streaming.active = false;
               setTtsStatus('idle');
@@ -512,6 +604,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
         audio.src = url;
         await audio.play();
+      } else {
+        resumeStreamingPlaybackIfNeeded();
       }
     } catch (err) {
       console.warn(`[TTS Stream] Sentence ${nextIdx + 1} synthesis failed:`, err);
@@ -550,7 +644,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     }
 
     if (s.synthQueue.length > s.resolvedBlobs.length) processStreamingSynthQueue();
-  }, [ttsBotId, language]);
+    else resumeStreamingPlaybackIfNeeded();
+  }, [ttsBotId, language, resumeStreamingPlaybackIfNeeded]);
 
   /**
    * Initialize streaming TTS. Returns true if sentence-level streaming
@@ -606,15 +701,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     const s = streamingTtsRef.current;
     if (!s || !s.active) return;
 
-    const cleanSentence = sentence
-      .replace(/#{1,6}\s/g, '')
-      .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-      .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
-      .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
-      .replace(/^>\s?/gm, '')
-      .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
-      .trim();
+    const cleanSentence = cleanTextForTts(sentence);
 
     if (!cleanSentence) return;
 
@@ -633,16 +720,56 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     if (!s) return;
     // Mark stream ended but keep active=true until last sentence finishes playing
     s.streamComplete = true;
-    lastSpokenTextRef.current = finalText
-      .replace(/#{1,6}\s/g, '')
-      .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-      .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
-      .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
-      .replace(/^>\s?/gm, '')
-      .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
-      .trim();
-  }, []);
+    lastSpokenTextRef.current = cleanTextForTts(finalText);
+    resumeStreamingPlaybackIfNeeded();
+  }, [resumeStreamingPlaybackIfNeeded]);
+
+  /**
+   * Enqueue any final sentences missing from the stream (Connector holdback tail,
+   * stage-direction strip, or late-arriving chunks).
+   */
+  const reconcileStreamingWithFinalText = useCallback((finalText: string) => {
+    const s = streamingTtsRef.current;
+    if (!s || !s.active) return;
+
+    const cleanFinal = cleanTextForTts(finalText);
+    if (!cleanFinal) return;
+
+    const normalize = (t: string) => t.replace(/\s+/g, ' ').trim();
+    const queued = normalize(s.synthQueue.join(' '));
+    const normalizedFinal = normalize(cleanFinal);
+
+    const enqueueMissing = (text: string) => {
+      for (const sentence of splitIntoSentences(text)) {
+        const norm = normalize(sentence);
+        if (!norm) continue;
+        const already = s.synthQueue.some((q) => {
+          const nq = normalize(q);
+          return nq === norm || nq.includes(norm) || norm.includes(nq);
+        });
+        if (!already) {
+          s.synthQueue.push(sentence);
+          s.sentenceCount++;
+        }
+      }
+      processStreamingSynthQueue();
+      resumeStreamingPlaybackIfNeeded();
+    };
+
+    if (!queued) {
+      enqueueMissing(cleanFinal);
+      return;
+    }
+
+    if (normalizedFinal.startsWith(queued)) {
+      const suffix = normalizedFinal.slice(queued.length).trim();
+      if (suffix) enqueueMissing(suffix);
+      return;
+    }
+
+    // Final text was trimmed vs streamed — enqueue any sentences not yet queued
+    enqueueMissing(cleanFinal);
+  }, [processStreamingSynthQueue, resumeStreamingPlaybackIfNeeded]);
 
   /** Cancel pending (not yet played) streaming sentences. */
   const cancelPendingSentences = useCallback(() => {
@@ -1167,13 +1294,14 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         (chatHistory.length === 2 && chatHistory[0].role === 'user'));
 
     if (isInitialBotResponse &&
+      !skipAutoFirstMessage &&
       (ttsMode === 'server' || voices.length > 0) &&
       isTtsEnabled &&
       !hasSpokenFirstMessageRef.current) {
       hasSpokenFirstMessageRef.current = true;
       speak(lastMessage.text);
     }
-  }, [chatHistory, voices, isTtsEnabled, ttsMode, speak]);
+  }, [chatHistory, voices, isTtsEnabled, ttsMode, speak, skipAutoFirstMessage]);
 
   const handlePreviewVoice = useCallback(async (voice: SpeechSynthesisVoice) => {
     if (!voice || !window.speechSynthesis) return;
@@ -1423,6 +1551,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     initStreamingTts,
     enqueueSentence,
     finishStreamingTts,
+    reconcileStreamingWithFinalText,
     cancelPendingSentences,
     botGender,
     ttsBotId,
@@ -1449,6 +1578,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     resetAudioSessionAfterRecording,
     unlockAudioSession,
     stopTts,
+    resetFirstMessageSpoken,
     audioRef,
     lastSpokenTextRef,
     gongAudioRef,
