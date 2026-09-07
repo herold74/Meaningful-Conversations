@@ -189,7 +189,7 @@ Jonas kommt frisch aus einem demütigenden Team-Meeting und will Dampf ablassen 
 
 ---
 
-## 6. Sophie · Repair (`sophie-repair`)
+## 6. Sophie · Verletzung ansprechen (`sophie-repair`)
 
 **Persona:** Enge Freundin, fühlt sich von etwas verletzt, das du letzte Woche gesagt hast.  
 **Schwerpunkte:** Neugier, Nicht-Werten, Gelassenheit  
