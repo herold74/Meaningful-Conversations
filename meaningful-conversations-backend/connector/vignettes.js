@@ -45,8 +45,8 @@ const CONNECTOR_VIGNETTES = [
       en: 'Immediately judging the email/quitting idea or downplaying ("it surely wasn\'t that bad") instead of first acknowledging the anger.',
     },
     goodConnection: {
-      de: 'Die Wut erst anerkennen, bevor irgendetwas anderes passiert; die Scham dahinter behutsam wahrnehmen; ruhig bleiben, obwohl Jonas eskaliert formuliert; nicht ungefragt beraten.',
-      en: 'Acknowledge the anger before anything else; gently notice the shame underneath; stay calm although Jonas escalates; no unsolicited advice.',
+      de: 'Die Wut erst anerkennen, bevor irgendetwas anderes passiert; die Scham dahinter behutsam wahrnehmen; ruhig bleiben, obwohl Jonas emotional wird; nicht ungefragt beraten.',
+      en: 'Acknowledge the anger before anything else; gently notice the shame underneath; stay calm although Jonas gets emotional; no unsolicited advice.',
     },
   },
   {
@@ -115,8 +115,8 @@ const CONNECTOR_VIGNETTES = [
       en: "Listen, I have to give them a yes or no by Friday. Vancouver. I've made endless pro-con lists and I'm not one step further. Just tell me: what would you do in my place?",
     },
     exitLine: {
-      de: 'Mist, ich hab gleich den Call mit denen. Ich meld mich nachher, ja?',
-      en: "Damn, I've got the call with them in a minute. I'll get back to you later, okay?",
+      de: 'Au, ich hab gleich den Call mit denen. Ich meld mich nachher, ja?',
+      en: "Oh, I've got the call with them in a minute. I'll get back to you later, okay?",
     },
     trap: {
       de: 'Die Ratsfrage wörtlich nehmen und entscheiden wollen („Ich würde den Job nehmen") oder Partei ergreifen (Job vs. Familie).',
@@ -267,8 +267,8 @@ const CONNECTOR_VIGNETTES = [
       en: 'Someone to share the joy before it immediately turns practical.',
     },
     opening: {
-      de: 'Rate mal — ich hab die Teamleitung bekommen! Ich sitz hier und grins dumm, und gleichzeitig denk ich: oh Gott, ab Montag bin ich plötzlich der, der schwierige Gespräche führen soll.',
-      en: "Guess what — I got the team lead role! I'm sitting here grinning like an idiot, and at the same time I'm thinking: oh God, as of Monday I'm suddenly the one who has to have difficult conversations.",
+      de: 'Rate mal — ich hab die Teamleitung bekommen! Ich sitz hier und grins dumm, und gleichzeitig denk ich: ab Montag bin ich plötzlich der, der schwierige Gespräche führen soll.',
+      en: "Guess what — I got the team lead role! I'm sitting here grinning like an idiot, and at the same time I'm thinking: as of Monday I'm suddenly the one who has to have difficult conversations.",
     },
     exitLine: {
       de: 'Ich muss los — aber danke, dass du mit mir gefeiert hast. Das tut gut.',

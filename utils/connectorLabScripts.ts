@@ -58,8 +58,8 @@ export const CONNECTOR_LAB_OPENINGS: Record<ConnectorLabVignetteId, { de: string
     en: "I'm not sure this is the right moment … but last week, when you said I always take things so hard — that's stayed with me. Did you mean it that way?",
   },
   'marc-promotion': {
-    de: 'Rate mal — ich hab die Teamleitung bekommen! Ich sitz hier und grins dumm, und gleichzeitig denk ich: oh Gott, ab Montag bin ich plötzlich der, der schwierige Gespräche führen soll.',
-    en: "Guess what — I got the team lead role! I'm sitting here grinning like an idiot, and at the same time I'm thinking: oh God, as of Monday I'm suddenly the one who has to have difficult conversations.",
+    de: 'Rate mal — ich hab die Teamleitung bekommen! Ich sitz hier und grins dumm, und gleichzeitig denk ich: ab Montag bin ich plötzlich der, der schwierige Gespräche führen soll.',
+    en: "Guess what — I got the team lead role! I'm sitting here grinning like an idiot, and at the same time I'm thinking: as of Monday I'm suddenly the one who has to have difficult conversations.",
   },
   'nina-review': {
     de: 'Haben Sie kurz Zeit? Morgen ist unser Jahresgespräch und ich … ich bin ehrlich gesagt ziemlich nervös. Sehen Sie das eigentlich als normal, oder sollte ich mir Sorgen machen?',
@@ -132,13 +132,13 @@ export const CONNECTOR_LAB_SCRIPTED_TURNS: Record<
     de: [
       'Ich höre, dass da mehr ist als nur „viel los". Du klingst wirklich erschöpft.',
       'Dass du nicht mehr klettern gehst — das klingt für mich nicht nach „alles gut".',
-      'Ich dränge nicht — aber ich bleibe gern bei dem, was du gerade gesagt hast. Was passiert abends auf dem Sofa?',
+      'Ich bleibe bei dem, was du gerade gesagt hast — ganz ohne Druck. Was passiert abends auf dem Sofa?',
       'Danke, dass du das teilst. Ich bin hier, ohne dir eine Diagnose zu geben.',
     ],
     en: [
       'I hear that there is more than just "a lot going on". You really sound exhausted.',
       'That you are not climbing anymore — that does not sound like "all good" to me.',
-      'I will not push — but I am happy to stay with what you just said. What happens on the sofa in the evenings?',
+      "I'll stay with what you just said — no pressure. What happens on the sofa in the evenings?",
       'Thank you for sharing that. I am here without giving you a diagnosis.',
     ],
   },
@@ -159,13 +159,13 @@ export const CONNECTOR_LAB_SCRIPTED_TURNS: Record<
   'marc-promotion': {
     de: [
       'Wow — das ist echt groß! Herzlichen Glückwunsch zur Teamleitung. Ich freu mich richtig mit dir.',
-      'Du grindest und gleichzeitig kommt gleich der „oh Gott"-Gedanke — beides darf da sein. Was freut dich am meisten daran?',
+      'Du grindest und gleichzeitig kommt gleich der Zweifel — beides darf da sein. Was freut dich am meisten daran?',
       'Und was macht dir am meisten Sorge, wenn du an Montag denkst?',
       'Danke, dass du das mit mir teilst. Feier das heute — du hast dir das verdient.',
     ],
     en: [
       "Wow — that's really big! Congratulations on the team lead role. I'm genuinely happy for you.",
-      "You're grinning and at the same time there's the 'oh God' thought — both can be there. What excites you most about it?",
+      "You're grinning and at the same time there's doubt creeping in — both can be there. What excites you most about it?",
       'And what worries you most when you think about Monday?',
       "Thanks for sharing this with me. Celebrate today — you've earned it.",
     ],
