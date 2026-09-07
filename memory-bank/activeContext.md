@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0
 **Branch:** `main`
-**Staging:** Deployed **2026-09-07**, v**2.6.0** Build **12** — https://mc-beta.manualmode.at (health OK). Connector next-steps ladder (micro-exercise, focused retry, opt-in coach bridge).
+**Staging:** Deployed **2026-09-07**, v**2.6.0** Build **14** — https://mc-beta.manualmode.at (health OK). Personality profile PDF redesign (hybrid Mockup A/B layout).
 **Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
@@ -37,6 +37,18 @@
 - **Commits:** `2efc663e` (fix + copy) · `c01d8ad6` (build 11 sync).
 - **Coaching/practice:** Shared streaming improvements only; holdback fix is Connector-only.
 - **Next:** Staging QA — Connector results ladder (score < 8) + voice mode regression.
+
+## Session handoff (2026-09-07) — Personality profile PDF redesign (deployed Build 14)
+
+- **PDF export:** `utils/pdfGeneratorReact.tsx` — hybrid layout (Mockup B editorial hero header + Mockup A app-cards body): flat cards, thin score bars, neutral OCEAN scale, full Riemann-Thomann SVG axis labels (Distanz/Nähe/Beständigkeit/Spontanität), two-page layout with `wrap={false}` sections for iOS share sheet.
+- **Design refs:** `DOCUMENTATION/design/pdf-profile-mockups/` (HTML mockups + PNGs + `render.mjs`).
+- **Commits:** `35d08323` (PDF redesign) · `4b7cf7b6` (build 14 sync).
+
+## Session handoff (2026-09-07) — Gloria connection-prep + Connector catalog (deployed Build 13)
+
+- **Gloria Interview:** Mode picker (standard vs. Gesprächsvorbereitung); Maxwell-inspired connection prep via questioning only (no coaching); transcript section „Verbindungspunkte“; Connector handoff starter for Gloria.
+- **Connector:** Practice catalog for single-vignette runs; returning users with saved signature land on catalog.
+- **Commits:** `8bb1ffa7` (feature) · `3c48c095` (build 13 sync).
 
 ## Session handoff (2026-09-07) — Connector next-steps ladder (deployed Build 12)
 
