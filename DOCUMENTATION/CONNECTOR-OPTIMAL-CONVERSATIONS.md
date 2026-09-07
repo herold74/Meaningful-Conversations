@@ -170,14 +170,14 @@ Jonas kommt frisch aus einem demütigenden Team-Meeting und will Dampf ablassen 
 |-----|----------------------|
 | 1 | „Ich höre, dass da mehr ist als nur ‚viel los'. Du klingst wirklich erschöpft." |
 | 2 | „Dass du nicht mehr klettern gehst — das klingt für mich nicht nach ‚alles gut'." |
-| 3 | „Ich dränge nicht — aber ich bleibe gern bei dem, was du gerade gesagt hast. Was passiert abends auf dem Sofa?" |
+| 3 | „Ich bleibe bei dem, was du gerade gesagt hast — ganz ohne Druck. Was passiert abends auf dem Sofa?" |
 | 4 | „Danke, dass du das teilst. Ich bin hier, ohne dir eine Diagnose zu geben." |
 
 ### Optimal conversation flow
 
 1. *"I hear that there is more than just \"a lot going on\". You really sound exhausted."*
 2. *"That you are not climbing anymore — that does not sound like \"all good\" to me."*
-3. *"I will not push — but I am happy to stay with what you just said. What happens on the sofa in the evenings?"*
+3. *"I'll stay with what you just said — no pressure. What happens on the sofa in the evenings?"*
 4. *"Thank you for sharing that. I am here without giving you a diagnosis."*
 
 ### Warum als optimal empfohlen?
@@ -239,14 +239,14 @@ Marc teilt gute Nachrichten und will mitfeiern — nicht sofort in Risiko-Warnun
 | Zug | Du (User) — Beispiel |
 |-----|----------------------|
 | 1 | „Wow — das ist echt groß! Herzlichen Glückwunsch zur Teamleitung. Ich freu mich richtig mit dir." |
-| 2 | „Du grindest und gleichzeitig kommt gleich der ‚oh Gott'-Gedanke — beides darf da sein. Was freut dich am meisten daran?" |
+| 2 | „Du grindest und gleichzeitig kommt gleich der Zweifel — beides darf da sein. Was freut dich am meisten daran?" |
 | 3 | „Und was macht dir am meisten Sorge, wenn du an Montag denkst?" |
 | 4 | „Danke, dass du das mit mir teilst. Feier das heute — du hast dir das verdient." |
 
 ### Optimal conversation flow
 
 1. *"Wow — that's really big! Congratulations on the team lead role. I'm genuinely happy for you."*
-2. *"You're grinning and at the same time there's the 'oh God' thought — both can be there. What excites you most about it?"*
+2. *"You're grinning and at the same time there's doubt creeping in — both can be there. What excites you most about it?"*
 3. *"And what worries you most when you think about Monday?"*
 4. *"Thanks for sharing this with me. Celebrate today — you've earned it."*
 

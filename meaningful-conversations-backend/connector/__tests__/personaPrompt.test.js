@@ -44,14 +44,18 @@ describe('buildConnectorPersonaPrompt — role guard', () => {
     const prompt = buildConnectorPersonaPrompt({ vignetteId: 'jonas-meeting', language: 'de', userTurnCount: 1 });
     expect(prompt).toContain('ROLLEN-GUARD');
     expect(prompt).toContain('KEIN Coach');
+    expect(prompt).toContain('Fäkalsprache');
+    expect(prompt).toContain('verdammt');
     expect(prompt).toContain('Jonas');
     expect(prompt).toContain('Bernhard');
   });
 
-  test('English prompt includes ROLE GUARD', () => {
+  test('English prompt includes ROLE GUARD and moderated profanity rule', () => {
     const prompt = buildConnectorPersonaPrompt({ vignetteId: 'leila-breakup', language: 'en', userTurnCount: 1 });
     expect(prompt).toContain('ROLE GUARD');
     expect(prompt).toContain('NOT a coach');
+    expect(prompt).toContain('fecal language');
+    expect(prompt).toContain('damn');
     expect(prompt).toContain('Leila');
   });
 
