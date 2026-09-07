@@ -1,4 +1,4 @@
-import type { Bot, ConnectorEndType, ConnectorVignettePublic, Message } from '../types';
+import type { Bot, ConnectorDimensionKey, ConnectorEndType, ConnectorVignettePublic, Message } from '../types';
 
 export const CONNECTOR_PERSONA_BOT_ID = 'connector-persona';
 
@@ -16,6 +16,7 @@ export interface ConnectorRunState {
     currentIndex: number;
     entries: { vignetteId: string; history: Message[]; endType: ConnectorEndType }[];
     liveMode: boolean;
+    practiceFocus?: ConnectorDimensionKey;
 }
 
 export interface ConnectorChatConfig {

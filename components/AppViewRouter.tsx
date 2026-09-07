@@ -8,7 +8,7 @@ import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorRea
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
-import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult } from '../types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorDimensionKey } from '../types';
 import type { ConnectorRunState } from '../utils/connectorRun';
 import type { UserIntent } from './IntentPickerView';
 import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
@@ -175,11 +175,14 @@ export interface AppViewRouterProps {
   connectorEvaluation: ConnectorEvaluationResult | null;
   isConnectorStarting: boolean;
   connectorSaveState: 'idle' | 'saving' | 'saved' | 'error';
+  connectorPracticeFocus: ConnectorDimensionKey | null;
   handleOpenConnectorIntro: () => void;
   handleStartConnectorRun: (liveMode: boolean) => void;
   handleConnectorEnded: (endType: 'heard' | 'timeout') => void;
   handleConnectorSaveToProfile: () => void;
   handleConnectorRestart: () => void;
+  handleConnectorRestartWithFocus: (focus: ConnectorDimensionKey) => void;
+  handleConnectorStartCoachSession: (botId: string, starterPrompt: string) => void;
   handleConnectorDone: () => void;
   handleConnectorPracticeCrossSell: () => void;
 
@@ -310,11 +313,14 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     connectorEvaluation,
     isConnectorStarting,
     connectorSaveState,
+    connectorPracticeFocus,
     handleOpenConnectorIntro,
     handleStartConnectorRun,
     handleConnectorEnded,
     handleConnectorSaveToProfile,
     handleConnectorRestart,
+    handleConnectorRestartWithFocus,
+    handleConnectorStartCoachSession,
     handleConnectorDone,
     handleConnectorPracticeCrossSell,
     refinementPreview,
@@ -777,6 +783,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onStart={handleStartConnectorRun}
           onBack={() => setView('botSelection')}
           isStarting={isConnectorStarting}
+          practiceFocus={connectorPracticeFocus}
         />
       );
     case 'connectorChat': {
@@ -816,6 +823,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onDone={handleConnectorDone}
           showPracticeCrossSell={(connectorEvaluation.overallScore ?? 0) >= 8}
           onPracticeCrossSell={handleConnectorPracticeCrossSell}
+          onRestartWithFocus={handleConnectorRestartWithFocus}
+          onStartCoachSession={handleConnectorStartCoachSession}
         />
       ) : null;
     case 'practiceSetup':
