@@ -120,6 +120,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     isNewSession,
     t,
     genderOverride: connectorConfig ? connectorConfig.personaGender : practiceCoacheeGender,
+    skipAutoFirstMessage: !!connectorConfig?.liveMode,
   });
   const meditation = useMeditation({
     speak: tts.speak,
@@ -142,6 +143,36 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       tts.setIsTtsEnabled(true);
     }
   }, [connectorConfig?.liveMode, connectorConfig?.vignetteId, tts]);
+
+  /** Connector: speak pre-seeded opening with the correct persona voice after vignette/voice settings apply. */
+  useEffect(() => {
+    if (!connectorConfig?.liveMode) return;
+    if (chatHistory.length !== 1 || chatHistory[0].role !== 'bot') return;
+    if (!tts.isTtsEnabled) return;
+    if (tts.ttsMode === 'local' && tts.voices.length === 0) return;
+
+    const openingText = chatHistory[0].text?.trim();
+    if (!openingText) return;
+
+    tts.stopTts();
+    tts.resetFirstMessageSpoken();
+
+    const timer = window.setTimeout(() => {
+      tts.speak(openingText);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    connectorConfig?.vignetteId,
+    connectorConfig?.personaGender,
+    connectorConfig?.liveMode,
+    tts.isTtsEnabled,
+    tts.ttsBotId,
+    tts.ttsMode,
+    tts.voices.length,
+    chatHistory,
+    tts,
+  ]);
 
   const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -308,6 +339,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         }, 1000);
       } else if (useStreamingTts) {
         flushSentences('', true);
+        tts.reconcileStreamingWithFinalText(meditationData.displayText);
         tts.finishStreamingTts(meditationData.displayText);
       } else {
         tts.speak(meditationData.displayText);

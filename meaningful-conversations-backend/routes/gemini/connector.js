@@ -184,6 +184,15 @@ router.post('/connector/turn', authMiddleware, async (req, res) => {
         }
       }
 
+      // Flush holdback tail so client TTS receives the full spoken text (not just done.text).
+      if (pending.length > 0) {
+        const tailChunk = pending.split(CONNECTOR_END_MARKER).join('');
+        if (tailChunk) {
+          res.write(`data: ${JSON.stringify({ chunk: tailChunk })}\n\n`);
+        }
+        pending = '';
+      }
+
       const { text: fullText, ended } = extractConnectorEnd(finalEvent?.fullText || '');
       const cleanText = stripCoacheeStageDirections(fullText);
       const forceEnded = userTurnCount >= MAX_USER_TURNS;
