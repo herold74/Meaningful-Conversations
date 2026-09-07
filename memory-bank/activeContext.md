@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0
 **Branch:** `main`
-**Staging:** Deployed **2026-09-07**, v**2.6.0** Build **14** — https://mc-beta.manualmode.at (health OK). Personality profile PDF redesign (hybrid Mockup A/B layout).
+**Staging:** Deployed **2026-09-07**, v**2.6.0** Build **15** — https://mc-beta.manualmode.at (health OK). Connector practice feedback, 8-vignette docs, distinct avatars (Sophie/Marc/Nina).
 **Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
@@ -37,6 +37,13 @@
 - **Commits:** `2efc663e` (fix + copy) · `c01d8ad6` (build 11 sync).
 - **Coaching/practice:** Shared streaming improvements only; holdback fix is Connector-only.
 - **Next:** Staging QA — Connector results ladder (score < 8) + voice mode regression.
+
+## Session handoff (2026-09-07) — Connector practice feedback + docs (deployed Build 15)
+
+- **Practice runs:** Catalog single-vignette sessions now get full LLM evaluation + dedicated results UI; saved profile signature is **not** overwritten (no save button on practice results).
+- **Docs:** `CONNECTOR-OPTIMAL-CONVERSATIONS.md` + PDF — 8 vignettes, DE copy + EN example turns only, disclaimer without QA score targets.
+- **Avatars:** `connector-sophie.png`, `connector-marc.png`, `connector-nina.png` — unique per persona (no reuse of Leila/Tom/Carmen).
+- **Commits:** `da41159c` (feature + docs + avatars) · `1c51a743` (build 15 sync).
 
 ## Session handoff (2026-09-07) — Personality profile PDF redesign (deployed Build 14)
 
