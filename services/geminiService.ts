@@ -1,4 +1,4 @@
-import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog, ConnectorVignettePublic, ConnectorEvaluationResult, ConnectorEndType } from '../types';
+import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog, ConnectorVignettePublic, ConnectorVignetteCatalogEntry, ConnectorEvaluationResult, ConnectorEndType } from '../types';
 import { apiFetch, getApiBaseUrl, getSession } from './api';
 
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
@@ -214,13 +214,20 @@ export const rateTranscriptEvaluation = async (
 export const generateInterviewTranscript = async (
     history: Message[],
     language: Language,
-    userName?: string
-): Promise<{ summary: string; setup: string; transcript: string }> => {
+    userName?: string,
+    connectionPrep?: boolean,
+): Promise<{ summary: string; setup: string; transcript: string; connectionPoints?: string; connectionPrep?: boolean }> => {
     const response = await apiFetch('/gemini/interview/transcript', {
         method: 'POST',
-        body: JSON.stringify({ history, language, userName }),
+        body: JSON.stringify({ history, language, userName, connectionPrep }),
     });
-    return { summary: response.summary, setup: response.setup, transcript: response.transcript };
+    return {
+        summary: response.summary,
+        setup: response.setup,
+        transcript: response.transcript,
+        connectionPoints: response.connectionPoints,
+        connectionPrep: response.connectionPrep,
+    };
 };
 
 export const transcribeAudio = async (
@@ -440,8 +447,21 @@ export const deletePracticeTranscript = async (id: string): Promise<void> => {
 
 export const startConnectorRun = async (
     language: Language,
-): Promise<{ vignettes: ConnectorVignettePublic[]; maxUserTurns: number }> => {
+): Promise<{ mode: 'assessment'; vignettes: ConnectorVignettePublic[]; maxUserTurns: number }> => {
     return await apiFetch(`/gemini/connector/start?language=${language}`);
+};
+
+export const fetchConnectorCatalog = async (
+    language: Language,
+): Promise<{ vignettes: ConnectorVignetteCatalogEntry[]; maxUserTurns: number }> => {
+    return await apiFetch(`/gemini/connector/catalog?language=${language}`);
+};
+
+export const fetchConnectorVignette = async (
+    vignetteId: string,
+    language: Language,
+): Promise<{ vignette: ConnectorVignettePublic; maxUserTurns: number }> => {
+    return await apiFetch(`/gemini/connector/vignette/${encodeURIComponent(vignetteId)}?language=${language}`);
 };
 
 /**

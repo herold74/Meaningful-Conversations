@@ -48,12 +48,14 @@ import EvaluationReview from './EvaluationReview';
 import EvaluationHistory from './EvaluationHistory';
 import PracticeSetupView from './PracticeSetupView';
 import ConnectorIntroView from './ConnectorIntroView';
+import ConnectorCatalogView from './ConnectorCatalogView';
 import ConnectorResultsView from './ConnectorResultsView';
 import PracticeEvaluationReview from './PracticeEvaluationReview';
 import PracticeHistoryView from './PracticeHistoryView';
 import PracticeProgressView from './PracticeProgressView';
 import PracticeSelfRatingView from './PracticeSelfRatingView';
 import PracticePhase2PickerView from './PracticePhase2PickerView';
+import GloriaInterviewIntroView from './GloriaInterviewIntroView';
 import InterviewTranscriptView from './InterviewTranscriptView';
 import TranscriptRecorder from './TranscriptRecorder';
 import AchievementsView from './AchievementsView';
@@ -176,8 +178,13 @@ export interface AppViewRouterProps {
   isConnectorStarting: boolean;
   connectorSaveState: 'idle' | 'saving' | 'saved' | 'error';
   connectorPracticeFocus: ConnectorDimensionKey | null;
+  gloriaConnectionPrep: boolean;
+  setGloriaConnectionPrep: React.Dispatch<React.SetStateAction<boolean>>;
+  handleStartGloriaInterview: (mode: import('../utils/gloriaInterview').GloriaInterviewMode) => void;
   handleOpenConnectorIntro: () => void;
   handleStartConnectorRun: (liveMode: boolean) => void;
+  handleStartConnectorPractice: (vignetteId: string, liveMode: boolean) => void;
+  handleConnectorNewAssessment: () => void;
   handleConnectorEnded: (endType: 'heard' | 'timeout') => void;
   handleConnectorSaveToProfile: () => void;
   handleConnectorRestart: () => void;
@@ -314,8 +321,13 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     isConnectorStarting,
     connectorSaveState,
     connectorPracticeFocus,
+    gloriaConnectionPrep,
+    setGloriaConnectionPrep,
+    handleStartGloriaInterview,
     handleOpenConnectorIntro,
     handleStartConnectorRun,
+    handleStartConnectorPractice,
+    handleConnectorNewAssessment,
     handleConnectorEnded,
     handleConnectorSaveToProfile,
     handleConnectorRestart,
@@ -786,6 +798,15 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           practiceFocus={connectorPracticeFocus}
         />
       );
+    case 'connectorCatalog':
+      return (
+        <ConnectorCatalogView
+          onStartPractice={handleStartConnectorPractice}
+          onBack={() => setView('botSelection')}
+          onNewAssessment={handleConnectorNewAssessment}
+          isStarting={isConnectorStarting}
+        />
+      );
     case 'connectorChat': {
       const connectorVignette = connectorRun?.vignettes[connectorRun.currentIndex];
       return connectorRun && connectorVignette && selectedBot ? (
@@ -1047,15 +1068,28 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       }
       return null;
     }
+    case 'gloriaInterviewIntro':
+      return (
+        <GloriaInterviewIntroView
+          onStart={handleStartGloriaInterview}
+          onBack={() => {
+            setSelectedBot(null);
+            setGloriaConnectionPrep(false);
+            setView('botSelection');
+          }}
+        />
+      );
     case 'interviewTranscript':
       return (
         <InterviewTranscriptView
           chatHistory={chatHistory}
           language={language}
           userName={currentUser?.firstName || undefined}
+          connectionPrep={gloriaConnectionPrep}
           onBack={() => {
             setSelectedBot(null);
             setChatHistory([]);
+            setGloriaConnectionPrep(false);
             setView('botSelection');
           }}
         />

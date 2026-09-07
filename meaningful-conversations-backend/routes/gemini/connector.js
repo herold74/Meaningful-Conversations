@@ -4,10 +4,11 @@ const authMiddleware = require('../../middleware/auth.js');
 const prisma = require('../../prismaClient.js');
 const {
   getVignetteById,
-  pickRunVignetteIds,
   toPublicVignette,
+  getAllPublicVignettesCatalog,
   VIGNETTES_PER_RUN,
 } = require('../../connector/vignettes.js');
+const { pickAssessmentVignetteIds } = require('../../connector/vignetteSelection.js');
 const {
   buildConnectorPersonaPrompt,
   extractConnectorEnd,
@@ -87,14 +88,34 @@ async function persistConnectorRunStat(evaluationResult, { language, liveMode, v
   }
 }
 
-// GET /api/gemini/connector/start — pick vignettes for a new run (registered users)
+// GET /api/gemini/connector/start — stratified random trio for first assessment run
 router.get('/connector/start', authMiddleware, async (req, res) => {
   const lang = normalizeLanguage(req.query.language);
-  const ids = pickRunVignetteIds(VIGNETTES_PER_RUN);
+  const ids = pickAssessmentVignetteIds(VIGNETTES_PER_RUN);
   res.json({
+    mode: 'assessment',
     vignettes: ids.map((id) => toPublicVignette(getVignetteById(id), lang)),
     maxUserTurns: MAX_USER_TURNS,
   });
+});
+
+// GET /api/gemini/connector/catalog — all scenarios for practice mode (no openings)
+router.get('/connector/catalog', authMiddleware, async (req, res) => {
+  const lang = normalizeLanguage(req.query.language);
+  res.json({
+    vignettes: getAllPublicVignettesCatalog(lang),
+    maxUserTurns: MAX_USER_TURNS,
+  });
+});
+
+// GET /api/gemini/connector/vignette/:id — one scenario with opening (practice chat start)
+router.get('/connector/vignette/:id', authMiddleware, async (req, res) => {
+  const lang = normalizeLanguage(req.query.language);
+  const vignette = getVignetteById(req.params.id);
+  if (!vignette) {
+    return res.status(404).json({ error: 'Unknown vignette.' });
+  }
+  res.json({ vignette: toPublicVignette(vignette, lang), maxUserTurns: MAX_USER_TURNS });
 });
 
 // POST /api/gemini/connector/turn — persona reply for one vignette

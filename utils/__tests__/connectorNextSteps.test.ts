@@ -49,4 +49,11 @@ describe('connectorNextSteps', () => {
     expect(prompt).toContain('Stay present longer');
     expect(prompt).toContain('prepare');
   });
+
+  it('builds Gloria-specific connection prep starter from connector handoff', () => {
+    const prompt = buildCoachStarterPrompt('curiosity', 'Ask before advising', 'en', 'gloria-interview');
+    expect(prompt).toContain('prepare for a conversation');
+    expect(prompt).toContain('Ask before advising');
+    expect(prompt).not.toContain('practice everyday conversation skills');
+  });
 });

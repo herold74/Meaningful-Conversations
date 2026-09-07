@@ -9,9 +9,15 @@ export const CONNECTOR_AVATARS: Record<string, string> = {
     'tom-vancouver': '/avatars/connector-tom.png',
     'carmen-mia': '/avatars/connector-carmen.png',
     'david-exhaustion': '/avatars/connector-david.png',
+    'sophie-repair': '/avatars/connector-leila.png',
+    'marc-promotion': '/avatars/connector-tom.png',
+    'nina-review': '/avatars/connector-carmen.png',
 };
 
+export type ConnectorRunMode = 'assessment' | 'practice';
+
 export interface ConnectorRunState {
+    mode: ConnectorRunMode;
     vignettes: ConnectorVignettePublic[];
     currentIndex: number;
     entries: { vignetteId: string; history: Message[]; endType: ConnectorEndType }[];
