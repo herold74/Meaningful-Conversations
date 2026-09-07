@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0
 **Branch:** `main`
-**Staging:** Deployed **2026-09-07**, v**2.6.0** Build **11** — https://mc-beta.manualmode.at (health OK). Connector voice TTS fix + Practice cross-sell copy.
+**Staging:** Deployed **2026-09-07**, v**2.6.0** Build **12** — https://mc-beta.manualmode.at (health OK). Connector next-steps ladder (micro-exercise, focused retry, opt-in coach bridge).
 **Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
@@ -36,7 +36,12 @@
 - **Copy:** Connector Practice cross-sell text scoped to coaching trainees (DE/EN).
 - **Commits:** `2efc663e` (fix + copy) · `c01d8ad6` (build 11 sync).
 - **Coaching/practice:** Shared streaming improvements only; holdback fix is Connector-only.
-- **Next:** Staging QA — Connector voice mode (full sentences + persona voice switch on vignette advance).
+- **Next:** Staging QA — Connector results ladder (score < 8) + voice mode regression.
+
+## Session handoff (2026-09-07) — Connector next-steps ladder (deployed Build 12)
+
+- **Feature:** Micro-commitment ladder on results when score < 8: (1) everyday micro-exercise, (2) Connector retry with focus badge, (3) opt-in Kommunikation coach (Nobody/Sam/Gloria) with copyable starter. Practice cross-sell unchanged at ≥ 8.
+- **Commits:** `0940977e` (ladder) · `5db9ccd1` (build 12 sync).
 
 ## Persistente Notizen (ASC 2.5.7 — bitte nicht vergessen)
 
