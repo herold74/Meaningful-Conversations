@@ -16,6 +16,7 @@ const DIMENSION_EMOJI: Record<ConnectorDimensionKey, string> = {
 interface ConnectorResultsViewProps {
   evaluation: ConnectorEvaluationResult;
   vignettes: ConnectorVignettePublic[];
+  runMode: 'assessment' | 'practice';
   onSaveToProfile: () => void;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
   canSave: boolean;
@@ -31,6 +32,7 @@ interface ConnectorResultsViewProps {
 const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
   evaluation,
   vignettes,
+  runMode,
   onSaveToProfile,
   saveState,
   canSave,
@@ -54,18 +56,22 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
   const personaName = (vignetteId: string) =>
     vignettes.find((v) => v.id === vignetteId)?.personaName || vignetteId;
 
+  const isPracticeRun = runMode === 'practice';
+
   return (
     <div className="w-full max-w-4xl mx-auto py-8 px-4 sm:px-6">
       <div className="bg-background-secondary/80 dark:bg-background-secondary/40 backdrop-blur-sm border border-border-primary/60 shadow-card rounded-card p-6 md:p-8 lg:p-10">
         <h1 className="text-2xl md:text-3xl font-bold text-content-primary mb-1">
-          {t('connector_results_title')}
+          {t(isPracticeRun ? 'connector_results_practice_title' : 'connector_results_title')}
         </h1>
-        <p className="text-content-tertiary text-sm mb-3">{t('connector_results_subtitle')}</p>
+        <p className="text-content-tertiary text-sm mb-3">
+          {t(isPracticeRun ? 'connector_results_practice_subtitle' : 'connector_results_subtitle')}
+        </p>
         <p
           role="note"
           className="text-sm text-content-secondary leading-relaxed mb-6 px-4 py-3 rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary/80"
         >
-          {t('connector_results_run_info')}
+          {t(isPracticeRun ? 'connector_results_practice_run_info' : 'connector_results_run_info')}
         </p>
 
         {/* Overall + radar */}
@@ -172,11 +178,13 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
         )}
 
         {/* Disclaimer */}
-        <p className="text-xs text-content-tertiary mb-6">{t('connector_results_disclaimer')}</p>
+        <p className="text-xs text-content-tertiary mb-6">
+          {t(isPracticeRun ? 'connector_results_practice_disclaimer' : 'connector_results_disclaimer')}
+        </p>
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
-          {canSave && saveState !== 'saved' && (
+          {!isPracticeRun && canSave && saveState !== 'saved' && (
             <button
               onClick={onSaveToProfile}
               disabled={saveState === 'saving'}
@@ -185,7 +193,7 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
               {saveState === 'saving' ? t('connector_results_saving') : t('connector_results_save')}
             </button>
           )}
-          {saveState === 'saved' && (
+          {!isPracticeRun && saveState === 'saved' && (
             <div className="flex-1 py-3 px-6 text-center text-sm font-medium text-accent-primary border border-accent-primary/40 rounded-lg">
               ✓ {t('connector_results_saved')}
             </div>
@@ -194,13 +202,13 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
             onClick={onRestart}
             className="py-3 px-6 border border-border-primary text-content-secondary hover:text-content-primary font-medium rounded-lg transition-colors"
           >
-            {t('connector_results_restart')}
+            {t(isPracticeRun ? 'connector_results_practice_restart' : 'connector_results_restart')}
           </button>
           <button
             onClick={onDone}
             className="py-3 px-6 border border-border-primary text-content-secondary hover:text-content-primary font-medium rounded-lg transition-colors"
           >
-            {t('connector_results_done')}
+            {t(isPracticeRun ? 'connector_results_practice_done' : 'connector_results_done')}
           </button>
         </div>
         {saveState === 'error' && (

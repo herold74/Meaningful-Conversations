@@ -94,6 +94,9 @@ const VIGNETTE_LABEL_KEYS: Record<string, string> = {
   'tom-vancouver': 'connector_lab_vignette_tom',
   'carmen-mia': 'connector_lab_vignette_carmen',
   'david-exhaustion': 'connector_lab_vignette_david',
+  'sophie-repair': 'connector_lab_vignette_sophie',
+  'marc-promotion': 'connector_lab_vignette_marc',
+  'nina-review': 'connector_lab_vignette_nina',
 };
 
 const AdminConnectorAnalyticsView: React.FC = () => {

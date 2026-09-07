@@ -11,7 +11,7 @@ After each generation, the backend runs `validateNarrativeConnectorConsistency()
 | Check | Severity |
 |-------|----------|
 | Connector mentioned when no input | high |
-| Vignette persona names (Jonas, Leila, Tom, Carmen, David) | high |
+| Vignette persona names (Jonas, Leila, Tom, Carmen, David, Sophie, Marc, Nina) | high |
 | Low empathy/presence scores vs. “natural empath/presence” claims | medium |
 | `operatingSystem` length > ~100 words | low |
 

@@ -837,6 +837,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
         <ConnectorResultsView
           evaluation={connectorEvaluation}
           vignettes={connectorRun.vignettes}
+          runMode={connectorRun.mode}
           onSaveToProfile={handleConnectorSaveToProfile}
           saveState={connectorSaveState}
           canSave={!!currentUser && !!encryptionKey}
