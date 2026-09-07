@@ -45,6 +45,12 @@
 - **Avatars:** `connector-sophie.png`, `connector-marc.png`, `connector-nina.png` — unique per persona (no reuse of Leila/Tom/Carmen).
 - **Commits:** `da41159c` (feature + docs + avatars) · `1c51a743` (build 15 sync).
 
+## Session handoff (2026-09-07) — Connector profanity policy + script copy (deployed Build 17)
+
+- **Persona prompts:** Tiered language — mild frustration allowed (`verdammt`, `so ein Idiot` about situation/third party); fecal language, slurs, and direct insults forbidden.
+- **Vignettes/scripts:** Tom exit softened (`Au`/`Oh`), Marc opening without „oh Gott", Jonas „emotional" not „eskaliert"; David turn 3 + Marc optimal turns in lab scripts + docs/PDF.
+- **Commits:** `4c38d6b3` (policy + copy) · `21d92707` (build 17 sync).
+
 ## Session handoff (2026-09-07) — Personality profile PDF redesign (deployed Build 14)
 
 - **PDF export:** `utils/pdfGeneratorReact.tsx` — hybrid layout (Mockup B editorial hero header + Mockup A app-cards body): flat cards, thin score bars, neutral OCEAN scale, full Riemann-Thomann SVG axis labels (Distanz/Nähe/Beständigkeit/Spontanität), two-page layout with `wrap={false}` sections for iOS share sheet.
