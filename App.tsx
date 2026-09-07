@@ -953,11 +953,6 @@ const App: React.FC = () => {
 
         // --- The Connector mode: ending means finishing the run early ---
         if (connectorRun && selectedBot.id === CONNECTOR_PERSONA_BOT_ID) {
-            if (connectorRun.mode === 'practice') {
-                resetConnectorState();
-                setView('connectorCatalog');
-                return;
-            }
             const hasUserMessages = chatHistory.some((m) => m.role === 'user');
             const current = connectorRun.vignettes[connectorRun.currentIndex];
             const entries = hasUserMessages && current
@@ -965,11 +960,11 @@ const App: React.FC = () => {
                 : connectorRun.entries;
             if (entries.length === 0) {
                 resetConnectorState();
-                setView('botSelection');
+                setView(connectorRun.mode === 'practice' ? 'connectorCatalog' : 'botSelection');
                 return;
             }
             setConnectorRun({ ...connectorRun, entries });
-            await finishConnectorRun(entries, connectorRun.liveMode);
+            await finishConnectorRun(entries, connectorRun.liveMode, connectorRun.mode);
             return;
         }
 
@@ -1524,11 +1519,15 @@ const App: React.FC = () => {
         }
     };
 
-    const finishConnectorRun = async (entries: ConnectorRunState['entries'], liveMode: boolean) => {
+    const finishConnectorRun = async (
+        entries: ConnectorRunState['entries'],
+        liveMode: boolean,
+        runMode: ConnectorRunState['mode'] = 'assessment',
+    ) => {
         const evaluable = entries.filter((e) => e.history.some((m) => m.role === 'user'));
         if (evaluable.length === 0) {
             resetConnectorState();
-            setView('botSelection');
+            setView(runMode === 'practice' ? 'connectorCatalog' : 'botSelection');
             return;
         }
         setIsConnectorEvaluating(true);
@@ -1542,7 +1541,7 @@ const App: React.FC = () => {
             console.error('Connector evaluation failed:', error);
             alert(t('connector_eval_error'));
             resetConnectorState();
-            setView('botSelection');
+            setView(runMode === 'practice' ? 'connectorCatalog' : 'botSelection');
         } finally {
             setIsConnectorEvaluating(false);
         }
@@ -1559,14 +1558,7 @@ const App: React.FC = () => {
             seedConnectorVignette(run, nextIndex);
         } else {
             setConnectorRun({ ...connectorRun, entries, currentIndex: nextIndex });
-            if (connectorRun.mode === 'practice') {
-                setSelectedBot(null);
-                setChatHistory([]);
-                setConnectorRun(null);
-                setView('connectorCatalog');
-                return;
-            }
-            finishConnectorRun(entries, connectorRun.liveMode);
+            finishConnectorRun(entries, connectorRun.liveMode, connectorRun.mode);
         }
     };
 
@@ -1658,8 +1650,9 @@ const App: React.FC = () => {
     };
 
     const handleConnectorDone = () => {
+        const wasPractice = connectorRun?.mode === 'practice';
         resetConnectorState();
-        setView('botSelection');
+        setView(wasPractice ? 'connectorCatalog' : 'botSelection');
     };
 
     const handleConnectorPracticeCrossSell = () => {
@@ -2225,7 +2218,7 @@ const App: React.FC = () => {
                     </h1>
                     <p className="mt-2 text-lg text-gray-400">
                         {connectorRun.mode === 'practice'
-                            ? t('connector_transition_practice_done')
+                            ? t('connector_transition_practice_to_results')
                             : connectorRun.currentIndex + 1 < connectorRun.vignettes.length
                             ? t('connector_transition_next', { current: String(connectorRun.currentIndex + 2), total: String(connectorRun.vignettes.length) })
                             : t('connector_transition_last')}
@@ -2235,7 +2228,7 @@ const App: React.FC = () => {
                         className="mt-6 py-3 px-8 bg-accent-primary hover:bg-accent-primary/90 text-white font-semibold rounded-lg transition-colors"
                     >
                         {connectorRun.mode === 'practice'
-                            ? t('connector_transition_back_catalog')
+                            ? t('connector_transition_to_results')
                             : connectorRun.currentIndex + 1 < connectorRun.vignettes.length
                             ? t('connector_transition_continue')
                             : t('connector_transition_to_results')}

@@ -9,9 +9,9 @@ export const CONNECTOR_AVATARS: Record<string, string> = {
     'tom-vancouver': '/avatars/connector-tom.png',
     'carmen-mia': '/avatars/connector-carmen.png',
     'david-exhaustion': '/avatars/connector-david.png',
-    'sophie-repair': '/avatars/connector-leila.png',
-    'marc-promotion': '/avatars/connector-tom.png',
-    'nina-review': '/avatars/connector-carmen.png',
+    'sophie-repair': '/avatars/connector-sophie.png',
+    'marc-promotion': '/avatars/connector-marc.png',
+    'nina-review': '/avatars/connector-nina.png',
 };
 
 export type ConnectorRunMode = 'assessment' | 'practice';

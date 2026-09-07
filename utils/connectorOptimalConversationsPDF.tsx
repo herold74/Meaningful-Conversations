@@ -193,6 +193,20 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
     marginBottom: 2,
   },
+  disclaimerBox: {
+    backgroundColor: colors.rose50,
+    borderRadius: 4,
+    padding: 10,
+    marginTop: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#fecdd3',
+  },
+  disclaimerText: {
+    fontSize: 9,
+    lineHeight: 1.45,
+    marginBottom: 4,
+  },
   footer: {
     position: 'absolute',
     bottom: 22,
@@ -281,6 +295,42 @@ const VIGNETTE_META: Record<
       'Keine Diagnose, keine Panik',
     ],
   },
+  'sophie-repair': {
+    titleDe: '6. Sophie · Repair',
+    personaDe: 'Enge Freundin, fühlt sich von etwas verletzt, das du letzte Woche gesagt hast.',
+    situationDe: 'Sophie holt vorsichtig nach — sie will echtes Zuhören, keine große Entschuldigungsrede.',
+    trapDe: 'Sofort rechtfertigen, gegenseitig vorwerfen, mit Humor wegwischen.',
+    whyDe: [
+      'Impact anerkannt, nicht sofort rechtfertigt',
+      'Neugierig nach dem konkreten Moment gefragt',
+      'Kein Humor, kein Gegen-Vorwurf',
+      'Bei Sophie geblieben',
+    ],
+  },
+  'marc-promotion': {
+    titleDe: '7. Marc · Teamleitung',
+    personaDe: 'Freund, gerade befördert — Freude und Impostor-Gefühl gleichzeitig.',
+    situationDe: 'Marc teilt gute Nachrichten und will mitfeiern — nicht sofort Risiko-Warnungen.',
+    trapDe: 'Freude relativieren, mit eigener Story übertrumpfen, Karriere-Tipps.',
+    whyDe: [
+      'Mitfreude vor Tipps',
+      'Raum für Freude und Unsicherheit',
+      'Neugier ohne Fix-it',
+      'Keine Karriere-Ratschläge',
+    ],
+  },
+  'nina-review': {
+    titleDe: '8. Nina · Jahresgespräch',
+    personaDe: 'Mitarbeiterin, morgen Jahresgespräch — nervös, sucht Ruhe.',
+    situationDe: 'Nina fragt indirekt, ob alles okay ist — keine HR-Floskeln, kein Vorgreifen.',
+    trapDe: 'Sofort bewerten, HR-Sätze, Gespräch von morgen vorwegnehmen.',
+    whyDe: [
+      'Gelassenheit ohne falsche Sicherheit',
+      'Kein vorgefertigtes „Du machst das super"',
+      'Gespräch von morgen nicht vorweggenommen',
+      'Echte Aufmerksamkeit statt HR-Floskel',
+    ],
+  },
 };
 
 const DIMENSIONS = [
@@ -290,6 +340,14 @@ const DIMENSIONS = [
   { name: 'Nicht-Werten', desc: 'Weder verurteilen noch reflexhaft freisprechen' },
   { name: 'Gelassenheit', desc: 'Ruhig bleiben bei Wut, Tränen, Abwiegeln' },
 ];
+
+const DIMENSION_LABELS_DE: Record<string, string> = {
+  empathy: 'Empathie',
+  presence: 'Präsenz',
+  curiosity: 'Neugier',
+  nonJudgment: 'Nicht-Werten',
+  steadiness: 'Gelassenheit',
+};
 
 function ShipWheelLogo() {
   const size = 26;
@@ -340,7 +398,7 @@ function VignetteSection({ id }: { id: ConnectorLabVignetteId }) {
         </Text>
         <Text style={styles.metaLine}>
           <Text style={styles.metaLabel}>Schwerpunkte: </Text>
-          {vignette.primaryDimensions.join(', ')}
+          {vignette.primaryDimensions.map((d) => DIMENSION_LABELS_DE[d] || d).join(', ')}
         </Text>
         <Text style={styles.metaLine}>
           <Text style={styles.metaLabel}>Situation: </Text>
@@ -352,7 +410,7 @@ function VignetteSection({ id }: { id: ConnectorLabVignetteId }) {
         </Text>
       </View>
 
-      <Text style={styles.sectionLabel}>Optimale Gesprächsführung (DE)</Text>
+      <Text style={styles.sectionLabel}>Optimale Gesprächsführung</Text>
       {turnsDe.map((turn, i) => (
         <View key={`de-${i}`} style={styles.turnRow} wrap={false}>
           <Text style={styles.turnNum}>{i + 1}</Text>
@@ -360,7 +418,7 @@ function VignetteSection({ id }: { id: ConnectorLabVignetteId }) {
         </View>
       ))}
 
-      <Text style={[styles.sectionLabel, { marginTop: 10 }]}>Optimale Gesprächsführung (EN)</Text>
+      <Text style={[styles.sectionLabel, { marginTop: 10 }]}>Optimal conversation flow</Text>
       {turnsEn.map((turn, i) => (
         <View key={`en-${i}`} style={styles.enTurnRow} wrap={false}>
           <Text style={styles.enTurnNum}>{i + 1}</Text>
@@ -369,7 +427,7 @@ function VignetteSection({ id }: { id: ConnectorLabVignetteId }) {
       ))}
 
       <View style={styles.whyBox} wrap={false}>
-        <Text style={[styles.metaLabel, { fontSize: 10, marginBottom: 4 }]}>Warum 10/10</Text>
+        <Text style={[styles.metaLabel, { fontSize: 10, marginBottom: 4 }]}>Warum als optimal empfohlen?</Text>
         {meta.whyDe.map((item, i) => (
           <Text key={i} style={styles.whyItem}>• {item}</Text>
         ))}
@@ -411,6 +469,18 @@ export function ConnectorOptimalConversationsPDFDocument() {
           dankbar von selbst) ist ein positives Signal.
         </Text>
 
+        <View style={styles.disclaimerBox}>
+          <Text style={[styles.metaLabel, { fontSize: 10, marginBottom: 6 }]}>Hinweis: Vorlage ist keine Garantie</Text>
+          <Text style={styles.disclaimerText}>
+            Die Beispielzüge beschreiben ideale Gesprächsführung — keine Garantie für 10/10 in der App.
+          </Text>
+          <Text style={styles.disclaimerText}>
+            LLM-Varianz bei Persona-Antworten, nur 3–5 Austausche pro Vignette und schwankende
+            Bewertungs-KI führen dazu, dass auch mit dieser Vorlage oft weniger als 10/10 herauskommen.
+            Das ist erwartbar und nicht tragisch.
+          </Text>
+        </View>
+
         <Text style={styles.sectionLabel}>Fünf Bewertungsdimensionen (je 1–10)</Text>
         {DIMENSIONS.map((d) => (
           <View key={d.name} style={styles.dimRow}>
@@ -436,8 +506,8 @@ export function ConnectorOptimalConversationsPDFDocument() {
         <Text style={styles.vignetteTitle}>QA Lab (Admin)</Text>
         <Text style={styles.intro}>
           Admin-Konsole → Session Simulator → Connector QA Lab. Script führt diese optimalen Züge
-          aus, live Persona antwortet, danach Connector-Bewertung. Ziel: Overall ≥ 8/10, mindestens
-          ein „gehört"-Ende.
+          aus, live Persona antwortet, danach Connector-Bewertung. Ergebnis-JSON für
+          Regressions-Vergleich bei Prompt-Änderungen exportieren.
         </Text>
         <Text style={[styles.intro, { marginTop: 12 }]}>
           Quelle: utils/connectorLabScripts.ts · meaningful-conversations-backend/connector/vignettes.js

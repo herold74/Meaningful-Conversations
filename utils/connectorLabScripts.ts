@@ -8,7 +8,10 @@ export type ConnectorLabVignetteId =
   | 'leila-breakup'
   | 'tom-vancouver'
   | 'carmen-mia'
-  | 'david-exhaustion';
+  | 'david-exhaustion'
+  | 'sophie-repair'
+  | 'marc-promotion'
+  | 'nina-review';
 
 export interface ConnectorLabVignetteOption {
   id: ConnectorLabVignetteId;
@@ -23,6 +26,9 @@ export const CONNECTOR_LAB_VIGNETTES: ConnectorLabVignetteOption[] = [
   { id: 'tom-vancouver', labelKey: 'connector_lab_vignette_tom', personaName: 'Tom', primaryDimensions: ['curiosity', 'nonJudgment'] },
   { id: 'carmen-mia', labelKey: 'connector_lab_vignette_carmen', personaName: 'Carmen', primaryDimensions: ['nonJudgment', 'empathy'] },
   { id: 'david-exhaustion', labelKey: 'connector_lab_vignette_david', personaName: 'David', primaryDimensions: ['presence', 'steadiness'] },
+  { id: 'sophie-repair', labelKey: 'connector_lab_vignette_sophie', personaName: 'Sophie', primaryDimensions: ['curiosity', 'nonJudgment', 'steadiness'] },
+  { id: 'marc-promotion', labelKey: 'connector_lab_vignette_marc', personaName: 'Marc', primaryDimensions: ['presence', 'empathy', 'curiosity'] },
+  { id: 'nina-review', labelKey: 'connector_lab_vignette_nina', personaName: 'Nina', primaryDimensions: ['steadiness', 'nonJudgment', 'presence'] },
 ];
 
 /** Bot opening lines (public vignette copy). */
@@ -46,6 +52,18 @@ export const CONNECTOR_LAB_OPENINGS: Record<ConnectorLabVignetteId, { de: string
   'david-exhaustion': {
     de: 'Nee, alles gut bei mir. Bisschen viel um die Ohren halt. Ich merk nur, dass ich seit Wochen abends einfach nur noch aufs Sofa fall — nicht mal zum Klettern raff ich mich mehr auf. Aber gut, ist wahrscheinlich normal, oder?',
     en: "Nah, I'm fine. Just a lot on my plate. I've just noticed that for weeks now I basically collapse onto the sofa every evening — can't even get myself to go climbing anymore. But hey, that's probably normal, right?",
+  },
+  'sophie-repair': {
+    de: 'Ich weiß nicht, ob das der richtige Moment ist … aber letzte Woche, als du gesagt hast, ich nehm das immer so schwer — das ist bei mir hängen geblieben. War das so gemeint?',
+    en: "I'm not sure this is the right moment … but last week, when you said I always take things so hard — that's stayed with me. Did you mean it that way?",
+  },
+  'marc-promotion': {
+    de: 'Rate mal — ich hab die Teamleitung bekommen! Ich sitz hier und grins dumm, und gleichzeitig denk ich: oh Gott, ab Montag bin ich plötzlich der, der schwierige Gespräche führen soll.',
+    en: "Guess what — I got the team lead role! I'm sitting here grinning like an idiot, and at the same time I'm thinking: oh God, as of Monday I'm suddenly the one who has to have difficult conversations.",
+  },
+  'nina-review': {
+    de: 'Haben Sie kurz Zeit? Morgen ist unser Jahresgespräch und ich … ich bin ehrlich gesagt ziemlich nervös. Sehen Sie das eigentlich als normal, oder sollte ich mir Sorgen machen?',
+    en: "Do you have a minute? Our annual review is tomorrow and I … honestly I'm pretty nervous. Do you see that as normal, or should I be worried?",
   },
 };
 
@@ -122,6 +140,48 @@ export const CONNECTOR_LAB_SCRIPTED_TURNS: Record<
       'That you are not climbing anymore — that does not sound like "all good" to me.',
       'I will not push — but I am happy to stay with what you just said. What happens on the sofa in the evenings?',
       'Thank you for sharing that. I am here without giving you a diagnosis.',
+    ],
+  },
+  'sophie-repair': {
+    de: [
+      'Danke, dass du das ansprichst — ich merke, dass das bei dir hängen geblieben ist. Ich will wirklich verstehen, was du gehört hast.',
+      'Wenn du sagst, ich nehm das immer so schwer — kannst du mir mehr erzählen, was genau dich getroffen hat in dem Moment?',
+      'Das klingt verletzend für dich, und ich nehme das ernst. Ich will nicht wegreden, ob es so gemeint war — ich höre dir zu.',
+      'Was würde dir helfen, damit wir wieder Nähe haben — ohne dass du dich kleiner fühlen musst?',
+    ],
+    en: [
+      "Thank you for bringing this up — I can tell it's been sitting with you. I really want to understand what you heard.",
+      'When you say I always take things so hard — can you tell me more about what exactly hit you in that moment?',
+      "That sounds hurtful for you, and I take that seriously. I don't want to talk over whether I meant it that way — I'm listening to you.",
+      'What would help you feel closer again — without you having to feel smaller?',
+    ],
+  },
+  'marc-promotion': {
+    de: [
+      'Wow — das ist echt groß! Herzlichen Glückwunsch zur Teamleitung. Ich freu mich richtig mit dir.',
+      'Du grindest und gleichzeitig kommt gleich der „oh Gott"-Gedanke — beides darf da sein. Was freut dich am meisten daran?',
+      'Und was macht dir am meisten Sorge, wenn du an Montag denkst?',
+      'Danke, dass du das mit mir teilst. Feier das heute — du hast dir das verdient.',
+    ],
+    en: [
+      "Wow — that's really big! Congratulations on the team lead role. I'm genuinely happy for you.",
+      "You're grinning and at the same time there's the 'oh God' thought — both can be there. What excites you most about it?",
+      'And what worries you most when you think about Monday?',
+      "Thanks for sharing this with me. Celebrate today — you've earned it.",
+    ],
+  },
+  'nina-review': {
+    de: [
+      'Danke, dass du das ansprichst — es ist völlig normal, vor einem Jahresgespräch nervös zu sein.',
+      'Ich will dir nicht vorgreifen, was morgen passiert. Was genau macht dir im Moment die größte Sorge?',
+      'Wenn du an die letzten Monate denkst — woran hängt deine Unsicherheit am meisten?',
+      'Morgen nehmen wir uns Zeit dafür. Bis dahin: Was bräuchtest du von mir, damit es sich etwas ruhiger anfühlt?',
+    ],
+    en: [
+      "Thank you for raising this — it's completely normal to feel nervous before an annual review.",
+      "I don't want to get ahead of what happens tomorrow. What exactly is worrying you most right now?",
+      'When you think about the last few months — what does your uncertainty attach to most?',
+      "We'll take time for this tomorrow. Until then: what would you need from me so it feels a bit calmer?",
     ],
   },
 };
