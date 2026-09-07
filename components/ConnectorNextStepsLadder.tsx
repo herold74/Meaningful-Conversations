@@ -46,6 +46,7 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
     selectedDimension,
     selectedGrowthArea,
     language as 'de' | 'en',
+    coach.botId,
   );
 
   const handleCopyStarter = () => {

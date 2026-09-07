@@ -8,12 +8,12 @@ const {
 const { CONNECTOR_VIGNETTES, getVignetteById, pickRunVignetteIds, VIGNETTES_PER_RUN } = require('../vignettes');
 
 describe('connector vignette catalog', () => {
-  test('has 5 vignettes with unique ids and full DE/EN parity', () => {
-    expect(CONNECTOR_VIGNETTES).toHaveLength(5);
+  test('has 8 vignettes with unique ids and full DE/EN parity', () => {
+    expect(CONNECTOR_VIGNETTES).toHaveLength(8);
     const ids = CONNECTOR_VIGNETTES.map((v) => v.id);
-    expect(new Set(ids).size).toBe(5);
+    expect(new Set(ids).size).toBe(8);
     CONNECTOR_VIGNETTES.forEach((v) => {
-      ['relationship', 'situation', 'emotionalTone', 'innerNeed', 'opening', 'exitLine', 'trap', 'goodConnection'].forEach((field) => {
+      ['relationship', 'situation', 'emotionalTone', 'innerNeed', 'opening', 'exitLine', 'trap', 'goodConnection', 'pickerTeaser'].forEach((field) => {
         expect(v[field]).toBeDefined();
         expect(typeof v[field].de).toBe('string');
         expect(typeof v[field].en).toBe('string');

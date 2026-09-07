@@ -11,19 +11,28 @@ interface InterviewTranscriptViewProps {
     chatHistory: Message[];
     language: Language;
     userName?: string;
+    connectionPrep?: boolean;
     onBack: () => void;
 }
 
-const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({ chatHistory, language, userName, onBack }) => {
+const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({
+    chatHistory,
+    language,
+    userName,
+    connectionPrep = false,
+    onBack,
+}) => {
     const { t } = useLocalization();
     const [summary, setSummary] = useState<string>('');
     const [setup, setSetup] = useState<string>('');
     const [transcript, setTranscript] = useState<string>('');
+    const [connectionPoints, setConnectionPoints] = useState<string>('');
+    const [showConnectionPoints, setShowConnectionPoints] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showSummary, setShowSummary] = useState(true);
     const [showSetup, setShowSetup] = useState(true);
-    const [copiedField, setCopiedField] = useState<'summary' | 'setup' | 'transcript' | null>(null);
+    const [copiedField, setCopiedField] = useState<'summary' | 'setup' | 'transcript' | 'connectionPoints' | null>(null);
     const hasGenerated = useRef(false);
 
     useEffect(() => {
@@ -34,10 +43,11 @@ const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({ chatH
             setIsLoading(true);
             setError(null);
             try {
-                const result = await generateInterviewTranscript(chatHistory, language, userName);
+                const result = await generateInterviewTranscript(chatHistory, language, userName, connectionPrep);
                 setSummary(result.summary);
                 setSetup(result.setup);
                 setTranscript(result.transcript);
+                setConnectionPoints(result.connectionPoints || '');
             } catch (err) {
                 console.error('Failed to generate interview transcript:', err);
                 setError(t('interview_transcript_error'));
@@ -46,9 +56,9 @@ const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({ chatH
             }
         };
         generate();
-    }, [chatHistory, language, t]);
+    }, [chatHistory, language, userName, connectionPrep, t]);
 
-    const handleCopy = async (text: string, field: 'summary' | 'setup' | 'transcript') => {
+    const handleCopy = async (text: string, field: 'summary' | 'setup' | 'transcript' | 'connectionPoints') => {
         try {
             await navigator.clipboard.writeText(text);
             setCopiedField(field);
@@ -71,7 +81,10 @@ const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({ chatH
         const sections = [
             `# ${t('interview_transcript_summary')}\n\n${summary}`,
             `# ${t('interview_transcript_setup')}\n\n${setup}`,
-            `# ${t('interview_transcript_full')}\n\n${transcript}`
+            ...(connectionPoints
+                ? [`# ${t('interview_transcript_connection_points')}\n\n${connectionPoints}`]
+                : []),
+            `# ${t('interview_transcript_full')}\n\n${transcript}`,
         ];
         await handleDownload(sections.join('\n\n---\n\n'), `interview-complete-${dateStr}.md`);
     };
@@ -156,6 +169,34 @@ const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({ chatH
                     </div>
                 )}
             </section>
+
+            {/* Section 2b — Connection Points (connection prep only) */}
+            {connectionPoints && (
+                <section className="mb-6">
+                    <button
+                        onClick={() => setShowConnectionPoints(!showConnectionPoints)}
+                        className="flex items-center gap-2 w-full text-left mb-3"
+                    >
+                        <span className={`text-content-secondary transition-transform ${showConnectionPoints ? 'rotate-90' : ''}`}>▶</span>
+                        <h2 className="text-lg font-semibold text-content-primary">{t('interview_transcript_connection_points')}</h2>
+                    </button>
+                    {showConnectionPoints && (
+                        <div className="bg-background-secondary dark:bg-background-secondary/50 border border-border-primary rounded-lg p-5">
+                            <div className="prose dark:prose-invert max-w-none text-content-primary text-sm leading-relaxed">
+                                <ReactMarkdown>{connectionPoints}</ReactMarkdown>
+                            </div>
+                            <div className="flex gap-2 mt-4 pt-3 border-t border-border-primary">
+                                <button
+                                    onClick={() => handleCopy(connectionPoints, 'connectionPoints')}
+                                    className="text-xs px-3 py-1.5 rounded-md bg-background-tertiary hover:bg-accent-primary/10 text-content-secondary hover:text-accent-primary transition-colors"
+                                >
+                                    {copiedField === 'connectionPoints' ? t('interview_transcript_copied') : t('interview_transcript_copy')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </section>
+            )}
 
             {/* Section 3 — Smoothed Interview */}
             <section className="mb-8">

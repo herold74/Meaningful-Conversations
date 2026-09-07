@@ -1,5 +1,6 @@
 import { CONNECTOR_DIMENSIONS } from '../components/ConnectorRadarChart';
-import type { ConnectorDimensionKey, ConnectorEvaluationResult } from '../types';
+import type { ConnectorDimensionKey, ConnectorEvaluationResult, Language } from '../types';
+import { buildGloriaConnectionPrepStarter } from './gloriaInterview';
 
 /** Kommunikation-section coaches only (registered tier). */
 export const CONNECTOR_KOMMUNIKATION_COACHES: Record<
@@ -40,8 +41,13 @@ export function microExerciseKey(dimension: ConnectorDimensionKey): string {
 export function buildCoachStarterPrompt(
   dimension: ConnectorDimensionKey,
   growthArea: string | undefined,
-  language: 'de' | 'en',
+  language: Language,
+  botId?: string,
 ): string {
+  if (botId === 'gloria-interview') {
+    return buildGloriaConnectionPrepStarter(language, growthArea);
+  }
+
   const topic = growthArea?.trim() || '';
   if (language === 'de') {
     const focus = topic

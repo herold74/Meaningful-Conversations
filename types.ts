@@ -37,12 +37,14 @@ export type NavView =
     | 'personalitySurvey'
     | 'personalityProfile'
     | 'connectorIntro'
+    | 'connectorCatalog'
     | 'connectorChat'
     | 'connectorResults'
     | 'lifeContextEditor'
     | 'transcriptEval'
     | 'transcriptRecord'
     | 'interviewTranscript'
+    | 'gloriaInterviewIntro'
     | 'oceanOnboarding'
     | 'intentPicker'
     | 'namePrompt'
@@ -480,11 +482,15 @@ export interface PracticeEvaluationSummary {
 
 // --- The Connector ---
 
-export interface ConnectorVignettePublic {
+export interface ConnectorVignetteCatalogEntry {
     id: string;
     personaName: string;
     gender: 'male' | 'female';
     relationship: string;
+    pickerTeaser: string;
+}
+
+export interface ConnectorVignettePublic extends ConnectorVignetteCatalogEntry {
     opening: string;
 }
 
