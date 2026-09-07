@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorEndType } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorEndType, ConnectorDimensionKey } from './types';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
 import * as userService from './services/userService';
@@ -180,6 +180,7 @@ const App: React.FC = () => {
     const [isConnectorStarting, setIsConnectorStarting] = useState(false);
     const [isConnectorEvaluating, setIsConnectorEvaluating] = useState(false);
     const [connectorSaveState, setConnectorSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    const [connectorPracticeFocus, setConnectorPracticeFocus] = useState<ConnectorDimensionKey | null>(null);
 
     const routeToCoachPractice = useCallback(() => {
         if (!currentUser || !resolvePracticeAccess(currentUser).canAccessPractice) {
@@ -1376,6 +1377,7 @@ const App: React.FC = () => {
         setConnectorEvaluation(null);
         setConnectorAwaitingNext(null);
         setConnectorSaveState('idle');
+        setConnectorPracticeFocus(null);
         setSelectedBot(null);
         setChatHistory([]);
     };
@@ -1401,7 +1403,14 @@ const App: React.FC = () => {
         setIsConnectorStarting(true);
         try {
             const { vignettes } = await geminiService.startConnectorRun(language);
-            const run: ConnectorRunState = { vignettes, currentIndex: 0, entries: [], liveMode };
+            const run: ConnectorRunState = {
+                vignettes,
+                currentIndex: 0,
+                entries: [],
+                liveMode,
+                practiceFocus: connectorPracticeFocus ?? undefined,
+            };
+            setConnectorPracticeFocus(null);
             setConnectorRun(run);
             setConnectorEvaluation(null);
             setConnectorSaveState('idle');
@@ -1519,10 +1528,24 @@ const App: React.FC = () => {
     };
 
     const handleConnectorRestart = () => {
+        setConnectorPracticeFocus(null);
         setConnectorRun(null);
         setConnectorEvaluation(null);
         setConnectorSaveState('idle');
         setView('connectorIntro');
+    };
+
+    const handleConnectorRestartWithFocus = (focus: ConnectorDimensionKey) => {
+        setConnectorPracticeFocus(focus);
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorSaveState('idle');
+        setView('connectorIntro');
+    };
+
+    const handleConnectorStartCoachSession = (botId: string, starterPrompt: string) => {
+        resetConnectorState();
+        handleStartSessionFromEval(botId, starterPrompt);
     };
 
     const handleConnectorDone = () => {
@@ -1867,11 +1890,14 @@ const App: React.FC = () => {
         connectorEvaluation,
         isConnectorStarting,
         connectorSaveState,
+        connectorPracticeFocus,
         handleOpenConnectorIntro,
         handleStartConnectorRun,
         handleConnectorEnded,
         handleConnectorSaveToProfile,
         handleConnectorRestart,
+        handleConnectorRestartWithFocus,
+        handleConnectorStartCoachSession,
         handleConnectorDone,
         handleConnectorPracticeCrossSell,
         refinementPreview,

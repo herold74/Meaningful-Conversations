@@ -3,11 +3,13 @@ import { useLocalization } from '../context/LocalizationContext';
 import BrandLoader from './shared/BrandLoader';
 import { SoundWaveIcon } from './icons/SoundWaveIcon';
 import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
+import type { ConnectorDimensionKey } from '../types';
 
 interface ConnectorIntroViewProps {
   onStart: (liveMode: boolean) => void;
   onBack: () => void;
   isStarting: boolean;
+  practiceFocus?: ConnectorDimensionKey | null;
 }
 
 /**
@@ -15,9 +17,17 @@ interface ConnectorIntroViewProps {
  * Frames the experience as a strengths discovery (NOT a coaching certificate),
  * includes the EU AI Act transparency note, and lets the user pick text or voice.
  */
-const ConnectorIntroView: React.FC<ConnectorIntroViewProps> = ({ onStart, onBack, isStarting }) => {
+const ConnectorIntroView: React.FC<ConnectorIntroViewProps> = ({ onStart, onBack, isStarting, practiceFocus }) => {
   const { t } = useLocalization();
   const [liveMode, setLiveMode] = useState(false);
+
+  const focusLabels: Record<ConnectorDimensionKey, string> = {
+    empathy: t('connector_dim_empathy'),
+    presence: t('connector_dim_presence'),
+    curiosity: t('connector_dim_curiosity'),
+    nonJudgment: t('connector_dim_nonjudgment'),
+    steadiness: t('connector_dim_steadiness'),
+  };
 
   if (isStarting) {
     return (
@@ -37,6 +47,20 @@ const ConnectorIntroView: React.FC<ConnectorIntroViewProps> = ({ onStart, onBack
         <p className="text-accent-primary font-semibold mb-4">{t('connector_intro_tagline')}</p>
 
         <p className="text-content-secondary mb-4">{t('connector_intro_description')}</p>
+
+        {practiceFocus && (
+          <div
+            role="note"
+            className="rounded-xl border border-accent-primary/40 bg-accent-primary/5 px-4 py-3 mb-4"
+          >
+            <p className="text-sm font-semibold text-content-primary">
+              {t('connector_intro_focus_badge', { focus: focusLabels[practiceFocus] })}
+            </p>
+            <p className="text-xs text-content-secondary mt-1">
+              {t(`connector_intro_focus_tip_${practiceFocus}`)}
+            </p>
+          </div>
+        )}
 
         <div className="rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 mb-4">
           <h2 className="font-semibold text-content-primary mb-2">{t('connector_intro_how_title')}</h2>

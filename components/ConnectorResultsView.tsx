@@ -1,7 +1,9 @@
 import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import ConnectorRadarChart, { CONNECTOR_DIMENSIONS } from './ConnectorRadarChart';
+import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
 import type { ConnectorDimensionKey, ConnectorEvaluationResult, ConnectorVignettePublic } from '../types';
+import { showConnectorPracticeLadder } from '../utils/connectorNextSteps';
 
 const DIMENSION_EMOJI: Record<ConnectorDimensionKey, string> = {
   empathy: '🤝',
@@ -22,6 +24,8 @@ interface ConnectorResultsViewProps {
   /** Show Coach Practice cross-sell for strong results */
   showPracticeCrossSell: boolean;
   onPracticeCrossSell: () => void;
+  onRestartWithFocus: (focus: ConnectorDimensionKey) => void;
+  onStartCoachSession: (botId: string, starterPrompt: string) => void;
 }
 
 const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
@@ -34,6 +38,8 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
   onDone,
   showPracticeCrossSell,
   onPracticeCrossSell,
+  onRestartWithFocus,
+  onStartCoachSession,
 }) => {
   const { t } = useLocalization();
 
@@ -140,6 +146,15 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
               ))}
             </div>
           </div>
+        )}
+
+        {/* Micro-commitment ladder (scores below Practice threshold) */}
+        {showConnectorPracticeLadder(evaluation.overallScore) && (
+          <ConnectorNextStepsLadder
+            evaluation={evaluation}
+            onRestartWithFocus={onRestartWithFocus}
+            onStartCoachSession={onStartCoachSession}
+          />
         )}
 
         {/* Practice cross-sell */}
