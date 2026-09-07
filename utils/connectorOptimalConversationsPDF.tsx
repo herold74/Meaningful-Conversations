@@ -296,7 +296,7 @@ const VIGNETTE_META: Record<
     ],
   },
   'sophie-repair': {
-    titleDe: '6. Sophie · Repair',
+    titleDe: '6. Sophie · Verletzung ansprechen',
     personaDe: 'Enge Freundin, fühlt sich von etwas verletzt, das du letzte Woche gesagt hast.',
     situationDe: 'Sophie holt vorsichtig nach — sie will echtes Zuhören, keine große Entschuldigungsrede.',
     trapDe: 'Sofort rechtfertigen, gegenseitig vorwerfen, mit Humor wegwischen.',
