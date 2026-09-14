@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import type { PracticeSessionDraft } from '../utils/practiceSessionDraft';
+import { usePracticeSessionUILabels } from '../hooks/usePracticeSessionUILabels';
 import { RotateCcw, X } from 'lucide-react';
 
 interface PracticeResumePromptProps {
@@ -15,6 +16,7 @@ const PracticeResumePrompt: React.FC<PracticeResumePromptProps> = ({
   onDiscard,
 }) => {
   const { t } = useLocalization();
+  const labels = usePracticeSessionUILabels(draft.practiceConfig);
   const messageCount = draft.chatHistory.length;
 
   return (
@@ -46,8 +48,8 @@ const PracticeResumePrompt: React.FC<PracticeResumePromptProps> = ({
         </div>
         <p className="text-sm text-content-secondary mb-6">
           {t('practice_draft_resume_body', {
-            method: draft.practiceConfig.frameworkName,
-            scenario: draft.practiceConfig.scenarioName,
+            method: labels?.frameworkName ?? draft.practiceConfig.frameworkName,
+            scenario: labels?.scenarioBrief ?? draft.practiceConfig.scenarioName,
             count: messageCount,
           })}
         </p>

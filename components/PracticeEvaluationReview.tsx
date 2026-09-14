@@ -1,17 +1,24 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
-import { PracticeEvaluationResult, PracticeMode } from '../types';
+import { Language, PracticeEvaluationResult, PracticeMode } from '../types';
 import ScoreBadge from './shared/ScoreBadge';
 import { downloadPracticeTranscript } from '../utils/practiceTranscriptDownload';
 import * as geminiService from '../services/geminiService';
 import { getFrameworkDisplayName, getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
+import { usePracticeCatalog } from '../hooks/usePracticeCatalog';
+import { resolvePracticeScenarioBriefFromParts } from '../utils/practiceScenarioBrief';
 import { Info } from 'lucide-react';
 
 interface PracticeEvaluationReviewProps {
   evaluation: PracticeEvaluationResult;
-  frameworkName: string;
-  scenarioName: string;
+  frameworkId: string;
+  scenarioId: string;
   difficulty: string;
+  /** Language of LLM evaluation artifacts (summary, contract, clarified concern). */
+  artifactLanguage?: Language;
+  scenarioNameFallback?: string;
+  clarifiedConcernForDisplay?: string;
+  contentLanguage?: Language;
   practiceMode?: PracticeMode;
   onDone: () => void;
   onContinuePhase2?: () => void;
@@ -64,9 +71,13 @@ const CheckItem: React.FC<{ label: string; done: boolean }> = ({ label, done }) 
 
 const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   evaluation,
-  frameworkName,
-  scenarioName,
+  frameworkId,
+  scenarioId,
   difficulty,
+  artifactLanguage,
+  scenarioNameFallback,
+  clarifiedConcernForDisplay,
+  contentLanguage,
   practiceMode = evaluation.practiceMode || 'method',
   onDone,
   onContinuePhase2,
@@ -75,10 +86,27 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
   onTranscriptDeleted,
 }) => {
   const { t, language } = useLocalization();
+  const { catalog, concernForScenario } = usePracticeCatalog(language);
+  const frameworkName = useMemo(
+    () => getFrameworkDisplayName(frameworkId, { catalog, t, language }),
+    [frameworkId, catalog, t, language],
+  );
+  const scenarioName = useMemo(
+    () =>
+      resolvePracticeScenarioBriefFromParts(language, concernForScenario(scenarioId), {
+        contentLanguage,
+        clarifiedConcern: clarifiedConcernForDisplay,
+        scenarioNameFallback,
+      }),
+    [language, concernForScenario, scenarioId, contentLanguage, clarifiedConcernForDisplay, scenarioNameFallback],
+  );
+  const artifactsDifferFromUi =
+    artifactLanguage != null && artifactLanguage !== language;
   const evidenceLabel = language === 'de' ? 'Belege:' : 'Evidence:';
   const gapsLabel = language === 'de' ? 'Lücken:' : 'Gaps:';
   const resolvedDifficultyLabel = getPracticeDifficultyLabel(difficulty, t, {
     liveMode: evaluation.liveMode === true,
+    language,
   });
   const isContracting = practiceMode === 'contracting';
   const isFreePlay = practiceMode === 'free-play';
@@ -137,17 +165,26 @@ const PracticeEvaluationReview: React.FC<PracticeEvaluationReviewProps> = ({
       <p className="text-sm text-content-secondary mb-6 break-words">{scenarioName}</p>
 
       <Section title={t('practice_review_summary')}>
+        {artifactsDifferFromUi && (
+          <p className="text-xs italic text-content-subtle mb-2">{t('practice_eval_artifact_language_note')}</p>
+        )}
         <p className="text-content-primary leading-relaxed">{evaluation.summary}</p>
       </Section>
 
       {isContracting && evaluation.sessionContract && (
         <Section title={t('practice_review_session_contract')}>
+          {artifactsDifferFromUi && (
+            <p className="text-xs italic text-content-subtle mb-2">{t('practice_eval_artifact_language_note')}</p>
+          )}
           <p className="text-sm text-content-primary leading-relaxed break-words">{evaluation.sessionContract}</p>
         </Section>
       )}
 
       {isContracting && evaluation.clarifiedConcern && (
         <Section title={t('practice_review_clarified_concern')}>
+          {artifactsDifferFromUi && (
+            <p className="text-xs italic text-content-subtle mb-2">{t('practice_eval_artifact_language_note')}</p>
+          )}
           <p className="text-sm text-content-primary leading-relaxed break-words">{evaluation.clarifiedConcern}</p>
         </Section>
       )}

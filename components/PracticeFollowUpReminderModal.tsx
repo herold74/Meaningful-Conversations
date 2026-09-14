@@ -3,6 +3,9 @@ import { useLocalization } from '../context/LocalizationContext';
 import { PracticeEvaluationSummary } from '../types';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
+import { usePracticeCatalog } from '../hooks/usePracticeCatalog';
+import { resolvePracticeScenarioBriefFromParts } from '../utils/practiceScenarioBrief';
+import type { Language } from '../types';
 
 interface PracticeFollowUpReminderModalProps {
   evaluation: PracticeEvaluationSummary;
@@ -21,6 +24,17 @@ const PracticeFollowUpReminderModal: React.FC<PracticeFollowUpReminderModalProps
 }) => {
   const { t, language } = useLocalization();
   const data = evaluation.evaluationData;
+  const { concernForScenario } = usePracticeCatalog(language);
+  const artifactLanguage: Language | undefined =
+    evaluation.language === 'de' || evaluation.language === 'en' ? (evaluation.language as Language) : undefined;
+  const clarifiedDisplay = resolvePracticeScenarioBriefFromParts(
+    language,
+    concernForScenario(evaluation.scenarioId),
+    {
+      contentLanguage: artifactLanguage,
+      clarifiedConcern: data.clarifiedConcern,
+    },
+  );
 
   return (
     <div
@@ -44,12 +58,12 @@ const PracticeFollowUpReminderModal: React.FC<PracticeFollowUpReminderModalProps
 
         <p className="text-sm text-content-secondary mb-4">{t('practice_followup_reminder_intro')}</p>
 
-        {data.clarifiedConcern?.trim() && (
+        {clarifiedDisplay && (
           <div className="mb-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-1">
               {t('practice_review_clarified_concern')}
             </p>
-            <p className="text-sm text-content-primary leading-relaxed">{data.clarifiedConcern}</p>
+            <p className="text-sm text-content-primary leading-relaxed">{clarifiedDisplay}</p>
           </div>
         )}
 
@@ -58,6 +72,9 @@ const PracticeFollowUpReminderModal: React.FC<PracticeFollowUpReminderModalProps
             <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-1">
               {t('practice_review_session_contract')}
             </p>
+            {artifactLanguage && artifactLanguage !== language && (
+              <p className="text-xs italic text-content-subtle mb-1">{t('practice_eval_artifact_language_note')}</p>
+            )}
             <p className="text-sm text-content-primary leading-relaxed">{data.sessionContract}</p>
           </div>
         )}

@@ -256,6 +256,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       liveMode,
       scopeBoundaryTheme,
       practiceMode: 'method',
+      contentLanguage: language,
     });
   };
 
@@ -288,6 +289,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       scopeBoundaryTheme: null,
       practiceMode: 'contracting',
       hideScenarioBrief: true,
+      contentLanguage: language,
     });
   };
 

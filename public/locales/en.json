@@ -2205,6 +2205,7 @@
   "practice_review_contracting_confirm": "Contract confirmed",
   "practice_review_session_contract": "Agreed contract",
   "practice_review_clarified_concern": "Clarified concern",
+  "practice_eval_artifact_language_note": "The text below is from your session and was not translated.",
   "practice_review_method_suggestions": "Method suggestions (optional)",
   "practice_review_observed_elements": "Observable method elements",
   "practice_review_freeplay_alternatives": "Alternatives",

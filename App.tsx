@@ -173,6 +173,7 @@ const App: React.FC = () => {
     // Coach Practice states
     const [practiceConfig, setPracticeConfig] = useState<CoachPracticeConfig | null>(null);
     const [practiceEvaluation, setPracticeEvaluation] = useState<PracticeEvaluationResult | null>(null);
+    const [practiceEvalArtifactLanguage, setPracticeEvalArtifactLanguage] = useState<Language | null>(null);
     const [practiceSelfRating, setPracticeSelfRating] = useState<number | undefined>(undefined);
     const [practiceDraftPrompt, setPracticeDraftPrompt] = useState<PracticeSessionDraft | null>(null);
     const [practicePhase2Context, setPracticePhase2Context] = useState<PracticePhase2Context | null>(null);
@@ -1678,6 +1679,7 @@ const App: React.FC = () => {
                 selfRating,
             );
             setPracticeEvaluation({ ...result.evaluation, id: result.id || undefined });
+            setPracticeEvalArtifactLanguage(language);
             if (practiceConfig.practiceMode === 'contracting') {
                 setPracticeTranscriptForPhase2(buildPracticeTranscriptSummary(chatHistory, language));
             }
@@ -1717,6 +1719,7 @@ const App: React.FC = () => {
         setPracticeDraftPrompt(null);
         setPracticeConfig(null);
         setPracticeEvaluation(null);
+        setPracticeEvalArtifactLanguage(null);
         setPracticePhase2Context(null);
         setPracticeTranscriptForPhase2('');
         setSelectedBot(null);
@@ -1741,6 +1744,7 @@ const App: React.FC = () => {
                 || practiceConfig.scenarioName,
             sessionContract: practiceEvaluation.sessionContract,
             contractingEvaluationId: practiceEvaluation.id,
+            contentLanguage: language,
         });
         setPracticeConfig(null);
         setPracticeEvaluation(null);
@@ -1976,6 +1980,8 @@ const App: React.FC = () => {
         setPracticeConfig,
         practiceEvaluation,
         setPracticeEvaluation,
+        practiceEvalArtifactLanguage,
+        setPracticeEvalArtifactLanguage,
         practicePhase2Context,
         setPracticePhase2Context,
         practiceEvalError,
