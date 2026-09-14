@@ -607,5 +607,6 @@
 - [ ] Coaching Framework Roadmap: client exact language bot, The Work bot, NLP Meta-Modell lens, Logische Ebenen lens
 - [ ] **Coach Practice → Coach-Feedback / Profil (Roadmap):** Aktuell Tipps + wiederkehrende Beobachtungen; später optional Coaching-Stil aus Practice — siehe `progress.md`
 - [ ] **Coach Practice → Entwickler-Feedback nach Auswertung (Roadmap, S):** Rating + optionaler Kommentar auf `PracticeEvaluationReview` — analog TE/SessionReview
+- [ ] **Rolling Context / Kontextlimitierung (Backlog, M):** Developer-Schalter für Classic-Chat — rollende Summary + Kurzfenster; siehe `progress.md` Pending/Roadmap *(2026-09-14)*
 - [ ] Presentation Evaluator (Premium Feature, backlog)
 - [ ] Micro Learnings: Integration Management Section (Nobody → proaktive Vorschläge, Links zu kuratierten Inhalten)

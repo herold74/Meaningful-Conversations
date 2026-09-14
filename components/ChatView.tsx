@@ -1069,7 +1069,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
             </div>
           ) : (
             <form onSubmit={handleFormSubmit} className="flex flex-col gap-1">
-              <div className="flex items-end gap-2 px-2 py-1.5 bg-background-primary/90 border border-border-primary/60 rounded-full shadow-card backdrop-blur-sm">
+              <div className="flex items-end gap-2 px-2 py-1.5 bg-background-primary/90 border border-border-primary/60 rounded-xl shadow-card backdrop-blur-sm">
                 <textarea
                   ref={textareaRef}
                   value={input}
@@ -1079,7 +1079,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                   disabled={isLoading}
                   maxLength={5000}
                   rows={1}
-                  className="flex-1 w-0 px-3 py-2 bg-transparent text-content-primary rounded-full text-sm focus:outline-none resize-none overflow-y-auto max-h-40 placeholder:text-content-subtle transition-colors"
+                  className="flex-1 w-0 px-3 py-2 bg-transparent text-content-primary text-sm focus:outline-none resize-none overflow-y-auto max-h-40 placeholder:text-content-subtle transition-colors"
                 />
                 <button type="button" onClick={speech.handleVoiceInteraction} disabled={isLoading} className="p-2 text-content-secondary hover:text-content-primary disabled:opacity-40 transition-colors shrink-0" aria-label={speech.isListening ? t('chat_send_message') : t('chat_voice_mode')}>
                     <MicrophoneIcon className={`w-5 h-5 ${speech.isListening ? 'text-red-500 animate-pulse' : ''}`} />
@@ -1117,7 +1117,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         bot={bot}
         isOpen={isCoachInfoOpen}
         onClose={() => setIsCoachInfoOpen(false)}
-        coachingMode={effectiveCoachingMode}
+        coachingMode={coachPracticeConfig ? 'off' : effectiveCoachingMode}
     />
      <FeedbackModal
         isOpen={isFeedbackModalOpen}
