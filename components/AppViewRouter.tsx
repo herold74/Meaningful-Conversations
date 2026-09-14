@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis } from '../types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, Language } from '../types';
 import * as api from '../services/api';
 import * as userService from '../services/userService';
 import * as geminiService from '../services/geminiService';
@@ -159,6 +159,8 @@ export interface AppViewRouterProps {
   setPracticeConfig: React.Dispatch<React.SetStateAction<CoachPracticeConfig | null>>;
   practiceEvaluation: PracticeEvaluationResult | null;
   setPracticeEvaluation: React.Dispatch<React.SetStateAction<PracticeEvaluationResult | null>>;
+  practiceEvalArtifactLanguage: Language | null;
+  setPracticeEvalArtifactLanguage: React.Dispatch<React.SetStateAction<Language | null>>;
   practicePhase2Context: PracticePhase2Context | null;
   setPracticePhase2Context: React.Dispatch<React.SetStateAction<PracticePhase2Context | null>>;
   practiceEvalError: string | null;
@@ -304,6 +306,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     setPracticeConfig,
     practiceEvaluation,
     setPracticeEvaluation,
+    practiceEvalArtifactLanguage,
+    setPracticeEvalArtifactLanguage,
     practicePhase2Context,
     setPracticePhase2Context,
     practiceEvalError,
@@ -863,7 +867,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     case 'practiceSelfRating':
       return practiceConfig ? (
         <PracticeSelfRatingView
-          frameworkName={practiceConfig.frameworkName}
+          frameworkId={practiceConfig.frameworkId}
           onSubmit={handlePracticeSelfRatingSubmit}
           onSkip={handlePracticeSelfRatingSkip}
         />
@@ -872,9 +876,13 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       return practiceEvaluation && practiceConfig ? (
         <PracticeEvaluationReview
           evaluation={practiceEvaluation}
-          frameworkName={practiceConfig.frameworkName}
-          scenarioName={practiceConfig.scenarioName}
+          frameworkId={practiceConfig.frameworkId}
+          scenarioId={practiceConfig.scenarioId}
           difficulty={practiceConfig.difficulty}
+          artifactLanguage={practiceEvalArtifactLanguage ?? practiceConfig.contentLanguage}
+          scenarioNameFallback={practiceConfig.scenarioName}
+          clarifiedConcernForDisplay={practiceConfig.clarifiedConcern}
+          contentLanguage={practiceConfig.contentLanguage}
           practiceMode={practiceConfig.practiceMode || practiceEvaluation.practiceMode || 'method'}
           onDone={handlePracticeDone}
           onContinuePhase2={handleContinueToPhase2}
@@ -904,6 +912,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onProgress={() => setView('practiceProgress')}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
             setPracticeEvaluation({ ...item.evaluationData, id: item.id });
+            setPracticeEvalArtifactLanguage(
+              item.language === 'de' || item.language === 'en' ? (item.language as Language) : null,
+            );
             if (!practiceConfig) {
               setPracticeConfig({
                 frameworkId: item.frameworkId,
@@ -932,6 +943,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onHistory={navigateToPracticeHistory}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
             setPracticeEvaluation({ ...item.evaluationData, id: item.id });
+            setPracticeEvalArtifactLanguage(
+              item.language === 'de' || item.language === 'en' ? (item.language as Language) : null,
+            );
             setPracticeConfig({
               frameworkId: item.frameworkId,
               frameworkName: getFrameworkDisplayName(item.frameworkId, { t, language }),

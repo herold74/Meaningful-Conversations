@@ -202,6 +202,8 @@ function getPublicContractingScenarios(language = 'de') {
     coacheeName: s.coacheeName[lang],
     avatar: s.avatar,
     coacheeGender: resolveCoacheeGender(s),
+    /** Localized for UI after language switch; not shown in blind contracting picker. */
+    concern: s.concern[lang],
   }));
 }
 

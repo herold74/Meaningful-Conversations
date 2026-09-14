@@ -283,6 +283,8 @@ export interface PracticePhase2Context {
     sessionContract?: string;
     /** Source contracting evaluation (for follow-up tracking). */
     contractingEvaluationId?: string;
+    /** Language used when contracting evaluation artifacts were produced. */
+    contentLanguage?: Language;
 }
 
 export type ScopeBoundaryTheme =
@@ -351,6 +353,8 @@ export interface PracticeContractingScenario {
     coacheeName: string;
     avatar: string;
     coacheeGender?: 'male' | 'female';
+    /** Present in catalog API for localized display (hidden in contracting picker UI). */
+    concern?: string;
 }
 
 export interface PracticeCatalog {
@@ -387,6 +391,8 @@ export interface CoachPracticeConfig {
     sessionContract?: string;
     /** Links a Phase 2 session back to its contracting evaluation. */
     followsContractingEvaluationId?: string;
+    /** Language of scenarioName / contracting artifacts when the session was started. */
+    contentLanguage?: Language;
 }
 
 export interface PracticeDimensionScore {
