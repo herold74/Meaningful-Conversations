@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0
 **Branch:** `main`
-**Staging:** Deployed **2026-09-14**, v**2.6.0** Build **18** — https://mc-beta.manualmode.at (health OK). Chat composer `rounded-xl`; Practice CoachInfo ohne DPFL-Anzeige; Rolling-Context-Backlog in `progress.md`.
+**Staging:** Deployed **2026-09-14**, v**2.6.0** Build **19** — https://mc-beta.manualmode.at (health OK). Practice UI labels follow app language (catalog + `contentLanguage`); contracting catalog includes localized `concern` for phase-2 display.
 **Production:** v2.5.7 (2026-08-23) — https://mc-app.manualmode.at. **Do not deploy 2.6.0 to production until staging QA of The Connector is done.**
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**. Next iOS binary: 2.6.0 (after staging QA; new feature = minor bump already applied).
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
