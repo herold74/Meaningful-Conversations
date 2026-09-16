@@ -221,8 +221,8 @@ export function FalkenbergBusinessCasePDFDocument() {
         <Text style={styles.body}>
           ManualMode ergänzt die Coach-Ausbildung der Falkenberg Akademie um einen 24/7-Übungsraum: Auszubildende
           üben als Coach mit KI-Klienten, wählen Methode und Szenario und erhalten strukturiertes Feedback — ideal
-          zwischen Live-Tagen, E-Learning und Supervision. Version 2.6 bringt zusätzlich The Connector
-          (Verbindungskompetenz) sowie Verbesserungen in Communication und Connection.
+          zwischen Live-Tagen, E-Learning und Supervision. Ab Version 2.6 steht zusätzlich das Feature The Connector
+          bereit, um Verbindungskompetenz im Allgemeinen zu evaluieren und zu stärken.
         </Text>
 
         <View style={styles.callout}>
