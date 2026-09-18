@@ -30,6 +30,7 @@ export interface ConnectorChatConfig {
     personaName: string;
     personaGender: 'male' | 'female';
     liveMode: boolean;
+    scenarioBrief: string;
 }
 
 export function botFromConnectorVignette(vignette: ConnectorVignettePublic): Bot {

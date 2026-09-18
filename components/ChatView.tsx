@@ -712,9 +712,17 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                       </p>
                     )}
                     {connectorConfig && (
-                      <p className="text-xs text-content-secondary line-clamp-2 leading-snug">
-                        {bot.description} · {t('connector_chat_hint')}
-                      </p>
+                      <>
+                        <p className="text-xs text-content-tertiary leading-snug">
+                          {bot.description}
+                        </p>
+                        <p className="text-xs text-content-secondary line-clamp-5 leading-snug mt-0.5">
+                          {connectorConfig.scenarioBrief}
+                        </p>
+                        <p className="text-xs text-content-tertiary italic leading-snug mt-0.5">
+                          {t('connector_chat_hint')}
+                        </p>
+                      </>
                     )}
                 </div>
             </button>

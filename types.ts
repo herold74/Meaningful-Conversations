@@ -494,6 +494,8 @@ export interface ConnectorVignetteCatalogEntry {
     gender: 'male' | 'female';
     relationship: string;
     pickerTeaser: string;
+    /** User-facing situational context (no opening-line spoilers). */
+    scenarioBrief: string;
 }
 
 export interface ConnectorVignettePublic extends ConnectorVignetteCatalogEntry {

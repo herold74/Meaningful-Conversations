@@ -2378,6 +2378,7 @@
   "connector_transition_timeout_title": "The conversation ended, as everyday life does.",
   "connector_transition_next": "On to conversation {{current}} of {{total}}.",
   "connector_transition_last": "That was the last conversation — your results are waiting.",
+  "connector_transition_scenario_label": "Next scenario",
   "connector_transition_continue": "Next conversation",
   "connector_transition_to_results": "See results",
   "connector_evaluating_title": "Evaluating your conversations …",

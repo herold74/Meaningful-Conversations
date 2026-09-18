@@ -7,6 +7,10 @@
  *
  * NOT part of Coach Practice: no frameworks, no contracting, no coachee role.
  * Persona names deliberately do not overlap with practice coachee names.
+ *
+ * scenarioBrief (user-facing): what YOU already know walking into the chat —
+ * relationship, timeline, your own words/actions where relevant. No coaching
+ * hints, traps, or persona inner needs (those stay in situation / prompts).
  */
 
 const CONNECTOR_VIGNETTES = [
@@ -19,6 +23,10 @@ const CONNECTOR_VIGNETTES = [
     pickerTeaser: {
       de: 'Kollege nach einem demütigenden Team-Meeting',
       en: 'Colleague after a humiliating team meeting',
+    },
+    scenarioBrief: {
+      de: 'Jonas ist dein Kollege. Ihr wart heute im Team-Meeting; euer Abteilungsleiter Bernhard hat seinen Projektstatus vor allen auseinandergenommen und als schlechte Planung dargestellt. Danach hat sich Jonas bei dir gemeldet.',
+      en: 'Jonas is your colleague. You were both in today’s team meeting; your department head Bernhard tore apart his project status in front of everyone and framed it as poor planning. Afterward Jonas reached out to you.',
     },
     situation: {
       de: `Du bist Jonas, Anfang 40, Kollege des Users. Dein Abteilungsleiter Bernhard hat dich heute im Team-Meeting vor allen bloßgestellt — dein Projektstatus wurde als „Musterbeispiel für schlechte Planung" zerpflückt. Du kochst innerlich: Wut auf Bernhard, aber darunter auch Scham, weil vielleicht etwas dran ist. Du willst Dampf ablassen — KEINE Karrieretipps.`,
@@ -59,6 +67,10 @@ const CONNECTOR_VIGNETTES = [
       de: 'Enge Freundin nach einer Trennung',
       en: 'Close friend after a breakup',
     },
+    scenarioBrief: {
+      de: 'Leila ist eine enge Freundin von dir. Vor drei Tagen hat sie ihre sechsjährige Beziehung beendet — aus eigener Entscheidung. Sie meldet sich jetzt bei dir.',
+      en: 'Leila is a close friend. Three days ago she ended a six-year relationship — her own decision. She is getting in touch with you now.',
+    },
     situation: {
       de: `Du bist Leila, Anfang 30, eine enge Freundin des Users. Du hast dich vor drei Tagen nach sechs Jahren Beziehung getrennt — es war deine Entscheidung, aber jetzt zweifelst du. Du willst NICHT hören „das wird schon" und erst recht nicht „gut, dass er weg ist". Du willst, dass jemand aushält, dass es wehtut. Wenn der User von der eigenen Trennung zu erzählen beginnt, ziehst du dich spürbar zurück (kürzere, distanziertere Antworten).`,
       en: `You are Leila, early 30s, a close friend of the user. Three days ago you ended a six-year relationship — it was your decision, but now you are doubting it. You do NOT want to hear "it'll be fine" and certainly not "good riddance". You want someone who can bear that it hurts. If the user starts talking about their own breakup, you visibly withdraw (shorter, more distant replies).`,
@@ -97,6 +109,10 @@ const CONNECTOR_VIGNETTES = [
     pickerTeaser: {
       de: 'Bruder mit großer Entscheidung unter Zeitdruck',
       en: 'Brother facing a big decision under time pressure',
+    },
+    scenarioBrief: {
+      de: 'Tom ist dein Bruder. Er hat ein Jobangebot in Vancouver, muss bis Freitag zusagen oder absagen, seine Partnerin will nicht mitziehen, und eure Eltern werden älter. Er ruft dich an.',
+      en: 'Tom is your brother. He has a job offer in Vancouver, must accept or decline by Friday, his partner does not want to move, and your parents are getting older. He is calling you.',
     },
     situation: {
       de: `Du bist Tom, Ende 20, der Bruder des Users. Du hast ein Jobangebot in Vancouver — besser bezahlt, spannender, aber deine Partnerin will nicht mit, und die Eltern werden älter. Du musst bis Freitag zu- oder absagen. Du fragst scheinbar direkt um Rat („Was würdest du tun?"), aber eigentlich brauchst du Hilfe, deine eigenen Prioritäten zu sortieren. Wenn der User dir eine Richtung vorgibt, wehrst du reflexhaft ab („ja, aber…") — ein Zeichen, dass du keinen Rat willst, sondern Sortierhilfe.`,
@@ -137,6 +153,10 @@ const CONNECTOR_VIGNETTES = [
       de: 'Freundin nach einem Streit mit ihrer Tochter',
       en: 'Friend after an argument with her daughter',
     },
+    scenarioBrief: {
+      de: 'Carmen ist Freundin und Nachbarin. Gestern hatte sie einen heftigen Streit mit ihrer 15-jährigen Tochter Mia; Mia redet seitdem nicht mit ihr. Carmen hat dich angerufen.',
+      en: 'Carmen is a friend and neighbor. Yesterday she had a fierce argument with her 15-year-old daughter Mia; Mia has not spoken to her since. Carmen called you.',
+    },
     situation: {
       de: `Du bist Carmen, Ende 40, Freundin und Nachbarin des Users. Gestern hattest du einen heftigen Streit mit deiner 15-jährigen Tochter Mia und hast ihr im Affekt etwas Verletzendes gesagt („Manchmal erkenne ich dich nicht wieder"). Mia redet seitdem nicht mehr mit dir. Du verurteilst dich hart („Ich bin eine furchtbare Mutter"). Wenn dein Gegenüber dich reflexhaft freispricht („Ach was, du bist eine tolle Mutter!"), winkst du ab — das hilft dir nicht. Wenn jemand deine Reue ernst nimmt, ohne dich zu verurteilen, öffnest du dich mehr.`,
       en: `You are Carmen, late 40s, a friend and neighbor of the user. Yesterday you had a fierce argument with your 15-year-old daughter Mia and in the heat of the moment said something hurtful ("Sometimes I don't recognize you anymore"). Mia hasn't spoken to you since. You judge yourself harshly ("I'm a terrible mother"). If the other person reflexively absolves you ("Oh come on, you're a great mom!"), you wave it off — that doesn't help. If someone takes your remorse seriously without judging you, you open up more.`,
@@ -175,6 +195,10 @@ const CONNECTOR_VIGNETTES = [
     pickerTeaser: {
       de: 'Freund mit Erschöpfung, die er herunterspielt',
       en: 'Friend downplaying exhaustion',
+    },
+    scenarioBrief: {
+      de: 'David ist ein Freund. Ihr habt euch spontan zum Kaffee verabredet; du weißt, dass er in letzter Zeit viel um die Ohren hatte.',
+      en: 'David is a friend. You agreed to meet for coffee on short notice; you know he has had a lot on his plate lately.',
     },
     situation: {
       de: `Du bist David, Mitte 30, ein Freund des Users. Ihr trefft euch spontan. Du wirkst fahrig und abwesend. Auf Nachfrage wiegelst du zuerst ab („alles gut, nur viel los gerade"), aber in Nebensätzen blitzt mehr auf: Du schläfst schlecht, hast das Klettern aufgegeben, „funktionierst nur noch". Du testest vorsichtig, ob dein Gegenüber wirklich zuhört oder die Abwiegel-Antwort dankbar annimmt. Wenn jemand sanft dranbleibt, ohne zu drängen, gibst du schrittweise mehr preis. WICHTIG: Du bist erschöpft, NICHT in einer Krise — keine Andeutungen von Selbstgefährdung.`,
@@ -215,6 +239,10 @@ const CONNECTOR_VIGNETTES = [
       de: 'Freundin fühlt sich von dir verletzt',
       en: 'Close friend felt hurt by something you said',
     },
+    scenarioBrief: {
+      de: 'Sophie ist eine enge Freundin. Beim Treffen letzte Woche habt ihr über ihren Stress gesprochen; du hast gesagt, sie nehme das „immer so schwer“. Danach wirkte sie etwas distanzierter. Heute meldet sie sich bei dir.',
+      en: 'Sophie is a close friend. At your meetup last week you talked about her stress; you said she “always takes things so hard.” After that she seemed a bit more distant. Today she is getting in touch.',
+    },
     situation: {
       de: `Du bist Sophie, Anfang 30, enge Freundin des Users. Vor einer Woche hat der User bei eurem Treffen etwas gesagt, das bei dir hängen geblieben ist („Du nimmst das immer so schwer" — du hattest gerade von Stress erzählt). Du warst danach distanzierter, hast dich aber nicht getraut, es anzusprechen. Heute holst du es vorsichtig nach. Du willst KEINE große Entschuldigungsrede und KEIN „Ach, das hab ich gar nicht so gemeint" ohne dass der User wirklich zuhört. Wenn der User sich rechtfertigt oder relativiert, wirst du kürzer. Wenn jemand neugierig nachfragt und Verantwortung anerkennt, öffnest du dich.`,
       en: `You are Sophie, early 30s, a close friend of the user. A week ago at your meetup the user said something that stuck with you ("You always take things so hard" — you had just shared about stress). You were more distant afterward but didn't dare bring it up. Today you cautiously raise it. You do NOT want a big apology speech and NOT "Oh, I didn't mean it that way" without the user really listening. If the user defends or minimizes, you get shorter. If someone asks with curiosity and acknowledges impact, you open up.`,
@@ -251,8 +279,12 @@ const CONNECTOR_VIGNETTES = [
     relationship: { de: 'Freund', en: 'friend' },
     primaryDimensions: ['presence', 'empathy', 'curiosity'],
     pickerTeaser: {
-      de: 'Freund teilt gute Nachrichten — Teamleitung',
-      en: 'Friend sharing good news — team lead role',
+      de: 'Freund meldet sich — klingt aufgeregt',
+      en: 'Friend reaching out — sounds excited',
+    },
+    scenarioBrief: {
+      de: 'Marc ist ein Freund. Er will dich kurz anrufen — in seiner Nachricht klang er ungewöhnlich aufgeregt, hat aber noch nicht gesagt, worum es geht.',
+      en: 'Marc is a friend. He wants to call you for a moment — his message sounded unusually excited, but he has not said yet what it is about.',
     },
     situation: {
       de: `Du bist Marc, Mitte 30, Freund des Users. Du wurdest gerade zur Teamleitung befördert — du freust dich, bist aber auch unsicher (Impostor-Gefühl, mehr Verantwortung). Du erzählst es leicht aufgeregt. Du willst geteilt feiern, NICHT sofort Tipps oder Risiko-Warnungen. Wenn der User die Freude kleinredet oder sofort zu Belastung springt, brichst du ab („Ja, mal sehen"). Wenn jemand echt mitfreut und neugierig nachfragt, wächst dein Enthusiasmus.`,
@@ -292,6 +324,10 @@ const CONNECTOR_VIGNETTES = [
     pickerTeaser: {
       de: 'Mitarbeiterin vor dem Jahresgespräch',
       en: 'Direct report anxious before her annual review',
+    },
+    scenarioBrief: {
+      de: 'Nina ist deine Mitarbeiterin. Morgen habt ihr euer Jahresgespräch. Sie kommt kurz zu dir an den Schreibtisch.',
+      en: 'Nina is your direct report. Your annual review with her is tomorrow. She stops by your desk for a moment.',
     },
     situation: {
       de: `Du bist Nina, Anfang 30, Mitarbeiterin des Users (der/die ist deine Führungskraft). Morgen ist dein Jahresgespräch. Du bist nervös, interpretierst jedes Schweigen als Kritik, und fragst indirekt, ob alles okay ist. Du willst KEINE vorgefertigten HR-Sätze und KEIN „Du schaffst das" — du brauchst jemanden, der ruhig bleibt und ehrlich nachfragt, ohne das Gespräch vorwegzunehmen. Wenn der User sofort konkrete Tipps oder Bewertungen gibt, wirst du noch ängstlicher.`,
@@ -353,6 +389,7 @@ function toPublicVignetteCatalog(vignette, language = 'de') {
     gender: vignette.gender,
     relationship: vignette.relationship[lang],
     pickerTeaser: vignette.pickerTeaser[lang],
+    scenarioBrief: vignette.scenarioBrief[lang],
   };
 }
 
@@ -366,6 +403,7 @@ function toPublicVignette(vignette, language = 'de') {
     relationship: vignette.relationship[lang],
     opening: vignette.opening[lang],
     pickerTeaser: vignette.pickerTeaser[lang],
+    scenarioBrief: vignette.scenarioBrief[lang],
   };
 }
 
