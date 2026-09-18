@@ -120,7 +120,8 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
                 <div className="min-w-0">
                   <p className="font-semibold text-content-primary">{v.personaName}</p>
                   <p className="text-xs text-content-tertiary mb-1">{v.relationship}</p>
-                  <p className="text-sm text-content-secondary leading-snug">{v.pickerTeaser}</p>
+                  <p className="text-sm font-medium text-content-primary leading-snug mb-1">{v.pickerTeaser}</p>
+                  <p className="text-xs text-content-secondary leading-snug">{v.scenarioBrief}</p>
                 </div>
               </div>
             </button>

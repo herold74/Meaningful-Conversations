@@ -831,6 +831,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             personaName: connectorVignette.personaName,
             personaGender: connectorVignette.gender,
             liveMode: connectorRun.liveMode,
+            scenarioBrief: connectorVignette.scenarioBrief,
           }}
           onConnectorEnded={handleConnectorEnded}
         />
