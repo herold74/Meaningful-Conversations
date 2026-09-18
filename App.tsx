@@ -2229,6 +2229,22 @@ const App: React.FC = () => {
                             ? t('connector_transition_next', { current: String(connectorRun.currentIndex + 2), total: String(connectorRun.vignettes.length) })
                             : t('connector_transition_last')}
                     </p>
+                    {connectorRun.mode === 'assessment'
+                        && connectorRun.currentIndex + 1 < connectorRun.vignettes.length && (
+                        <div className="mt-4 max-w-md mx-auto rounded-lg bg-white/10 px-4 py-3 text-left">
+                            <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">
+                                {t('connector_transition_scenario_label')}
+                            </p>
+                            <p className="text-sm font-semibold text-gray-200">
+                                {connectorRun.vignettes[connectorRun.currentIndex + 1].personaName}
+                                {' · '}
+                                {connectorRun.vignettes[connectorRun.currentIndex + 1].relationship}
+                            </p>
+                            <p className="text-sm text-gray-300 mt-1 leading-snug">
+                                {connectorRun.vignettes[connectorRun.currentIndex + 1].scenarioBrief}
+                            </p>
+                        </div>
+                    )}
                     <button
                         onClick={handleConnectorContinue}
                         className="mt-6 py-3 px-8 bg-accent-primary hover:bg-accent-primary/90 text-white font-semibold rounded-lg transition-colors"

@@ -13,7 +13,7 @@ describe('connector vignette catalog', () => {
     const ids = CONNECTOR_VIGNETTES.map((v) => v.id);
     expect(new Set(ids).size).toBe(8);
     CONNECTOR_VIGNETTES.forEach((v) => {
-      ['relationship', 'situation', 'emotionalTone', 'innerNeed', 'opening', 'exitLine', 'trap', 'goodConnection', 'pickerTeaser'].forEach((field) => {
+      ['relationship', 'situation', 'emotionalTone', 'innerNeed', 'opening', 'exitLine', 'trap', 'goodConnection', 'pickerTeaser', 'scenarioBrief'].forEach((field) => {
         expect(v[field]).toBeDefined();
         expect(typeof v[field].de).toBe('string');
         expect(typeof v[field].en).toBe('string');

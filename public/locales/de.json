@@ -2378,6 +2378,7 @@
   "connector_transition_timeout_title": "Das Gespräch ist im Alltag zu Ende gegangen.",
   "connector_transition_next": "Weiter zu Gespräch {{current}} von {{total}}.",
   "connector_transition_last": "Das war das letzte Gespräch — deine Auswertung wartet.",
+  "connector_transition_scenario_label": "Nächstes Szenario",
   "connector_transition_continue": "Nächstes Gespräch",
   "connector_transition_to_results": "Zur Auswertung",
   "connector_evaluating_title": "Deine Gespräche werden ausgewertet …",
