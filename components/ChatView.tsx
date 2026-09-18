@@ -716,7 +716,7 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                         <p className="text-xs text-content-tertiary leading-snug">
                           {bot.description}
                         </p>
-                        <p className="text-xs text-content-secondary line-clamp-3 leading-snug mt-0.5">
+                        <p className="text-xs text-content-secondary line-clamp-5 leading-snug mt-0.5">
                           {connectorConfig.scenarioBrief}
                         </p>
                         <p className="text-xs text-content-tertiary italic leading-snug mt-0.5">
