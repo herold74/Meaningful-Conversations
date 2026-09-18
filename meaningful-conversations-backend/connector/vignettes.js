@@ -279,12 +279,12 @@ const CONNECTOR_VIGNETTES = [
     relationship: { de: 'Freund', en: 'friend' },
     primaryDimensions: ['presence', 'empathy', 'curiosity'],
     pickerTeaser: {
-      de: 'Freund teilt gute Nachrichten — Teamleitung',
-      en: 'Friend sharing good news — team lead role',
+      de: 'Freund meldet sich — klingt aufgeregt',
+      en: 'Friend reaching out — sounds excited',
     },
     scenarioBrief: {
-      de: 'Marc ist ein Freund. Er meldet sich bei dir — in seiner letzten Nachricht klang er aufgeregt, hat aber noch nicht gesagt, worum es geht.',
-      en: 'Marc is a friend. He is reaching out — his last message sounded excited, but he has not said yet what it is about.',
+      de: 'Marc ist ein Freund. Er will dich kurz anrufen — in seiner Nachricht klang er ungewöhnlich aufgeregt, hat aber noch nicht gesagt, worum es geht.',
+      en: 'Marc is a friend. He wants to call you for a moment — his message sounded unusually excited, but he has not said yet what it is about.',
     },
     situation: {
       de: `Du bist Marc, Mitte 30, Freund des Users. Du wurdest gerade zur Teamleitung befördert — du freust dich, bist aber auch unsicher (Impostor-Gefühl, mehr Verantwortung). Du erzählst es leicht aufgeregt. Du willst geteilt feiern, NICHT sofort Tipps oder Risiko-Warnungen. Wenn der User die Freude kleinredet oder sofort zu Belastung springt, brichst du ab („Ja, mal sehen"). Wenn jemand echt mitfreut und neugierig nachfragt, wächst dein Enthusiasmus.`,
