@@ -5,8 +5,8 @@
 **Branch:** `main`
 **Staging:** Deployed **2026-09-14**, v**2.6.0** Build **19** — https://mc-beta.manualmode.at (health OK). Practice UI labels follow app language (catalog + `contentLanguage`); contracting catalog includes localized `concern` for phase-2 display.
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19).
-**App Store:** iOS **2.5.7 approved & live (2026-09-04)**; production API + web are **2.6.0**. Next iOS binary: **2.6.0** — set `MARKETING_VERSION` and ASC build **≥5** before archive.
-**Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
+**App Store:** iOS **2.5.7 approved & live (2026-09-04)**; production API + web are **2.6.0**. **Local Xcode prep (2026-09-18):** `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **19** (ASC upload will show **2.6.0 (19)**); `npm run verify:ios-iap` passed; archive pending Xcode GUI (license + signing).
+**Xcode:** Ready to archive — open `ios/App/App.xcodeproj`, scheme **App**, **Any iOS Device (arm64)**, Product → Archive. Do **not** upload until ASC version row created and submit checklist done (`DOCUMENTATION/APP-STORE-CHECKLIST.md`).
 
 ## Session handoff (2026-09-16) — Production v2.6.0 Build 19
 
@@ -15,7 +15,7 @@
 - **Migration:** `20260906150000_add_connector_run_stats` inferred applied (backend healthy; startup `prisma migrate deploy` is fatal on failure).
 - **TTS:** `/api/tts/health` OK (`piperAvailable: true`, 4 voices).
 - **iOS 2.5.7:** App Store binary unchanged; backward-compatible with production 2.6.0 API per `release-2.6.0-compatibility.md`. Connector/Gloria connection-prep/Fremdsicht/PDF redesign are web-only until iOS 2.6.0 archive.
-- **Next:** Bump `MARKETING_VERSION` → 2.6.0 + `CURRENT_PROJECT_VERSION` ≥ **5**; `npm run build && npx cap sync ios`; `npm run verify:ios-iap`; archive + ASC submit. Optional: iOS 2.5.7 regression on production API (login, coaching, practice, Gloria, IAP restore, voice).
+- **Next:** Archive iOS **2.6.0 (19)** in Xcode + ASC submit (subscriptions linked, DE/EN-CA metadata). Optional: iOS 2.5.7 regression on production API (login, coaching, practice, Gloria, IAP restore, voice).
 
 ## Session handoff (2026-09-04) — The Connector (v2.6.0)
 
