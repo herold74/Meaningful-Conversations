@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info, HeartHandshake } from 'lucide-react';
+import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -15,6 +15,7 @@ import { speechService } from '../services/capacitorSpeechService';
 import { brand } from '../config/brand';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import TranscriptMicAvatar from './icons/TranscriptMicAvatar';
+import ConnectorTileAvatar from './icons/ConnectorTileAvatar';
 import {
   getCoachSessionRing,
   getCoachSessionRingClass,
@@ -474,8 +475,15 @@ const ConnectorTile: React.FC<ConnectorTileProps> = ({ isGuest, onConnector, onA
       whileHover={isGuest ? undefined : { y: -3 }}
       transition={{ duration: 0.15 }}
     >
-      <div className="rounded-full p-3 bg-accent-primary/10 shrink-0">
-        <HeartHandshake className={`w-14 h-14 text-accent-primary ${isGuest ? 'opacity-60' : ''}`} aria-hidden />
+      <div
+        className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', isGuest)} ${isGuest ? 'opacity-60' : ''}`}
+        title={t(COACH_SESSION_RING_I18N.tool)}
+      >
+        <div
+          className={`w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center ${isGuest ? 'filter grayscale opacity-80' : ''}`}
+        >
+          <ConnectorTileAvatar className="w-[4.75rem] h-[4.75rem]" />
+        </div>
       </div>
 
       <div className="mt-3 flex flex-col flex-1 w-full justify-between">
