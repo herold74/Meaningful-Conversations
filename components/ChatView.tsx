@@ -696,6 +696,11 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
     [tts.voices, language]
   );
 
+  const connectorRelationshipLabel = useMemo(() => {
+    if (!connectorConfig) return '';
+    return language === 'de' ? (bot.description_de || bot.description) : bot.description;
+  }, [connectorConfig, language, bot.description, bot.description_de]);
+
   return (
     <div className="flex flex-col h-[82.5vh] max-w-3xl mx-auto bg-background-secondary/80 dark:bg-background-secondary/40 backdrop-blur-sm border border-border-primary/60 shadow-card rounded-card overflow-hidden">
       <header className="flex items-center justify-between p-4 border-b border-border-primary/50 gap-2">
@@ -703,11 +708,11 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         <div className="flex-1 min-w-0">
              <button 
                 onClick={() => setIsCoachInfoOpen(true)} 
-                className="flex items-center text-left focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-accent-primary rounded-lg p-1 -ml-1 transition-colors hover:bg-background-tertiary dark:hover:bg-background-tertiary/50"
+                className="flex items-center w-full min-w-0 text-left focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-background-primary focus:ring-accent-primary rounded-lg p-1 -ml-1 transition-colors hover:bg-background-tertiary dark:hover:bg-background-tertiary/50"
                 aria-label={`${t('chat_viewInfo')} for ${bot.name}`}
             >
                 <img src={resolveAssetUrl(bot.avatar)} alt={bot.name} className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3 shrink-0 ring-2 ring-accent-primary/30" />
-                <div className="min-w-0 flex flex-col">
+                <div className="min-w-0 flex-1 overflow-hidden flex flex-col">
                     <h1 className="text-lg md:text-xl font-bold text-content-primary truncate">{bot.name}</h1>
                     {coachPracticeConfig && (
                       <p className="text-xs text-content-secondary line-clamp-2 leading-snug">
@@ -716,24 +721,16 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                       </p>
                     )}
                     {connectorConfig && (
-                      <>
-                        <p className="text-xs text-content-tertiary leading-snug">
-                          {bot.description}
-                        </p>
-                        <p className="text-xs text-content-secondary line-clamp-5 leading-snug mt-0.5">
-                          {connectorConfig.scenarioBrief}
-                        </p>
-                        <p className="text-xs text-content-tertiary italic leading-snug mt-0.5">
-                          {t('connector_chat_hint')}
-                        </p>
-                      </>
+                      <p className="text-xs text-content-secondary line-clamp-2 leading-snug mt-0.5 break-words">
+                        {connectorRelationshipLabel}
+                      </p>
                     )}
                 </div>
             </button>
         </div>
 
         {/* Right: Controls */}
-        <div className="flex items-center justify-end gap-x-1 sm:gap-x-2 md:gap-x-4 max-w-[50%] sm:max-w-none">
+        <div className="flex shrink-0 items-center justify-end gap-x-1 sm:gap-x-2 md:gap-x-4 max-w-[50%] sm:max-w-none">
             {!practiceLiveMode && (
             <button 
                 onClick={() => {
