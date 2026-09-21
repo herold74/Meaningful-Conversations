@@ -2,11 +2,12 @@
 
 ## Current Status
 **Version:** 2.6.0 **Build 23** (repo + staging)
-**Branch:** `main` @ `bd64ccc4` — **merged 2026-09-21:** Connector **Eigene Situation** (Premium+ gating, qualitative results, migration `20260921120000_connector_open_run_stats`) + catalog polish (tile avatars, chat header intro, layout/footer, darker speech bubbles). Feature tip before deploy: `2776454b`.
+**Branch:** `main` @ `79e4a4db` — **merged 2026-09-21:** Connector **Eigene Situation** (Premium+ gating, qualitative results, migration `20260921120000_connector_open_run_stats`) + catalog polish (tile avatars, chat header intro, layout/footer, darker speech bubbles). Feature tip before deploy: `2776454b`.
 **Staging:** Deployed **2026-09-21**, v**2.6.0** Build **23** — https://mc-beta.manualmode.at (`/api/health` OK, `sw.js` `v2.6.0-b23`). `make deploy-staging` from Mac; backend migration applied via container startup (`prisma migrate deploy`).
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
 **App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **23** (synced by deploy script). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
-**Xcode:** Open `ios/App/App.xcodeproj`, scheme **App** — archive when ready; ASC **2.6.0**, assign build **23** (or newer after another staging deploy). No archive/submit in this session.
+**Xcode:** `main` includes **UIScene** migration (`SceneDelegate` + `UIApplicationSceneManifest`) for Xcode 27 launch — `79e4a4db`. Open `ios/App/App.xcodeproj`, scheme **App**; clean build + reinstall on device after pull. ASC **2.6.0**, build **23**.
+**Connector chat UX (pending commit):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal (catalog copy).
 
 ## Session handoff (2026-09-16) — Production v2.6.0 Build 19
 

@@ -38,7 +38,8 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { parseMeditationMarkers } from '../hooks/useMeditation';
 import { stripReferralAndAuditMarkers } from '../utils/messageMarkers';
 import { BOTS } from '../constants';
-import { connectorChatHeaderIntroKey } from '../utils/connectorChatIntro';
+import { firstSentenceOfScenarioBrief } from '../utils/connectorScenarioBrief';
+import { useCompactVerticalViewport } from '../hooks/useCompactVerticalViewport';
 
 /** Meditation markers first; then strip referral / AUDIT_TASK from visible bubble text. */
 function processAssistantReply(rawText: string) {
@@ -101,6 +102,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const [isVoiceMode, setIsVoiceMode] = useState(() => coachPracticeConfig?.liveMode === true || connectorConfig?.liveMode === true);
   const practiceLiveMode = coachPracticeConfig?.liveMode === true;
   const showVoiceUi = practiceLiveMode || isVoiceMode;
+  /** Voice header has more controls — keep connector subline to relationship-only sooner. */
+  const compactVertical = useCompactVerticalViewport(showVoiceUi && connectorConfig ? 700 : 620);
 
   const isIOS = useMemo(() => {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -709,6 +712,19 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
     [tts.voices, language]
   );
 
+  const connectorRelationshipLabel = useMemo(() => {
+    if (!connectorConfig) return '';
+    return language === 'de' ? (bot.description_de || bot.description) : bot.description;
+  }, [connectorConfig, language, bot.description, bot.description_de]);
+
+  const connectorHeaderSubline = useMemo(() => {
+    if (!connectorConfig) return '';
+    if (compactVertical) return connectorRelationshipLabel;
+    const brief = connectorConfig.scenarioBrief?.trim();
+    if (brief) return firstSentenceOfScenarioBrief(brief);
+    return connectorRelationshipLabel;
+  }, [connectorConfig, compactVertical, connectorRelationshipLabel]);
+
   return (
     <div className="flex flex-col h-[82.5vh] max-w-3xl mx-auto bg-background-secondary/80 dark:bg-background-secondary/40 backdrop-blur-sm border border-border-primary/60 shadow-card rounded-card overflow-hidden">
       <header className="flex items-center justify-between p-4 border-b border-border-primary/50 gap-2">
@@ -728,13 +744,9 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                         {practiceLiveMode && ` · ${t('practice_live_badge')}`}
                       </p>
                     )}
-                    {connectorConfig && (
-                      <p className="text-xs text-content-secondary line-clamp-3 leading-snug mt-0.5 break-words">
-                        {t(connectorChatHeaderIntroKey(language, connectorConfig.personaGender), {
-                          name: bot.name,
-                          relationship: language === 'de' ? (bot.description_de || bot.description) : bot.description,
-                          hint: t('connector_chat_hint'),
-                        })}
+                    {connectorConfig && connectorHeaderSubline && (
+                      <p className="text-xs text-content-secondary line-clamp-2 leading-snug mt-0.5 break-words">
+                        {connectorHeaderSubline}
                       </p>
                     )}
                 </div>
