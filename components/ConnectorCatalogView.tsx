@@ -4,23 +4,33 @@ import BrandLoader from './shared/BrandLoader';
 import { SoundWaveIcon } from './icons/SoundWaveIcon';
 import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import * as geminiService from '../services/geminiService';
+import { ApiError } from '../services/api';
 import { CONNECTOR_AVATARS } from '../utils/connectorRun';
-import type { ConnectorVignetteCatalogEntry } from '../types';
+import type { ConnectorVignetteCatalogEntry, User } from '../types';
+import { resolveConnectorPremiumAccess } from '../utils/connectorAccess';
 
 interface ConnectorCatalogViewProps {
+  currentUser: User | null;
   onStartPractice: (vignetteId: string, liveMode: boolean) => void;
+  onOpenSituation: () => void;
   onBack: () => void;
   onNewAssessment?: () => void;
+  onUpgrade?: () => void;
   isStarting: boolean;
 }
 
 const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
+  currentUser,
   onStartPractice,
+  onOpenSituation,
   onBack,
   onNewAssessment,
+  onUpgrade,
   isStarting,
 }) => {
   const { t, language } = useLocalization();
+  const premiumAccess = resolveConnectorPremiumAccess(currentUser);
+  const practiceLocked = !premiumAccess.canAccessConnectorPractice;
   const [liveMode, setLiveMode] = useState(false);
   const [catalog, setCatalog] = useState<ConnectorVignetteCatalogEntry[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -34,8 +44,14 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
       .then((res) => {
         if (!cancelled) setCatalog(res.vignettes);
       })
-      .catch(() => {
-        if (!cancelled) setLoadError(t('connector_catalog_load_error'));
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          if (err instanceof ApiError && err.data?.errorCode === 'CONNECTOR_PREMIUM_REQUIRED') {
+            setLoadError(t('connector_catalog_premium_required'));
+          } else {
+            setLoadError(t('connector_catalog_load_error'));
+          }
+        }
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -75,7 +91,29 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
         <h1 className="text-2xl md:text-3xl font-bold text-content-primary mb-1">
           {t('connector_catalog_title')}
         </h1>
-        <p className="text-content-secondary text-sm mb-6">{t('connector_catalog_subtitle')}</p>
+        <p className="text-content-secondary text-sm mb-4">{t('connector_catalog_subtitle')}</p>
+
+        {practiceLocked && (
+          <div className="mb-6 rounded-xl border border-accent-primary/40 bg-accent-primary/5 p-4 text-sm text-content-secondary">
+            <p className="mb-3">{t('connector_catalog_premium_required')}</p>
+            <button
+              type="button"
+              onClick={() => onUpgrade?.()}
+              className="py-2 px-4 rounded-lg bg-accent-primary text-button-foreground-on-accent font-semibold text-sm"
+            >
+              {t('connector_catalog_premium_cta')}
+            </button>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => (practiceLocked ? onUpgrade?.() : onOpenSituation())}
+          className="w-full text-left rounded-xl border border-accent-primary/50 bg-accent-primary/5 p-4 mb-6 hover:border-accent-primary transition-colors"
+        >
+          <p className="font-semibold text-content-primary">{t('connector_catalog_open_situation')}</p>
+          <p className="text-sm text-content-secondary mt-1">{t('connector_catalog_open_situation_desc')}</p>
+        </button>
 
         <div className="rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 mb-6">
           <h2 className="font-semibold text-content-primary mb-2 text-sm">{t('connector_intro_mode_title')}</h2>
@@ -108,8 +146,10 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
             <button
               key={v.id}
               type="button"
-              onClick={() => onStartPractice(v.id, liveMode)}
-              className="text-left rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 hover:border-accent-primary/60 hover:bg-accent-primary/5 transition-colors"
+              onClick={() => (practiceLocked ? onUpgrade?.() : onStartPractice(v.id, liveMode))}
+              className={`text-left rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 transition-colors ${
+                practiceLocked ? 'opacity-60' : 'hover:border-accent-primary/60 hover:bg-accent-primary/5'
+              }`}
             >
               <div className="flex gap-3">
                 <img

@@ -57,6 +57,33 @@ describe('connectorStatsService', () => {
     expect(stats.totals.heardRatePercent).toBe(50);
   });
 
+  test('aggregates open situation runs without scores', () => {
+    const openRows = Array.from({ length: 5 }, (_, i) => ({
+      runMode: 'open',
+      overallScore: null,
+      empathy: null,
+      presence: null,
+      curiosity: null,
+      nonJudgment: null,
+      steadiness: null,
+      vignetteIds: [`custom-${i}`],
+      endTypes: ['heard'],
+      lengthPreset: 'standard',
+      relationshipBucket: 'friend',
+      developmentFieldsTouched: ['empathy', 'presence'],
+      language: 'de',
+      liveMode: false,
+      createdAt: new Date('2026-07-21T10:00:00.000Z'),
+    }));
+    const stats = computeConnectorAdminStats(openRows, 10, { days: 90 });
+
+    expect(stats.openSituation.displayCount).toBe('5');
+    expect(stats.openSituation.byLengthPreset.find((r) => r.id === 'standard')?.displayCount).toBe('5');
+    expect(stats.openSituation.developmentFieldTouches.find((r) => r.id === 'empathy')?.displayCount).toBe('5');
+    expect(stats.totals.completedRuns).toBe(5);
+    expect(stats.totals.avgOverallScore).toBeNull();
+  });
+
   test('tracks live mode split', () => {
     const stats = computeConnectorAdminStats([
       makeRow({ liveMode: false }),

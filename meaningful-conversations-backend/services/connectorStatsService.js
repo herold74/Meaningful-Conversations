@@ -58,8 +58,32 @@ function computeConnectorAdminStats(rows, activeUserCount, options = {}) {
   const byEndType = new Map(END_TYPES.map((t) => [t, { count: 0, scores: [] }]));
   const byLiveMode = { text: { count: 0, scores: [] }, voice: { count: 0, scores: [] } };
   const daily = new Map();
+  const openRuns = { count: 0, byLengthPreset: new Map(), byRelationshipBucket: new Map(), fieldTouches: new Map() };
 
   for (const row of inRange) {
+    if (row.runMode === 'open') {
+      openRuns.count += 1;
+      if (row.lengthPreset) {
+        openRuns.byLengthPreset.set(row.lengthPreset, (openRuns.byLengthPreset.get(row.lengthPreset) || 0) + 1);
+      }
+      if (row.relationshipBucket) {
+        openRuns.byRelationshipBucket.set(
+          row.relationshipBucket,
+          (openRuns.byRelationshipBucket.get(row.relationshipBucket) || 0) + 1,
+        );
+      }
+      const fields = Array.isArray(row.developmentFieldsTouched) ? row.developmentFieldsTouched : [];
+      for (const f of fields) {
+        if (typeof f !== 'string') continue;
+        openRuns.fieldTouches.set(f, (openRuns.fieldTouches.get(f) || 0) + 1);
+      }
+      const dateKey = (row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt))
+        .toISOString()
+        .slice(0, 10);
+      daily.set(dateKey, (daily.get(dateKey) || 0) + 1);
+      continue;
+    }
+
     if (typeof row.overallScore !== 'number') continue;
 
     overallScores.push(row.overallScore);
@@ -132,6 +156,23 @@ function computeConnectorAdminStats(rows, activeUserCount, options = {}) {
     dimensionAverages[dim] = dimSums[dim].length ? round1(avg(dimSums[dim])) : null;
   }
 
+  const openFieldStats = CONNECTOR_DIMENSIONS.map((dim) => {
+    const count = openRuns.fieldTouches.get(dim) || 0;
+    return bucketRow(dim, count, [], { suppressCount: false });
+  });
+
+  const openLengthStats = ['short', 'standard', 'long'].map((preset) => {
+    const count = openRuns.byLengthPreset.get(preset) || 0;
+    return bucketRow(preset, count, [], { suppressCount: false });
+  });
+
+  const openRelationshipStats = ['colleague', 'friend', 'family', 'partner', 'other'].map((bucket) => {
+    const count = openRuns.byRelationshipBucket.get(bucket) || 0;
+    return bucketRow(bucket, count, [], { suppressCount: false });
+  });
+
+  const openRunsSuppressed = suppressCount(openRuns.count);
+
   return {
     period: {
       start: start.toISOString(),
@@ -159,6 +200,14 @@ function computeConnectorAdminStats(rows, activeUserCount, options = {}) {
       vignettes: CONNECTOR_VIGNETTES.length,
     },
     vignetteNames,
+    openSituation: {
+      completedRuns: openRunsSuppressed ? null : openRuns.count,
+      suppressed: openRunsSuppressed,
+      displayCount: openRunsSuppressed ? `<${K_ANONYMITY}` : String(openRuns.count),
+      byLengthPreset: openLengthStats,
+      byRelationshipBucket: openRelationshipStats,
+      developmentFieldTouches: openFieldStats,
+    },
   };
 }
 

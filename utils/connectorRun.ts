@@ -14,7 +14,14 @@ export const CONNECTOR_AVATARS: Record<string, string> = {
     'nina-review': '/avatars/connector-nina.png',
 };
 
-export type ConnectorRunMode = 'assessment' | 'practice';
+export type ConnectorRunMode = 'assessment' | 'practice' | 'open';
+
+export const CONNECTOR_OPEN_SITUATION_CONSENT_KEY = 'connector_open_situation_consent_v1';
+
+export const CONNECTOR_OPEN_LIMITS = {
+    relationshipMax: 120,
+    situationMax: 800,
+} as const;
 
 export interface ConnectorRunState {
     mode: ConnectorRunMode;
@@ -23,6 +30,10 @@ export interface ConnectorRunState {
     entries: { vignetteId: string; history: Message[]; endType: ConnectorEndType }[];
     liveMode: boolean;
     practiceFocus?: ConnectorDimensionKey;
+    customScenarioId?: string;
+    maxUserTurns?: number;
+    lengthPreset?: string;
+    relationshipBucket?: string;
 }
 
 export interface ConnectorChatConfig {
@@ -31,6 +42,9 @@ export interface ConnectorChatConfig {
     personaGender: 'male' | 'female';
     liveMode: boolean;
     scenarioBrief: string;
+    runMode: ConnectorRunMode;
+    customScenarioId?: string;
+    maxUserTurns?: number;
 }
 
 export function botFromConnectorVignette(vignette: ConnectorVignettePublic): Bot {
@@ -39,7 +53,7 @@ export function botFromConnectorVignette(vignette: ConnectorVignettePublic): Bot
         name: vignette.personaName,
         description: vignette.relationship,
         description_de: vignette.relationship,
-        avatar: CONNECTOR_AVATARS[vignette.id] || '/avatars/nobody.png',
+        avatar: vignette.id.startsWith('custom-') ? '/avatars/nobody.png' : (CONNECTOR_AVATARS[vignette.id] || '/avatars/nobody.png'),
         style: 'The Connector',
         style_de: 'The Connector',
         accessTier: 'registered',

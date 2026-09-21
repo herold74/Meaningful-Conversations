@@ -32,6 +32,14 @@ interface AdminConnectorStats {
   scoreHistogram: Record<string, number>;
   daily: Array<{ date: string; count: number }>;
   catalogSize: { vignettes: number };
+  openSituation?: {
+    completedRuns: number | null;
+    suppressed: boolean;
+    displayCount: string;
+    byLengthPreset: BucketRow[];
+    byRelationshipBucket: BucketRow[];
+    developmentFieldTouches: BucketRow[];
+  };
 }
 
 const PERIODS: PeriodDays[] = [7, 30, 90, 365];
@@ -217,6 +225,46 @@ const AdminConnectorAnalyticsView: React.FC = () => {
           hint={t('admin_connector_stats_heard_rate_hint')}
         />
       </div>
+
+      {stats.openSituation && (
+        <section className="min-w-0 rounded-lg border border-gray-200 dark:border-gray-700 p-3 sm:p-4 bg-white dark:bg-gray-800/40">
+          <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 mb-3">
+            {t('admin_connector_stats_open_runs')}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            {t('admin_connector_stats_runs_short')}: {stats.openSituation.displayCount}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('admin_connector_stats_open_length')}</h4>
+              {stats.openSituation.byLengthPreset.map((row) => (
+                <div key={row.id} className="flex justify-between text-xs text-gray-600 dark:text-gray-400 py-0.5">
+                  <span>{row.id}</span>
+                  <span>{row.displayCount}</span>
+                </div>
+              ))}
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('admin_connector_stats_open_relationship')}</h4>
+              {stats.openSituation.byRelationshipBucket.map((row) => (
+                <div key={row.id} className="flex justify-between text-xs text-gray-600 dark:text-gray-400 py-0.5">
+                  <span>{row.id}</span>
+                  <span>{row.displayCount}</span>
+                </div>
+              ))}
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('admin_connector_stats_open_fields')}</h4>
+              {stats.openSituation.developmentFieldTouches.map((row) => (
+                <div key={row.id} className="flex justify-between text-xs text-gray-600 dark:text-gray-400 py-0.5">
+                  <span>{dimLabels[row.id as keyof typeof dimLabels] || row.id}</span>
+                  <span>{row.displayCount}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="min-w-0">
         <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 mb-3">

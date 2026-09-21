@@ -1,5 +1,6 @@
-import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog, ConnectorVignettePublic, ConnectorVignetteCatalogEntry, ConnectorEvaluationResult, ConnectorEndType } from '../types';
+import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog, ConnectorVignettePublic, ConnectorVignetteCatalogEntry, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType } from '../types';
 import { apiFetch, getApiBaseUrl, getSession } from './api';
+import type { ConnectorRunMode } from '../utils/connectorRun';
 
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
 
@@ -464,6 +465,25 @@ export const fetchConnectorVignette = async (
     return await apiFetch(`/gemini/connector/vignette/${encodeURIComponent(vignetteId)}?language=${language}`);
 };
 
+export const compileConnectorOpenScenario = async (
+    params: {
+        relationship: string;
+        situation: string;
+        lengthPreset: 'short' | 'standard' | 'long';
+        language: Language;
+    },
+): Promise<{
+    customScenarioId: string;
+    vignette: ConnectorVignettePublic;
+    maxUserTurns: number;
+    lengthPreset: string;
+}> => {
+    return await apiFetch('/gemini/connector/scenario/from-description', {
+        method: 'POST',
+        body: JSON.stringify(params),
+    });
+};
+
 /**
  * Send one Connector turn with SSE streaming.
  * Returns final text plus whether the persona ended the conversation
@@ -475,6 +495,10 @@ export const sendConnectorTurnStream = async (
     language: Language,
     liveMode: boolean,
     onChunk: (chunk: string) => void,
+    options?: {
+        runMode?: ConnectorRunMode;
+        customScenarioId?: string;
+    },
 ): Promise<{ text: string; ended: boolean; endType: ConnectorEndType | null; provider?: string | null }> => {
     const session = getSession();
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -486,7 +510,15 @@ export const sendConnectorTurnStream = async (
     const response = await fetch(`${apiBaseUrl}/api/gemini/connector/turn`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ vignetteId, history, language, liveMode, stream: true }),
+        body: JSON.stringify({
+            vignetteId,
+            customScenarioId: options?.customScenarioId,
+            runMode: options?.runMode ?? 'assessment',
+            history,
+            language,
+            liveMode,
+            stream: true,
+        }),
     });
 
     if (!response.ok) {
@@ -543,5 +575,22 @@ export const evaluateConnectorRun = async (
     return await apiFetch('/gemini/connector/evaluate', {
         method: 'POST',
         body: JSON.stringify({ vignettes: entries, language, liveMode }),
+    });
+};
+
+export const evaluateConnectorQualitative = async (
+    params: {
+        customScenarioId: string;
+        history: Message[];
+        endType: ConnectorEndType;
+        language: Language;
+        liveMode: boolean;
+        lengthPreset?: string;
+        relationshipBucket?: string;
+    },
+): Promise<{ evaluation: ConnectorQualitativeEvaluationResult; durationMs: number }> => {
+    return await apiFetch('/gemini/connector/evaluate-qualitative', {
+        method: 'POST',
+        body: JSON.stringify(params),
     });
 };

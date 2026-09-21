@@ -8,7 +8,7 @@ import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorRea
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
-import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorDimensionKey } from '../types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorDimensionKey } from '../types';
 import type { ConnectorRunState } from '../utils/connectorRun';
 import type { UserIntent } from './IntentPickerView';
 import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
@@ -49,6 +49,8 @@ import EvaluationHistory from './EvaluationHistory';
 import PracticeSetupView from './PracticeSetupView';
 import ConnectorIntroView from './ConnectorIntroView';
 import ConnectorCatalogView from './ConnectorCatalogView';
+import ConnectorOpenSituationView from './ConnectorOpenSituationView';
+import ConnectorQualitativeResultsView from './ConnectorQualitativeResultsView';
 import ConnectorResultsView from './ConnectorResultsView';
 import PracticeEvaluationReview from './PracticeEvaluationReview';
 import PracticeHistoryView from './PracticeHistoryView';
@@ -177,6 +179,7 @@ export interface AppViewRouterProps {
   // The Connector
   connectorRun: ConnectorRunState | null;
   connectorEvaluation: ConnectorEvaluationResult | null;
+  connectorQualitativeEvaluation: ConnectorQualitativeEvaluationResult | null;
   isConnectorStarting: boolean;
   connectorSaveState: 'idle' | 'saving' | 'saved' | 'error';
   connectorPracticeFocus: ConnectorDimensionKey | null;
@@ -186,6 +189,14 @@ export interface AppViewRouterProps {
   handleOpenConnectorIntro: () => void;
   handleStartConnectorRun: (liveMode: boolean) => void;
   handleStartConnectorPractice: (vignetteId: string, liveMode: boolean) => void;
+  handleStartConnectorOpenSituation: (params: {
+    relationship: string;
+    situation: string;
+    lengthPreset: 'short' | 'standard' | 'long';
+    liveMode: boolean;
+  }) => void;
+  handleConnectorOpenAgain: () => void;
+  handleConnectorOpenToCatalog: () => void;
   handleConnectorNewAssessment: () => void;
   handleConnectorEnded: (endType: 'heard' | 'timeout') => void;
   handleConnectorSaveToProfile: () => void;
@@ -322,6 +333,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handlePracticeHistoryBack,
     connectorRun,
     connectorEvaluation,
+    connectorQualitativeEvaluation,
     isConnectorStarting,
     connectorSaveState,
     connectorPracticeFocus,
@@ -331,6 +343,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handleOpenConnectorIntro,
     handleStartConnectorRun,
     handleStartConnectorPractice,
+    handleStartConnectorOpenSituation,
+    handleConnectorOpenAgain,
+    handleConnectorOpenToCatalog,
     handleConnectorNewAssessment,
     handleConnectorEnded,
     handleConnectorSaveToProfile,
@@ -805,9 +820,22 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     case 'connectorCatalog':
       return (
         <ConnectorCatalogView
+          currentUser={currentUser}
           onStartPractice={handleStartConnectorPractice}
+          onOpenSituation={() => setView('connectorOpenSituation')}
           onBack={() => setView('botSelection')}
           onNewAssessment={handleConnectorNewAssessment}
+          onUpgrade={() => openUpgrade()}
+          isStarting={isConnectorStarting}
+        />
+      );
+    case 'connectorOpenSituation':
+      return (
+        <ConnectorOpenSituationView
+          currentUser={currentUser}
+          onBack={() => setView('connectorCatalog')}
+          onUpgrade={() => openUpgrade()}
+          onStart={handleStartConnectorOpenSituation}
           isStarting={isConnectorStarting}
         />
       );
@@ -832,17 +860,30 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             personaGender: connectorVignette.gender,
             liveMode: connectorRun.liveMode,
             scenarioBrief: connectorVignette.scenarioBrief,
+            runMode: connectorRun.mode,
+            customScenarioId: connectorRun.customScenarioId,
+            maxUserTurns: connectorRun.maxUserTurns,
           }}
           onConnectorEnded={handleConnectorEnded}
         />
       ) : null;
     }
+    case 'connectorOpenResults':
+      return connectorQualitativeEvaluation && connectorRun ? (
+        <ConnectorQualitativeResultsView
+          evaluation={connectorQualitativeEvaluation}
+          vignettes={connectorRun.vignettes}
+          onAgain={handleConnectorOpenAgain}
+          onCatalog={handleConnectorOpenToCatalog}
+          onDone={handleConnectorDone}
+        />
+      ) : null;
     case 'connectorResults':
       return connectorEvaluation && connectorRun ? (
         <ConnectorResultsView
           evaluation={connectorEvaluation}
           vignettes={connectorRun.vignettes}
-          runMode={connectorRun.mode}
+          runMode={connectorRun.mode === 'open' ? 'practice' : connectorRun.mode}
           onSaveToProfile={handleConnectorSaveToProfile}
           saveState={connectorSaveState}
           canSave={!!currentUser && !!encryptionKey}

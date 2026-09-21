@@ -1,4 +1,5 @@
 const { getVignetteById } = require('./vignettes');
+const { localizedField } = require('./vignetteFields');
 
 /**
  * The Connector persona prompt.
@@ -56,18 +57,28 @@ ALLOWED:
  * Build the system prompt for one Connector vignette turn.
  *
  * @param {object} opts
- * @param {string} opts.vignetteId
+ * @param {string} [opts.vignetteId]
+ * @param {object} [opts.vignette] curated or compiled vignette object
  * @param {string} opts.language 'de' | 'en'
  * @param {number} opts.userTurnCount user messages sent so far (including the one being answered)
  * @param {boolean} opts.liveMode voice mode (spoken-language style)
+ * @param {number} [opts.maxUserTurns] turn cap (open situation presets)
  */
-function buildConnectorPersonaPrompt({ vignetteId, language = 'de', userTurnCount = 1, liveMode = false }) {
-  const vignette = getVignetteById(vignetteId);
+function buildConnectorPersonaPrompt({
+  vignetteId,
+  vignette: vignetteOverride,
+  language = 'de',
+  userTurnCount = 1,
+  liveMode = false,
+  maxUserTurns = MAX_USER_TURNS,
+}) {
+  const vignette = vignetteOverride || getVignetteById(vignetteId);
   if (!vignette) {
-    throw new Error(`Unknown vignette: ${vignetteId}`);
+    throw new Error(`Unknown vignette: ${vignetteId || '(none)'}`);
   }
   const lang = language === 'en' ? 'en' : 'de';
-  const forceClose = userTurnCount >= MAX_USER_TURNS;
+  const turnCap = Number.isFinite(maxUserTurns) && maxUserTurns > 0 ? maxUserTurns : MAX_USER_TURNS;
+  const forceClose = userTurnCount >= turnCap;
   const allowHeardClose = !forceClose && userTurnCount >= MIN_TURNS_BEFORE_HEARD_CLOSE;
 
   const liveBlock = liveMode
@@ -80,10 +91,10 @@ function buildConnectorPersonaPrompt({ vignetteId, language = 'de', userTurnCoun
   if (forceClose) {
     closingBlock = lang === 'de'
       ? `\nGESPRÄCHSENDE (JETZT):
-Dies ist deine letzte Antwort. Reagiere noch kurz und aufrichtig auf die letzte Nachricht, dann beende das Gespräch natürlich mit einem Alltagsgrund, sinngemäß: „${vignette.exitLine.de}"
+Dies ist deine letzte Antwort. Reagiere noch kurz und aufrichtig auf die letzte Nachricht, dann beende das Gespräch natürlich mit einem Alltagsgrund, sinngemäß: „${localizedField(vignette, 'exitLine', lang)}"
 Hänge GANZ AM ENDE deiner Antwort exakt dies an: ${CONNECTOR_END_MARKER}\n`
       : `\nCONVERSATION END (NOW):
-This is your final reply. Briefly and sincerely respond to the last message, then end the conversation naturally with an everyday excuse, along the lines of: "${vignette.exitLine.en}"
+This is your final reply. Briefly and sincerely respond to the last message, then end the conversation naturally with an everyday excuse, along the lines of: "${localizedField(vignette, 'exitLine', lang)}"
 At the VERY END of your reply append exactly this: ${CONNECTOR_END_MARKER}\n`;
   } else if (allowHeardClose) {
     closingBlock = lang === 'de'
@@ -106,15 +117,15 @@ If you don't truly feel heard yet, continue the conversation normally — WITHOU
     : 'Everyday tone among friends/colleagues: mild frustration is okay (e.g. "damn", "what an idiot"), but no fecal language or crude profanity';
 
   if (lang === 'de') {
-    return `Du bist ${vignette.personaName} (${vignette.relationship.de} deines Gegenübers) in einem alltäglichen Gespräch.
+    return `Du bist ${vignette.personaName} (${localizedField(vignette, 'relationship', lang)} deines Gegenübers) in einem alltäglichen Gespräch.
 
 DEINE SITUATION:
-${vignette.situation.de}
+${localizedField(vignette, 'situation', lang)}
 
-DEINE EMOTIONALE GRUNDSTIMMUNG: ${vignette.emotionalTone.de}
+DEINE EMOTIONALE GRUNDSTIMMUNG: ${localizedField(vignette, 'emotionalTone', lang)}
 
 (DEIN INNERES BEDÜRFNIS — nicht aussprechen, aber danach handeln):
-${vignette.innerNeed.de}
+${localizedField(vignette, 'innerNeed', lang)}
 ${liveBlock}
 ${PERSONA_ROLE_GUARD.de}
 ${closingBlock}
@@ -126,15 +137,15 @@ REGELN:
 5. ${languageToneRule}`;
   }
 
-  return `You are ${vignette.personaName} (the user's ${vignette.relationship.en}) in an everyday conversation.
+  return `You are ${vignette.personaName} (the user's ${localizedField(vignette, 'relationship', lang)}) in an everyday conversation.
 
 YOUR SITUATION:
-${vignette.situation.en}
+${localizedField(vignette, 'situation', lang)}
 
-YOUR EMOTIONAL BASELINE: ${vignette.emotionalTone.en}
+YOUR EMOTIONAL BASELINE: ${localizedField(vignette, 'emotionalTone', lang)}
 
 (YOUR INNER NEED — never state it, but act on it):
-${vignette.innerNeed.en}
+${localizedField(vignette, 'innerNeed', lang)}
 ${liveBlock}
 ${PERSONA_ROLE_GUARD.en}
 ${closingBlock}
