@@ -1,9 +1,8 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0
-**Branch:** `cursor/connector-open-situation-110e` — Connector Phase 1: **Eigene Situation** (Premium) + practice catalog gating; **`ba12612e`+**: persona name/gender, voice opening TTS once, open-situation copy (no signature feed, no user comparison); local scripts `reset-local-dev-users.js`, `seed-local-admin-connector-profile.js`.
-**Branch:** `main`
+**Version:** 2.6.0 (repo **Build 20** after merge)
+**Branch:** `main` — **merged 2026-09-21:** Connector Phase 1 **Eigene Situation** (Premium+ / registered tier gating via `connectorPremiumAccess` + `connectorLimits`); qualitative open-run results; practice catalog premium gates; migration `20260921120000_connector_open_run_stats`. Deploy staging/production + `prisma migrate deploy` before live open-situation.
 **Staging:** Deployed **2026-09-14**, v**2.6.0** Build **19** — https://mc-beta.manualmode.at (health OK). Practice UI labels follow app language (catalog + `contentLanguage`); contracting catalog includes localized `concern` for phase-2 display.
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19).
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**; production API + web are **2.6.0**. Next iOS binary: **2.6.0** — set `MARKETING_VERSION` and ASC build **≥5** before archive.
