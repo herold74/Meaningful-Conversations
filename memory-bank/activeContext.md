@@ -2,6 +2,7 @@
 
 ## Current Status
 **Version:** 2.6.0
+**Branch:** `cursor/connector-open-situation-110e` (session) — Connector Phase 1: **Eigene Situation** + Premium gating for practice catalog/open mode; assessment stays registered-only.
 **Branch:** `main`
 **Staging:** Deployed **2026-09-14**, v**2.6.0** Build **19** — https://mc-beta.manualmode.at (health OK). Practice UI labels follow app language (catalog + `contentLanguage`); contracting catalog includes localized `concern` for phase-2 display.
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19).

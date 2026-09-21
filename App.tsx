@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorEndType, ConnectorDimensionKey } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey } from './types';
+import { resolveConnectorPremiumAccess } from './utils/connectorAccess';
 import { userHasSavedConnector } from './utils/connectorProfile';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
@@ -48,6 +49,7 @@ import {
     openingMessageFromVignette,
     CONNECTOR_PERSONA_BOT_ID,
     type ConnectorRunState,
+    type ConnectorRunMode,
 } from './utils/connectorRun';
 import {
     buildGloriaConnectionPrepStarter,
@@ -183,6 +185,7 @@ const App: React.FC = () => {
     // The Connector states
     const [connectorRun, setConnectorRun] = useState<ConnectorRunState | null>(null);
     const [connectorEvaluation, setConnectorEvaluation] = useState<ConnectorEvaluationResult | null>(null);
+    const [connectorQualitativeEvaluation, setConnectorQualitativeEvaluation] = useState<ConnectorQualitativeEvaluationResult | null>(null);
     const [connectorAwaitingNext, setConnectorAwaitingNext] = useState<ConnectorEndType | null>(null);
     const [isConnectorStarting, setIsConnectorStarting] = useState(false);
     const [isConnectorEvaluating, setIsConnectorEvaluating] = useState(false);
@@ -961,11 +964,11 @@ const App: React.FC = () => {
                 : connectorRun.entries;
             if (entries.length === 0) {
                 resetConnectorState();
-                setView(connectorRun.mode === 'practice' ? 'connectorCatalog' : 'botSelection');
+                setView(connectorHubView(connectorRun.mode));
                 return;
             }
             setConnectorRun({ ...connectorRun, entries });
-            await finishConnectorRun(entries, connectorRun.liveMode, connectorRun.mode);
+            await finishConnectorRun(entries, connectorRun.liveMode, connectorRun.mode, connectorRun);
             return;
         }
 
@@ -1430,9 +1433,16 @@ const App: React.FC = () => {
 
     // --- The Connector handlers ---
 
+    const connectorHubView = (mode: ConnectorRunMode): NavView => {
+        if (mode === 'open') return 'connectorOpenSituation';
+        if (mode === 'practice') return 'connectorCatalog';
+        return 'botSelection';
+    };
+
     const resetConnectorState = () => {
         setConnectorRun(null);
         setConnectorEvaluation(null);
+        setConnectorQualitativeEvaluation(null);
         setConnectorAwaitingNext(null);
         setConnectorSaveState('idle');
         setConnectorPracticeFocus(null);
@@ -1455,7 +1465,12 @@ const App: React.FC = () => {
         setIsConnectorStarting(true);
         try {
             const hasPrior = await userHasSavedConnector(encryptionKey);
-            setView(hasPrior ? 'connectorCatalog' : 'connectorIntro');
+            const premium = resolveConnectorPremiumAccess(currentUser);
+            if (hasPrior && premium.canAccessConnectorPractice) {
+                setView('connectorCatalog');
+            } else {
+                setView('connectorIntro');
+            }
         } finally {
             setIsConnectorStarting(false);
         }
@@ -1524,27 +1539,86 @@ const App: React.FC = () => {
         entries: ConnectorRunState['entries'],
         liveMode: boolean,
         runMode: ConnectorRunState['mode'] = 'assessment',
+        runState?: ConnectorRunState | null,
     ) => {
         const evaluable = entries.filter((e) => e.history.some((m) => m.role === 'user'));
         if (evaluable.length === 0) {
             resetConnectorState();
-            setView(runMode === 'practice' ? 'connectorCatalog' : 'botSelection');
+            setView(connectorHubView(runMode));
             return;
         }
         setIsConnectorEvaluating(true);
         try {
-            const result = await geminiService.evaluateConnectorRun(evaluable, language, liveMode);
-            setConnectorEvaluation(result.evaluation);
-            setSelectedBot(null);
-            setChatHistory([]);
-            setView('connectorResults');
+            if (runMode === 'open' && runState?.customScenarioId) {
+                const entry = evaluable[0];
+                const result = await geminiService.evaluateConnectorQualitative({
+                    customScenarioId: runState.customScenarioId,
+                    history: entry.history,
+                    endType: entry.endType,
+                    language,
+                    liveMode,
+                    lengthPreset: runState.lengthPreset,
+                    relationshipBucket: runState.relationshipBucket,
+                });
+                setConnectorQualitativeEvaluation(result.evaluation);
+                setConnectorEvaluation(null);
+                setSelectedBot(null);
+                setChatHistory([]);
+                setView('connectorOpenResults');
+            } else {
+                const result = await geminiService.evaluateConnectorRun(evaluable, language, liveMode);
+                setConnectorEvaluation(result.evaluation);
+                setConnectorQualitativeEvaluation(null);
+                setSelectedBot(null);
+                setChatHistory([]);
+                setView('connectorResults');
+            }
         } catch (error) {
             console.error('Connector evaluation failed:', error);
             alert(t('connector_eval_error'));
             resetConnectorState();
-            setView(runMode === 'practice' ? 'connectorCatalog' : 'botSelection');
+            setView(connectorHubView(runMode));
         } finally {
             setIsConnectorEvaluating(false);
+        }
+    };
+
+    const handleStartConnectorOpenSituation = async (params: {
+        relationship: string;
+        situation: string;
+        lengthPreset: 'short' | 'standard' | 'long';
+        liveMode: boolean;
+    }) => {
+        if (!currentUser) return;
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        setIsConnectorStarting(true);
+        try {
+            const compiled = await geminiService.compileConnectorOpenScenario({
+                relationship: params.relationship,
+                situation: params.situation,
+                lengthPreset: params.lengthPreset,
+                language,
+            });
+            const run: ConnectorRunState = {
+                mode: 'open',
+                vignettes: [compiled.vignette],
+                currentIndex: 0,
+                entries: [],
+                liveMode: params.liveMode,
+                customScenarioId: compiled.customScenarioId,
+                maxUserTurns: compiled.maxUserTurns,
+                lengthPreset: compiled.lengthPreset,
+            };
+            setConnectorRun(run);
+            setConnectorEvaluation(null);
+            setConnectorQualitativeEvaluation(null);
+            setConnectorSaveState('idle');
+            seedConnectorVignette(run, 0);
+        } catch (error) {
+            console.error('Connector open situation start failed:', error);
+            alert(t('connector_start_error'));
+        } finally {
+            setIsConnectorStarting(false);
         }
     };
 
@@ -1559,7 +1633,7 @@ const App: React.FC = () => {
             seedConnectorVignette(run, nextIndex);
         } else {
             setConnectorRun({ ...connectorRun, entries, currentIndex: nextIndex });
-            finishConnectorRun(entries, connectorRun.liveMode, connectorRun.mode);
+            finishConnectorRun(entries, connectorRun.liveMode, connectorRun.mode, connectorRun);
         }
     };
 
@@ -1651,9 +1725,21 @@ const App: React.FC = () => {
     };
 
     const handleConnectorDone = () => {
-        const wasPractice = connectorRun?.mode === 'practice';
+        const mode = connectorRun?.mode;
         resetConnectorState();
-        setView(wasPractice ? 'connectorCatalog' : 'botSelection');
+        if (mode) setView(connectorHubView(mode));
+        else setView('botSelection');
+    };
+
+    const handleConnectorOpenAgain = () => {
+        setConnectorRun(null);
+        setConnectorQualitativeEvaluation(null);
+        setView('connectorOpenSituation');
+    };
+
+    const handleConnectorOpenToCatalog = () => {
+        resetConnectorState();
+        setView('connectorCatalog');
     };
 
     const handleConnectorPracticeCrossSell = () => {
@@ -1996,6 +2082,7 @@ const App: React.FC = () => {
         handlePracticeHistoryBack,
         connectorRun,
         connectorEvaluation,
+        connectorQualitativeEvaluation,
         isConnectorStarting,
         connectorSaveState,
         connectorPracticeFocus,
@@ -2005,6 +2092,9 @@ const App: React.FC = () => {
         handleOpenConnectorIntro,
         handleStartConnectorRun,
         handleStartConnectorPractice,
+        handleStartConnectorOpenSituation,
+        handleConnectorOpenAgain,
+        handleConnectorOpenToCatalog,
         handleConnectorNewAssessment,
         handleConnectorEnded,
         handleConnectorSaveToProfile,
@@ -2223,7 +2313,7 @@ const App: React.FC = () => {
                         {connectorAwaitingNext === 'heard' ? t('connector_transition_heard_title') : t('connector_transition_timeout_title')}
                     </h1>
                     <p className="mt-2 text-lg text-gray-400">
-                        {connectorRun.mode === 'practice'
+                        {connectorRun.mode === 'practice' || connectorRun.mode === 'open'
                             ? t('connector_transition_practice_to_results')
                             : connectorRun.currentIndex + 1 < connectorRun.vignettes.length
                             ? t('connector_transition_next', { current: String(connectorRun.currentIndex + 2), total: String(connectorRun.vignettes.length) })
@@ -2249,7 +2339,7 @@ const App: React.FC = () => {
                         onClick={handleConnectorContinue}
                         className="mt-6 py-3 px-8 bg-accent-primary hover:bg-accent-primary/90 text-white font-semibold rounded-lg transition-colors"
                     >
-                        {connectorRun.mode === 'practice'
+                        {connectorRun.mode === 'practice' || connectorRun.mode === 'open'
                             ? t('connector_transition_to_results')
                             : connectorRun.currentIndex + 1 < connectorRun.vignettes.length
                             ? t('connector_transition_continue')

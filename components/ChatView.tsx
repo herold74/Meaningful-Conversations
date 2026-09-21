@@ -272,6 +272,10 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           language,
           showVoiceUi,
           onStreamChunk,
+          {
+            runMode: connectorConfig.runMode,
+            customScenarioId: connectorConfig.customScenarioId,
+          },
         );
         connectorEnd = { ended: connectorResponse.ended, endType: connectorResponse.endType };
         response = { text: connectorResponse.text, provider: connectorResponse.provider ?? null };

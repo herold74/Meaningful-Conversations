@@ -38,8 +38,10 @@ export type NavView =
     | 'personalityProfile'
     | 'connectorIntro'
     | 'connectorCatalog'
+    | 'connectorOpenSituation'
     | 'connectorChat'
     | 'connectorResults'
+    | 'connectorOpenResults'
     | 'lifeContextEditor'
     | 'transcriptEval'
     | 'transcriptRecord'
@@ -525,4 +527,14 @@ export interface ConnectorEvaluationResult {
     vignetteIds: string[];
     endTypes: ConnectorEndType[];
     completedAt: string;
+}
+
+export interface ConnectorQualitativeEvaluationResult {
+    summary: string;
+    strengths: string[];
+    missedOpportunities: string[];
+    developmentFieldsTouched: ConnectorDimensionKey[];
+    completedAt: string;
+    endType: ConnectorEndType;
+    customScenarioId: string;
 }
