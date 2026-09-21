@@ -2374,6 +2374,8 @@
   "connector_intro_ai_notice": "Deine Gesprächspartner sind KI-Personas. Die Auswertung erstellt eine KI — sie ist ein Impuls zur Selbstreflexion, kein psychologisches Gutachten.",
   "connector_intro_privacy_note": "Die Gespräche werden nur für die Auswertung verwendet und nicht als Chat gespeichert. Dein Ergebnis kannst du optional verschlüsselt im Persönlichkeitsprofil abrufen (unter „Wie du interagierst“) und als PDF exportieren.",
   "connector_chat_hint": "Sei einfach du selbst — es gibt kein richtig oder falsch.",
+  "connector_chat_header_intro_m": "{{name}} ist dein {{relationship}}. {{hint}}",
+  "connector_chat_header_intro_f": "{{name}} ist deine {{relationship}}. {{hint}}",
   "connector_transition_heard_title": "Dein Gegenüber hat sich verstanden gefühlt.",
   "connector_transition_timeout_title": "Das Gespräch ist im Alltag zu Ende gegangen.",
   "connector_transition_next": "Weiter zu Gespräch {{current}} von {{total}}.",

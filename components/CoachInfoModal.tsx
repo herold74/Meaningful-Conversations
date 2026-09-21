@@ -12,9 +12,11 @@ interface CoachInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
   coachingMode: 'off' | 'dpc' | 'dpfl';
+  /** Connector (and similar): full scenario context on the info card */
+  scenarioDetail?: string;
 }
 
-const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, coachingMode }) => {
+const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, coachingMode, scenarioDetail }) => {
     const { language, t } = useLocalization();
     const coachInfoModalRef = useRef<HTMLDivElement>(null);
     useModalOpen(isOpen);
@@ -23,6 +25,10 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
 
     const botDescription = language === 'de' ? bot.description_de : bot.description;
     const botStyle = language === 'de' ? bot.style_de : bot.style;
+    const bodyText = (scenarioDetail?.trim() || botDescription?.trim()) ?? '';
+    const showBodyText =
+      bodyText.length > 0 &&
+      bodyText.localeCompare(bot.name.trim(), undefined, { sensitivity: 'accent' }) !== 0;
 
   return createPortal(
     <div 
@@ -52,7 +58,9 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
             </span>
           ))}
         </div>
-        <p className="mt-2 text-content-secondary leading-relaxed">{botDescription}</p>
+        {showBodyText && (
+          <p className="mt-2 text-content-secondary leading-relaxed text-left">{bodyText}</p>
+        )}
         
         {coachingMode !== 'off' && (
           <div className="mt-4 p-3 bg-background-tertiary dark:bg-background-primary border border-border-primary rounded-lg">

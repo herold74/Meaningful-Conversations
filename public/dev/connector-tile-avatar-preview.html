@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connector Tile — 3 neue Entwürfe</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem 1.25rem 3rem;
+      background: linear-gradient(160deg, #fff7ed 0%, #f0fdfa 45%, #f8fafc 100%);
+      color: #111827;
+    }
+    h1 { font-size: 1.35rem; margin: 0 0 0.35rem; }
+    .sub { color: #4b5563; font-size: 0.9rem; max-width: 40rem; margin-bottom: 2rem; line-height: 1.5; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      max-width: 960px;
+    }
+    .card {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 1.35rem 1rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .card h2 { font-size: 0.95rem; margin: 1rem 0 0.35rem; }
+    .card p { font-size: 0.78rem; color: #6b7280; margin: 0 auto; line-height: 1.45; max-width: 14rem; }
+    .ring {
+      display: inline-block;
+      padding: 2px;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #5BBFBF 0%, #38bdf8 50%, #F59E0B 100%);
+    }
+    .inner {
+      width: 80px;
+      height: 80px;
+      border-radius: 9999px;
+      border: 2px solid #f9fafb;
+      background: #f9fafb;
+      overflow: hidden;
+    }
+    .inner svg { width: 76px; height: 76px; display: block; }
+    .tag {
+      display: inline-block;
+      margin-top: 0.65rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #0f766e;
+      background: #ccfbf1;
+      padding: 0.18rem 0.45rem;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Connector-Kachel — 3 neue Entwürfe</h1>
+  <p class="sub">
+    Gleicher Ring wie Transkript-Tools. Zwei Sprecher-Farben: Teal (du) und Orange (Gegenüber).
+    Sag uns <strong>1</strong>, <strong>2</strong> oder <strong>3</strong> — dann bauen wir es in die App ein.
+  </p>
+
+  <div class="grid">
+    <!-- Entwurf 1: Diagonal-Dialog -->
+    <div class="card">
+      <div class="ring"><div class="inner">
+        <svg viewBox="0 0 80 80" aria-hidden="true">
+          <defs>
+            <linearGradient id="e1-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1B7272" stop-opacity="0.35"/>
+              <stop offset="55%" stop-color="#38BDF8" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#F59E0B" stop-opacity="0.35"/>
+            </linearGradient>
+          </defs>
+          <circle cx="40" cy="40" r="38" fill="url(#e1-bg)"/>
+          <path d="M64 28Q76 40 64 52" fill="none" stroke="#38BDF8" stroke-width="1.75" stroke-linecap="round" opacity="0.4"/>
+          <path d="M16 28Q4 40 16 52" fill="none" stroke="#fbbf24" stroke-width="1.75" stroke-linecap="round" opacity="0.4"/>
+          <g transform="translate(40 40) translate(1 1)">
+            <g transform="translate(-7 -5)">
+              <rect x="-14" y="-7" width="28" height="14" rx="4.5" fill="#5BBFBF"/>
+              <path d="M -9 7 L -14 12 L -4 7 Z" fill="#5BBFBF"/>
+              <line x1="-11" y1="-3" x2="5" y2="-3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/>
+              <circle cx="-11" cy="2.5" r="1.2" fill="#fff" opacity="0.95"/>
+              <circle cx="-5.5" cy="2.5" r="1.2" fill="#fff" opacity="0.85"/>
+              <circle cx="0" cy="2.5" r="1.2" fill="#fff" opacity="0.75"/>
+            </g>
+            <g transform="translate(5 3)">
+              <rect x="-14" y="-7" width="28" height="14" rx="4.5" fill="#FBBF24"/>
+              <path d="M 9 7 L 14 12 L 6 7 Z" fill="#FBBF24"/>
+              <circle cx="-11" cy="-3" r="1.2" fill="#fff" opacity="0.95"/>
+              <circle cx="-5.5" cy="-3" r="1.2" fill="#fff" opacity="0.85"/>
+              <circle cx="0" cy="-3" r="1.2" fill="#fff" opacity="0.75"/>
+              <line x1="-11" y1="2.5" x2="5" y2="2.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity="0.95"/>
+            </g>
+          </g>
+        </svg>
+      </div></div>
+      <span class="tag">Entwurf 1</span>
+      <h2>Diagonal</h2>
+      <p>Zwei Zeilen pro Blase (…/— wechselnd), Amber #FBBF24. (App-Kachel)</p>
+    </div>
+
+    <!-- Entwurf 2: Chat-Verlauf -->
+    <div class="card">
+      <div class="ring"><div class="inner">
+        <svg viewBox="0 0 80 80" aria-hidden="true">
+          <defs>
+            <linearGradient id="e2-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1B7272" stop-opacity="0.35"/>
+              <stop offset="55%" stop-color="#38BDF8" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#F59E0B" stop-opacity="0.35"/>
+            </linearGradient>
+          </defs>
+          <circle cx="40" cy="40" r="38" fill="url(#e2-bg)"/>
+          <path d="M58 34Q66 40 58 46" fill="none" stroke="#1B7272" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <path d="M22 34Q14 40 22 46" fill="none" stroke="#1B7272" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <!-- incoming teal, left -->
+          <rect x="16" y="30" width="26" height="9" rx="4.5" fill="#5BBFBF"/>
+          <line x1="19" y1="34.5" x2="36" y2="34.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity="0.95"/>
+          <!-- outgoing orange, leicht überlappend -->
+          <rect x="30" y="36" width="26" height="9" rx="4.5" fill="#F59E0B"/>
+          <line x1="33" y1="40.5" x2="44" y2="40.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity="0.95"/>
+          <line x1="33" y1="43.5" x2="40" y2="43.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
+        </svg>
+      </div></div>
+      <span class="tag">Entwurf 2</span>
+      <h2>Chat-Verlauf</h2>
+      <p>Messenger-Stil mit leichter Überlappung der beiden Blasen.</p>
+    </div>
+
+    <!-- Entwurf 3: Brücke -->
+    <div class="card">
+      <div class="ring"><div class="inner">
+        <svg viewBox="0 0 80 80" aria-hidden="true">
+          <defs>
+            <linearGradient id="e3-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1B7272" stop-opacity="0.35"/>
+              <stop offset="55%" stop-color="#38BDF8" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#F59E0B" stop-opacity="0.35"/>
+            </linearGradient>
+            <clipPath id="e3-clip-right">
+              <circle cx="47" cy="40" r="13"/>
+            </clipPath>
+          </defs>
+          <circle cx="40" cy="40" r="38" fill="url(#e3-bg)"/>
+          <path d="M58 34Q66 40 58 46" fill="none" stroke="#1B7272" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <path d="M22 34Q14 40 22 46" fill="none" stroke="#1B7272" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <circle cx="33" cy="40" r="13" fill="#1B7272" fill-opacity="0.75" clip-path="url(#e3-clip-right)"/>
+          <circle cx="33" cy="40" r="13" fill="none" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="47" cy="40" r="13" fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div></div>
+      <span class="tag">Entwurf 3</span>
+      <h2>Verbund-Ringe</h2>
+      <p>Zwei Amber-Töne an den Ringen, Teal in der Schnittfläche — gemeinsamer Raum, nicht „heiß“.</p>
+    </div>
+  </div>
+</body>
+</html>
