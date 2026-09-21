@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 (repo **Build 22** after merge)
-**Branch:** `main` — **merged 2026-09-21:** Connector **Eigene Situation** (open situation, Premium+ gating, qualitative results, migration `20260921120000_connector_open_run_stats`) **plus** catalog polish (tile avatars, chat header intro, catalog layout/footer, darker speech bubbles). Deploy staging to **Build 22** + `prisma migrate deploy` before live open-situation.
-**Staging:** Target **v2.6.0 Build 22** after deploy — https://mc-beta.manualmode.at (currently Build 19–21 until next `./deploy-manualmode.sh -e staging -c app`). Practice UI labels follow app language (catalog + `contentLanguage`); contracting catalog includes localized `concern` for phase-2 display.
-**Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19).
-**App Store:** iOS **2.5.7 live**; Einreichung **2.6.0** vorbereitet. **Xcode (2026-09-21):** `npm run build && npx cap sync ios` (Production-API), `verify:ios-iap` OK — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **22**. Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md` (Was ist neu 2.6.0), `screenshots/app-store/v2.6.0/README.md`.
-**Xcode:** Archive — `ios/App/App.xcodeproj`, scheme **App**, **Any iOS Device (arm64)**, Product → Archive → Distribute. ASC-Version **2.6.0** anlegen, Build **22** zuweisen, DE + EN-CA „Was ist neu“, Screenshots, Review Notes (`APP-STORE-METADATA.md`).
+**Version:** 2.6.0 **Build 23** (repo + staging)
+**Branch:** `main` @ `bd64ccc4` — **merged 2026-09-21:** Connector **Eigene Situation** (Premium+ gating, qualitative results, migration `20260921120000_connector_open_run_stats`) + catalog polish (tile avatars, chat header intro, layout/footer, darker speech bubbles). Feature tip before deploy: `2776454b`.
+**Staging:** Deployed **2026-09-21**, v**2.6.0** Build **23** — https://mc-beta.manualmode.at (`/api/health` OK, `sw.js` `v2.6.0-b23`). `make deploy-staging` from Mac; backend migration applied via container startup (`prisma migrate deploy`).
+**Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
+**App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **23** (synced by deploy script). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
+**Xcode:** Open `ios/App/App.xcodeproj`, scheme **App** — archive when ready; ASC **2.6.0**, assign build **23** (or newer after another staging deploy). No archive/submit in this session.
 
 ## Session handoff (2026-09-16) — Production v2.6.0 Build 19
 

@@ -107,7 +107,8 @@
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
 - [x] **Production v2.6.0 (2026-09-16):** Build **19** — https://mc-app.manualmode.at, health OK (`sw.js` v2.6.0-b19; Connector routes live; parity staging b19)
-- [x] **Staging v2.6.0 (2026-09-14):** Build **19** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.6.0-b19; practice UI labels + `contentLanguage`)
+- [x] **Staging v2.6.0 (2026-09-21):** Build **23** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.6.0-b23; Connector open situation + catalog polish; deploy `make deploy-staging`, sync commit `bd64ccc4`, feature `2776454b`)
+- [x] **Staging v2.6.0 (2026-09-14):** Build **19** — superseded by Build 23
 - [x] **Production v2.5.6 (2026-08-09):** Build **26** — superseded by v2.6.0
 - [x] **Staging v2.5.6 (2026-08-09):** Build **26** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b26)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **11** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b11; FAQ Intent-Picker-Nachfolger entfernt `bc14105`)
