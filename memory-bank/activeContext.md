@@ -7,7 +7,7 @@
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
 **App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **23** (synced by deploy script). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Xcode:** `main` includes **UIScene** migration (`SceneDelegate` + `UIApplicationSceneManifest`) for Xcode 27 launch — `79e4a4db`. Open `ios/App/App.xcodeproj`, scheme **App**; clean build + reinstall on device after pull. ASC **2.6.0**, build **23**.
-**Connector chat UX (pending commit):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal (catalog copy).
+**Connector chat UX (`04d34335`):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal. Local `npm run build && npx cap sync ios` done for Xcode — reinstall from Xcode (build 23).
 
 ## Session handoff (2026-09-16) — Production v2.6.0 Build 19
 
