@@ -38,6 +38,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { parseMeditationMarkers } from '../hooks/useMeditation';
 import { stripReferralAndAuditMarkers } from '../utils/messageMarkers';
 import { BOTS } from '../constants';
+import { connectorChatHeaderIntroKey } from '../utils/connectorChatIntro';
 
 /** Meditation markers first; then strip referral / AUDIT_TASK from visible bubble text. */
 function processAssistantReply(rawText: string) {
@@ -712,17 +713,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                       </p>
                     )}
                     {connectorConfig && (
-                      <>
-                        <p className="text-xs text-content-tertiary leading-snug">
-                          {bot.description}
-                        </p>
-                        <p className="text-xs text-content-secondary line-clamp-5 leading-snug mt-0.5">
-                          {connectorConfig.scenarioBrief}
-                        </p>
-                        <p className="text-xs text-content-tertiary italic leading-snug mt-0.5">
-                          {t('connector_chat_hint')}
-                        </p>
-                      </>
+                      <p className="text-xs text-content-secondary line-clamp-3 leading-snug mt-0.5">
+                        {t(connectorChatHeaderIntroKey(language, connectorConfig.personaGender), {
+                          name: bot.name,
+                          relationship: language === 'de' ? bot.description_de : bot.description,
+                          hint: t('connector_chat_hint'),
+                        })}
+                      </p>
                     )}
                 </div>
             </button>
@@ -1128,7 +1125,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         bot={bot}
         isOpen={isCoachInfoOpen}
         onClose={() => setIsCoachInfoOpen(false)}
-        coachingMode={coachPracticeConfig ? 'off' : effectiveCoachingMode}
+        coachingMode={coachPracticeConfig || connectorConfig ? 'off' : effectiveCoachingMode}
+        scenarioDetail={
+          connectorConfig?.scenarioBrief
+          ?? (coachPracticeConfig && !coachPracticeConfig.hideScenarioBrief
+            ? practiceUILabels?.scenarioBrief
+            : undefined)
+        }
     />
      <FeedbackModal
         isOpen={isFeedbackModalOpen}
