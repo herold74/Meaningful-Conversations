@@ -4,7 +4,7 @@
 **Version:** 2.6.0
 **Branch:** `cursor/connector-open-situation-110e` — Connector Phase 1: **Eigene Situation** (Premium) + practice catalog gating; **`ba12612e`+**: persona name/gender, voice opening TTS once, open-situation copy (no signature feed, no user comparison); local scripts `reset-local-dev-users.js`, `seed-local-admin-connector-profile.js`.
 **Branch:** `main`
-**Staging:** Deployed **2026-09-14**, v**2.6.0** Build **19** — https://mc-beta.manualmode.at (health OK). Practice UI labels follow app language (catalog + `contentLanguage`); contracting catalog includes localized `concern` for phase-2 display.
+**Staging:** Deployed **2026-09-21**, v**2.6.0** Build **20** — https://mc-beta.manualmode.at (health OK). Branch `cursor/connector-open-situation-110e`: open situation (persona name/gender), voice opening fix, updated privacy copy; backend connector compile routes.
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19).
 **App Store:** iOS **2.5.7 approved & live (2026-09-04)**; production API + web are **2.6.0**. Next iOS binary: **2.6.0** — set `MARKETING_VERSION` and ASC build **≥5** before archive.
 **Xcode:** `MARKETING_VERSION` still 2.5.7 locally — update to 2.6.0 before next archive; ASC build counter: next archive **≥5**.
