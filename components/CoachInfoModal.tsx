@@ -25,7 +25,9 @@ const CoachInfoModal: React.FC<CoachInfoModalProps> = ({ bot, isOpen, onClose, c
 
     const botDescription = language === 'de' ? bot.description_de : bot.description;
     const botStyle = language === 'de' ? bot.style_de : bot.style;
-    const bodyText = (scenarioDetail?.trim() || botDescription?.trim()) ?? '';
+    const scenarioText = scenarioDetail?.trim() ?? '';
+    /** Connector catalog brief — full text from scenario selection, not just relationship. */
+    const bodyText = scenarioText || botDescription?.trim() || '';
     const showBodyText =
       bodyText.length > 0 &&
       bodyText.localeCompare(bot.name.trim(), undefined, { sensitivity: 'accent' }) !== 0;
