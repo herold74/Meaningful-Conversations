@@ -192,6 +192,8 @@ export interface AppViewRouterProps {
   handleStartConnectorOpenSituation: (params: {
     relationship: string;
     situation: string;
+    personaName: string;
+    personaGender: 'male' | 'female';
     lengthPreset: 'short' | 'standard' | 'long';
     liveMode: boolean;
   }) => void;

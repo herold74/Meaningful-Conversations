@@ -202,12 +202,18 @@ router.get('/connector/vignette/:id', authMiddleware, async (req, res) => {
 router.post('/connector/scenario/from-description', authMiddleware, async (req, res) => {
   const startTime = Date.now();
   const userId = req.userId;
-  const { relationship, situation, lengthPreset, language } = req.body;
+  const { relationship, situation, lengthPreset, language, personaName, personaGender } = req.body;
   const lang = normalizeLanguage(language);
 
   if (!(await sendConnectorPremiumRequired(res, userId, lang))) return;
 
-  const validation = validateOpenSituationInput({ relationship, situation, lengthPreset });
+  const validation = validateOpenSituationInput({
+    relationship,
+    situation,
+    lengthPreset,
+    personaName,
+    personaGender,
+  });
   if (!validation.ok) {
     return res.status(400).json({ error: validation.errors.join(' ') });
   }
@@ -225,6 +231,8 @@ router.post('/connector/scenario/from-description', authMiddleware, async (req, 
       relationship: validation.relationship,
       situation: validation.situation,
       language: lang,
+      personaName: validation.personaName,
+      personaGender: validation.personaGender,
     });
 
     const result = await withTimeout(
@@ -255,6 +263,8 @@ router.post('/connector/scenario/from-description', authMiddleware, async (req, 
     const vignette = sanitizeCompiledVignette(compiled, {
       relationship: validation.relationship,
       language: lang,
+      personaName: validation.personaName,
+      personaGender: validation.personaGender,
     });
 
     const customScenarioId = putCustomScenario({

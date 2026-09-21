@@ -95,6 +95,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const footerRef = useRef<HTMLElement>(null);
   const voiceTextRef = useRef<HTMLDivElement>(null);
   const initialFetchInitiated = useRef<boolean>(false);
+  /** Prevents connector opening TTS from re-firing on every render (useTts return object is unstable). */
+  const connectorOpeningSpokenKeyRef = useRef<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(() => coachPracticeConfig?.liveMode === true || connectorConfig?.liveMode === true);
   const practiceLiveMode = coachPracticeConfig?.liveMode === true;
   const showVoiceUi = practiceLiveMode || isVoiceMode;
@@ -123,7 +125,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     isNewSession,
     t,
     genderOverride: connectorConfig ? connectorConfig.personaGender : practiceCoacheeGender,
-    skipAutoFirstMessage: !!connectorConfig?.liveMode,
+    skipAutoFirstMessage: !!connectorConfig,
   });
   const meditation = useMeditation({
     speak: tts.speak,
@@ -137,7 +139,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       setIsVoiceMode(true);
       tts.setIsTtsEnabled(true);
     }
-  }, [practiceLiveMode, tts]);
+  }, [practiceLiveMode, tts.setIsTtsEnabled]);
 
   // The Connector voice mode: mirror Coach Practice — enable TTS, not just voice UI
   useEffect(() => {
@@ -145,11 +147,15 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       setIsVoiceMode(true);
       tts.setIsTtsEnabled(true);
     }
-  }, [connectorConfig?.liveMode, connectorConfig?.vignetteId, tts]);
+  }, [connectorConfig?.liveMode, connectorConfig?.vignetteId, tts.setIsTtsEnabled]);
 
-  /** Connector: speak pre-seeded opening with the correct persona voice after vignette/voice settings apply. */
   useEffect(() => {
-    if (!connectorConfig?.liveMode) return;
+    connectorOpeningSpokenKeyRef.current = null;
+  }, [connectorConfig?.vignetteId]);
+
+  /** Connector: persona opens — speak pre-seeded opening once per vignette in voice UI. */
+  useEffect(() => {
+    if (!connectorConfig || !showVoiceUi) return;
     if (chatHistory.length !== 1 || chatHistory[0].role !== 'bot') return;
     if (!tts.isTtsEnabled) return;
     if (tts.ttsMode === 'local' && tts.voices.length === 0) return;
@@ -157,24 +163,30 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     const openingText = chatHistory[0].text?.trim();
     if (!openingText) return;
 
-    tts.stopTts();
-    tts.resetFirstMessageSpoken();
+    const sessionKey = `${connectorConfig.vignetteId}\0${openingText}`;
+    if (connectorOpeningSpokenKeyRef.current === sessionKey) return;
 
+    let cancelled = false;
     const timer = window.setTimeout(() => {
+      if (cancelled) return;
+      connectorOpeningSpokenKeyRef.current = sessionKey;
       tts.speak(openingText);
-    }, 0);
+    }, 150);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [
     connectorConfig?.vignetteId,
-    connectorConfig?.personaGender,
-    connectorConfig?.liveMode,
+    showVoiceUi,
     tts.isTtsEnabled,
-    tts.ttsBotId,
     tts.ttsMode,
     tts.voices.length,
-    chatHistory,
-    tts,
+    chatHistory.length,
+    chatHistory[0]?.role,
+    chatHistory[0]?.text,
+    tts.speak,
   ]);
 
   const [isCoachInfoOpen, setIsCoachInfoOpen] = useState(false);
@@ -967,8 +979,17 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                                   ? t('chat_voice_listening')
                                   : coachPracticeConfig && chatHistory.length === 0
                                     ? t('practice_open_hint_body', { coacheeName: coachPracticeConfig.coacheeName })
-                                    : t('chat_tapToSpeak'))}
+                                    : connectorConfig && chatHistory[0]?.role === 'bot' && chatHistory[0].text?.trim()
+                                      ? chatHistory[0].text
+                                      : t('chat_tapToSpeak'))}
                             </p>
+                            {connectorConfig && !input && !speech.isListening && chatHistory[0]?.role === 'bot' && chatHistory[0].text?.trim() && (
+                              <p className="text-xs text-content-tertiary text-center mt-2">
+                                {tts.isLoadingAudio || tts.ttsStatus === 'speaking'
+                                  ? t('connector_voice_partner_speaking', { name: bot.name })
+                                  : t('connector_voice_your_turn')}
+                              </p>
+                            )}
                             {speech.isListening && !wakeLock.isSupported && (
                                 <p className="text-xs text-status-warning-foreground text-center mt-1">{t('chat_keep_screen_on')}</p>
                             )}
