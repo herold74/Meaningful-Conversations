@@ -5,8 +5,8 @@
 **Branch:** `cursor/ios-asc-2.6.0-prep-9bbc`
 **Staging:** Deployed **2026-09-21**, v**2.6.0** Build **21** — https://mc-beta.manualmode.at (health OK). Connector tile avatar (speech bubbles), chat/catalog UX (header intro, info modal, catalog layout/footer), Practice/Connector coaching-mode hidden in info modal.
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19).
-**App Store:** iOS **2.5.7 approved & live (2026-09-04)**; production API + web are **2.6.0**. **Local Xcode prep (2026-09-18):** `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **20** after `npm run sync:ios-staging` (staging API); archive pending Xcode GUI (license + signing).
-**Xcode:** Ready to archive — open `ios/App/App.xcodeproj`, scheme **App**, **Any iOS Device (arm64)**, Product → Archive. Do **not** upload until ASC version row created and submit checklist done (`DOCUMENTATION/APP-STORE-CHECKLIST.md`).
+**App Store:** iOS **2.5.7 live**; Einreichung **2.6.0** vorbereitet. **Xcode (2026-09-21):** `npm run build && npx cap sync ios` (Production-API), `verify:ios-iap` OK — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **21**. Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md` (Was ist neu 2.6.0), `screenshots/app-store/v2.6.0/README.md`.
+**Xcode:** Archive — `ios/App/App.xcodeproj`, scheme **App**, **Any iOS Device (arm64)**, Product → Archive → Distribute. ASC-Version **2.6.0** anlegen, Build **21** zuweisen, DE + EN-CA „Was ist neu“, Screenshots, Review Notes (`APP-STORE-METADATA.md`).
 
 ## Session handoff (2026-09-16) — Production v2.6.0 Build 19
 

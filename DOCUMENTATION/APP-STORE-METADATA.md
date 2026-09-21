@@ -283,6 +283,85 @@ LANGUAGE: Primary store metadata German; full English in-app via Welcome screen 
 
 ---
 
+## Was ist neu — App Store Connect (v2.6.0) — **aktuelle Einreichung**
+
+**In ASC:** Version **2.6.0** anlegen → Build aus Xcode wählen (z. B. **2.6.0 (21)** nach Upload/Processing). Pro Lokalisierung **Deutsch** und **Englisch (Kanada)** unter „Was ist neu in dieser Version“ einfügen.
+
+**Screenshots:** Plan und Dateinamen → `screenshots/app-store/v2.6.0/README.md` (min. 3× 1284×2778 pro Lokalisierung; **The Connector** sichtbar machen).
+
+**Store-Beschreibung (optional, nicht zwingend pro Release):** Wenn ihr die lange Beschreibung aktualisiert, Abschnitt **„Beschreibung — Ergänzung 2.6.0“** unten in DE + EN einfügen.
+
+### Deutsch
+
+```
+The Connector (neu): Kurze Alltags-Szenen mit KI-Personas — du übst zuhörende Gespräche in Text oder Sprache und erhältst eine Auswertung mit Radar-Profil (Empathie, Präsenz, Neugier, Wertschätzung, Gelassenheit). Ergebnis optional verschlüsselt im Profil speichern.
+
+Profil & Reflexion: Connector-Ergebnisse unter „Wie du interagierst“, optional eine kurze Fremdsicht zu deinem Lebenskontext (opt-in, Ende-zu-Ende-verschlüsselt).
+
+Verbindungsvorbereitung: Gloria hilft beim Vorbereiten wichtiger Gespräche — strukturiert und im Lebenskontext verankert.
+
+Coaching üben: Klarere Sprache und Methoden-Bezeichnungen in Katalog und Sitzung; verbesserte Oberfläche beim Üben.
+
+Weitere Verbesserungen: Überarbeitetes Persönlichkeits-PDF, Feinschliff an Coach-Auswahl und Connector-Oberfläche, Stabilität und Korrekturen.
+```
+
+### English (Canada)
+
+```
+The Connector (new): Short everyday scenarios with AI personas — practice listening conversations by text or voice and get feedback with a radar profile (empathy, presence, curiosity, non-judgment, steadiness). Optionally save your result encrypted in your profile.
+
+Profile & reflection: Connector results under “How you interact,” plus an optional short external perspective on your Life Context (opt-in, end-to-end encrypted).
+
+Connection prep: Gloria helps you prepare for important conversations — structured and grounded in your Life Context.
+
+Coach Practice: Clearer language and method labels in the catalog and session; improved practice setup experience.
+
+Other improvements: Redesigned personality PDF export, polish on coach selection and Connector UI, stability and fixes.
+```
+
+### Beschreibung — Ergänzung 2.6.0 (optional in ASC einfügen)
+
+**Deutsch** — nach „COACHING ÜBEN“ oder als eigener Absatz:
+
+```
+THE CONNECTOR
+Kurze Alltags-Szenen mit KI-Personas: Übe zuhörende Gespräche per Text oder Sprache, erhalte ein Radar-Profil zu fünf Dimensionen und speichere dein Ergebnis optional verschlüsselt im Profil. Optional: kurze Fremdsicht zu deinem Lebenskontext (opt-in).
+```
+
+**English (Canada)** — after “COACH PRACTICE” or as its own paragraph:
+
+```
+THE CONNECTOR
+Short everyday scenarios with AI personas: practice listening conversations by text or voice, get a five-dimension radar profile, and optionally save your result encrypted in your profile. Optional: a short external perspective on your Life Context (opt-in).
+```
+
+### Review Notes — Ergänzung v2.6.0
+
+**Checkliste:** Version **2.6.0** · Production-API (`mc-app.manualmode.at`) · `npm run build && npx cap sync ios` (**nicht** `sync:ios-staging`) vor Archive.
+
+**Demo-Schritte (Referenz)** — nach Login, Intent **Coaching**:
+
+1. **Coach-Auswahl → Kommunikation:** Tile **The Connector** (Registrierung nötig; Gäste sehen gesperrte Kachel).
+2. **Intro:** Modus Text oder Sprache wählen → Szenen starten (3 von 5 Kurzdialogen).
+3. **Auswertung:** Radar + Stärken/Entwicklung → optional **Speichern** (E2EE im Profil).
+4. **Profil:** Menü → Persönlichkeitsprofil → Abschnitt Connector / „Wie du interagierst“; optional **Fremdsicht** generieren (opt-in).
+5. **Coach Practice** und **IAP** wie in der Demo-Anleitung v2.5.7 (unverändert).
+
+**Copy-paste block — Zusatz für Notes** (unter dem v2.5.7-Block oder ersetzen mit aktualisierter Versionszeile):
+
+```
+VERSION 2.6.0 — NEW FEATURE DEMO:
+After login (Premium+ test account): Intent → Coaching → Coach grid → Communication section → The Connector.
+Complete intro (text or voice), finish vignettes, view radar evaluation, optionally save to profile.
+Profile → Personality → Connector section; optional external perspective (opt-in, E2EE).
+Production API: mc-app.manualmode.at (iOS archive built with npm run build && npx cap sync ios).
+IAP / compliance: unchanged from v2.5.7 (upgrade codes removed; Menu → Upgrade; Restore Purchases).
+```
+
+**Screen recording:** Bestehendes ~7-Min-IAP-Video weiter nutzen, sofern Premium+ + Practice noch abgedeckt; **empfohlen:** kurzer Zusatzclip oder neues Recording mit Connector-Flow (30–90 s) als zweites Attachment oder aktualisiertes Gesamtvideo.
+
+---
+
 ## Was ist neu — App Store Connect (v2.5.7, Build 1) — **Resubmission nach Ablehnung 2.5.6 (2026-08-13)**
 
 **Rejection:** Guideline 3.1.1 (upgrade codes) + 2.1(b) (IAP not found in binary).
@@ -466,7 +545,7 @@ node scripts/capture-app-store-screenshots.mjs --lang all
 node scripts/capture-app-store-screenshots.mjs --lang en --device iphone
 ```
 
-Output: `screenshots/app-store/v2.5.4/{iphone|ipad}/*-{de|en}.png` — in App Store Connect **pro Lokalisierung** hochladen.
+Output: `screenshots/app-store/v2.6.0/{iphone|ipad}/*-{de|en}.png` (aktuell) — in App Store Connect **pro Lokalisierung** hochladen. Ältere Sets: `v2.5.4/`.
 
 **v2.5.4 DE (Practice):** `scripts/prepare-asc-screenshots-from-assets.py` — iPhone/iPad Practice-Screens aus Geräte-Exports + Basis-Screens aus v2.4.2.
 
