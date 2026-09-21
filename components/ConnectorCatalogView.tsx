@@ -141,27 +141,33 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 items-stretch">
           {catalog.map((v) => (
             <button
               key={v.id}
               type="button"
               onClick={() => (practiceLocked ? onUpgrade?.() : onStartPractice(v.id, liveMode))}
-              className={`text-left rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 transition-colors ${
+              className={`text-left h-full rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 transition-colors ${
                 practiceLocked ? 'opacity-60' : 'hover:border-accent-primary/60 hover:bg-accent-primary/5'
               }`}
             >
-              <div className="flex gap-3">
+              <div className="flex gap-3 h-full">
                 <img
                   src={CONNECTOR_AVATARS[v.id] || '/avatars/nobody.png'}
                   alt=""
-                  className="w-12 h-12 rounded-full object-cover shrink-0 bg-background-secondary"
+                  className="w-12 h-12 rounded-full object-cover shrink-0 self-start bg-background-secondary"
                 />
-                <div className="min-w-0">
-                  <p className="font-semibold text-content-primary">{v.personaName}</p>
-                  <p className="text-xs text-content-tertiary mb-1">{v.relationship}</p>
-                  <p className="text-sm font-medium text-content-primary leading-snug mb-1">{v.pickerTeaser}</p>
-                  <p className="text-xs text-content-secondary leading-snug">{v.scenarioBrief}</p>
+                <div className="min-w-0 flex-1 flex flex-col">
+                  <p className="font-semibold text-content-primary line-clamp-1 min-h-5 leading-5">
+                    {v.personaName}
+                  </p>
+                  <p className="text-xs text-content-tertiary line-clamp-2 min-h-7 leading-5">
+                    {v.relationship}
+                  </p>
+                  <p className="text-sm font-medium text-content-primary line-clamp-2 leading-snug">
+                    {v.pickerTeaser}
+                  </p>
+                  <p className="text-xs text-content-secondary leading-snug mt-1">{v.scenarioBrief}</p>
                 </div>
               </div>
             </button>
@@ -173,7 +179,7 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
             <button
               type="button"
               onClick={onNewAssessment}
-              className="py-3 px-6 border border-border-primary text-content-secondary hover:text-content-primary font-medium rounded-lg transition-colors"
+              className="flex-1 py-3 px-6 bg-accent-primary hover:bg-accent-primary/90 text-white font-semibold rounded-lg transition-colors"
             >
               {t('connector_catalog_new_assessment')}
             </button>
@@ -181,7 +187,7 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
           <button
             type="button"
             onClick={onBack}
-            className="py-3 px-6 border border-border-primary text-content-secondary hover:text-content-primary font-medium rounded-lg transition-colors"
+            className="py-3 px-6 border border-border-primary text-content-secondary hover:text-content-primary font-medium rounded-lg transition-colors sm:shrink-0"
           >
             {t('connector_intro_back')}
           </button>

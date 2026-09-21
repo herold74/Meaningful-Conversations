@@ -38,6 +38,7 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { parseMeditationMarkers } from '../hooks/useMeditation';
 import { stripReferralAndAuditMarkers } from '../utils/messageMarkers';
 import { BOTS } from '../constants';
+import { connectorChatHeaderIntroKey } from '../utils/connectorChatIntro';
 
 /** Meditation markers first; then strip referral / AUDIT_TASK from visible bubble text. */
 function processAssistantReply(rawText: string) {
@@ -708,11 +709,6 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
     [tts.voices, language]
   );
 
-  const connectorRelationshipLabel = useMemo(() => {
-    if (!connectorConfig) return '';
-    return language === 'de' ? (bot.description_de || bot.description) : bot.description;
-  }, [connectorConfig, language, bot.description, bot.description_de]);
-
   return (
     <div className="flex flex-col h-[82.5vh] max-w-3xl mx-auto bg-background-secondary/80 dark:bg-background-secondary/40 backdrop-blur-sm border border-border-primary/60 shadow-card rounded-card overflow-hidden">
       <header className="flex items-center justify-between p-4 border-b border-border-primary/50 gap-2">
@@ -733,8 +729,12 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
                       </p>
                     )}
                     {connectorConfig && (
-                      <p className="text-xs text-content-secondary line-clamp-2 leading-snug mt-0.5 break-words">
-                        {connectorRelationshipLabel}
+                      <p className="text-xs text-content-secondary line-clamp-3 leading-snug mt-0.5 break-words">
+                        {t(connectorChatHeaderIntroKey(language, connectorConfig.personaGender), {
+                          name: bot.name,
+                          relationship: language === 'de' ? (bot.description_de || bot.description) : bot.description,
+                          hint: t('connector_chat_hint'),
+                        })}
                       </p>
                     )}
                 </div>
@@ -1150,7 +1150,13 @@ const handleFeedbackSubmit = async (feedback: { comments: string; isAnonymous: b
         bot={bot}
         isOpen={isCoachInfoOpen}
         onClose={() => setIsCoachInfoOpen(false)}
-        coachingMode={coachPracticeConfig ? 'off' : effectiveCoachingMode}
+        coachingMode={coachPracticeConfig || connectorConfig ? 'off' : effectiveCoachingMode}
+        scenarioDetail={
+          connectorConfig?.scenarioBrief
+          ?? (coachPracticeConfig && !coachPracticeConfig.hideScenarioBrief
+            ? practiceUILabels?.scenarioBrief
+            : undefined)
+        }
     />
      <FeedbackModal
         isOpen={isFeedbackModalOpen}
