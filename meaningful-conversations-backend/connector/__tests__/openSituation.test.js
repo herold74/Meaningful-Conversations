@@ -1,6 +1,7 @@
 const {
   MAX_RELATIONSHIP_CHARS,
   MAX_SITUATION_CHARS,
+  MAX_PERSONA_NAME_CHARS,
   OPEN_LENGTH_PRESETS,
 } = require('../connectorLimits');
 const {
@@ -17,9 +18,35 @@ describe('open situation limits', () => {
       relationship: 'x'.repeat(MAX_RELATIONSHIP_CHARS + 1),
       situation: 'y'.repeat(MAX_SITUATION_CHARS + 1),
       lengthPreset: 'standard',
+      personaName: 'Alex',
+      personaGender: 'female',
     });
     expect(validation.ok).toBe(false);
     expect(validation.errors.length).toBeGreaterThanOrEqual(2);
+  });
+
+  test('rejects missing persona name and invalid gender', () => {
+    expect(validateOpenSituationInput({
+      relationship: 'Kollege',
+      situation: 'Ok.',
+      lengthPreset: 'standard',
+      personaName: '',
+      personaGender: 'female',
+    }).ok).toBe(false);
+    expect(validateOpenSituationInput({
+      relationship: 'Kollege',
+      situation: 'Ok.',
+      lengthPreset: 'standard',
+      personaName: 'x'.repeat(MAX_PERSONA_NAME_CHARS + 1),
+      personaGender: 'female',
+    }).ok).toBe(false);
+    expect(validateOpenSituationInput({
+      relationship: 'Kollege',
+      situation: 'Ok.',
+      lengthPreset: 'standard',
+      personaName: 'Alex',
+      personaGender: 'other',
+    }).ok).toBe(false);
   });
 
   test('accepts valid input and maps length presets', () => {
@@ -27,6 +54,8 @@ describe('open situation limits', () => {
       relationship: 'Kollege',
       situation: 'Wir hatten ein schwieriges Meeting.',
       lengthPreset: 'long',
+      personaName: 'Jonas',
+      personaGender: 'male',
     });
     expect(validation.ok).toBe(true);
     expect(OPEN_LENGTH_PRESETS.long.maxUserTurns).toBe(12);
@@ -47,7 +76,14 @@ describe('compiled vignette public payload', () => {
       exitLine: 'Muss los.',
       trap: 'Sofort beraten',
       goodConnection: 'Zuhören',
-    }, { relationship: 'Kollege', language: 'de' });
+    }, {
+      relationship: 'Kollege',
+      language: 'de',
+      personaName: 'Alex',
+      personaGender: 'female',
+    });
+    expect(internal.personaName).toBe('Alex');
+    expect(internal.gender).toBe('female');
 
     const pub = publicPayloadFromCompiled({ ...internal, id: 'custom-abc' }, 'de');
     expect(pub.scenarioBrief).toBeTruthy();

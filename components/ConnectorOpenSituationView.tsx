@@ -6,6 +6,7 @@ import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import {
   CONNECTOR_OPEN_LIMITS,
   CONNECTOR_OPEN_SITUATION_CONSENT_KEY,
+  type ConnectorOpenPersonaGender,
 } from '../utils/connectorRun';
 import type { User } from '../types';
 import { resolveConnectorPremiumAccess } from '../utils/connectorAccess';
@@ -19,6 +20,8 @@ interface ConnectorOpenSituationViewProps {
   onStart: (params: {
     relationship: string;
     situation: string;
+    personaName: string;
+    personaGender: ConnectorOpenPersonaGender;
     lengthPreset: ConnectorOpenLengthPreset;
     liveMode: boolean;
   }) => void;
@@ -37,6 +40,8 @@ const ConnectorOpenSituationView: React.FC<ConnectorOpenSituationViewProps> = ({
   const locked = !premiumAccess.canAccessConnectorPractice;
 
   const [relationship, setRelationship] = useState('');
+  const [personaName, setPersonaName] = useState('');
+  const [personaGender, setPersonaGender] = useState<ConnectorOpenPersonaGender>('female');
   const [situation, setSituation] = useState('');
   const [lengthPreset, setLengthPreset] = useState<ConnectorOpenLengthPreset>('standard');
   const [liveMode, setLiveMode] = useState(false);
@@ -69,7 +74,14 @@ const ConnectorOpenSituationView: React.FC<ConnectorOpenSituationViewProps> = ({
         /* ignore */
       }
     }
-    onStart({ relationship: relationship.trim(), situation: situation.trim(), lengthPreset, liveMode });
+    onStart({
+      relationship: relationship.trim(),
+      situation: situation.trim(),
+      personaName: personaName.trim(),
+      personaGender,
+      lengthPreset,
+      liveMode,
+    });
   };
 
   if (isStarting) {
@@ -116,6 +128,47 @@ const ConnectorOpenSituationView: React.FC<ConnectorOpenSituationViewProps> = ({
               <span>{t('connector_open_consent')}</span>
             </label>
           )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-content-primary mb-1">
+                {t('connector_open_persona_name_label')}
+              </label>
+              <input
+                type="text"
+                maxLength={CONNECTOR_OPEN_LIMITS.personaNameMax}
+                value={personaName}
+                onChange={(e) => setPersonaName(e.target.value)}
+                disabled={locked}
+                className="w-full rounded-lg border border-border-primary bg-background-tertiary px-3 py-2 text-content-primary text-sm"
+                placeholder={t('connector_open_persona_name_placeholder')}
+                autoComplete="off"
+              />
+              <p className="text-xs text-content-tertiary mt-1 text-right">
+                {personaName.length}/{CONNECTOR_OPEN_LIMITS.personaNameMax}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-content-primary mb-1">{t('connector_open_persona_gender_label')}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {(['female', 'male'] as ConnectorOpenPersonaGender[]).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    disabled={locked}
+                    onClick={() => setPersonaGender(g)}
+                    className={`py-2 px-2 rounded-lg border text-sm transition-colors ${
+                      personaGender === g
+                        ? 'border-accent-primary bg-accent-primary/10 text-content-primary'
+                        : 'border-border-secondary text-content-secondary'
+                    }`}
+                  >
+                    {t(g === 'female' ? 'connector_open_persona_gender_female' : 'connector_open_persona_gender_male')}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-content-primary mb-1">
@@ -205,7 +258,13 @@ const ConnectorOpenSituationView: React.FC<ConnectorOpenSituationViewProps> = ({
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               type="submit"
-              disabled={locked || !relationship.trim() || !situation.trim() || (consentRequired && !consentChecked)}
+              disabled={
+                locked
+                || !personaName.trim()
+                || !relationship.trim()
+                || !situation.trim()
+                || (consentRequired && !consentChecked)
+              }
               className="flex-1 py-3 px-6 rounded-lg bg-accent-primary text-button-foreground-on-accent font-semibold disabled:opacity-50"
             >
               {t('connector_open_start')}

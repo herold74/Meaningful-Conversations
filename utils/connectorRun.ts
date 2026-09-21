@@ -21,7 +21,10 @@ export const CONNECTOR_OPEN_SITUATION_CONSENT_KEY = 'connector_open_situation_co
 export const CONNECTOR_OPEN_LIMITS = {
     relationshipMax: 120,
     situationMax: 800,
+    personaNameMax: 40,
 } as const;
+
+export type ConnectorOpenPersonaGender = 'male' | 'female';
 
 export interface ConnectorRunState {
     mode: ConnectorRunMode;

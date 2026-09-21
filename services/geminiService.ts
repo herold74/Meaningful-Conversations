@@ -469,6 +469,8 @@ export const compileConnectorOpenScenario = async (
     params: {
         relationship: string;
         situation: string;
+        personaName: string;
+        personaGender: 'male' | 'female';
         lengthPreset: 'short' | 'standard' | 'long';
         language: Language;
     },

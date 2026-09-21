@@ -1,6 +1,7 @@
 const {
   MAX_RELATIONSHIP_CHARS,
   MAX_SITUATION_CHARS,
+  MAX_PERSONA_NAME_CHARS,
   OPEN_LENGTH_PRESETS,
   VALID_LENGTH_PRESET_KEYS,
   RELATIONSHIP_BUCKETS,
@@ -40,12 +41,21 @@ const compilerResponseSchema = {
   ],
 };
 
-function validateOpenSituationInput({ relationship, situation, lengthPreset }) {
+function validateOpenSituationInput({ relationship, situation, lengthPreset, personaName, personaGender }) {
   const errors = [];
   const rel = typeof relationship === 'string' ? relationship.trim() : '';
   const sit = typeof situation === 'string' ? situation.trim() : '';
+  const name = typeof personaName === 'string' ? personaName.trim() : '';
+  const genderRaw = typeof personaGender === 'string' ? personaGender.trim().toLowerCase() : '';
   if (!rel) errors.push('relationship is required.');
   if (!sit) errors.push('situation is required.');
+  if (!name) errors.push('personaName is required.');
+  if (name.length > MAX_PERSONA_NAME_CHARS) {
+    errors.push(`personaName exceeds ${MAX_PERSONA_NAME_CHARS} characters.`);
+  }
+  if (genderRaw !== 'male' && genderRaw !== 'female') {
+    errors.push('personaGender must be male or female.');
+  }
   if (rel.length > MAX_RELATIONSHIP_CHARS) {
     errors.push(`relationship exceeds ${MAX_RELATIONSHIP_CHARS} characters.`);
   }
@@ -56,10 +66,18 @@ function validateOpenSituationInput({ relationship, situation, lengthPreset }) {
   if (!VALID_LENGTH_PRESET_KEYS.includes(presetKey)) {
     errors.push(`Invalid lengthPreset. Use one of: ${VALID_LENGTH_PRESET_KEYS.join(', ')}.`);
   }
-  return { ok: errors.length === 0, errors, relationship: rel, situation: sit, lengthPreset: presetKey };
+  return {
+    ok: errors.length === 0,
+    errors,
+    relationship: rel,
+    situation: sit,
+    lengthPreset: presetKey,
+    personaName: name,
+    personaGender: genderRaw === 'female' ? 'female' : 'male',
+  };
 }
 
-function buildScenarioCompilerPrompt({ relationship, situation, language }) {
+function buildScenarioCompilerPrompt({ relationship, situation, language, personaName, personaGender }) {
   const lang = language === 'en' ? 'en' : 'de';
   const preset = OPEN_LENGTH_PRESETS.standard;
   if (lang === 'de') {
@@ -71,9 +89,12 @@ NUTZER — BEZIEHUNG (max Kontext): ${relationship}
 
 NUTZER — SITUATION: ${situation}
 
+NUTZER — PERSONA-NAME (verbindlich): ${personaName}
+NUTZER — PERSONA-GESCHLECHT (verbindlich): ${personaGender}
+
 REGELN:
 - Schreibe alle Felder auf Deutsch.
-- personaName: generisch (z. B. "Alex", "Gesprächspartner") — KEINE echten Namen aus dem Nutzertext übernehmen.
+- personaName und gender MÜSSEN exakt die Nutzerangaben sein (Name: "${personaName}", gender: "${personaGender}").
 - scenarioBrief: nur Fakten, die der Nutzer schon kennt — KEINE Fallen, KEINE Coaching-Hinweise, KEIN innerNeed.
 - situation / trap / goodConnection / innerNeed: nur für das LLM — niemals Spoiler im scenarioBrief.
 - gender: "male" oder "female".
@@ -89,9 +110,12 @@ USER — RELATIONSHIP: ${relationship}
 
 USER — SITUATION: ${situation}
 
+USER — PERSONA NAME (binding): ${personaName}
+USER — PERSONA GENDER (binding): ${personaGender}
+
 RULES:
 - Write all fields in English.
-- personaName: generic (e.g. "Alex", "Conversation partner") — do NOT copy real names from the user text.
+- personaName and gender MUST match the user choices exactly (name: "${personaName}", gender: "${personaGender}").
 - scenarioBrief: only facts the user already knows — NO traps, NO coaching hints, NO innerNeed.
 - situation / trap / goodConnection / innerNeed: LLM-only — never spoil in scenarioBrief.
 - gender: "male" or "female".
@@ -100,16 +124,18 @@ RULES:
 - exitLine: brief everyday excuse to end at turn cap (~${preset.maxUserTurns} user messages).`;
 }
 
-function sanitizeCompiledVignette(raw, { relationship, language }) {
+function sanitizeCompiledVignette(raw, { relationship, language, personaName, personaGender }) {
   const lang = language === 'en' ? 'en' : 'de';
-  const gender = raw.gender === 'female' ? 'female' : 'male';
+  const gender = personaGender === 'female' || personaGender === 'male'
+    ? personaGender
+    : (raw.gender === 'female' ? 'female' : 'male');
   let bucket = typeof raw.relationshipBucket === 'string' ? raw.relationshipBucket.toLowerCase() : 'other';
   if (!RELATIONSHIP_BUCKETS.includes(bucket)) bucket = 'other';
 
   const str = (v, fallback = '') => (typeof v === 'string' ? v.trim() : fallback);
 
   const vignette = {
-    personaName: str(raw.personaName, lang === 'de' ? 'Gesprächspartner' : 'Conversation partner'),
+    personaName: str(personaName) || str(raw.personaName, lang === 'de' ? 'Gesprächspartner' : 'Conversation partner'),
     gender,
     relationship: relationship,
     relationshipBucket: bucket,
@@ -118,7 +144,9 @@ function sanitizeCompiledVignette(raw, { relationship, language }) {
     situation: str(raw.situation),
     emotionalTone: str(raw.emotionalTone, lang === 'de' ? 'Angespannt' : 'Tense'),
     innerNeed: str(raw.innerNeed),
-    opening: str(raw.opening),
+    opening: str(raw.opening) || (lang === 'de'
+      ? 'Hi — ich wollte kurz mit dir reden.'
+      : 'Hi — I wanted to talk with you for a moment.'),
     exitLine: str(raw.exitLine, lang === 'de' ? 'Ich muss gleich los — danke fürs Zuhören.' : 'I have to run — thanks for listening.'),
     trap: str(raw.trap),
     goodConnection: str(raw.goodConnection),

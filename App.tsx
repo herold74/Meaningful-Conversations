@@ -1586,6 +1586,8 @@ const App: React.FC = () => {
     const handleStartConnectorOpenSituation = async (params: {
         relationship: string;
         situation: string;
+        personaName: string;
+        personaGender: 'male' | 'female';
         lengthPreset: 'short' | 'standard' | 'long';
         liveMode: boolean;
     }) => {
@@ -1596,6 +1598,8 @@ const App: React.FC = () => {
             const compiled = await geminiService.compileConnectorOpenScenario({
                 relationship: params.relationship,
                 situation: params.situation,
+                personaName: params.personaName,
+                personaGender: params.personaGender,
                 lengthPreset: params.lengthPreset,
                 language,
             });
