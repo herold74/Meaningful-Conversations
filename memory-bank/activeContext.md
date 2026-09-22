@@ -2,18 +2,19 @@
 
 ## Current Status
 **Version:** 2.6.0 **Build 25** (repo + staging)
-**Branch:** `main` @ `5a717d0c` — **2026-09-22:** Connector practice catalog UX (Signatur-Info, a11y, brief line-clamp) · prior Victor/staging b25 on `fba59e5b`.
+**Branch:** `main` @ `718865d9` — **2026-09-22:** Connector catalog vignette info modals · prior catalog a11y/clamp `5a717d0c`.
 **Staging:** Deployed **2026-09-22**, v**2.6.0** Build **25** — https://mc-beta.manualmode.at (`/api/health` OK, `sw.js` `v2.6.0-b25`).
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
 **App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **23** (synced by deploy script). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Xcode:** `main` includes **UIScene** migration (`SceneDelegate` + `UIApplicationSceneManifest`) for Xcode 27 launch — `79e4a4db`. Open `ios/App/App.xcodeproj`, scheme **App**; clean build + reinstall on device after pull. ASC **2.6.0**, build **23**.
 **Connector chat UX (`04d34335`):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal. Local `npm run build && npx cap sync ios` done for Xcode — reinstall from Xcode (build 23).
-**Connector catalog (`5a717d0c`):** „Eigene Situation“ row + Verbindungs-Signatur-Info-Modal; a11y label/describedby; vignette `scenarioBrief` line-clamp-2 in catalog cards.
+**Connector catalog (`5a717d0c` + `718865d9`):** „Eigene Situation“ row + Verbindungs-Signatur-Info-Modal; a11y label/describedby; vignette `scenarioBrief` line-clamp-2; per-card Info → full scenario modal (DE/EN i18n).
 
 ## Session handoff (2026-09-22) — Connector catalog polish
 
 - **`ConnectorCatalogView`:** Info-Button + Modal (i18n `connector_signature_info_*`); open-situation button accessible name; catalog card briefs clamped.
 - **Commit:** `5a717d0c` — not yet on staging (deploy when ready).
+- **Commit:** `718865d9` — vignette info buttons + modal on catalog cards.
 
 ## Session handoff (2026-09-22) — Victor intimacy + staging b25
 
