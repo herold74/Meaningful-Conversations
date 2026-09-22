@@ -2481,6 +2481,8 @@
   "connector_signature_info_label": "Explain Connection signature",
   "connector_signature_info_title": "What is your Connection signature?",
   "connector_signature_info_body": "Your Connection signature is created when you complete \"The Connector\" as an evaluation: In three curated short conversations we observe how you build connection — across five dimensions: empathy, presence, curiosity, non-judgment, and steadiness.\n\nYou can optionally save the result encrypted in your profile under “How you interact”.\n\nPractice in the catalog and “Your own situation” are for training: they do not replace or change your saved signature.",
+  "connector_catalog_vignette_info_label": "Show scenario description: {{name}}",
+  "connector_catalog_vignette_start_label": "Start practice: {{name}}",
   "connector_open_title": "Your own situation",
   "connector_open_subtitle": "Briefly describe relationship and context. We build a practice conversation from it.",
   "connector_open_expectation": "Note: Feedback is shorter and less deep than curated scenarios. It does not feed into your signature — and we never compare your results with other users.",

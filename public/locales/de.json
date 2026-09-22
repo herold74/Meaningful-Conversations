@@ -2481,6 +2481,8 @@
   "connector_signature_info_label": "Verbindungs-Signatur erklären",
   "connector_signature_info_title": "Was ist die Verbindungs-Signatur?",
   "connector_signature_info_body": "Deine Verbindungs-Signatur entsteht, wenn du \"The Connector\" als Evaluierung abschließst: In drei kuratierten Kurz-Gesprächen wird beobachtet, wie du Verbindung herstellst — in den fünf Dimensionen: Empathie, Präsenz, Neugier, Urteilsfreiheit, Stabilität.\n\nDu kannst das Ergebnis optional verschlüsselt im Profil unter „Wie du interagierst“ speichern.\n\nÜbungen im Katalog und „Eigene Situation“ dienen dem Trainieren: Sie ersetzen oder ändern deine gespeicherte Signatur nicht.",
+  "connector_catalog_vignette_info_label": "Szenario-Beschreibung anzeigen: {{name}}",
+  "connector_catalog_vignette_start_label": "Übung starten: {{name}}",
   "connector_open_title": "Eigene Situation",
   "connector_open_subtitle": "Beschreibe kurz Beziehung und Kontext. Wir erstellen daraus ein Übungsgespräch.",
   "connector_open_expectation": "Hinweis: Feedback ist kürzer und weniger tief als bei kuratierten Szenarien. Es fließt nicht in deine Signatur ein — und wir vergleichen deine Ergebnisse mit keinem anderen Nutzer.",
