@@ -372,7 +372,7 @@ router.post('/connector/turn', authMiddleware, async (req, res) => {
       config: {
         systemInstruction,
         maxOutputTokens: 1500,
-        temperature: 0.85,
+        temperature: 0.72,
       },
       context: 'chat',
       userRegionPreference,

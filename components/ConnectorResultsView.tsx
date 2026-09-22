@@ -182,31 +182,38 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
           {t(isPracticeRun ? 'connector_results_practice_disclaimer' : 'connector_results_disclaimer')}
         </p>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        {/* Actions — match PracticeEvaluationReview / PracticeResumePrompt button tokens */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-2">
           {!isPracticeRun && canSave && saveState !== 'saved' && (
             <button
+              type="button"
               onClick={onSaveToProfile}
               disabled={saveState === 'saving'}
-              className="flex-1 py-3 px-6 bg-accent-primary hover:bg-accent-primary/90 disabled:opacity-60 text-white font-semibold rounded-lg transition-colors"
+              className="flex-1 py-3 rounded-lg btn-accent-solid font-semibold disabled:opacity-50"
             >
               {saveState === 'saving' ? t('connector_results_saving') : t('connector_results_save')}
             </button>
           )}
           {!isPracticeRun && saveState === 'saved' && (
-            <div className="flex-1 py-3 px-6 text-center text-sm font-medium text-accent-primary border border-accent-primary/40 rounded-lg">
+            <div className="flex-1 py-3 px-6 text-center text-sm font-semibold text-accent-primary border border-accent-primary/40 rounded-lg bg-accent-primary/5">
               ✓ {t('connector_results_saved')}
             </div>
           )}
           <button
+            type="button"
             onClick={onRestart}
-            className="py-3 px-6 border border-border-primary text-content-secondary hover:text-content-primary font-medium rounded-lg transition-colors"
+            className={`flex-1 py-3 rounded-lg font-semibold ${
+              isPracticeRun ? 'btn-accent-solid' : 'btn-surface-outline'
+            }`}
           >
             {t(isPracticeRun ? 'connector_results_practice_restart' : 'connector_results_restart')}
           </button>
           <button
+            type="button"
             onClick={onDone}
-            className="py-3 px-6 border border-border-primary text-content-secondary hover:text-content-primary font-medium rounded-lg transition-colors"
+            className={`flex-1 py-3 rounded-lg font-semibold ${
+              isPracticeRun ? 'btn-surface-outline' : 'btn-accent-solid'
+            }`}
           >
             {t(isPracticeRun ? 'connector_results_practice_done' : 'connector_results_done')}
           </button>
