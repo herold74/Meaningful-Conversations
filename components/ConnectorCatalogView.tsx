@@ -36,6 +36,7 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
   const practiceLocked = !premiumAccess.canAccessConnectorPractice;
   const [liveMode, setLiveMode] = useState(false);
   const [signatureInfoOpen, setSignatureInfoOpen] = useState(false);
+  const [catalogVignetteInfo, setCatalogVignetteInfo] = useState<ConnectorVignetteCatalogEntry | null>(null);
   const [catalog, setCatalog] = useState<ConnectorVignetteCatalogEntry[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -193,38 +194,77 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 items-stretch">
           {catalog.map((v) => (
-            <button
+            <div
               key={v.id}
-              type="button"
-              onClick={() => (practiceLocked ? onUpgrade?.() : onStartPractice(v.id, liveMode))}
-              className={`text-left h-full rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 transition-colors ${
+              className={`h-full rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 transition-colors ${
                 practiceLocked ? 'opacity-60' : 'hover:border-accent-primary/60 hover:bg-accent-primary/5'
               }`}
             >
-              <div className="flex gap-3 h-full">
-                <img
-                  src={CONNECTOR_AVATARS[v.id] || '/avatars/nobody.png'}
-                  alt=""
-                  className="w-12 h-12 rounded-full object-cover shrink-0 self-start bg-background-secondary"
-                />
-                <div className="min-w-0 flex-1 flex flex-col">
-                  <p className="font-semibold text-content-primary line-clamp-1 min-h-5 leading-5">
-                    {v.personaName}
-                  </p>
-                  <p className="text-xs text-content-tertiary line-clamp-2 min-h-7 leading-5">
-                    {v.relationship}
-                  </p>
-                  <p className="text-sm font-medium text-content-primary line-clamp-2 leading-snug">
-                    {v.pickerTeaser}
-                  </p>
-                  <p className="text-xs text-content-secondary line-clamp-2 leading-snug mt-1">
-                    {v.scenarioBrief}
-                  </p>
-                </div>
+              <div className="flex gap-2 items-start h-full">
+                <button
+                  type="button"
+                  onClick={() => (practiceLocked ? onUpgrade?.() : onStartPractice(v.id, liveMode))}
+                  aria-label={t('connector_catalog_vignette_start_label', { name: v.personaName })}
+                  className="flex gap-3 flex-1 min-w-0 text-left h-full"
+                >
+                  <img
+                    src={CONNECTOR_AVATARS[v.id] || '/avatars/nobody.png'}
+                    alt=""
+                    className="w-12 h-12 rounded-full object-cover shrink-0 self-start bg-background-secondary"
+                    aria-hidden
+                  />
+                  <div className="min-w-0 flex-1 flex flex-col">
+                    <p className="font-semibold text-content-primary line-clamp-1 min-h-5 leading-5">
+                      {v.personaName}
+                    </p>
+                    <p className="text-xs text-content-tertiary line-clamp-2 min-h-7 leading-5">
+                      {v.relationship}
+                    </p>
+                    <p className="text-sm font-medium text-content-primary line-clamp-2 leading-snug">
+                      {v.pickerTeaser}
+                    </p>
+                    <p className="text-xs text-content-secondary line-clamp-2 leading-snug mt-1">
+                      {v.scenarioBrief}
+                    </p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCatalogVignetteInfo(v)}
+                  aria-label={t('connector_catalog_vignette_info_label', { name: v.personaName })}
+                  className="shrink-0 inline-flex items-center justify-center p-2 rounded-lg text-accent-primary hover:bg-accent-primary/10 transition-colors"
+                >
+                  <Info className="w-5 h-5" aria-hidden />
+                </button>
               </div>
-            </button>
+            </div>
           ))}
         </div>
+
+        <ModalOverlay
+          isOpen={!!catalogVignetteInfo}
+          onClose={() => setCatalogVignetteInfo(null)}
+          title={catalogVignetteInfo?.personaName ?? ''}
+        >
+          {catalogVignetteInfo && (
+            <>
+              <p className="text-sm text-content-tertiary">{catalogVignetteInfo.relationship}</p>
+              <p className="text-sm font-semibold text-content-primary mt-3 leading-snug">
+                {catalogVignetteInfo.pickerTeaser}
+              </p>
+              <p className="text-sm text-content-secondary leading-relaxed mt-3">
+                {catalogVignetteInfo.scenarioBrief}
+              </p>
+              <button
+                type="button"
+                onClick={() => setCatalogVignetteInfo(null)}
+                className="mt-6 w-full py-2.5 rounded-lg btn-accent-solid text-sm font-semibold"
+              >
+                {t('aria_close')}
+              </button>
+            </>
+          )}
+        </ModalOverlay>
 
         <div className="flex flex-col sm:flex-row gap-3">
           {onNewAssessment && (
