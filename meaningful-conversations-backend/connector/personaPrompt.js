@@ -1,5 +1,6 @@
 const { getVignetteById } = require('./vignettes');
 const { localizedField } = require('./vignetteFields');
+const { getContentSafetyBlock } = require('../bots/contentSafetyPromptBlocks');
 
 /**
  * The Connector persona prompt.
@@ -128,6 +129,7 @@ DEINE EMOTIONALE GRUNDSTIMMUNG: ${localizedField(vignette, 'emotionalTone', lang
 ${localizedField(vignette, 'innerNeed', lang)}
 ${liveBlock}
 ${PERSONA_ROLE_GUARD.de}
+${getContentSafetyBlock('connector_persona', 'de')}
 ${closingBlock}
 REGELN:
 1. ${sentenceRule}
@@ -149,6 +151,7 @@ YOUR EMOTIONAL BASELINE: ${localizedField(vignette, 'emotionalTone', lang)}
 ${localizedField(vignette, 'innerNeed', lang)}
 ${liveBlock}
 ${PERSONA_ROLE_GUARD.en}
+${getContentSafetyBlock('connector_persona', 'en')}
 ${closingBlock}
 RULES:
 1. ${sentenceRule}

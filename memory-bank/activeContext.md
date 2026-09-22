@@ -9,6 +9,15 @@
 **Xcode:** `main` includes **UIScene** migration (`SceneDelegate` + `UIApplicationSceneManifest`) for Xcode 27 launch — `79e4a4db`. Open `ios/App/App.xcodeproj`, scheme **App**; clean build + reinstall on device after pull. ASC **2.6.0**, build **23**.
 **Connector chat UX (`04d34335`):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal. Local `npm run build && npx cap sync ios` done for Xcode — reinstall from Xcode (build 23).
 
+## Session handoff (2026-09-22) — Chat safety / jailbreak / intimacy policy (local, not deployed)
+
+- **Prompt safety:** `bots/contentSafetyPromptBlocks.js` — prompt integrity, harassment boundaries, legitimate intimacy coaching lane; appended in `routes/gemini/chat.js`, `practice/coacheePrompt.js`, `connector/personaPrompt.js`.
+- **Provider:** `services/aiSafetyConfig.js` — Gemini `safetySettings` merged for `context: 'chat'`.
+- **Practice eval:** Professional-boundary / coach misconduct rubric in `services/geminiPrompts.js`.
+- **Tests:** Jest unit tests + Test Runner scenarios `safety_jailbreak_meta`, `safety_sexual_boundary`, `safety_intimacy_coaching` (DE/EN keys).
+- **Docs:** `DOCUMENTATION/SAFETY-PROMPT-POLICY.md`. Roadmap stub: future Schnarch-style intimacy coach (`coaching_intimacy` surface).
+- **Next:** Staging LLM regression on new safety scenarios; deploy when ready.
+
 ## Session handoff (2026-09-16) — Production v2.6.0 Build 19
 
 - **Production:** v**2.6.0** Build **19** verified live at https://mc-app.manualmode.at — health OK, `sw.js` `meaningful-conversations-cache-v2.6.0-b19`, bundle parity with staging (`main-CgRDw8aH.js`).

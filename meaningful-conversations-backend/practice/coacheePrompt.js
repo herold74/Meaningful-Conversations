@@ -4,6 +4,7 @@ const { resolveCoacheeGender } = require('./avatarGender');
 const { getScopeBoundaryPrompt, isValidTheme } = require('./scopeBoundary');
 const { resolveFrameworkId, isPracticeSentinelFramework } = require('./methodTaxonomy');
 const { getMentalFitnessCoacheeBlock, isMentalFitnessFramework } = require('./mentalFitnessCoacheeProfile');
+const { getContentSafetyBlock } = require('../bots/contentSafetyPromptBlocks');
 
 const LIVE_MODE_MODIFIER = {
   en: `SPEECH MODE (LIVE SESSION): Respond as if speaking aloud on a phone call — natural spoken language, occasional fillers ("um", "well"), shorter sentences (1-3), incomplete thoughts allowed. NOT polished written prose.`,
@@ -129,7 +130,7 @@ You already know the coach. Continue seamlessly — no repeated greeting or full
     : 'On the coach\'s very first message: briefly introduce yourself and outline your concern in your own words.';
 
   const firstTurnRule = isContracting ? contractingFirstTurn : standardFirstTurn;
-  const roleGuardBlock = `\n${COACHEE_ROLE_GUARD[lang]}\n`;
+  const roleGuardBlock = `\n${COACHEE_ROLE_GUARD[lang]}\n${getContentSafetyBlock('practice_coachee', lang)}\n`;
 
   const rawScenario = getScenarioById(scenarioId);
   const coacheeGender = resolveCoacheeGender(rawScenario);

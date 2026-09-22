@@ -10,6 +10,10 @@ const dynamicPromptController = require('../../services/dynamicPromptController.
 const behaviorLogger = require('../../services/behaviorLogger.js');
 const { withTimeout } = require('./shared.js');
 const { normalizeLanguage } = require('../../utils/language.js');
+const {
+  getContentSafetyBlock,
+  getChatContentSafetySurface,
+} = require('../../bots/contentSafetyPromptBlocks.js');
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
@@ -100,6 +104,9 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
 
     // Replace the date placeholder in the system instruction.
     systemInstruction = systemInstruction.replace(/\[CURRENT_DATE\]/g, formattedDate);
+
+    const safetySurface = getChatContentSafetySurface(bot.id);
+    systemInstruction += getContentSafetyBlock(safetySurface, lang);
 
     const isInitialMessage = history.length === 0;
     const isInterviewBot = bot.id === 'gloria-life-context' || bot.id === 'gloria-interview';

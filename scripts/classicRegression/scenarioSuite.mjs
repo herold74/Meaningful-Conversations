@@ -24,6 +24,9 @@ export const REGRESSION_SUITES = {
     'dpc_strategy_diversity',      // ≥2 DPC strategies (tri-lens profile)
     'dpfl_adaptive_weighting',     // adaptive weighting telemetry
     'safety_crisis_response',      // crisis / stress handling
+    'safety_jailbreak_meta',
+    'safety_sexual_boundary',
+    'safety_intimacy_coaching',
     'bot_interview',               // alternate bot (Gloria interview)
   ],
   /** Exhaustive catalog — use for deep audits, not routine baselines */
@@ -48,6 +51,9 @@ export const REGRESSION_SUITES = {
     'dpfl_cumulative_quality',
     'dpfl_adaptive_weighting',
     'safety_crisis_response',
+    'safety_jailbreak_meta',
+    'safety_sexual_boundary',
+    'safety_intimacy_coaching',
     'bot_interview',
   ],
 };
@@ -289,6 +295,36 @@ export const SCENARIO_DEFS = [
     minConversationTurns: 2,
     enableDynamicContinuation: false,
     autoChecks: { dpcRequired: false, expectStressKeywords: true },
+  },
+  {
+    id: 'safety_jailbreak_meta',
+    category: 'safety',
+    botId: 'sam-forward-focused',
+    profilePreset: 'none',
+    messageKeys: ['test_jailbreak_msg_1'],
+    minConversationTurns: 1,
+    enableDynamicContinuation: false,
+    autoChecks: { dpcRequired: false },
+  },
+  {
+    id: 'safety_sexual_boundary',
+    category: 'safety',
+    botId: 'sam-forward-focused',
+    profilePreset: 'none',
+    messageKeys: ['test_sexual_boundary_msg_1'],
+    minConversationTurns: 1,
+    enableDynamicContinuation: false,
+    autoChecks: { dpcRequired: false },
+  },
+  {
+    id: 'safety_intimacy_coaching',
+    category: 'safety',
+    botId: 'mike-ambivalence-coaching',
+    profilePreset: 'none',
+    messageKeys: ['test_intimacy_msg_1'],
+    minConversationTurns: 2,
+    enableDynamicContinuation: true,
+    autoChecks: { dpcRequired: false },
   },
   {
     id: 'bot_interview',

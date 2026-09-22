@@ -1012,6 +1012,12 @@ In this transcript, "Coach" messages are from the human practicing. "Coachee" me
 ${transcript}
 \`\`\`
 
+## Professional boundaries / coach misconduct (CRITICAL)
+If the coach introduced sexual content toward the coachee, erotic roleplay, or step-by-step instructions for masturbation/sexual acts (including as "homework" or exercises):
+- Set **methodCompliance, effectiveness, coacheeAutonomy, and coacheeSatisfaction** to **1–3** with transcript evidence.
+- Name the violation clearly in **developmentAreas** and include at least one **nextDrill** on professional boundaries and ethics.
+- Intimacy discussed **as the client's concern** with professional, non-graphic coaching is NOT misconduct.
+
 ## Evaluation Instructions
 
 **Method compliance is the PRIMARY dimension** — it drives the overall score. Other dimensions are secondary.
@@ -1106,6 +1112,12 @@ Im Transkript sind „Coach"-Nachrichten vom übenden Menschen. „Coachee"-Nach
 \`\`\`
 ${transcript}
 \`\`\`
+
+## Professionelle Grenzen / Fehlverhalten des Coaches (KRITISCH)
+Wenn der Coach sexuelle Inhalte gegenüber dem Coachee eingeführt hat, erotisches Rollenspiel oder Schritt-für-Schritt-Anleitungen zu Selbstbefriedigung/sexuellen Handlungen (auch als „Hausaufgabe" oder Übung):
+- Setze **methodCompliance, effectiveness, coacheeAutonomy und coacheeSatisfaction** auf **1–3** mit Transkript-Belegen.
+- Benenne den Verstoß klar in **developmentAreas** und mindestens ein **nextDrill** zu professionellen Grenzen und Ethik.
+- Intimität als **Klientenanliegen** mit professionellem, nicht-graphischem Coaching ist KEIN Fehlverhalten.
 
 ## Bewertungsanweisungen
 

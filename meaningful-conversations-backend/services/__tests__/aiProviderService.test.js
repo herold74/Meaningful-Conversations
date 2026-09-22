@@ -130,7 +130,10 @@ describe('generateContent() — Google provider', () => {
     expect(mockGoogleGenerateContent).toHaveBeenCalledWith(
       expect.objectContaining({
         contents: 'Test prompt',
-        config: expect.objectContaining({ temperature: 0.5 }),
+        config: expect.objectContaining({
+          temperature: 0.5,
+          safetySettings: expect.any(Array),
+        }),
       })
     );
   });
