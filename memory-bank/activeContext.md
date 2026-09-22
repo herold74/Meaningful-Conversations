@@ -1,22 +1,21 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 23** (repo + staging)
-**Branch:** `main` @ `79e4a4db` — **merged 2026-09-21:** Connector **Eigene Situation** (Premium+ gating, qualitative results, migration `20260921120000_connector_open_run_stats`) + catalog polish (tile avatars, chat header intro, layout/footer, darker speech bubbles). Feature tip before deploy: `2776454b`.
-**Staging:** Deployed **2026-09-21**, v**2.6.0** Build **23** — https://mc-beta.manualmode.at (`/api/health` OK, `sw.js` `v2.6.0-b23`). `make deploy-staging` from Mac; backend migration applied via container startup (`prisma migrate deploy`).
+**Version:** 2.6.0 **Build 24** (repo + staging)
+**Branch:** `main` @ `25f469cd` — **2026-09-22:** Chat safety hardening (`cd3285ba`) + User Guide §2.4 / Disclaimer / Connector catalog copy (`624335d5`); staging deploy **Build 24**.
+**Staging:** Deployed **2026-09-22**, v**2.6.0** Build **24** — https://mc-beta.manualmode.at (`/api/health` OK, `sw.js` `v2.6.0-b24`).
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
 **App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **23** (synced by deploy script). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Xcode:** `main` includes **UIScene** migration (`SceneDelegate` + `UIApplicationSceneManifest`) for Xcode 27 launch — `79e4a4db`. Open `ios/App/App.xcodeproj`, scheme **App**; clean build + reinstall on device after pull. ASC **2.6.0**, build **23**.
 **Connector chat UX (`04d34335`):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal. Local `npm run build && npx cap sync ios` done for Xcode — reinstall from Xcode (build 23).
 
-## Session handoff (2026-09-22) — Chat safety / jailbreak / intimacy policy (local, not deployed)
+## Session handoff (2026-09-22) — Safety + handbook + staging b24
 
-- **Prompt safety:** `bots/contentSafetyPromptBlocks.js` — prompt integrity, harassment boundaries, legitimate intimacy coaching lane; appended in `routes/gemini/chat.js`, `practice/coacheePrompt.js`, `connector/personaPrompt.js`.
-- **Provider:** `services/aiSafetyConfig.js` — Gemini `safetySettings` merged for `context: 'chat'`.
-- **Practice eval:** Professional-boundary / coach misconduct rubric in `services/geminiPrompts.js`.
-- **Tests:** Jest unit tests + Test Runner scenarios `safety_jailbreak_meta`, `safety_sexual_boundary`, `safety_intimacy_coaching` (DE/EN keys).
-- **Docs:** `DOCUMENTATION/SAFETY-PROMPT-POLICY.md`. Roadmap stub: future Schnarch-style intimacy coach (`coaching_intimacy` surface).
-- **Next:** Staging LLM regression on new safety scenarios; deploy when ready.
+- **Safety (live on staging):** `contentSafetyPromptBlocks.js`, `aiSafetyConfig.js`, practice eval misconduct rubric; Test Runner `safety_*` scenarios.
+- **Handbuch:** User Guide **§2.4** (Grenzen/Intimität), Connector Übungskatalog + Eigene Situation, Practice-Grenzen; Disclaimer cross-ref.
+- **Commits:** `cd3285ba` (safety) · `624335d5` (handbook) · `25f469cd` (build 24 sync).
+- **Xcode:** Local `npm run build` + `npx cap sync ios` done — `CURRENT_PROJECT_VERSION` **24**, `MARKETING_VERSION` **2.6.0**; archive in Xcode (scheme **App**).
+- **Next:** Optional LLM regression on staging safety scenarios; production promote when ready.
 
 ## Session handoff (2026-09-16) — Production v2.6.0 Build 19
 
