@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
+import { Info } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import BrandLoader from './shared/BrandLoader';
+import ModalOverlay from './shared/ModalOverlay';
 import { SoundWaveIcon } from './icons/SoundWaveIcon';
 import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import * as geminiService from '../services/geminiService';
@@ -29,9 +31,11 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
   isStarting,
 }) => {
   const { t, language } = useLocalization();
+  const openSituationDescId = useId();
   const premiumAccess = resolveConnectorPremiumAccess(currentUser);
   const practiceLocked = !premiumAccess.canAccessConnectorPractice;
   const [liveMode, setLiveMode] = useState(false);
+  const [signatureInfoOpen, setSignatureInfoOpen] = useState(false);
   const [catalog, setCatalog] = useState<ConnectorVignetteCatalogEntry[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,14 +110,60 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => (practiceLocked ? onUpgrade?.() : onOpenSituation())}
-          className="w-full text-left rounded-xl border border-accent-primary/50 bg-accent-primary/5 p-4 mb-6 hover:border-accent-primary transition-colors"
+        <div className="rounded-xl border border-accent-primary/50 bg-accent-primary/5 p-4 mb-6 hover:border-accent-primary transition-colors">
+          <div className="flex gap-2 items-start">
+            <button
+              type="button"
+              onClick={() => (practiceLocked ? onUpgrade?.() : onOpenSituation())}
+              aria-label={t('connector_catalog_open_situation')}
+              aria-describedby={openSituationDescId}
+              className="flex gap-3 flex-1 min-w-0 text-left"
+            >
+              <img
+                src="/avatars/nobody.png"
+                alt=""
+                className="w-12 h-12 rounded-full object-cover shrink-0 bg-background-secondary"
+                aria-hidden
+              />
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-content-primary" aria-hidden>
+                  {t('connector_catalog_open_situation')}
+                </p>
+                <p
+                  id={openSituationDescId}
+                  className="text-sm text-content-secondary mt-1"
+                >
+                  {t('connector_catalog_open_situation_desc')}
+                </p>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSignatureInfoOpen(true)}
+              aria-label={t('connector_signature_info_label')}
+              className="shrink-0 inline-flex items-center justify-center p-2 rounded-lg text-accent-primary hover:bg-accent-primary/10 transition-colors"
+            >
+              <Info className="w-5 h-5" aria-hidden />
+            </button>
+          </div>
+        </div>
+
+        <ModalOverlay
+          isOpen={signatureInfoOpen}
+          onClose={() => setSignatureInfoOpen(false)}
+          title={t('connector_signature_info_title')}
         >
-          <p className="font-semibold text-content-primary">{t('connector_catalog_open_situation')}</p>
-          <p className="text-sm text-content-secondary mt-1">{t('connector_catalog_open_situation_desc')}</p>
-        </button>
+          <p className="text-sm text-content-secondary leading-relaxed whitespace-pre-line">
+            {t('connector_signature_info_body')}
+          </p>
+          <button
+            type="button"
+            onClick={() => setSignatureInfoOpen(false)}
+            className="mt-6 w-full py-2.5 rounded-lg btn-accent-solid text-sm font-semibold"
+          >
+            {t('aria_close')}
+          </button>
+        </ModalOverlay>
 
         <div className="rounded-xl border border-border-secondary dark:border-border-primary bg-background-tertiary p-4 mb-6">
           <h2 className="font-semibold text-content-primary mb-2 text-sm">{t('connector_intro_mode_title')}</h2>
@@ -167,7 +217,9 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
                   <p className="text-sm font-medium text-content-primary line-clamp-2 leading-snug">
                     {v.pickerTeaser}
                   </p>
-                  <p className="text-xs text-content-secondary leading-snug mt-1">{v.scenarioBrief}</p>
+                  <p className="text-xs text-content-secondary line-clamp-2 leading-snug mt-1">
+                    {v.scenarioBrief}
+                  </p>
                 </div>
               </div>
             </button>
