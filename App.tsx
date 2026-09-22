@@ -311,6 +311,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!currentUser?.id || !practiceConfig || chatHistory.length === 0) return;
+        if (view !== 'practiceChat' || practiceEvaluation) return;
         savePracticeSessionDraft({
             userId: currentUser.id,
             practiceConfig,
@@ -318,7 +319,7 @@ const App: React.FC = () => {
             userMessageCount,
             baselineMessageCount,
         });
-    }, [currentUser?.id, practiceConfig, chatHistory, userMessageCount, baselineMessageCount]);
+    }, [currentUser?.id, practiceConfig, chatHistory, userMessageCount, baselineMessageCount, view, practiceEvaluation]);
     
     const calculateNewGamificationState = useCallback((
         currentState: GamificationState,

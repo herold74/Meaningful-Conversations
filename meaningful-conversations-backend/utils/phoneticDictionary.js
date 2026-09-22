@@ -55,7 +55,8 @@ function getPhoneticReplacements(language) {
     return languagePatterns.patterns.map(pattern => ({
         term: pattern.term,
         phonetic: pattern.phonetic,
-        caseSensitive: pattern.caseSensitive !== false  // Default to true if not specified
+        caseSensitive: pattern.caseSensitive !== false,  // Default to true if not specified
+        ttsBehavior: pattern.ttsBehavior || null,
     }));
 }
 

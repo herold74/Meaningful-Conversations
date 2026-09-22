@@ -246,6 +246,19 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
  * @param {string} language - Language code for phonetic replacements (default: 'de')
  * @returns {string} - Cleaned text ready for TTS
  */
+function applyPausePatterns(text, language) {
+    const patterns = getPhoneticReplacements(language).filter((p) => p.ttsBehavior === 'pause');
+    let out = text;
+    for (const { term, phonetic } of patterns) {
+        if (!term) continue;
+        const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        out = out.replace(new RegExp(escapedTerm, 'g'), phonetic || ', ');
+    }
+    // Long runs of dots (e.g. ....) → pause even if not in dictionary
+    out = out.replace(/\.{3,}/g, ', ');
+    return out;
+}
+
 function cleanTextForSpeech(text, language = 'de') {
     // Load phonetic replacements from dictionary
     // Dictionary is cached, so this has no I/O overhead
@@ -266,11 +279,14 @@ function cleanTextForSpeech(text, language = 'de') {
         // Remove blockquote markers
         .replace(/^>\s?/gm, '');
     
+    cleanedText = applyPausePatterns(cleanedText, language);
+    
     // Apply phonetic replacements for better pronunciation
     // Use word boundaries to avoid partial replacements
     let replacementsApplied = 0;
     const replacementLog = [];
     for (const pattern of phoneticReplacements) {
+        if (pattern.ttsBehavior === 'pause') continue;
         const { term, phonetic, caseSensitive } = pattern;
         
         // Escape special regex characters in the term
@@ -298,7 +314,7 @@ function cleanTextForSpeech(text, language = 'de') {
         .replace(/[\u2018\u2019]/g, "'")
         .replace(/[\u201C\u201D]/g, '"')
         .replace(/[\u2013\u2014]/g, '-')
-        .replace(/\u2026/g, '...')
+        .replace(/\u2026/g, ', ')
         .replace(/\u00AD/g, '')
         .replace(/\s+/g, ' ')
         .trim();

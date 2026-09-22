@@ -83,8 +83,8 @@ function buildConnectorPersonaPrompt({
 
   const liveBlock = liveMode
     ? (lang === 'de'
-      ? '\nSPRECHMODUS (LIVE-GESPRÄCH): Antworte wie in einem echten Gespräch — natürliche gesprochene Sprache, gelegentliche Füllwörter („äh", „also"), kürzere Sätze, unvollständige Gedanken erlaubt. KEIN polierter Schreibstil.\n'
-      : '\nSPEECH MODE (LIVE CONVERSATION): Respond as if speaking aloud — natural spoken language, occasional fillers ("um", "well"), shorter sentences, incomplete thoughts allowed. NOT polished written prose.\n')
+      ? '\nSPRECHMODUS (LIVE-GESPRÄCH): Antworte wie gesprochen — Füllwörter („äh", „also") und kürzere Sätze sind okay, aber jeder Satz muss grammatisch vollständig sein (kein abgebrochenes „sondern …" ohne zweiten Teil, kein Satzfragment mit Punkt mitten in der Konstruktion). KEIN polierter Essay-Stil.\n'
+      : '\nSPEECH MODE (LIVE CONVERSATION): Sound spoken — fillers ("um", "well") and shorter sentences are fine, but each sentence must be grammatically complete (no broken "but …" without a second clause, no mid-sentence fragments). NOT polished essay prose.\n')
     : '';
 
   let closingBlock = '';
@@ -109,8 +109,8 @@ If you don't truly feel heard yet, continue the conversation normally — WITHOU
   }
 
   const sentenceRule = lang === 'de'
-    ? 'Antworte in 1-4 kurzen Sätzen, wie in einem echten Gespräch unter Freunden/Kollegen.'
-    : 'Respond in 1-4 short sentences, like a real conversation between friends/colleagues.';
+    ? 'Antworte in 1-4 kurzen, grammatisch vollständigen Sätzen (korrekte Nebensätze mit „dass"/„weil", „nicht … sondern …" nur mit beiden Teilen), wie in einem echten Gespräch unter Freunden/Kollegen.'
+    : 'Respond in 1-4 short, grammatically complete sentences (proper subordinate clauses; "not … but …" only with both parts), like a real conversation between friends/colleagues.';
 
   const languageToneRule = lang === 'de'
     ? 'Alltagston wie unter Kollegen/Freunden: leichte Kraftausdrücke bei Frust sind okay (z. B. „verdammt", „…so ein Idiot…"), aber keine Fäkalsprache und keine groben Schimpfwörter'
@@ -134,7 +134,8 @@ REGELN:
 2. Reagiere dynamisch auf die Qualität der Verbindung: Öffne dich bei echtem Zuhören; verschließe dich bei Ratschlägen, Urteilen oder Selbstbezug des Gegenübers
 3. KEINE Bühnenanweisungen — weder mit Sternchen (*seufzt*) noch in Klammern ((pause))
 4. Schreibe wie ein echter Mensch in normalem Text
-5. ${languageToneRule}`;
+5. ${languageToneRule}
+6. Auslassungspunkte („…" oder „...") höchstens einmal pro Antwort und nur für eine natürliche Denkpause — nie mitten in einem unvollständigen Satz`;
   }
 
   return `You are ${vignette.personaName} (the user's ${localizedField(vignette, 'relationship', lang)}) in an everyday conversation.
@@ -154,7 +155,8 @@ RULES:
 2. React dynamically to the quality of connection: open up under real listening; close down under advice, judgment, or self-referencing
 3. NO stage directions — neither with asterisks (*sighs*) nor in parentheses ((pause))
 4. Write like a real person in plain text
-5. ${languageToneRule}`;
+5. ${languageToneRule}
+6. Ellipsis ("…" or "...") at most once per reply and only for a natural thinking pause — never mid incomplete sentence`;
 }
 
 /**

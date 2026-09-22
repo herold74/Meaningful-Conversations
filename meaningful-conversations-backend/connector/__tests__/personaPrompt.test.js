@@ -46,6 +46,8 @@ describe('buildConnectorPersonaPrompt — role guard', () => {
     expect(prompt).toContain('KEIN Coach');
     expect(prompt).toContain('Fäkalsprache');
     expect(prompt).toContain('verdammt');
+    expect(prompt).toContain('grammatisch vollständigen');
+    expect(prompt).toContain('Auslassungspunkte');
     expect(prompt).toContain('Jonas');
     expect(prompt).toContain('Bernhard');
   });
@@ -56,6 +58,8 @@ describe('buildConnectorPersonaPrompt — role guard', () => {
     expect(prompt).toContain('NOT a coach');
     expect(prompt).toContain('fecal language');
     expect(prompt).toContain('damn');
+    expect(prompt).toContain('grammatically complete');
+    expect(prompt).toContain('Ellipsis');
     expect(prompt).toContain('Leila');
   });
 

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.6",
+  "version": "1.0.7",
   "languages": {
     "de": {
       "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
@@ -357,12 +357,41 @@
           "phonetic": "linkt-in",
           "caseSensitive": true,
           "notes": "Kleingeschrieben"
+        },
+        {
+          "term": "...",
+          "phonetic": ", ",
+          "caseSensitive": true,
+          "ttsBehavior": "pause",
+          "notes": "Auslassungspunkte nicht aussprechen — kurze Sprechpause (Komma), nicht „Punkt Punkt Punkt“"
+        },
+        {
+          "term": "…",
+          "phonetic": ", ",
+          "caseSensitive": true,
+          "ttsBehavior": "pause",
+          "notes": "Unicode-Ellipse — wie ... als Pause, nicht vorlesen"
         }
       ]
     },
     "en": {
-      "description": "Phonetische Ersetzungen für englische TTS-Stimmen (aktuell leer)",
-      "patterns": []
+      "description": "Phonetische Ersetzungen für englische TTS-Stimmen",
+      "patterns": [
+        {
+          "term": "...",
+          "phonetic": ", ",
+          "caseSensitive": true,
+          "ttsBehavior": "pause",
+          "notes": "Ellipsis — short speech pause (comma), do not say “dot dot dot”"
+        },
+        {
+          "term": "…",
+          "phonetic": ", ",
+          "caseSensitive": true,
+          "ttsBehavior": "pause",
+          "notes": "Unicode ellipsis — same as ..."
+        }
+      ]
     }
   }
 }
