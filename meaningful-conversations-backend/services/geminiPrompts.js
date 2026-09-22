@@ -596,7 +596,7 @@ ${transcript}
 - Kenji (kenji-resilience, premium): Stoic, composed, wise. For: stress, perspective shifts, inner calm, philosophical reflection.
 - Chloe (chloe-structured-reflection, premium): Practical, structured, evidence-based. For: thought patterns, behavioral strategies, systematic reflection.
 - Rob (rob, client): Mental fitness, empathetic, mindful. For: self-sabotage patterns, emotional resilience, inner blockages.
-- Victor (victor-systemic-coaching, client): Systemic, analytical, neutral. For: relationship dynamics, conflict patterns, team dynamics, differentiation.
+- Victor (victor-systemic-coaching, client): Systemic, analytical, neutral. For: relationship and team dynamics, differentiation; switches to an intimacy/partnership track (desire, distance, gridlock) when relevant — one partner reflecting; not couple or sex therapy.
 
 10. **Context Updates:** If the user has a Life Context, propose updates that capture significant new insights from this evaluation. Follow the hierarchical headline format (e.g., "Career & Work > Challenges"). ${docLang === 'de' ? 'Write context updates in German.' : 'Write context updates in English.'}
 
@@ -675,7 +675,7 @@ ${transcript}
 - Kenji (kenji-resilience, premium): Stoisch, gelassen, weise. Für: Stress, Perspektivwechsel, innere Ruhe, philosophische Reflexion.
 - Chloe (chloe-structured-reflection, premium): Praktisch, strukturiert, evidenzbasiert. Für: Denkmuster, Verhaltensstrategien, systematische Reflexion.
 - Rob (rob, client): Mentale Fitness, empathisch, achtsam. Für: Selbstsabotage-Muster, emotionale Resilienz, innere Blockaden.
-- Victor (victor-systemic-coaching, client): Systemisch, analytisch, neutral. Für: Beziehungsdynamiken, Konfliktmuster, Teamdynamiken, Differenzierung.
+- Victor (victor-systemic-coaching, client): Systemisch, analytisch, neutral. Für: Beziehungs- und Teamdynamiken, Differenzierung; Intimitäts-/Partnerschafts-Modus (Wunsch, Distanz, Gridlock) bei passendem Anliegen — ein Partner reflektiert; keine Paar- oder Sexualtherapie.
 
 10. **Kontext-Updates:** Falls ein Lebenskontext vorhanden ist, schlage Updates vor, die bedeutende neue Erkenntnisse aus dieser Bewertung erfassen. Verwende das hierarchische Überschriftenformat (z.B. "Karriere & Beruf > Herausforderungen"). ${docLang === 'de' ? 'Schreibe Kontext-Updates auf Deutsch.' : 'Schreibe Kontext-Updates auf Englisch.'}
 
@@ -704,7 +704,7 @@ const BOT_CATALOG_EN = `- Nobody (nexus-goal-path-solution, guest): Pragmatic ma
 - Chloe (chloe-structured-reflection, premium): Practical, structured, evidence-based. For: thought patterns, behavioral strategies, systematic reflection.
 - Mike (mike-ambivalence-coaching, premium): Ambivalence coaching with listening skills. For: mixed feelings about change, evoking own motivation — not persuasion or therapy.
 - Rob (rob, client): Mental fitness, empathetic, mindful. For: self-sabotage patterns, emotional resilience, inner blockages.
-- Victor (victor-systemic-coaching, client): Systemic, analytical, neutral. For: relationship dynamics, conflict patterns, team dynamics, differentiation.
+- Victor (victor-systemic-coaching, client): Systemic, analytical, neutral. For: relationship and team dynamics, differentiation; intimacy/partnership track when relevant (desire, distance, gridlock) — not couple or sex therapy.
 - Bekky (bekky-thought-audit, client): Structured thought audit. For: stressful beliefs, cognitive clarity, agency at work and in life.
 - Dan (dan-client-language, client): Client exact language. For: exploring inner beliefs through the client's own metaphors without coach interpretation.`;
 
@@ -718,7 +718,7 @@ const BOT_CATALOG_DE = `- Nobody (nexus-goal-path-solution, guest): Pragmatische
 - Chloe (chloe-structured-reflection, premium): Praktisch, strukturiert, evidenzbasiert. Für: Denkmuster, Verhaltensstrategien, systematische Reflexion.
 - Mike (mike-ambivalence-coaching, premium): Ambivalenz-Coaching mit Zuhör- und Fragetechniken. Für: gemischte Gefühle gegenüber Veränderung, eigene Motivation evozieren — keine Überredung oder Therapie.
 - Rob (rob, client): Mentale Fitness, empathisch, achtsam. Für: Selbstsabotagemuster, emotionale Resilienz, innere Blockaden.
-- Victor (victor-systemic-coaching, client): Systemisch, analytisch, neutral. Für: Beziehungsdynamiken, Konfliktmuster, Teamdynamiken, Differenzierung.
+- Victor (victor-systemic-coaching, client): Systemisch, analytisch, neutral. Für: Beziehungs- und Teamdynamiken, Differenzierung; Intimitäts-/Partnerschafts-Modus bei passendem Anliegen — keine Paar- oder Sexualtherapie.
 - Bekky (bekky-thought-audit, client): Strukturiertes Gedanken-Audit. Für: belastende Überzeugungen, kognitive Klarheit, Handlungsfähigkeit.
 - Dan (dan-client-language, client): Exakte Klientensprache. Für: innere Überzeugungen durch eigene Metaphern erkunden, ohne Coach-Interpretation.`;
 

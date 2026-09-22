@@ -18,7 +18,7 @@ Provider defense-in-depth: [`services/aiSafetyConfig.js`](../meaningful-conversa
 | `interview` | `gloria-life-context`, `gloria-interview` |
 | `practice_coachee` | Coach Practice coachee system prompt |
 | `connector_persona` | The Connector vignette persona |
-| `coaching_intimacy` | Reserved for future intimacy-focused coach (Schnarch-style track) |
+| `coaching_intimacy` | `victor-systemic-coaching` (intimacy/partnership track when client topic) |
 
 ## Triage (coaching)
 

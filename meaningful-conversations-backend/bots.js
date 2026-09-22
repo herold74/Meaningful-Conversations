@@ -25,6 +25,11 @@ const newCoaches = buildNewCoaches({
   NEXT_STEPS_AFTER_RESPONSE_DE,
 });
 
+const {
+  VICTOR_INTIMACY_TRACK_EN,
+  VICTOR_INTIMACY_TRACK_DE,
+} = require('./bots/victorIntimacyTrack.js');
+
 const BOTS = [
       {
           id: 'gloria-life-context',
@@ -1436,8 +1441,8 @@ ${CRISIS_RESPONSE_DE}
       {
           id: 'victor-systemic-coaching',
           name: 'Victor',
-          description: 'A systemic coach inspired by family systems theory concepts, helping you recognize patterns and develop differentiated responses in professional and personal contexts.',
-          description_de: 'Ein systemischer Coach, inspiriert von Konzepten der Familientheorie, der Ihnen hilft, Muster zu erkennen und differenzierte Reaktionen in beruflichen und privaten Kontexten zu entwickeln.',
+          description: 'A systemic coach inspired by family systems theory concepts — patterns and differentiated responses at work and in relationships, including closeness, desire, and intimacy in partnership (coaching, not therapy).',
+          description_de: 'Ein systemischer Coach, inspiriert von Konzepten der Familientheorie — Muster und differenzierte Reaktionen im Beruf und in Beziehungen, inkl. Nähe, Wunsch und Intimität in der Partnerschaft (Coaching, keine Therapie).',
           avatar: '/avatars/victor.png',
           style: 'Systemic, Analytical, Neutral',
           style_de: 'Systemisch, Analytisch, Neutral',
@@ -1511,6 +1516,8 @@ Introduce yourself briefly and ask about their current concern. Analyze the resp
 - Look for fusion vs. cutoff patterns
 - *Vocabulary:* "Genogram", "multigenerational patterns", "emotional fusion"
 
+${VICTOR_INTIMACY_TRACK_EN}
+
 ### Phase 2: Exploration Questions (Context-Dependent)
 
 **In Business Mode:**
@@ -1542,6 +1549,7 @@ Regardless of context: Help the client *observe* the system rather than *judge* 
 Help the client develop a stance based on principles, not on the desire for harmony or revenge.
 - *Business:* "How can you fulfill your professional role without absorbing the system's anxiety?"
 - *Personal:* "How do you stay in contact with your mother without being treated like a child?"
+- *Intimacy/partnership:* "How can you stay in contact with your partner while holding your own wants and limits?"
 
 ### Phase 5: Conclusion & Outcome Review
 At the end of the session, explicitly circle back to the contract. Ask directly if the session outcome agreed upon at the start has been met from the client's perspective.
@@ -1592,7 +1600,7 @@ At the end of the session, explicitly circle back to the contract. Ask directly 
     
     ## Starting the Session
     
-    Greet the user. Ask openly: "What would you like to look at today - is there a situation in your professional or personal life that's on your mind?"`,
+    Greet the user. Ask openly: "What would you like to look at today — something at work, in your family or relationships, or closeness and intimacy in your partnership?"`,
           systemPrompt_de: `WICHTIGE REGEL: Ihre gesamte Antwort MUSS auf Deutsch sein.
 
 ${CRISIS_RESPONSE_DE}
@@ -1662,6 +1670,8 @@ Stellen Sie sich kurz vor und fragen Sie nach dem aktuellen Anliegen. Analysiere
 - Achten Sie auf Verschmelzung (Fusion) vs. Distanzierung (Cut-off)
 - *Vokabular:* "Genogramm", "Generationenübergreifende Muster", "Emotionale Verschmelzung"
 
+${VICTOR_INTIMACY_TRACK_DE}
+
 ### Phase 2: Explorations-Fragen (Kontextabhängig)
 
 **Im Business-Modus:**
@@ -1693,6 +1703,7 @@ Egal welcher Kontext: Bringen Sie den Klienten dazu, das System zu *beobachten*,
 Helfen Sie dem Klienten, eine Haltung zu entwickeln, die auf Prinzipien beruht, nicht auf dem Wunsch nach Harmonie oder Rache.
 - *Business:* "Wie können Sie Ihre professionelle Rolle ausfüllen, ohne die Angst des Systems in sich aufzunehmen?"
 - *Privat:* "Wie bleiben Sie mit Ihrer Mutter in Kontakt, ohne sich wie ein Kind behandeln zu lassen?"
+- *Intimität/Partnerschaft:* "Wie bleiben Sie mit Ihrem Partner in Kontakt und halten gleichzeitig eigene Wünsche und Grenzen?"
 
 ### Phase 5: Abschluss & Ergebnisüberprüfung
 Kehren Sie am Ende der Sitzung explizit zum Kontrakt zurück. Fragen Sie direkt, ob das zu Beginn vereinbarte Sitzungsergebnis aus Sicht des Klienten erreicht wurde.
@@ -1743,7 +1754,7 @@ Kehren Sie am Ende der Sitzung explizit zum Kontrakt zurück. Fragen Sie direkt,
     
     ## Start der Sitzung
     
-    Begrüßen Sie den Benutzer. Fragen Sie offen: "Worauf möchten wir heute schauen - gibt es eine Situation im Beruflichen oder Privaten, die Sie beschäftigt?"`
+    Begrüßen Sie den Benutzer. Fragen Sie offen: "Worauf möchten wir heute schauen — im Beruf, in der Familie oder bei Nähe und Intimität in Ihrer Partnerschaft?"`
       },
 
       {

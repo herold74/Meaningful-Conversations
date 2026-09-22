@@ -793,8 +793,9 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Emotionale Reaktivität in Beziehungen reduzieren
 - Eigene Muster in wiederkehrenden Konflikten erkennen
 - Differenzierung des Selbst -- ein klares "Ich" in Beziehungen entwickeln
+- **Nähe, Wunsch und Intimität in der Partnerschaft** (ein Partner reflektiert — kein Paar- oder Sexualcoaching im Chat)
 
-**Beispiel-Situationen:** "Ich gerate in Familientreffen immer in dieselben Konflikte." / "Ich möchte verstehen, warum bestimmte Beziehungen mich so triggern." / "Ich möchte lernen, in Konflikten gelassener zu bleiben."
+**Beispiel-Situationen:** "Ich gerate in Familientreffen immer in dieselben Konflikte." / "Wir funktionieren, aber mir fehlt Verbindung — ich traue mich nicht, das anzusprechen." / "Ich möchte lernen, in Konflikten gelassener zu bleiben."
 
 **Zugang:** Klienten-Benutzer
 </div>
@@ -1968,8 +1969,9 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Reducing emotional reactivity in relationships
 - Recognizing your patterns in recurring conflicts
 - Differentiation of self -- developing a clear "I" within relationships
+- **Closeness, desire, and intimacy in partnership** (one partner reflecting — not couple or sex therapy in chat)
 
-**Example Situations:** "I always end up in the same conflicts at family gatherings." / "I want to understand why certain relationships trigger me so much." / "I want to learn to stay calmer in conflicts."
+**Example Situations:** "I always end up in the same conflicts at family gatherings." / "We function as a team but I miss connection — I'm afraid to bring it up." / "I want to learn to stay calmer in conflicts."
 
 **Access:** Client users
 </div>

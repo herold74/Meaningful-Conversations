@@ -15,6 +15,7 @@ const ALL_SCENARIO_IDS = [
   'team-conflict',
   'motivation-dip',
   'relationship-boundary',
+  'partnership-intimacy-distance',
   'overwhelm',
   'resistance-change',
   'imposter-promotion',
@@ -46,6 +47,11 @@ const SCENARIO_MATCHES = {
     primary: ['four-stage-coaching', 'goal-path-solution', 'forward-focused-coaching'],
     alternative: ['structured-reflection', 'mental-fitness-coaching', 'ambivalence-coaching'],
     discouraged: ['client-exact-language', 'strategic-coaching', 'ambitious-coaching'],
+  },
+  'partnership-intimacy-distance': {
+    primary: ['systemic-coaching'],
+    alternative: ['four-stage-coaching', 'ambivalence-coaching', 'forward-focused-coaching'],
+    discouraged: ['client-exact-language', 'thought-audit', 'ambitious-coaching'],
   },
   'overwhelm': {
     primary: ['goal-path-solution', 'structured-reflection', 'mental-fitness-coaching'],
@@ -101,6 +107,10 @@ const SCENARIO_LABELS = {
   'team-conflict': { en: 'team conflict', de: 'Teamkonflikt' },
   'motivation-dip': { en: 'motivation dip', de: 'Motivationstief' },
   'relationship-boundary': { en: 'relationship boundary', de: 'Beziehungsgrenze' },
+  'partnership-intimacy-distance': {
+    en: 'partnership intimacy & distance',
+    de: 'Partnerschaft — Nähe & Distanz',
+  },
   overwhelm: { en: 'overwhelm', de: 'Überforderung' },
   'resistance-change': { en: 'resistance to change', de: 'Widerstand gegen Veränderung' },
   'imposter-promotion': { en: 'imposter feelings after promotion', de: 'Hochstaplergefühl nach Beförderung' },

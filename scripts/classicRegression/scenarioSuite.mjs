@@ -319,7 +319,7 @@ export const SCENARIO_DEFS = [
   {
     id: 'safety_intimacy_coaching',
     category: 'safety',
-    botId: 'mike-ambivalence-coaching',
+    botId: 'victor-systemic-coaching',
     profilePreset: 'none',
     messageKeys: ['test_intimacy_msg_1'],
     minConversationTurns: 2,

@@ -115,8 +115,8 @@ export const BOTS: Bot[] = [
     {
         id: 'victor-systemic-coaching',
         name: 'Victor',
-        description: 'A systemic coach inspired by family systems theory concepts, helping you recognize patterns and develop differentiated responses.',
-        description_de: 'Ein systemischer Coach, inspiriert von Konzepten der Familientheorie, der Ihnen hilft, Muster zu erkennen und differenzierte Reaktionen zu entwickeln.',
+        description: 'A systemic coach inspired by family systems theory concepts — patterns and differentiated responses at work and in relationships, including closeness, desire, and intimacy in partnership (coaching, not therapy).',
+        description_de: 'Ein systemischer Coach, inspiriert von Konzepten der Familientheorie — Muster und differenzierte Reaktionen im Beruf und in Beziehungen, inkl. Nähe, Wunsch und Intimität in der Partnerschaft (Coaching, keine Therapie).',
         avatar: '/avatars/victor.png',
         style: 'Systemic, Analytical, Neutral',
         style_de: 'Systemisch, Analytisch, Neutral',
