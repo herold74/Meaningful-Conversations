@@ -45,6 +45,7 @@ describe('buildConnectorPersonaPrompt — role guard', () => {
     expect(prompt).toContain('ROLLEN-GUARD');
     expect(prompt).toContain('KEIN Coach');
     expect(prompt).toContain('Fäkalsprache');
+    expect(prompt).toContain('sexuell belästigt');
     expect(prompt).toContain('verdammt');
     expect(prompt).toContain('grammatisch vollständigen');
     expect(prompt).toContain('Auslassungspunkte');

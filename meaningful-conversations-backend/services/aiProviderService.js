@@ -1,6 +1,7 @@
 const prisma = require('../prismaClient.js');
 const { normalizeLanguage } = require('../utils/language.js');
 const { convertGoogleSchemaToJsonSchema } = require('../utils/googleSchemaConverter.js');
+const { mergeSafetyIntoConfig, logSafetyMetadata } = require('./aiSafetyConfig.js');
 
 const STRUCTURED_OUTPUT_MAX_TOKENS = {
   chat: 2048,
@@ -320,11 +321,13 @@ async function generateWithGoogle({ model, contents, config, context = 'chat' })
   
   console.log(`  → Using Google model: ${configuredModel} (requested: ${model}, context: ${context})`);
   
+  const mergedConfig = mergeSafetyIntoConfig(config, context);
   const response = await client.models.generateContent({
     model: configuredModel,
     contents,
-    config
+    config: mergedConfig,
   });
+  logSafetyMetadata(response, 'google');
   
   return {
     text: extractGoogleResponseText(response),
