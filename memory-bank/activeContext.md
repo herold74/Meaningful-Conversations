@@ -1,21 +1,26 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 24** (repo + staging)
-**Branch:** `main` @ `25f469cd` — **2026-09-22:** Chat safety hardening (`cd3285ba`) + User Guide §2.4 / Disclaimer / Connector catalog copy (`624335d5`); staging deploy **Build 24**.
-**Staging:** Deployed **2026-09-22**, v**2.6.0** Build **24** — https://mc-beta.manualmode.at (`/api/health` OK, `sw.js` `v2.6.0-b24`).
+**Version:** 2.6.0 **Build 25** (repo + staging)
+**Branch:** `main` @ `fba59e5b` — **2026-09-22:** Victor intimacy track + practice scenario (`299e4391`); staging deploy **Build 25** (`fba59e5b` build sync).
+**Staging:** Deployed **2026-09-22**, v**2.6.0** Build **25** — https://mc-beta.manualmode.at (`/api/health` OK, `sw.js` `v2.6.0-b25`).
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
 **App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **23** (synced by deploy script). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Xcode:** `main` includes **UIScene** migration (`SceneDelegate` + `UIApplicationSceneManifest`) for Xcode 27 launch — `79e4a4db`. Open `ios/App/App.xcodeproj`, scheme **App**; clean build + reinstall on device after pull. ASC **2.6.0**, build **23**.
 **Connector chat UX (`04d34335`):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal. Local `npm run build && npx cap sync ios` done for Xcode — reinstall from Xcode (build 23).
+
+## Session handoff (2026-09-22) — Victor intimacy + staging b25
+
+- **Victor:** Intimitäts-/Partnerschafts-Modus (`victorIntimacyTrack.js`), `coaching_intimacy` safety; Practice-Szenario `partnership-intimacy-distance`; Elena nicht shipped.
+- **Commits:** `299e4391` (feature) · `fba59e5b` (build 25 sync).
+- **Xcode:** Local `npm run build` + `npx cap sync ios` done — `CURRENT_PROJECT_VERSION` **25**, `MARKETING_VERSION` **2.6.0**; archive in Xcode (scheme **App**).
+- **Next:** Staging QA Victor + `safety_intimacy_coaching`; production promote when ready.
 
 ## Session handoff (2026-09-22) — Safety + handbook + staging b24
 
 - **Safety (live on staging):** `contentSafetyPromptBlocks.js`, `aiSafetyConfig.js`, practice eval misconduct rubric; Test Runner `safety_*` scenarios.
 - **Handbuch:** User Guide **§2.4** (Grenzen/Intimität), Connector Übungskatalog + Eigene Situation, Practice-Grenzen; Disclaimer cross-ref.
 - **Commits:** `cd3285ba` (safety) · `624335d5` (handbook) · `25f469cd` (build 24 sync).
-- **Xcode:** Local `npm run build` + `npx cap sync ios` done — `CURRENT_PROJECT_VERSION` **24**, `MARKETING_VERSION` **2.6.0**; archive in Xcode (scheme **App**).
-- **Next:** Optional LLM regression on staging safety scenarios; production promote when ready.
 
 ## Session handoff (2026-09-16) — Production v2.6.0 Build 19
 
