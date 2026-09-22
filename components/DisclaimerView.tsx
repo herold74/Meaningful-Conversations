@@ -15,6 +15,9 @@ Sie interagieren in dieser Anwendung **ausschließlich mit KI-Systemen** — nic
 - **Menschliche Aufsicht:** Fehlerhafte Antworten können Sie im Chat melden (Flaggen-Symbol) und nach der Sitzung bewerten; bei Fragen wenden Sie sich an support@manualmode.at.
 - **Datenverarbeitung:** Gesprächsinhalte werden zur Antwortgenerierung an den konfigurierten KI-Dienst übermittelt — Details in der Datenschutzerklärung und im Benutzerhandbuch (Kapitel 2.3).
 
+## Respektvolle Nutzung & Grenzen
+Die KI-Coaches sind nicht für erotische Rollenspiele oder sexuelle Belästigung gedacht. Partnerschaft und Intimität können als **Ihr** Kliententhema besprochen werden — ohne Sexualtherapie und ohne explizite Inhalte. Details: Benutzerhandbuch Kapitel 2.4.
+
 ## Kein Ersatz für professionelle Beratung
 Die KI-Coaches sind keine lizenzierten medizinischen, rechtlichen, finanziellen oder therapeutischen Fachkräfte. Die erbrachte Leistung stellt somit **ausdrücklich keine medizinische, psychologische oder psychotherapeutische Diagnose, Therapie oder Heilbehandlung dar und ersetzt diese in keiner Weise**. Laufende Behandlungen in diesen Bereichen sollen aufgrund des Coachings weder unterbrochen, abgebrochen noch unterlassen werden. Die Gespräche, die Sie führen, sind kein Ersatz für die Beratung durch einen qualifizierten Fachmann. 
 
@@ -44,6 +47,9 @@ In this application, you interact **exclusively with AI systems** — not with h
 - **No automated decisions with legal effect:** No decisions about you are made that produce legal or similarly significant consequences.
 - **Human oversight:** You can report problematic responses in chat (flag icon) and rate sessions afterward; questions: support@manualmode.at.
 - **Data processing:** Conversation content is sent to the configured AI service to generate responses — details in the Privacy Policy and User Guide (Chapter 2.3).
+
+## Respectful use & boundaries
+AI coaches are not intended for erotic roleplay or sexual harassment. Partnership and intimacy may be discussed as **your** client topic — without sex therapy or explicit content. Details: User Guide Chapter 2.4.
 
 ## No Substitute for Professional Advice
 The AI coaches are not licensed medical, legal, financial, or therapeutic professionals. The services provided therefore **expressly do not constitute and do not replace medical, psychological, or psychotherapeutic diagnosis, therapy, or healing treatment in any way**. Ongoing treatments in these areas should not be interrupted, discontinued, or refrained from as a result of the coaching. The conversations you have are not a substitute for advice from a qualified professional.

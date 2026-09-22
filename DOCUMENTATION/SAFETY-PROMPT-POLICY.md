@@ -49,3 +49,8 @@ Planned dedicated coach (differentiation / desire in partnership, **one partner 
 ## Mistral
 
 Prompt rules apply on EU (Mistral) path; Gemini safety settings apply only on Google path.
+
+## User-facing documentation
+
+- In-app **User Guide** Chapter 2.4 (DE/EN): boundaries, intimacy as client topic, Connector & Practice notes.
+- **Disclaimer** (DE/EN): short cross-reference to User Guide 2.4.

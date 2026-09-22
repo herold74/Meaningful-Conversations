@@ -263,6 +263,16 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>KI-Transparenz:</strong> Alle „
 <li><strong>Datenverarbeitung:</strong> Gesprächsinhalte werden zur Antwortgenerierung an den konfigurierten KI-Dienst übermittelt — Details in der Datenschutzerklärung.</li>
 </ul>`)}
 
+### 2.4 Grenzen, Sicherheit & sensibles Thema Intimität
+
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Respektvolle Nutzung:</strong> Die Coaches sind KI-Systeme für Reflexion und Coaching — keine Partner:innen für erotische Rollenspiele oder explizite Inhalte. Sexuelle Ansprache <em>an den Bot</em> wird abgelehnt; die Sitzung kann beendet werden.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Prompt-Manipulation:</strong> Aufforderungen, Systemanweisungen zu ignorieren, den Prompt offenzulegen oder die Rolle zu „hacken“, werden nicht befolgt.</li>
+<li><strong>Partnerschaft & Intimität als Kliententhema:</strong> Wenn <em>Sie</em> Nähe, Distanz oder Gespräche mit Partner:innen als Lebensanliegen ansprechen, können Coaches professionell darauf eingehen — ohne grafische Sexualbeschreibungen und ohne Sexualtherapie. Bei klinischen oder traumatischen Themen: Verweis auf qualifizierte menschliche Hilfe.</li>
+<li><strong>The Connector:</strong> Personas sind fiktive Gesprächspartner — keine romantischen oder erotischen Gegenüber. Belästigung führt zu Grenzsetzung oder Gesprächsende.</li>
+<li><strong>Coach Practice:</strong> Sexuelle Grenzverletzungen durch Übende (z. B. explizite „Übungen“) sind unprofessionell; der simulierte Klient reagiert mit Abgrenzung, die Auswertung bestraft solches Verhalten.</li>
+</ul>`)}
+
 </div>
 </details>
 
@@ -843,6 +853,12 @@ Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector**
 
 **Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — **Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität** — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist **mehr Fähigkeit als Talent**: Das Profil zeigt, worauf Sie aufbauen können. Wer tiefer einsteigen möchte, findet in **Coach Practice** (siehe 5.3) den passenden Übungsraum.
 
+**Übungskatalog (Premium):** Nach einem abgeschlossenen Hauptlauf können Sie **einzelne kuratierte Szenarien** erneut üben — mit Auswertung für diese Einheit (ohne Ihre gespeicherte Signatur zu überschreiben).
+
+**Eigene Situation (Premium):** Beschreiben Sie Beziehung und Kontext mit **fiktiven Namen** — die KI erstellt ein Übungsgespräch. Sie erhalten **qualitatives Feedback** (kürzer als beim Hauptlauf). Diese Ergebnisse fließen **nicht** in Ihre Verbindungs-Signatur ein.
+
+**In der Chat-Ansicht:** In der Kopfzeile sehen Sie die Beziehung bzw. eine Kurzbeschreibung; das vollständige Szenario öffnen Sie über **Tipp auf den Avatar**.
+
 **Datenschutz:** Die Gespräche werden nur für die Auswertung verwendet und **nicht als Chat-Verlauf gespeichert**. Ihr Ergebnis können Sie optional **Ende-zu-Ende-verschlüsselt** in Ihrem Persönlichkeitsprofil sichern — unter **„Wie du interagierst“** (Verbindungs-Signatur) und im **PDF-Export**. Optional können Sie in der Signatur per **„Signatur mit Fremdsicht anreichern“** einen kurzen 360°-Brückentext ergänzen (Vorschau vor dem Speichern).
 
 ${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächspartner sind KI-Personas, die Auswertung erstellt eine KI. Das Ergebnis ist ein Impuls zur Selbstreflexion — kein psychologisches Gutachten und kein Coaching-Zertifikat.</p>')}
@@ -1276,6 +1292,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Methodenbezeichnungen:</strong> D
 <li><strong>Keine Therapie / keine klinische Anwendung:</strong> Coach-Übung dient der Reflexion und Skills-Übung — nicht der Behandlung psychischer Erkrankungen oder Krisenintervention.</li>
 <li><strong>Keine Supervision:</strong> Die App ersetzt keine professionelle Supervision oder Peer-Review durch qualifizierte Kolleg:innen.</li>
 <li><strong>Simulierter Klient:</strong> Allgemeine KI-Hinweise siehe ${deChapterLabel(2)}, Abschnitt 2.3. Der Übungs-Klient kann fehlerhaft antworten — nutzen Sie kritische Reflexion und menschliche Aufsicht in Ihrer Ausbildung.</li>
+<li><strong>Professionelle Grenzen:</strong> Sexuelle oder explizite Inhalte gegenüber dem Übungs-Klienten sind unzulässig; die Auswertung wertet Verstöße ab. Siehe auch ${deChapterLabel(2)}, Abschnitt 2.4.</li>
 <li><strong>Haftung:</strong> Sie tragen die Verantwortung dafür, wie Sie Erkenntnisse aus der Übung in echter Klientenarbeit anwenden (siehe auch Haftungsausschluss der App).</li>
 </ul>`)}
 
@@ -1445,6 +1462,16 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>AI transparency:</strong> All "co
 <li><strong>No automated decisions with legal effect.</strong></li>
 <li><strong>Human oversight:</strong> Report problematic responses in chat (flag icon) and rate sessions afterward; questions: support@manualmode.at.</li>
 <li><strong>Data processing:</strong> Conversation content is sent to the configured AI service — details in the Privacy Policy.</li>
+</ul>`)}
+
+### 2.4 Boundaries, safety & intimacy topics
+
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Respectful use:</strong> Coaches are AI systems for reflection and coaching — not partners for erotic roleplay or explicit content. Sexual approaches <em>to the bot</em> are refused; the session may end.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Prompt manipulation:</strong> Requests to ignore instructions, reveal the system prompt, or “jailbreak” the role are not followed.</li>
+<li><strong>Partnership & intimacy as a client topic:</strong> When <em>you</em> raise closeness, distance, or talking with a partner as a life concern, coaches may respond professionally — without graphic sexual content or sex therapy. Clinical or trauma-related issues: referral to qualified human support.</li>
+<li><strong>The Connector:</strong> Personas are fictional conversation partners — not romantic or erotic counterparts. Harassment leads to boundaries or ending the conversation.</li>
+<li><strong>Coach Practice:</strong> Sexual boundary violations by trainees (e.g. explicit “exercises”) are unprofessional; the simulated client pushes back and evaluations penalize such behavior.</li>
 </ul>`)}
 
 </div>
@@ -2001,6 +2028,12 @@ In the **Management & Communication** section, you'll find **The Connector** car
 
 **Your result:** A **Connection Signature** with five dimensions — **empathy, presence, curiosity, non-judgment, and steadiness** — shown as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is **more skill than talent**: the profile shows what to build on. If you want to go deeper, **Coach Practice** (see 5.3) is the matching training space.
 
+**Practice catalog (Premium):** After a completed main run, you can replay **individual curated vignettes** with evaluation for that unit (without overwriting your saved signature).
+
+**Your own situation (Premium):** Describe relationship and context using **fictional names** — the AI creates a practice conversation. You receive **qualitative feedback** (shorter than the main run). These results are **not** included in your Connection Signature.
+
+**In chat:** The header shows the relationship or a short description; tap the **avatar** for the full scenario brief.
+
 **Privacy:** The conversations are only used for the evaluation and are **not stored as chat history**. You can optionally save your result **end-to-end encrypted** in your personality profile — under **“How you interact”** (Connection Signature) and in the **PDF export**. Optionally, use **“Enrich signature with external view”** to add a short 360° bridge text to your signature (preview before saving).
 
 ${guideInfoBox('<p class="m-0"><strong>AI transparency:</strong> Your conversation partners are AI personas, and the evaluation is AI-generated. The result is a prompt for self-reflection — not a psychological assessment and not a coaching certificate.</p>')}
@@ -2434,6 +2467,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Method labels:</strong> Coaching 
 <li><strong>Not therapy / not clinical use:</strong> Coach Practice supports reflection and skill practice — not treatment of mental illness or crisis intervention.</li>
 <li><strong>Not supervision:</strong> The app does not replace professional supervision or peer review by qualified colleagues.</li>
 <li><strong>Simulated client:</strong> General AI transparency: see ${enChapterLabel(2)}, section 2.3. The practice client may respond incorrectly — use critical reflection and human oversight in your training.</li>
+<li><strong>Professional boundaries:</strong> Sexual or explicit content toward the practice client is unacceptable; evaluations penalize violations. See also ${enChapterLabel(2)}, section 2.4.</li>
 <li><strong>Liability:</strong> You are responsible for how you apply insights from practice in real client work (see also the app's disclaimer).</li>
 </ul>`)}
 
