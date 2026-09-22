@@ -33,5 +33,6 @@ describe('contentSafetyPromptBlocks', () => {
   test('getChatContentSafetySurface maps Gloria to interview', () => {
     expect(getChatContentSafetySurface('gloria-interview')).toBe('interview');
     expect(getChatContentSafetySurface('sam-forward-focused')).toBe('coaching');
+    expect(getChatContentSafetySurface('victor-systemic-coaching')).toBe('coaching_intimacy');
   });
 });

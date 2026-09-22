@@ -31,9 +31,9 @@ Partnerschaft und Sexualität können gültige Coaching-Themen sein, wenn der Kl
 };
 
 const COACHING_INTIMACY_EXTRA = {
-  en: `## Intimacy-focused coaching (when this is your specialty)
+  en: `## Intimacy-focused coaching (when session focus is partnership intimacy — Victor intimacy track)
 Focus on differentiation, desire, and your client's stance in the partnership — one partner reflecting in session; do not simulate couple therapy with both partners live in chat.`,
-  de: `## Intimitäts-orientiertes Coaching (wenn dies Ihre Spezialisierung ist)
+  de: `## Intimitäts-orientiertes Coaching (wenn der Sitzungsfokus Partnerschaft/Intimität ist — Victor-Intimitäts-Modus)
 Fokus auf Differenzierung, Wunsch und die Position des Klienten in der Partnerschaft — ein Partner reflektiert in der Session; keine Paartherapie mit beiden Partnern live im Chat simulieren.`,
 };
 
@@ -110,6 +110,9 @@ function getContentSafetyBlock(surface, language = 'de') {
 function getChatContentSafetySurface(botId) {
   if (botId === 'gloria-life-context' || botId === 'gloria-interview') {
     return 'interview';
+  }
+  if (botId === 'victor-systemic-coaching') {
+    return 'coaching_intimacy';
   }
   return 'coaching';
 }

@@ -237,6 +237,10 @@ const FRAMEWORKS = [
       { en: 'Uses relationship/system lens; neutral, non-blaming observation', de: 'Nutzt Beziehungs-/Systemblick; neutrale, nicht beschuldigende Beobachtung' },
       { en: 'What/How/Who questions — avoid "Why" that triggers justification', de: 'Was/Wie/Wer-Fragen — „Warum" vermeiden, das Rechtfertigung auslöst' },
       { en: 'Self-position and differentiation — coach asks "your part in the dance"', de: 'Selbstposition und Differenzierung — Coach fragt „Ihr Anteil am Tanz"' },
+      {
+        en: 'When intimacy is the client topic: professional, non-graphic exploration; no sexual instructions; refer clinical/couple therapy needs to humans',
+        de: 'Wenn Intimität das Klientenanliegen ist: professionell, nicht-graphisch erkunden; keine sexuellen Anleitungen; klinische/Paartherapie-Bedürfnisse an Menschen verweisen',
+      },
     ],
     // sessionFlow aligned with victor-systemic-coaching
     sessionFlowRubric: {
@@ -249,8 +253,8 @@ const FRAMEWORKS = [
       goodCompliance: { en: 'You ask about roles and patterns across the system — neutrally, without blame.', de: 'Du fragst nach Rollen und Mustern im gesamten System — neutral, ohne zu beschuldigen.' },
     },
     evaluatorRubric: {
-      en: 'Score systemic mapping before intervention, pattern recognition, neutral observation, self-position questions, and small systemic experiments. Penalize villain-blaming, advice ("you should leave"), or skipping map phase.',
-      de: 'Bewerte Systemkartierung vor Intervention, Mustererkennung, neutrale Beobachtung, Selbstpositions-Fragen und kleine systemische Experimente. Abzug für Bösewicht-Schuldzuweisung, Ratschläge („Sie sollten gehen") oder übersprungene Kartierungs-Phase.',
+      en: 'Score systemic mapping before intervention, pattern recognition, neutral observation, self-position questions, and small systemic experiments. For intimacy topics: penalize explicit sexual content, sexual "homework," or couple-therapy simulation; reward values, communication prep, and owned next steps. Penalize villain-blaming, advice ("you should leave"), or skipping map phase.',
+      de: 'Bewerte Systemkartierung vor Intervention, Mustererkennung, neutrale Beobachtung, Selbstpositions-Fragen und kleine systemische Experimente. Bei Intimitätsthemen: Abzug für explizite Inhalte, sexuelle „Übungen" oder Paartherapie-Simulation; Plus für Werte, Gesprächsvorbereitung und getragene Schritte. Abzug für Bösewicht-Schuldzuweisung, Ratschläge („Sie sollten gehen") oder übersprungene Kartierungs-Phase.',
     },
   },
   {
