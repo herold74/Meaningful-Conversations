@@ -4,20 +4,24 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
-import { brand } from '../config/brand';
+import { brand, brandProviderMailtoMarkdown } from '../config/brand';
 import { isNativeApp } from '../utils/platformDetection';
 import { User } from '../types';
 import { resolvePracticeAccess } from '../utils/practiceAccess';
+import { USER_GUIDE_ANCHORS, scrollUserGuideToAnchorWhenReady, takePendingUserGuideAnchor } from '../utils/userGuideAnchors';
+import {
+  coachingChapterNum,
+  computeCoachingSessionSubsections,
+  profileChapterNum,
+} from '../utils/userGuideStructure';
 
 interface InfoViewProps {
     currentUser?: User | null;
+    focusAnchor?: string | null;
+    onFocusAnchorHandled?: () => void;
 }
 
-/** Coaching chapter index — shifts when install (web) and/or profile (registered) chapters are present. */
-const coachingChapterNum = (isNative: boolean, isRegistered: boolean): number =>
-    (isNative ? 3 : 4) + (isRegistered ? 1 : 0);
-
-const profileChapterNum = (isNative: boolean): number => (isNative ? 3 : 4);
+const providerContact = brandProviderMailtoMarkdown();
 
 const deChapterLabel = (num: number) => `Kapitel ${num}`;
 const enChapterLabel = (num: number) => `Chapter ${num}`;
@@ -41,12 +45,11 @@ const guideInfoBox = (body: string) => `
 
 const deTranscriptToolsSection = (
     isNative: boolean,
-    isRegistered: boolean,
-    showChapter8: boolean,
+    sectionNum: string | null,
 ): string => {
-    if (!showChapter8) return '';
-    const base = coachingChapterNum(isNative, isRegistered);
-    return `### 5.2 Transkript-Tools (Premium)
+    if (!sectionNum) return '';
+    const base = coachingChapterNum(isNative, true);
+    return `<h3 id="${USER_GUIDE_ANCHORS.transcriptTools}">${sectionNum} Transkript-Tools (Premium)</h3>
 
 Im Bereich **Management & Kommunikation** (Nobody, Sam, Gloria) finden Sie die Karte **Transkript-Tools** — ab **Premium** (nach Anmeldung):
 - **Transkript-Auswertung** — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(base + 3)}.
@@ -56,12 +59,11 @@ Im Bereich **Management & Kommunikation** (Nobody, Sam, Gloria) finden Sie die K
 
 const dePracticeTabSection = (
     isNative: boolean,
-    isRegistered: boolean,
-    showChapter10: boolean,
+    sectionNum: string | null,
 ): string => {
-    if (!showChapter10) return '';
-    const base = coachingChapterNum(isNative, isRegistered);
-    return `### 5.3 Coaching üben (Premium+, Trial oder Klient)
+    if (!sectionNum) return '';
+    const base = coachingChapterNum(isNative, true);
+    return `### ${sectionNum} Coaching üben (Premium+, Trial oder Klient)
 
 Im **Coaching-Bereich** wechseln Sie über den Tab **Coaching üben** (neben „Coaching“) in den Übungsmodus. Dort starten Sie eine Session als Coach — die KI spielt Ihren Klienten. Ausführliche Anleitung: ${deChapterLabel(base + 5)}.
 
@@ -71,12 +73,11 @@ Im **Coaching-Bereich** wechseln Sie über den Tab **Coaching üben** (neben „
 
 const enTranscriptToolsSection = (
     isNative: boolean,
-    isRegistered: boolean,
-    showChapter8: boolean,
+    sectionNum: string | null,
 ): string => {
-    if (!showChapter8) return '';
-    const base = coachingChapterNum(isNative, isRegistered);
-    return `### 5.2 Transcript Tools (Premium)
+    if (!sectionNum) return '';
+    const base = coachingChapterNum(isNative, true);
+    return `<h3 id="${USER_GUIDE_ANCHORS.transcriptTools}">${sectionNum} Transcript Tools (Premium)</h3>
 
 In the **Management & Communication** section (Nobody, Sam, Gloria), you'll find the **Transcript Tools** card — from **Premium** onward (after sign-in):
 - **Transcript Evaluation** — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(base + 3)}.
@@ -86,12 +87,11 @@ In the **Management & Communication** section (Nobody, Sam, Gloria), you'll find
 
 const enPracticeTabSection = (
     isNative: boolean,
-    isRegistered: boolean,
-    showChapter10: boolean,
+    sectionNum: string | null,
 ): string => {
-    if (!showChapter10) return '';
-    const base = coachingChapterNum(isNative, isRegistered);
-    return `### 5.3 Coach Practice (Premium+, trial, or Client)
+    if (!sectionNum) return '';
+    const base = coachingChapterNum(isNative, true);
+    return `### ${sectionNum} Coach Practice (Premium+, trial, or Client)
 
 In the **Coaching** section, switch to the **Coach Practice** tab (next to "Coaching") to enter training mode. You play the coach and the AI plays your client. Full instructions: ${enChapterLabel(base + 5)}.
 
@@ -106,7 +106,14 @@ const de_markdown = (
     showChapter8: boolean,
     showChapter9: boolean,
     showChapter10: boolean,
-) => `<details>
+) => {
+    const coachingSub = computeCoachingSessionSubsections({
+        isNative,
+        isRegistered,
+        showTranscriptTools: showChapter8,
+        showPracticeTab: showChapter10,
+    });
+    return `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
@@ -119,7 +126,7 @@ ${guideInfoBox('<p class="m-0"><strong>Kein Gesprächstagebuch nötig:</strong> 
 
 ---
 
-<details open>
+<details id="${USER_GUIDE_ANCHORS.ch1}" open>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
 <div style="padding: 16px;">
 
@@ -213,7 +220,7 @@ Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehre
 
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.ch2}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Kapitel 2: Datenschutz & Sicherheit</summary>
 <div style="padding: 16px;">
 
@@ -245,7 +252,7 @@ Die App bietet mehrere Zugangsstufen mit steigendem Funktionsumfang:
 | **Registriert** | **9-Tage-Premium-Test** nach Registrierung; danach Registered-Abo (z. B. €3,90/Monat) | + Gloria (Interview), Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, Narrative Signatur, Server-TTS (Web), DPC-Modus, Profil-PDF, Gamification; im Test auch Premium-Features und Coach Practice (8 Methoden) |
 | **Premium** | Kostenpflichtiges Upgrade (z. B. €9,90/Monat) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung inkl. PDF |
 | **Premium+** | Premium inkl. Coach Practice (z. B. €14,90/Monat) | wie Premium | + **Coach Practice** (8 Übungsmethoden) |
-| **Klient** | ${isNative ? `Zugang über ${brand.providerName} (Web/Code — **nicht** in der iOS-App einlösbar)` : `Zugangscode von ${brand.providerName}`} | + Rob, Victor, Bekky, Dan | Audio-Transkription, **PEP Lösungsblockaden**, **Coach Practice (12 Methoden)**, alle Features |
+| **Klient** | ${isNative ? `Zugang über ${providerContact} (Web/Code — **nicht** in der iOS-App einlösbar)` : `Zugangscode von ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio-Transkription, **PEP Lösungsblockaden**, **Coach Practice (12 Methoden)**, alle Features |
 
 **So upgraden Sie:**
 ${isNative ? `- Direkt in der App über **Apple In-App Purchase** (Menü → **Upgrade**): Registered Monats-/Jahresabo, Premium Monats-/Jahresabo, Premium+ Monat, Coach-Freischaltungen (Kenji, Chloe). Am Ende des Bildschirms: **Käufe wiederherstellen**. Abonnements werden über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
@@ -552,11 +559,11 @@ ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines n
 
 ---
 
-` : ''}<details>
+` : ''}<details id="${USER_GUIDE_ANCHORS.coachingSession}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${deChapterLabel(coachingChapterNum(isNative, isRegistered))}: Die Coaching-Sitzung</summary>
 <div style="padding: 16px;">
 
-### 5.1 Einen Coach auswählen
+### ${coachingSub.coachSelect} Einen Coach auswählen
 Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
 
 Der gewählte **Intent** klappt den passenden Bereich auf (Management & Kommunikation, Coaching oder Coach Practice). **Gäste** sehen die **Anliegen-Suche** nicht — bei Intent „Coaching zu meinem Anliegen" wird stattdessen der **Coaching-Bereich** hervorgehoben.
@@ -576,7 +583,7 @@ Der gewählte **Intent** klappt den passenden Bereich auf (Management & Kommunik
 - **Chloe** -- Strukturierte Reflexion zum Erkennen von Denkmustern (Premium)
 - **Mike** -- Ambivalenz-Coaching bei gemischten Gefühlen gegenüber Veränderung (Premium)
 
-**Exklusiv für Klienten** (${brand.providerName}):
+**Exklusiv für Klienten** (${providerContact}):
 - **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Klienten) 🔔
 - **Victor** -- Systemischer Coach für Beziehungsmuster und Reaktionsdifferenzierung (Klienten)
 - **Bekky** -- Gedanken-Audit: belastende Überzeugungen strukturiert prüfen und Perspektiven wechseln (Klienten)
@@ -839,9 +846,9 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 </div>
 </details>
 
-${deTranscriptToolsSection(isNative, isRegistered, showChapter8)}
-${dePracticeTabSection(isNative, isRegistered, showChapter10)}
-### 5.4 The Connector — Verbindung herstellen, anstatt nur zu kommunizieren (Registriert)
+${deTranscriptToolsSection(isNative, coachingSub.transcriptTools)}
+${dePracticeTabSection(isNative, coachingSub.practiceTab)}
+<h3 id="${USER_GUIDE_ANCHORS.connector}">${coachingSub.connector} The Connector — Verbindung herstellen, anstatt nur zu kommunizieren (Registriert)</h3>
 
 Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector** — verfügbar für registrierte Benutzer.
 
@@ -866,7 +873,7 @@ ${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächsp
 
 **Gäste:** Die Karte ist sichtbar, aber gesperrt — ein Klick führt zur **Registrierung**.
 
-### 5.5 Coach-Empfehlung (KI-gestützte Suche)
+### ${coachingSub.coachRecommendation} Coach-Empfehlung (KI-gestützte Suche)
 
 Über der Coach-Liste befindet sich ein Suchfeld, mit dem Sie sich einen passenden Coach empfehlen lassen können.
 
@@ -879,7 +886,7 @@ ${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächsp
 
 **Hinweis:** Diese Funktion steht nur registrierten Benutzern zur Verfügung. Die Empfehlungen basieren ausschließlich auf Ihrer Beschreibung und den verfügbaren Coach-Profilen.
 
-### 5.6 Die Chat-Oberfläche
+<h3 id="${USER_GUIDE_ANCHORS.chatInterface}">${coachingSub.chatInterface} Die Chat-Oberfläche</h3>
 - **Kopfzeile:** Name und Avatar des Coaches. **Tippen Sie auf die Kopfzeile** — ein Modal zeigt Stil und Methodik. Aktiver Coaching-Modus (DPC/DPFL) erscheint hier ebenfalls. Rechts: **Sitzung beenden**.
 - **Textmodus (Standard):**
   - Nachricht unten eingeben.
@@ -904,7 +911,7 @@ ${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Ger
 
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.sessionReview}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${deChapterLabel(coachingChapterNum(isNative, isRegistered) + 1)}: Nach der Sitzung - Der Analyseprozess</summary>
 <div style="padding: 16px;">
 
@@ -994,11 +1001,12 @@ In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung
 </div>
 </details>
 `;
+};
 
 const de_chapter8 = (isNative: boolean) => `
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.transcriptEval}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${deChapterLabel(coachingChapterNum(isNative, true) + 3)}: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
 
@@ -1160,7 +1168,7 @@ Nach der Transkription haben Sie folgende Möglichkeiten:
 const de_chapter9_pep = (isNative: boolean) => `
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.pep}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧩 PEP — Lösungsblockaden (Klienten-Feature)</summary>
 <div style="padding: 16px;">
 
@@ -1174,11 +1182,11 @@ Die fünf Muster sind: **Selbstvorwurf**, **Fremdbeschuldigung**, **Erwartungsha
 
 ### Was macht die App?
 
-In **Meaningful Conversations** ersetzt die App **keine** vollständige PEP-Sitzung (kein Klopfen, keine KKT-Prozesse). Am **Sitzungs-Review** analysiert die KI Ihr **Gesprächstranskript** und markiert **mögliche** Big-Five-Muster mit kurzer Erklärung und Zitat — als **Reflexionshilfe** für Klient:innen im Rahmen des Coachings bei ${brand.providerName}.
+In **Meaningful Conversations** ersetzt die App **keine** vollständige PEP-Sitzung (kein Klopfen, keine KKT-Prozesse). Am **Sitzungs-Review** analysiert die KI Ihr **Gesprächstranskript** und markiert **mögliche** Big-Five-Muster mit kurzer Erklärung und Zitat — als **Reflexionshilfe** für Klient:innen im Rahmen des Coachings bei ${providerContact}.
 
 ### Wer kann es nutzen?
 
-Nur **Klienten**-Nutzer (Zugang über ${brand.providerName}) sowie Admin/Developer-Testkonten. Premium, Premium+ und registrierte Standardnutzer sehen diesen Abschnitt **nicht**.
+Nur **Klienten**-Nutzer (Zugang über ${providerContact}) sowie Admin/Developer-Testkonten. Premium, Premium+ und registrierte Standardnutzer sehen diesen Abschnitt **nicht**.
 
 ${isNative ? `**Hinweis iOS:** Klienten-Zugang wird außerhalb der App vergeben — Code-Einlösung ist in der iOS-App nicht verfügbar.` : ''}
 
@@ -1189,7 +1197,7 @@ Am Ende einer Coaching-Sitzung im **Sitzungs-Review**, Abschnitt **„Mögliche 
 ### Wie nutzen Sie es?
 
 - Lesen Sie die Vorschläge als **Reflexionsimpuls**, nicht als Diagnose.
-- Besprechen Sie auffällige Blockaden mit Ihrem Coach bei ${brand.providerName}.
+- Besprechen Sie auffällige Blockaden mit Ihrem Coach bei ${providerContact}.
 - Der Abschnitt erscheint nur, wenn die Analyse Muster erkennt — sonst „Keine erkannt“.
 
 </div>
@@ -1199,7 +1207,7 @@ Am Ende einer Coaching-Sitzung im **Sitzungs-Review**, Abschnitt **„Mögliche 
 const de_chapter10 = (isNative: boolean) => `
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.coachPractice}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${deChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach-Übung (Premium+, Trial & Klienten)</summary>
 <div style="padding: 16px;">
 
@@ -1314,7 +1322,14 @@ const en_markdown = (
     showChapter8: boolean,
     showChapter9: boolean,
     showChapter10: boolean,
-) => `<details>
+) => {
+    const coachingSub = computeCoachingSessionSubsections({
+        isNative,
+        isRegistered,
+        showTranscriptTools: showChapter8,
+        showPracticeTab: showChapter10,
+    });
+    return `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
@@ -1327,7 +1342,7 @@ ${guideInfoBox('<p class="m-0"><strong>No conversation journal needed:</strong> 
 
 ---
 
-<details open>
+<details id="${USER_GUIDE_ANCHORS.ch1}" open>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
 <div style="padding: 16px;">
 
@@ -1421,7 +1436,7 @@ If you are a registered user returning with a saved context, you will see the **
 
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.ch2}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Chapter 2: Privacy & Security</summary>
 <div style="padding: 16px;">
 
@@ -1453,7 +1468,7 @@ The app offers several access tiers with increasing functionality:
 | **Registered** | **9-day Premium trial** after signup; then Registered subscription (e.g. €3.90/month) | + Gloria (interview), Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, narrative signature, server TTS (web), DPC mode, profile PDF, Gamification; during trial also Premium features and Coach Practice (8 methods) |
 | **Premium** | Paid upgrade (e.g. €9.90/month) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation incl. PDF |
 | **Premium+** | Premium incl. Coach Practice (e.g. €14.90/month) | same as Premium | + **Coach Practice** (8 practice methods) |
-| **Client** | ${isNative ? `Access via ${brand.providerName} (web/code — **not** redeemable in the iOS app)` : `Access code from ${brand.providerName}`} | + Rob, Victor, Bekky, Dan | Audio transcription, **PEP solution blockages**, **Coach Practice (12 methods)**, all features |
+| **Client** | ${isNative ? `Access via ${providerContact} (web/code — **not** redeemable in the iOS app)` : `Access code from ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio transcription, **PEP solution blockages**, **Coach Practice (12 methods)**, all features |
 
 **How to upgrade:**
 ${isNative ? `- Directly in the app via **Apple In-App Purchase** (Menu → **Upgrade**): Registered monthly/annual, Premium monthly/annual, Premium+ monthly, coach unlocks (Kenji, Chloe). At the bottom of the screen: **Restore Purchases**. Subscriptions are managed through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.
@@ -1734,11 +1749,11 @@ ${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personal
 
 ---
 
-` : ''}<details>
+` : ''}<details id="${USER_GUIDE_ANCHORS.coachingSession}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${enChapterLabel(coachingChapterNum(isNative, isRegistered))}: The Coaching Session</summary>
 <div style="padding: 16px;">
 
-### 5.1 Choosing Your Coach
+### ${coachingSub.coachSelect} Choosing Your Coach
 On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
 
 Your chosen **intent** expands the matching section (Management & Communication, Coaching, or Coach Practice). **Guests** do not see **topic search** — with intent “Coaching for my concern”, the **Coaching section** is highlighted instead.
@@ -1758,7 +1773,7 @@ Your chosen **intent** expands the matching section (Management & Communication,
 - **Chloe** -- Structured reflection for recognizing thought patterns (Premium)
 - **Mike** -- Ambivalence coaching for mixed feelings about change (Premium)
 
-**Exclusive for clients** (${brand.providerName}):
+**Exclusive for clients** (${providerContact}):
 - **Rob** -- Mental fitness and mindfulness against self-sabotage (Client) 🔔
 - **Victor** -- Systemic coach for relationship patterns and response differentiation (Client)
 - **Bekky** -- Thought audit: structured review of stressful beliefs and perspective shifts (Client)
@@ -2021,9 +2036,9 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 </div>
 </details>
 
-${enTranscriptToolsSection(isNative, isRegistered, showChapter8)}
-${enPracticeTabSection(isNative, isRegistered, showChapter10)}
-### 5.4 The Connector — Connecting, not just communicating (Registered)
+${enTranscriptToolsSection(isNative, coachingSub.transcriptTools)}
+${enPracticeTabSection(isNative, coachingSub.practiceTab)}
+<h3 id="${USER_GUIDE_ANCHORS.connector}">${coachingSub.connector} The Connector — Connecting, not just communicating (Registered)</h3>
 
 In the **Management & Communication** section, you'll find **The Connector** card — available for registered users.
 
@@ -2048,7 +2063,7 @@ ${guideInfoBox('<p class="m-0"><strong>AI transparency:</strong> Your conversati
 
 **Guests:** The card is visible but locked — tapping it leads to **registration**.
 
-### 5.5 Coach Recommendation (AI-Powered Search)
+### ${coachingSub.coachRecommendation} Coach Recommendation (AI-Powered Search)
 
 Above the coach list, you'll find a search field that lets the AI recommend a suitable coach for you.
 
@@ -2061,7 +2076,7 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 
 **Note:** This feature is only available to registered users. Recommendations are based solely on your description and the available coach profiles.
 
-### 5.6 The Chat Interface
+<h3 id="${USER_GUIDE_ANCHORS.chatInterface}">${coachingSub.chatInterface} The Chat Interface</h3>
 - **Header:** Coach name and avatar. **Tap the header** to open a modal with style and methodology. Active coaching mode (DPC/DPFL) appears here too. On the right: **End Session**.
 - **Text Mode (Default):**
   - Type your message at the bottom.
@@ -2086,7 +2101,7 @@ ${isNative ? `  - **Note:** The iOS app uses high-quality Apple device voices on
 
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.sessionReview}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${enChapterLabel(coachingChapterNum(isNative, isRegistered) + 1)}: After the Session - The Review Process</summary>
 <div style="padding: 16px;">
 
@@ -2176,11 +2191,12 @@ In the Gamification Bar, you'll find two icons to customize the appearance:
 </div>
 </details>
 `;
+};
 
 const en_chapter8 = (isNative: boolean) => `
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.transcriptEval}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${enChapterLabel(coachingChapterNum(isNative, true) + 3)}: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
 
@@ -2342,7 +2358,7 @@ After transcription, you have the following options:
 const en_chapter9_pep = (isNative: boolean) => `
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.pep}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧩 PEP — Solution Blockages (Client Feature)</summary>
 <div style="padding: 16px;">
 
@@ -2356,11 +2372,11 @@ The five patterns are: **self-reproach**, **blaming others**, **expectational at
 
 ### What does the app do?
 
-**Meaningful Conversations** does **not** replace a full PEP session (no tapping sequences, no KKT process). In **Session Review**, the AI analyzes your **conversation transcript** and flags **possible** Big Five patterns with a short explanation and quote — as a **reflection aid** for clients working with a coach at ${brand.providerName}.
+**Meaningful Conversations** does **not** replace a full PEP session (no tapping sequences, no KKT process). In **Session Review**, the AI analyzes your **conversation transcript** and flags **possible** Big Five patterns with a short explanation and quote — as a **reflection aid** for clients working with a coach at ${providerContact}.
 
 ### Who can use it?
 
-**Client** users only (access via ${brand.providerName}), plus admin/developer test accounts. Premium, Premium+, and standard registered users do **not** see this section.
+**Client** users only (access via ${providerContact}), plus admin/developer test accounts. Premium, Premium+, and standard registered users do **not** see this section.
 
 ${isNative ? `**iOS note:** Client access is granted outside the app — code redemption is not available in the iOS app.` : ''}
 
@@ -2371,7 +2387,7 @@ At the end of a coaching session in **Session Review**, section **"Potential Sol
 ### How to use it
 
 - Treat suggestions as **reflection prompts**, not a diagnosis.
-- Discuss notable blockages with your coach at ${brand.providerName}.
+- Discuss notable blockages with your coach at ${providerContact}.
 - The section only highlights patterns when the analysis finds them — otherwise "None identified".
 
 </div>
@@ -2381,7 +2397,7 @@ At the end of a coaching session in **Session Review**, section **"Potential Sol
 const en_chapter10 = (isNative: boolean) => `
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.coachPractice}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${enChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach Practice (Premium+, Trial & Client)</summary>
 <div style="padding: 16px;">
 
@@ -2489,7 +2505,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Method labels:</strong> Coaching 
 </details>
 `;
 
-const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
+const UserGuideView: React.FC<InfoViewProps> = ({ currentUser, focusAnchor, onFocusAnchorHandled }) => {
     const { t, language } = useLocalization();
 
     const practiceAccess = useMemo(() => resolvePracticeAccess(currentUser ?? null), [currentUser]);
@@ -2511,6 +2527,18 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
         const ch10 = language === 'de' ? de_chapter10(native) : en_chapter10(native);
         return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 + ch9pep : '') + (showChapter10 ? ch10 : '');
     }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9, showChapter10]);
+
+    React.useLayoutEffect(() => {
+        const anchor = focusAnchor ?? takePendingUserGuideAnchor();
+        if (!anchor) return;
+
+        const cancel = scrollUserGuideToAnchorWhenReady(anchor, {
+            onDone: (success) => {
+                if (success) onFocusAnchorHandled?.();
+            },
+        });
+        return cancel;
+    }, [focusAnchor, markdownContent, onFocusAnchorHandled]);
     
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
@@ -2523,7 +2551,7 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
                     rehypePlugins={[rehypeRaw]}
                     components={{
                         h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2 not-prose" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2 not-prose scroll-mt-24" {...props} />,
                         table: ({node, ...props}) => <table className="w-full my-4 text-sm" {...props} />,
                         th: ({node, ...props}) => <th className="border border-border-secondary p-2 bg-background-tertiary" {...props} />,
                         td: ({node, ...props}) => <td className="border border-border-secondary p-2" {...props} />,
@@ -2537,7 +2565,7 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
                             }
                             return <div style={style} {...props} />;
                         },
-                        details: ({node, ...props}) => <details className="my-3 border border-border-secondary rounded-lg overflow-hidden" {...props} />,
+                        details: ({node, ...props}) => <details className="my-3 border border-border-secondary rounded-lg overflow-hidden scroll-mt-24" {...props} />,
                         summary: ({node, ...props}) => <summary className="cursor-pointer px-4 py-3 bg-background-tertiary hover:bg-background-tertiary/80 font-medium text-content-primary select-none !my-0" {...props} />,
                     }}
                 >
