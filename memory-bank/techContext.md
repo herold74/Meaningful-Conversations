@@ -143,6 +143,7 @@
 - **Anzeige:** `Version 2.0.1 (Build 35)` im Burger-Menü via `VITE_BUILD_NUMBER`
 - **Service Worker:** Cache-Name enthält Version + Build (`meaningful-conversations-cache-v2.0.1-b35`)
 - **iOS:** `ios/App/CapApp-SPM/Package.swift` — Capacitor Swift PM **8.4.2** (synced 2026-07-24)
+- **iOS plugin Swift warnings:** Vendor fixes in `patches/` via **`patch-package`** (`postinstall`). Patches: `@capacitor/filesystem` (unused `responseType`), `@revenuecat/purchases-capacitor` (optional→`Any`). Re-apply after `npm ci`; re-create patch if package version bumps.
 
 **⚠️ KRITISCH: BUILD_NUMBER bei Versionswechsel zurücksetzen!**
 ```
