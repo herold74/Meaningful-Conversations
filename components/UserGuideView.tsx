@@ -270,7 +270,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Respektvolle Nutzung:</strong> Di
 <li><strong>Prompt-Manipulation:</strong> Aufforderungen, Systemanweisungen zu ignorieren, den Prompt offenzulegen oder die Rolle zu „hacken“, werden nicht befolgt.</li>
 <li><strong>Partnerschaft & Intimität als Kliententhema:</strong> Wenn <em>Sie</em> Nähe, Distanz oder Gespräche mit Partner:innen als Lebensanliegen ansprechen, können Coaches professionell darauf eingehen — ohne grafische Sexualbeschreibungen und ohne Sexualtherapie. Bei klinischen oder traumatischen Themen: Verweis auf qualifizierte menschliche Hilfe.</li>
 <li><strong>The Connector:</strong> Personas sind fiktive Gesprächspartner — keine romantischen oder erotischen Gegenüber. Belästigung führt zu Grenzsetzung oder Gesprächsende.</li>
-<li><strong>Coach Practice:</strong> Sexuelle Grenzverletzungen durch Übende (z. B. explizite „Übungen“) sind unprofessionell; der simulierte Klient reagiert mit Abgrenzung, die Auswertung bestraft solches Verhalten.</li>
+<li><strong>Coach Practice:</strong> Sexuelle Grenzverletzungen durch Übende (z. B. explizite „Übungen“) sind unprofessionell; der simulierte Klient reagiert mit Abgrenzung, die Auswertung kritisiert solches Verhalten.</li>
 </ul>`)}
 
 </div>
@@ -1166,9 +1166,15 @@ const de_chapter9_pep = (isNative: boolean) => `
 
 ### Was sind PEP-Lösungsblockaden?
 
-**PEP** (Psychologisches Entwicklungsprogramm) nach **Dr. Michael Bohne** ist ein Verfahren zur Erkennung innerer **Lösungsblockaden** — unbewusster Muster, die Ihren Fortschritt behindern können, obwohl Sie sich anstrengen.
+**PEP** (**P**rozess- und **E**mbodiment fokussierte **P**sychologie) nach **Dr. Michael Bohne** ist ein therapeutisches und coachingspezifisches Verfahren, das körperbezogene (embodimentfokussierte) Interventionen mit prozessorientierter Arbeit verbindet.
 
-Nach einer Coaching-Sitzung analysiert die KI Ihr Gespräch im **Sitzungs-Review** auf typische Blockademuster (z. B. Vermeidung, Selbstsabotage, unrealistische Erwartungen).
+**Lösungsblockaden** sind in PEP keine „Ergebnisse“ eines Durchlaufs, sondern **entwicklungshemmende Beziehungsmuster** (die sogenannten **Big Five**), die Lösungs- und Veränderungsprozesse blockieren können — auch wenn Sie sich bereits anstrengen. In der klassischen PEP-Arbeit werden sie **typischerweise erst in den Blick genommen, wenn embodimentfokussierte Schritte allein nicht ausreichen**, um spürbare Entlastung oder Bewegung zu erreichen; die Blockaden stehen der wirksamen Anwendung von Veränderungsarbeit eher **im Weg** als dass sie deren Abschlussprodukt wären.
+
+Die fünf Muster sind: **Selbstvorwurf**, **Fremdbeschuldigung**, **Erwartungshaltung**, **Altersregression** und **dysfunktionale Loyalitäten**.
+
+### Was macht die App?
+
+In **Meaningful Conversations** ersetzt die App **keine** vollständige PEP-Sitzung (kein Klopfen, keine KKT-Prozesse). Am **Sitzungs-Review** analysiert die KI Ihr **Gesprächstranskript** und markiert **mögliche** Big-Five-Muster mit kurzer Erklärung und Zitat — als **Reflexionshilfe** für Klient:innen im Rahmen des Coachings bei ${brand.providerName}.
 
 ### Wer kann es nutzen?
 
@@ -1293,7 +1299,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Methodenbezeichnungen:</strong> D
 <li><strong>Keine Therapie / keine klinische Anwendung:</strong> Coach-Übung dient der Reflexion und Skills-Übung — nicht der Behandlung psychischer Erkrankungen oder Krisenintervention.</li>
 <li><strong>Keine Supervision:</strong> Die App ersetzt keine professionelle Supervision oder Peer-Review durch qualifizierte Kolleg:innen.</li>
 <li><strong>Simulierter Klient:</strong> Allgemeine KI-Hinweise siehe ${deChapterLabel(2)}, Abschnitt 2.3. Der Übungs-Klient kann fehlerhaft antworten — nutzen Sie kritische Reflexion und menschliche Aufsicht in Ihrer Ausbildung.</li>
-<li><strong>Professionelle Grenzen:</strong> Sexuelle oder explizite Inhalte gegenüber dem Übungs-Klienten sind unzulässig; die Auswertung wertet Verstöße ab. Siehe auch ${deChapterLabel(2)}, Abschnitt 2.4.</li>
+<li><strong>Professionelle Grenzen:</strong> Sexuelle oder explizite Inhalte gegenüber dem Übungs-Klienten sind unzulässig; die Auswertung kritisiert Verstöße. Siehe auch ${deChapterLabel(2)}, Abschnitt 2.4.</li>
 <li><strong>Haftung:</strong> Sie tragen die Verantwortung dafür, wie Sie Erkenntnisse aus der Übung in echter Klientenarbeit anwenden (siehe auch Haftungsausschluss der App).</li>
 </ul>`)}
 
@@ -1472,7 +1478,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Respectful use:</strong> Coaches 
 <li><strong>Prompt manipulation:</strong> Requests to ignore instructions, reveal the system prompt, or “jailbreak” the role are not followed.</li>
 <li><strong>Partnership & intimacy as a client topic:</strong> When <em>you</em> raise closeness, distance, or talking with a partner as a life concern, coaches may respond professionally — without graphic sexual content or sex therapy. Clinical or trauma-related issues: referral to qualified human support.</li>
 <li><strong>The Connector:</strong> Personas are fictional conversation partners — not romantic or erotic counterparts. Harassment leads to boundaries or ending the conversation.</li>
-<li><strong>Coach Practice:</strong> Sexual boundary violations by trainees (e.g. explicit “exercises”) are unprofessional; the simulated client pushes back and evaluations penalize such behavior.</li>
+<li><strong>Coach Practice:</strong> Sexual boundary violations by trainees (e.g. explicit “exercises”) are unprofessional; the simulated client pushes back and evaluations criticize such behavior.</li>
 </ul>`)}
 
 </div>
@@ -2342,9 +2348,15 @@ const en_chapter9_pep = (isNative: boolean) => `
 
 ### What are PEP solution blockages?
 
-**PEP** (Psychological Development Program) by **Dr. Michael Bohne** is a framework for identifying inner **solution blockages** — unconscious patterns that can hinder your progress even when you are trying hard.
+**PEP** (**P**rocess- and **E**mbodiment-**F**ocused **P**sychology) by **Dr. Michael Bohne** is a therapeutic and coaching approach that combines body-oriented (embodiment-focused) interventions with process-oriented work.
 
-After a coaching session, the AI analyzes your conversation in **Session Review** for typical blockage patterns (e.g. avoidance, self-sabotage, unrealistic expectations).
+**Solution blockages** in PEP are not the “output” of a session but **development-hindering relationship patterns** (the **Big Five**) that can block change — even when you are already trying hard. In classic PEP work they are **typically explored when embodiment-focused steps alone are not enough** to achieve noticeable relief or movement; blockages **get in the way** of effective change work rather than being its end product.
+
+The five patterns are: **self-reproach**, **blaming others**, **expectational attitudes**, **age regression**, and **dysfunctional loyalties**.
+
+### What does the app do?
+
+**Meaningful Conversations** does **not** replace a full PEP session (no tapping sequences, no KKT process). In **Session Review**, the AI analyzes your **conversation transcript** and flags **possible** Big Five patterns with a short explanation and quote — as a **reflection aid** for clients working with a coach at ${brand.providerName}.
 
 ### Who can use it?
 
@@ -2469,7 +2481,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Method labels:</strong> Coaching 
 <li><strong>Not therapy / not clinical use:</strong> Coach Practice supports reflection and skill practice — not treatment of mental illness or crisis intervention.</li>
 <li><strong>Not supervision:</strong> The app does not replace professional supervision or peer review by qualified colleagues.</li>
 <li><strong>Simulated client:</strong> General AI transparency: see ${enChapterLabel(2)}, section 2.3. The practice client may respond incorrectly — use critical reflection and human oversight in your training.</li>
-<li><strong>Professional boundaries:</strong> Sexual or explicit content toward the practice client is unacceptable; evaluations penalize violations. See also ${enChapterLabel(2)}, section 2.4.</li>
+<li><strong>Professional boundaries:</strong> Sexual or explicit content toward the practice client is unacceptable; evaluations criticize violations. See also ${enChapterLabel(2)}, section 2.4.</li>
 <li><strong>Liability:</strong> You are responsible for how you apply insights from practice in real client work (see also the app's disclaimer).</li>
 </ul>`)}
 
