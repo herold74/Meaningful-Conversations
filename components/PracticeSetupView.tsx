@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import {
   PracticeCatalog,
@@ -25,6 +25,7 @@ import {
   formatCompletionPillLabel,
 } from '../utils/practiceSetupProgress';
 import PracticeFollowUpReminderModal from './PracticeFollowUpReminderModal';
+import ModalOverlay from './shared/ModalOverlay';
 import { resolvePracticeAccess } from '../utils/practiceAccess';
 import {
   getPracticeDifficultyLabel,
@@ -86,6 +87,94 @@ const MatchBadge: React.FC<{ tier: PracticeMatchTier }> = ({ tier }) => {
   );
 };
 
+function useElementTextClamped(ref: React.RefObject<HTMLElement | null>, text: string) {
+  const [clamped, setClamped] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) {
+      setClamped(false);
+      return;
+    }
+    const measure = () => {
+      setClamped(el.scrollHeight > el.clientHeight + 1);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [text]);
+  return clamped;
+}
+
+interface PracticeScenarioSelectCardProps {
+  scenario: PracticeScenario;
+  selected: boolean;
+  onSelect: () => void;
+  onShowConcernInfo: () => void;
+  headerTrailing?: React.ReactNode;
+}
+
+const PracticeScenarioSelectCard: React.FC<PracticeScenarioSelectCardProps> = ({
+  scenario,
+  selected,
+  onSelect,
+  onShowConcernInfo,
+  headerTrailing,
+}) => {
+  const { t } = useLocalization();
+  const concernRef = useRef<HTMLParagraphElement>(null);
+  const concernClamped = useElementTextClamped(concernRef, scenario.concern);
+
+  return (
+    <div
+      className={`rounded-xl border transition-all ${
+        selected ? 'border-accent-primary bg-accent-primary/5' : 'surface-elevated hover:border-accent-primary/40'
+      }`}
+    >
+      <div className="flex gap-1 items-start p-4">
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-label={t('practice_scenario_select_label', { name: scenario.coacheeName })}
+          className="flex-1 min-w-0 text-left"
+        >
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <img
+              src={resolveAssetUrl(scenario.avatar)}
+              alt=""
+              className="w-10 h-10 rounded-full object-cover object-center shrink-0"
+              aria-hidden
+            />
+            <span className="font-semibold text-content-primary">{scenario.coacheeName}</span>
+            {headerTrailing}
+          </div>
+          <p
+            ref={concernRef}
+            className="text-sm text-content-secondary line-clamp-4 sm:line-clamp-3"
+          >
+            {scenario.concern}
+          </p>
+          <p className="text-xs text-content-secondary mt-2">{scenario.emotionalTone}</p>
+        </button>
+        {concernClamped && (
+          <button
+            type="button"
+            onClick={onShowConcernInfo}
+            aria-label={t('practice_scenario_concern_info_label', { name: scenario.coacheeName })}
+            className="shrink-0 inline-flex items-center justify-center p-2 rounded-lg text-accent-primary hover:bg-accent-primary/10 transition-colors"
+          >
+            <Info className="w-5 h-5" aria-hidden />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   currentUser,
   onStart,
@@ -110,6 +199,7 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
   const [expandedSection, setExpandedSection] = useState<PracticeEntrySection | null>(null);
   const [showDiscouragedModal, setShowDiscouragedModal] = useState(false);
   const [subtitleInfoOpen, setSubtitleInfoOpen] = useState(false);
+  const [scenarioConcernInfo, setScenarioConcernInfo] = useState<PracticeScenario | null>(null);
   const [contractingScenarioId, setContractingScenarioId] = useState('');
   const [difficultyInfoOpen, setDifficultyInfoOpen] = useState(false);
   const [followUpModal, setFollowUpModal] = useState<{
@@ -564,26 +654,19 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
               {catalog.scenarios.map((sc: PracticeScenario) => {
                 const progress = methodProgressMap.get(sc.id);
                 return (
-                <button
-                  key={sc.id}
-                  type="button"
-                  onClick={() => setScenarioId(sc.id)}
-                  className={`text-left p-4 rounded-xl border transition-all ${
-                    scenarioId === sc.id ? 'border-accent-primary bg-accent-primary/5' : 'surface-elevated hover:border-accent-primary/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full object-cover object-center shrink-0" />
-                    <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
-                    {renderCompletionPill(formatCompletionPillLabel(
+                  <PracticeScenarioSelectCard
+                    key={sc.id}
+                    scenario={sc}
+                    selected={scenarioId === sc.id}
+                    onSelect={() => setScenarioId(sc.id)}
+                    onShowConcernInfo={() => setScenarioConcernInfo(sc)}
+                    headerTrailing={renderCompletionPill(formatCompletionPillLabel(
                       progress?.highestDifficultyLabel,
                       progress?.bestScore,
                     ))}
-                  </div>
-                  <p className="text-sm text-content-secondary line-clamp-4 sm:line-clamp-3">{sc.concern}</p>
-                  <p className="text-xs text-content-secondary mt-2">{sc.emotionalTone}</p>
-                </button>
-              );})}
+                  />
+                );
+              })}
             </div>
 
             {scenarioId && (
@@ -780,26 +863,22 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
                     const tier = catalog.frameworks.find((f) => f.id === frameworkId)?.scenarioMatches?.[sc.id] ?? 'neutral';
                     const progress = methodProgressMap.get(sc.id);
                     return (
-                      <button
+                      <PracticeScenarioSelectCard
                         key={sc.id}
-                        type="button"
-                        onClick={() => setScenarioId(sc.id)}
-                        className={`text-left p-4 rounded-xl border transition-all ${
-                          scenarioId === sc.id ? 'border-accent-primary bg-accent-primary/5' : 'surface-elevated hover:border-accent-primary/40'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <img src={resolveAssetUrl(sc.avatar)} alt="" className="w-10 h-10 rounded-full object-cover object-center shrink-0" />
-                          <span className="font-semibold text-content-primary">{sc.coacheeName}</span>
-                          <MatchBadge tier={tier} />
-                          {renderCompletionPill(formatCompletionPillLabel(
-                            progress?.highestDifficultyLabel,
-                            progress?.bestScore,
-                          ))}
-                        </div>
-                        <p className="text-sm text-content-secondary line-clamp-4 sm:line-clamp-3">{sc.concern}</p>
-                        <p className="text-xs text-content-secondary mt-2">{sc.emotionalTone}</p>
-                      </button>
+                        scenario={sc}
+                        selected={scenarioId === sc.id}
+                        onSelect={() => setScenarioId(sc.id)}
+                        onShowConcernInfo={() => setScenarioConcernInfo(sc)}
+                        headerTrailing={(
+                          <>
+                            <MatchBadge tier={tier} />
+                            {renderCompletionPill(formatCompletionPillLabel(
+                              progress?.highestDifficultyLabel,
+                              progress?.bestScore,
+                            ))}
+                          </>
+                        )}
+                      />
                     );
                   })}
                 </div>
@@ -878,6 +957,26 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
       </button>
         </>
       )}
+
+      <ModalOverlay
+        isOpen={!!scenarioConcernInfo}
+        onClose={() => setScenarioConcernInfo(null)}
+        title={scenarioConcernInfo?.coacheeName ?? ''}
+      >
+        {scenarioConcernInfo && (
+          <>
+            <p className="text-sm text-content-secondary leading-relaxed">{scenarioConcernInfo.concern}</p>
+            <p className="text-xs text-content-secondary mt-3">{scenarioConcernInfo.emotionalTone}</p>
+            <button
+              type="button"
+              onClick={() => setScenarioConcernInfo(null)}
+              className="mt-6 w-full py-2.5 rounded-lg btn-accent-solid text-sm font-semibold"
+            >
+              {t('aria_close')}
+            </button>
+          </>
+        )}
+      </ModalOverlay>
 
       {followUpModal && (
         <PracticeFollowUpReminderModal
