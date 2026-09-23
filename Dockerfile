@@ -13,6 +13,7 @@ WORKDIR /app
 
 # Copy package.json and package-lock.json to leverage Docker's layer caching.
 COPY package*.json ./
+COPY scripts/postinstall-patches.mjs ./scripts/postinstall-patches.mjs
 
 # npm install instead of npm ci: macOS-generated lockfile omits linux/amd64
 # optional binary entries (e.g. @emnapi/core) that npm ci rejects cross-platform.
@@ -49,6 +50,7 @@ RUN apt-get update && \
 # and the built static assets.
 COPY package*.json ./
 COPY server.js ./
+COPY scripts/postinstall-patches.mjs ./scripts/postinstall-patches.mjs
 COPY --from=builder /app/dist ./dist
 
 # npm install instead of npm ci (cross-platform lockfile compatibility, see builder stage).
