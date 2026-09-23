@@ -26,12 +26,8 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
     /// Deactivate audio session and notify other apps they can resume
     private func deactivateAudioSession(completion: (() -> Void)? = nil) {
         let session = AVAudioSession.sharedInstance()
-        session.setActive(false, options: [.notifyOthersOnDeactivation]) { success in
-            if success {
-                print("[NativeTTS] Audio session deactivated")
-            } else {
-                print("[NativeTTS] Audio session deactivation failed")
-            }
+        MCAudioSession.deactivate(session, notifyOthers: true) {
+            print("[NativeTTS] Audio session deactivated")
             completion?()
         }
     }
@@ -52,7 +48,7 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
                 completion()
                 return
             }
-            session.setActive(true, options: []) { success in
+            MCAudioSession.activate(session) { success in
                 if success {
                     print("[NativeTTS] \(label) (mode: \(session.mode.rawValue))")
                 } else {
@@ -85,7 +81,7 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
             print("[NativeTTS] ✅ Audio session released after \(attempts) attempts")
         }
 
-        session.setActive(false, options: [.notifyOthersOnDeactivation]) { _ in
+        MCAudioSession.deactivate(session, notifyOthers: true) {
             activateForPlayback(categoryOptions: [.duckOthers], label: "Audio session configured for playback")
         }
     }

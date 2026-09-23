@@ -131,7 +131,7 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
                 return
             }
 
-            audioSession.setActive(true, options: []) { [weak self] success in
+            MCAudioSession.activate(audioSession) { [weak self] success in
                 guard let self = self else { return }
                 guard success else {
                     print("[NativeSTT] ❌ Failed to activate audio session")
@@ -239,12 +239,8 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
         
         // Deactivate audio session to release it for TTS
         if wasRecording {
-            AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation]) { success in
-                if success {
-                    print("[NativeSTT] ✅ Audio session deactivated after STT stop")
-                } else {
-                    print("[NativeSTT] ⚠️ Failed to deactivate audio session")
-                }
+            MCAudioSession.deactivate(AVAudioSession.sharedInstance(), notifyOthers: true) {
+                print("[NativeSTT] ✅ Audio session deactivated after STT stop")
             }
         }
         
