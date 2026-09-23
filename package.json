@@ -23,7 +23,7 @@
     "test:coverage": "jest --coverage --coverageProvider=v8",
     "test:backend": "cd meaningful-conversations-backend && npx jest",
     "ci": "npm test && npm run test:backend && npm run typecheck && npm run check:locales && npm run build",
-    "postinstall": "patch-package"
+    "postinstall": "node scripts/postinstall-patches.mjs"
   },
   "dependencies": {
     "@capacitor-community/speech-recognition": "^7.0.1",
