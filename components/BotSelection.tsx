@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info } from 'lucide-react';
+import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info, BookOpen } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -26,6 +26,11 @@ import { resolvePracticeAccess, type PracticeAccessReason } from '../utils/pract
 import { isNativeIOS } from '../utils/platformDetection';
 import type { UserIntent } from './IntentPickerView';
 import { getBotSelectionSectionState, type HighlightSection } from '../utils/userIntent';
+import {
+  getKommunikationTutorialTilePosition,
+  KOMMUNIKATION_TUTORIAL_TILE_POSITION_EVENT,
+  type KommunikationTutorialTilePosition,
+} from '../utils/kommunikationTutorialTilePrefs';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
@@ -33,6 +38,7 @@ interface BotSelectionProps {
   onTranscriptRecord?: () => void;
   onCoachPractice?: () => void;
   onConnector?: () => void;
+  onTutorials?: () => void;
   onAuthRequired?: () => void;
   onUpgrade?: () => void;
   onPracticeUpgrade?: () => void;
@@ -439,6 +445,63 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
   );
 };
 
+interface TutorialsTileProps {
+  onTutorials?: () => void;
+}
+
+/** Anleitungen & Tutorials — first utility tile in Kommunikation (position user-configurable). */
+const TutorialsTile: React.FC<TutorialsTileProps> = ({ onTutorials }) => {
+  const { t } = useLocalization();
+
+  return (
+    <motion.div
+      role="button"
+      tabIndex={0}
+      onClick={() => onTutorials?.()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onTutorials?.();
+        }
+      }}
+      className="flex flex-col items-center text-center p-6 h-full
+        bg-background-secondary border border-section-bronze/35 rounded-card shadow-card cursor-pointer transition-all duration-200
+        hover:border-section-bronze hover:shadow-card-hover"
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div
+        className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)}`}
+        title={t(COACH_SESSION_RING_I18N.tool)}
+      >
+        <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-section-bronze/10 overflow-hidden flex items-center justify-center">
+          <BookOpen className="w-9 h-9 text-section-bronze" aria-hidden />
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-col flex-1 w-full justify-between">
+        <div>
+          <h3 className="text-xl font-semibold text-content-primary tracking-tight">
+            {t('tutorialTile_title')}
+          </h3>
+          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+            {t('tutorialTile_desc')}
+          </p>
+        </div>
+
+        <div className="mt-4 w-full">
+          <span className="inline-flex items-center justify-center gap-1.5 w-full px-2 py-2.5 rounded-lg text-sm font-semibold transition-all border border-section-bronze bg-section-bronze/10 text-section-bronze hover:bg-section-bronze hover:text-button-foreground-on-accent">
+            <span className="truncate">{t('tutorialTile_open')}</span>
+          </span>
+          <p className="text-[0.6875rem] text-content-subtle leading-snug pt-1">
+            {t('tutorialTile_hint')}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 interface ConnectorTileProps {
   isGuest: boolean;
   onConnector?: () => void;
@@ -709,13 +772,16 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onConnector, onAuthRequired, onUpgrade, onPracticeUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone, entryIntent = null }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onConnector, onTutorials, onAuthRequired, onUpgrade, onPracticeUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone, entryIntent = null }) => {
   const { t, language } = useLocalization();
   const initialSectionState = getBotSelectionSectionState(entryIntent, !currentUser);
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeHighlight, setActiveHighlight] = useState<HighlightSection>(null);
   const [coachingView, setCoachingView] = useState<'coaches' | 'practice'>(initialSectionState.coachingView);
+  const [tutorialTilePosition, setTutorialTilePosition] = useState<KommunikationTutorialTilePosition>(
+    () => getKommunikationTutorialTilePosition(),
+  );
   const isClientPlus = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
   const isPremiumPlus = !!(currentUser?.isPremium || isClientPlus);
   const practiceAccess = resolvePracticeAccess(currentUser);
@@ -733,6 +799,12 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
     setClientSectionOpen(next.clientOpen);
     setCoachingView(next.coachingView);
   }, [entryIntent, currentUser]);
+
+  useEffect(() => {
+    const syncTilePosition = () => setTutorialTilePosition(getKommunikationTutorialTilePosition());
+    window.addEventListener(KOMMUNIKATION_TUTORIAL_TILE_POSITION_EVENT, syncTilePosition);
+    return () => window.removeEventListener(KOMMUNIKATION_TUTORIAL_TILE_POSITION_EVENT, syncTilePosition);
+  }, []);
 
   useEffect(() => {
     if (!highlightSection || isLoading) return;
@@ -850,6 +922,25 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   
   const availableKommunikationBots = kommunikationBots.filter(b => b.isAvailable);
   const lockedKommunikationBots = kommunikationBots.filter(b => !b.isAvailable);
+  const kommunikationBotsOrdered = [...availableKommunikationBots, ...lockedKommunikationBots];
+  const kommunikationLeadBot =
+    tutorialTilePosition === 'last' && kommunikationBotsOrdered.length > 0
+      ? kommunikationBotsOrdered[0]
+      : null;
+  const kommunikationTrailBots =
+    tutorialTilePosition === 'last' ? kommunikationBotsOrdered.slice(1) : kommunikationBotsOrdered;
+
+  const renderKommunikationBotCard = (bot: BotWithAvailability) => (
+    <BotCard
+      key={bot.id}
+      bot={bot}
+      onSelect={onSelect}
+      onUpgrade={bot.isAvailable ? undefined : onUpgrade}
+      language={language}
+      hasPersonalityProfile={hasPersonalityProfile}
+      coachingMode={coachingMode}
+    />
+  );
   
   const availableCoachingBots = coachingBots.filter(b => b.isAvailable);
   const lockedCoachingBots = coachingBots.filter(b => !b.isAvailable);
@@ -925,30 +1016,19 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           {kommunikationSectionOpen && (
           <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Nobody Bot Card */}
-            {availableKommunikationBots.map((bot) => (
-              <BotCard 
-                key={bot.id} 
-                bot={bot} 
-                onSelect={onSelect} 
-                language={language}
-                hasPersonalityProfile={hasPersonalityProfile}
-                coachingMode={coachingMode}
-              />
-            ))}
-            
-            {/* Locked Kommunikation Bots */}
-            {lockedKommunikationBots.map((bot) => (
-              <BotCard 
-                key={bot.id} 
-                bot={bot} 
-                onSelect={onSelect} 
-                onUpgrade={onUpgrade}
-                language={language}
-                hasPersonalityProfile={hasPersonalityProfile}
-                coachingMode={coachingMode}
-              />
-            ))}
+            {tutorialTilePosition === 'first' && (
+              <TutorialsTile onTutorials={onTutorials} />
+            )}
+
+            {kommunikationLeadBot && renderKommunikationBotCard(kommunikationLeadBot)}
+
+            <ConnectorTile
+              isGuest={!currentUser}
+              onConnector={onConnector}
+              onAuthRequired={onAuthRequired}
+            />
+
+            {kommunikationTrailBots.map(renderKommunikationBotCard)}
 
             <TranscriptToolsTile
               isGuest={!currentUser}
@@ -960,11 +1040,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               onAuthRequired={onAuthRequired}
             />
 
-            <ConnectorTile
-              isGuest={!currentUser}
-              onConnector={onConnector}
-              onAuthRequired={onAuthRequired}
-            />
+            {tutorialTilePosition === 'last' && (
+              <TutorialsTile onTutorials={onTutorials} />
+            )}
           </div>
           <CoachRingLegend />
           </>

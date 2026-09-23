@@ -22,6 +22,7 @@ export type NavView =
     | 'paywall'
     | 'achievements'
     | 'userGuide'
+    | 'tutorialHub'
     | 'formattingHelp'
     | 'faq'
     | 'about'
