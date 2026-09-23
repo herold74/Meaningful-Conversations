@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { MessageCircle, Lightbulb, GraduationCap, ChevronRight, Info, type LucideIcon } from 'lucide-react';
@@ -56,6 +56,29 @@ const CARD_THEME_CLASSES: Record<IntentCardTheme, {
   },
 };
 
+function useElementTextClamped(ref: React.RefObject<HTMLElement | null>, text: string) {
+  const [clamped, setClamped] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) {
+      setClamped(false);
+      return;
+    }
+    const measure = () => {
+      setClamped(el.scrollHeight > el.clientHeight + 1);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [text]);
+  return clamped;
+}
+
 interface IntentPickerCardProps {
   Icon: LucideIcon;
   title: string;
@@ -76,6 +99,8 @@ const IntentPickerCard: React.FC<IntentPickerCardProps> = ({
   onShowInfo,
 }) => {
   const { t } = useLocalization();
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const descClamped = useElementTextClamped(descRef, description);
 
   return (
     <motion.div
@@ -100,7 +125,10 @@ const IntentPickerCard: React.FC<IntentPickerCardProps> = ({
               {title}
             </h3>
           </div>
-          <p className={`text-sm leading-snug md:leading-relaxed flex-1 line-clamp-3 md:line-clamp-none ${styles.desc}`}>
+          <p
+            ref={descRef}
+            className={`text-sm leading-snug md:leading-relaxed flex-1 line-clamp-3 md:line-clamp-none ${styles.desc}`}
+          >
             {description}
           </p>
           <div className={`mt-2 md:mt-auto pt-1 md:pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${styles.cta}`}>
@@ -108,14 +136,16 @@ const IntentPickerCard: React.FC<IntentPickerCardProps> = ({
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </div>
         </motion.button>
-        <button
-          type="button"
-          onClick={onShowInfo}
-          aria-label={t('intent_card_info_label', { title })}
-          className="md:hidden shrink-0 inline-flex items-start justify-center p-2 -mr-1 rounded-lg text-accent-primary hover:bg-accent-primary/10 transition-colors"
-        >
-          <Info className="w-5 h-5" aria-hidden />
-        </button>
+        {descClamped && (
+          <button
+            type="button"
+            onClick={onShowInfo}
+            aria-label={t('intent_card_info_label', { title })}
+            className="md:hidden shrink-0 inline-flex items-start justify-center p-2 -mr-1 rounded-lg text-accent-primary hover:bg-accent-primary/10 transition-colors"
+          >
+            <Info className="w-5 h-5" aria-hidden />
+          </button>
+        )}
       </div>
     </motion.div>
   );
