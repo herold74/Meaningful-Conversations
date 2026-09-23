@@ -1,17 +1,30 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 28** (repo + staging)
-**Branch:** `main` @ `195ab662` (build 28 sync) · `ecedb021` intent picker + admin Connector DE.
-**Staging:** Deployed **2026-09-23**, v**2.6.0** Build **28** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b28`).
+**Version:** 2.6.0 **Build 30** (repo + staging)
+**Branch:** `main` @ `f0e2208b` (build 30 sync) · `52aaaf51` remove unused native-audio · `5239a0b9` patch-package.
+**Staging:** Deployed **2026-09-23**, v**2.6.0** Build **30** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b30`).
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
-**App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **23** (synced by deploy script). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
-**Xcode:** Local **`npm run sync:ios-staging`** done **2026-09-22** after staging b26 — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **26**; open `ios/App/App.xcodeproj`, scheme **App**, clean build + reinstall on device. API target: **mc-beta** (staging).
+**App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **30** (matches staging b30). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
+**Xcode:** Local **`npm run sync:ios-staging`** done **2026-09-23** after staging b30 — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **30**; scheme **App**, clean build + reinstall on device. API target: **mc-beta** (staging). `@capacitor-community/native-audio` removed from SPM (no AVAudioSession init at plugin load).
 **Connector chat UX (`04d34335`):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal. Local `npm run build && npx cap sync ios` done for Xcode — reinstall from Xcode (build 23).
 **Connector catalog (`5a717d0c` + `718865d9`):** „Eigene Situation“ row + Verbindungs-Signatur-Info-Modal; a11y label/describedby; vignette `scenarioBrief` line-clamp-2; per-card Info → full scenario modal (DE/EN i18n).
 **Intent picker + admin (`ecedb021`, staging b28):** Mobile tile height + desktop grid ohne Viewport-Stretch; Admin Connector tab DE (Markenname „The Connector“); open-situation bucket labels i18n.
 
-## Session handoff (2026-09-23) — Intent picker layout + staging b28
+## Session handoff (2026-09-23) — Tutorial Hub handbook links
+
+- **Deep links:** `utils/userGuideAnchors.ts` (stable IDs, scroll retry); Tutorial Hub → Handbuch (Session Review, Chat-Oberfläche, tier-dependent § numbers via `userGuideStructure.ts`).
+- **Visibility:** `tutorialHubVisibility.ts` — PEP nur Klienten (+ Staff); Tests.
+- **Hub copy:** Footer Browser vs App Store; handbook hints use section titles not fixed § numbers.
+- **Commit:** `2c1a0e11` on `main`; **staging b29** `1311b8b9` deploy **2026-09-23**; superseded by **b30** (`f0e2208b`) with native-audio removal + Docker postinstall fix.
+
+## Session handoff (2026-09-23) — native-audio removal + staging b30
+
+- Removed `@capacitor-community/native-audio` (unused; voice = NativeSTT/NativeTTS). Fixes Xcode AVAudioSession hang warning at plugin load.
+- **patch-package:** `scripts/postinstall-patches.mjs` + Dockerfile COPY so staging Docker build succeeds.
+- **Staging b30** deploy OK; **`npm run sync:ios-staging`** done; `CURRENT_PROJECT_VERSION` **30**.
+
+## Session handoff (2026-09-23) — Tutorial Hub handbook links
 
 - **`IntentPickerView` / `index.css`:** `flex-1` grid nur mobile; Spacer statt `flex-1` auf Beschreibung; drei CTAs bündig ohne Viewport-Löcher.
 - **Admin:** `AdminConnectorAnalyticsView` + `admin_connector_stats_*` DE; EN parity keys.
