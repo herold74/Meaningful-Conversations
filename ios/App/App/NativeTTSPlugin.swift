@@ -23,82 +23,72 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
     
     // MARK: - Audio Session Management
     
-    /// Configure audio session for high-quality TTS playback
-    private func configureAudioSessionForPlayback() {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            
-            // CRITICAL: If other audio is playing (e.g., STT session not fully released),
-            // we MUST wait for it to finish before we can configure our session
-            if session.isOtherAudioPlaying {
-                print("[NativeTTS] ⚠️ Other audio is playing - waiting for it to release...")
-                
-                // Wait up to 1 second (100ms x 10 attempts) for the other audio to finish
-                // Frontend already waited 500ms, so we only need a short additional wait
-                var attempts = 0
-                let maxAttempts = 10
-                
-                while session.isOtherAudioPlaying && attempts < maxAttempts {
-                    Thread.sleep(forTimeInterval: 0.1)
-                    attempts += 1
-                    print("[NativeTTS] Waiting for audio session release (attempt \(attempts)/\(maxAttempts))...")
-                }
-                
-                if session.isOtherAudioPlaying {
-                    print("[NativeTTS] ⚠️ Other audio STILL playing after \(maxAttempts) attempts")
-                    print("[NativeTTS] Using .mixWithOthers fallback to allow degraded playback")
-                    
-                    // Fallback: Use .mixWithOthers to at least allow our audio to play
-                    // This will result in degraded quality but better than nothing
-                    if #available(iOS 12.0, *) {
-                        try session.setCategory(.playback, mode: .spokenAudio, options: [.mixWithOthers])
-                    } else {
-                        try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-                    }
-                    
-                    // Activate with .mixWithOthers
-                    try session.setActive(true, options: [])
-                    
-                    print("[NativeTTS] Audio session configured with .mixWithOthers (degraded mode)")
-                    return  // IMPORTANT: Exit early to skip the normal activation below
-                } else {
-                    print("[NativeTTS] ✅ Audio session released after \(attempts) attempts")
-                }
-            }
-            
-            // Normal path: Session is free or no conflicts
-            try session.setActive(false, options: [.notifyOthersOnDeactivation])
-            
-            // Set category and mode for high-quality playback
-            if #available(iOS 12.0, *) {
-                try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
-            } else {
-                try session.setCategory(.playback, mode: .default, options: [.duckOthers])
-            }
-            
-            // Activate the session
-            try session.setActive(true, options: [])
-            
-            print("[NativeTTS] Audio session configured for playback (mode: \(session.mode.rawValue))")
-        } catch {
-            print("[NativeTTS] Audio session configuration error: \(error)")
-        }
-    }
-    
     /// Deactivate audio session and notify other apps they can resume
-    private func deactivateAudioSession() {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            
-            // Deactivate and notify other apps they can resume
-            try session.setActive(false, options: [.notifyOthersOnDeactivation])
-            
-            print("[NativeTTS] Audio session deactivated")
-        } catch {
-            print("[NativeTTS] Audio session deactivation error: \(error)")
+    private func deactivateAudioSession(completion: (() -> Void)? = nil) {
+        let session = AVAudioSession.sharedInstance()
+        session.setActive(false, options: [.notifyOthersOnDeactivation]) { success in
+            if success {
+                print("[NativeTTS] Audio session deactivated")
+            } else {
+                print("[NativeTTS] Audio session deactivation failed")
+            }
+            completion?()
         }
     }
-    
+
+    /// Configure audio session for high-quality TTS playback
+    private func configureAudioSessionForPlayback(completion: @escaping () -> Void) {
+        let session = AVAudioSession.sharedInstance()
+
+        func activateForPlayback(categoryOptions: AVAudioSession.CategoryOptions, label: String) {
+            do {
+                if #available(iOS 12.0, *) {
+                    try session.setCategory(.playback, mode: .spokenAudio, options: categoryOptions)
+                } else {
+                    try session.setCategory(.playback, mode: .default, options: categoryOptions)
+                }
+            } catch {
+                print("[NativeTTS] Audio session configuration error: \(error)")
+                completion()
+                return
+            }
+            session.setActive(true, options: []) { success in
+                if success {
+                    print("[NativeTTS] \(label) (mode: \(session.mode.rawValue))")
+                } else {
+                    print("[NativeTTS] Audio session activation failed")
+                }
+                completion()
+            }
+        }
+
+        // CRITICAL: If other audio is playing (e.g., STT session not fully released),
+        // we MUST wait for it to finish before we can configure our session
+        if session.isOtherAudioPlaying {
+            print("[NativeTTS] ⚠️ Other audio is playing - waiting for it to release...")
+
+            var attempts = 0
+            let maxAttempts = 10
+
+            while session.isOtherAudioPlaying && attempts < maxAttempts {
+                Thread.sleep(forTimeInterval: 0.1)
+                attempts += 1
+                print("[NativeTTS] Waiting for audio session release (attempt \(attempts)/\(maxAttempts))...")
+            }
+
+            if session.isOtherAudioPlaying {
+                print("[NativeTTS] ⚠️ Other audio STILL playing after \(maxAttempts) attempts")
+                print("[NativeTTS] Using .mixWithOthers fallback to allow degraded playback")
+                activateForPlayback(categoryOptions: [.mixWithOthers], label: "Audio session configured with .mixWithOthers (degraded mode)")
+                return
+            }
+            print("[NativeTTS] ✅ Audio session released after \(attempts) attempts")
+        }
+
+        session.setActive(false, options: [.notifyOthersOnDeactivation]) { _ in
+            activateForPlayback(categoryOptions: [.duckOthers], label: "Audio session configured for playback")
+        }
+    }
     
     // MARK: - Lifecycle
     public override func load() {
@@ -152,44 +142,41 @@ public class NativeTTSPlugin: CAPPlugin, CAPBridgedPlugin, AVSpeechSynthesizerDe
             call.reject("Text is required")
             return
         }
-        
-        // Stop any current speech AND clean up audio session
-        if synthesizer.isSpeaking {
-            synthesizer.stopSpeaking(at: .immediate)
-            deactivateAudioSession()
-        }
-        
-        // Configure audio session BEFORE creating utterance
-        configureAudioSessionForPlayback()
-        
+
         let utterance = AVSpeechUtterance(string: text)
-        
-        // Set voice if specified
+
         if let voiceIdentifier = call.getString("voiceIdentifier") {
             if let voice = AVSpeechSynthesisVoice(identifier: voiceIdentifier) {
                 utterance.voice = voice
             } else {
-                // Try to find voice by language if identifier not found
                 let languageCode = String(voiceIdentifier.prefix(5))
                 utterance.voice = AVSpeechSynthesisVoice(language: languageCode)
             }
         }
-        
-        // Set speech parameters with defaults
+
         let rate = call.getFloat("rate") ?? 0.5
         utterance.rate = max(AVSpeechUtteranceMinimumSpeechRate, min(AVSpeechUtteranceMaximumSpeechRate, rate))
-        
+
         let pitch = call.getFloat("pitch") ?? 1.0
         utterance.pitchMultiplier = max(0.5, min(2.0, pitch))
-        
+
         let volume = call.getFloat("volume") ?? 1.0
         utterance.volume = max(0.0, min(1.0, volume))
-        
-        // Store call for callback
+
         currentCall = call
-        
-        // Start speaking
-        synthesizer.speak(utterance)
+
+        let startSpeaking = { [self] in
+            self.configureAudioSessionForPlayback {
+                self.synthesizer.speak(utterance)
+            }
+        }
+
+        if synthesizer.isSpeaking {
+            synthesizer.stopSpeaking(at: .immediate)
+            deactivateAudioSession(completion: startSpeaking)
+        } else {
+            startSpeaking()
+        }
     }
     
     @objc func stop(_ call: CAPPluginCall) {
