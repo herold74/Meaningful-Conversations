@@ -22,7 +22,8 @@
     "generate:connector-pdf": "npx tsx scripts/generate-connector-optimal-pdf.ts",
     "test:coverage": "jest --coverage --coverageProvider=v8",
     "test:backend": "cd meaningful-conversations-backend && npx jest",
-    "ci": "npm test && npm run test:backend && npm run typecheck && npm run check:locales && npm run build"
+    "ci": "npm test && npm run test:backend && npm run typecheck && npm run check:locales && npm run build",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@capacitor-community/native-audio": "^8.0.0",
@@ -55,6 +56,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
     "jest": "^30.2.0",
+    "patch-package": "^8.0.1",
     "playwright": "^1.62.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",

@@ -1,0 +1,32 @@
+diff --git a/node_modules/@capacitor/filesystem/.swiftpm/xcode/xcuserdata/gherold.xcuserdatad/xcschemes/xcschememanagement.plist b/node_modules/@capacitor/filesystem/.swiftpm/xcode/xcuserdata/gherold.xcuserdatad/xcschemes/xcschememanagement.plist
+new file mode 100644
+index 0000000..a45a892
+--- /dev/null
++++ b/node_modules/@capacitor/filesystem/.swiftpm/xcode/xcuserdata/gherold.xcuserdatad/xcschemes/xcschememanagement.plist
+@@ -0,0 +1,14 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<plist version="1.0">
++<dict>
++	<key>SchemeUserState</key>
++	<dict>
++		<key>CapacitorFilesystem.xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>5</integer>
++		</dict>
++	</dict>
++</dict>
++</plist>
+diff --git a/node_modules/@capacitor/filesystem/ios/Sources/FilesystemPlugin/LegacyFilesystemImplementation.swift b/node_modules/@capacitor/filesystem/ios/Sources/FilesystemPlugin/LegacyFilesystemImplementation.swift
+index b9dad01..99994be 100644
+--- a/node_modules/@capacitor/filesystem/ios/Sources/FilesystemPlugin/LegacyFilesystemImplementation.swift
++++ b/node_modules/@capacitor/filesystem/ios/Sources/FilesystemPlugin/LegacyFilesystemImplementation.swift
+@@ -74,7 +74,6 @@ import Capacitor
+ 
+         let headers = (call.getObject("headers") ?? [:]) as [String: Any]
+         let params = (call.getObject("params") ?? [:]) as [String: Any]
+-        let responseType = call.getString("responseType", "text")
+         let connectTimeout = call.getDouble("connectTimeout")
+         let readTimeout = call.getDouble("readTimeout")
+ 
