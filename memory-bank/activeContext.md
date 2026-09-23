@@ -1,20 +1,27 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 26** (repo + staging)
-**Branch:** `main` @ `dfbf88c6` (build 26 sync) · feature commits through `718865d9` (Connector catalog).
-**Staging:** Deployed **2026-09-22**, v**2.6.0** Build **26** — https://mc-beta.manualmode.at (`/api/health` OK, `sw.js` `v2.6.0-b26`).
+**Version:** 2.6.0 **Build 28** (repo + staging)
+**Branch:** `main` @ `195ab662` (build 28 sync) · `ecedb021` intent picker + admin Connector DE.
+**Staging:** Deployed **2026-09-23**, v**2.6.0** Build **28** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b28`).
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
 **App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **23** (synced by deploy script). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Xcode:** Local **`npm run sync:ios-staging`** done **2026-09-22** after staging b26 — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **26**; open `ios/App/App.xcodeproj`, scheme **App**, clean build + reinstall on device. API target: **mc-beta** (staging).
 **Connector chat UX (`04d34335`):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal. Local `npm run build && npx cap sync ios` done for Xcode — reinstall from Xcode (build 23).
 **Connector catalog (`5a717d0c` + `718865d9`):** „Eigene Situation“ row + Verbindungs-Signatur-Info-Modal; a11y label/describedby; vignette `scenarioBrief` line-clamp-2; per-card Info → full scenario modal (DE/EN i18n).
+**Intent picker + admin (`ecedb021`, staging b28):** Mobile tile height + desktop grid ohne Viewport-Stretch; Admin Connector tab DE (Markenname „The Connector“); open-situation bucket labels i18n.
+
+## Session handoff (2026-09-23) — Intent picker layout + staging b28
+
+- **`IntentPickerView` / `index.css`:** `flex-1` grid nur mobile; Spacer statt `flex-1` auf Beschreibung; drei CTAs bündig ohne Viewport-Löcher.
+- **Admin:** `AdminConnectorAnalyticsView` + `admin_connector_stats_*` DE; EN parity keys.
+- **Commits:** `ecedb021` · `195ab662` (build 28 sync).
+- **Staging:** Deploy OK **2026-09-23** — Frontend/Backend health OK.
 
 ## Session handoff (2026-09-22) — Connector catalog polish
 
 - **`ConnectorCatalogView`:** Info-Button + Modal (i18n `connector_signature_info_*`); open-situation button accessible name; catalog card briefs clamped.
-- **Commit:** `5a717d0c` — not yet on staging (deploy when ready).
-- **Commit:** `718865d9` — vignette info buttons + modal on catalog cards.
+- **Commits:** `5a717d0c` · `718865d9` (on staging since b26+).
 
 ## Session handoff (2026-09-22) — Victor intimacy + staging b25
 
