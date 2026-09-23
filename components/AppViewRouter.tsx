@@ -62,6 +62,7 @@ import InterviewTranscriptView from './InterviewTranscriptView';
 import TranscriptRecorder from './TranscriptRecorder';
 import AchievementsView from './AchievementsView';
 import UserGuideView from './UserGuideView';
+import TutorialHubView, { type TutorialTryAction } from './TutorialHubView';
 import FormattingHelpView from './FormattingHelpView';
 import FAQView from './FAQView';
 import AboutView from './AboutView';
@@ -762,6 +763,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setView('practiceSetup');
           }}
           onConnector={handleOpenConnectorIntro}
+          onTutorials={() => setView('tutorialHub')}
           onAuthRequired={handleGuestAuthRequired}
           onUpgrade={() => openUpgrade()}
           onPracticeUpgrade={() => openUpgrade('premium_plus')}
@@ -1157,6 +1159,38 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       return <AchievementsView gamificationState={gamificationState} />;
     case 'userGuide':
       return <UserGuideView currentUser={currentUser} />;
+    case 'tutorialHub': {
+      const handleTutorialTry = (action: TutorialTryAction) => {
+        switch (action) {
+          case 'botSelection':
+            setView('botSelection');
+            break;
+          case 'transcriptEval':
+            setTeStep('pre');
+            setTePreAnswers(null);
+            setTeEvaluation(null);
+            setTePrefillTranscript(null);
+            setView('transcriptEval');
+            break;
+          case 'connector':
+            handleOpenConnectorIntro();
+            break;
+          case 'practiceSetup':
+            if (!currentUser) return;
+            setPracticeConfig(null);
+            setPracticeEvaluation(null);
+            setView('practiceSetup');
+            break;
+        }
+      };
+      return (
+        <TutorialHubView
+          currentUser={currentUser}
+          onOpenHandbook={() => setView('userGuide')}
+          onTry={handleTutorialTry}
+        />
+      );
+    }
     case 'formattingHelp':
       return <FormattingHelpView />;
     case 'faq':
