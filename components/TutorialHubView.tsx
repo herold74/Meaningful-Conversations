@@ -14,15 +14,24 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import type { User } from '../types';
-import { resolvePracticeAccess } from '../utils/practiceAccess';
+import {
+  isTutorialHubItemVisible,
+  resolveTutorialHubVisibilityContext,
+  type TutorialHubItemId,
+} from '../utils/tutorialHubVisibility';
 import {
   getKommunikationTutorialTilePosition,
   setKommunikationTutorialTilePosition,
   type KommunikationTutorialTilePosition,
 } from '../utils/kommunikationTutorialTilePrefs';
+import {
+  tutorialHandbookAnchorKey,
+  userGuideAnchorId,
+  type UserGuideAnchorKey,
+} from '../utils/userGuideAnchors';
 
 export type TutorialTryAction =
-  | 'botSelection'
+  | 'lifeContext'
   | 'transcriptEval'
   | 'connector'
   | 'practiceSetup';
@@ -34,8 +43,8 @@ type TutorialItemDef = {
   descKey: string;
   durationKey: string;
   handbookHintKey: string;
+  handbookAnchor: UserGuideAnchorKey;
   tryAction?: TutorialTryAction;
-  visible?: (ctx: { isRegistered: boolean; showPractice: boolean; showPep: boolean }) => boolean;
 };
 
 const TUTORIAL_ITEMS: TutorialItemDef[] = [
@@ -45,9 +54,9 @@ const TUTORIAL_ITEMS: TutorialItemDef[] = [
     titleKey: 'tutorialHub_item_life_context_title',
     descKey: 'tutorialHub_item_life_context_desc',
     durationKey: 'tutorialHub_duration_short',
-    handbookHintKey: 'tutorialHub_handbook_ch2',
-    tryAction: 'botSelection',
-    visible: () => true,
+    handbookHintKey: 'tutorialHub_handbook_ch1',
+    handbookAnchor: 'ch1',
+    tryAction: 'lifeContext',
   },
   {
     id: 'voice_text',
@@ -55,8 +64,8 @@ const TUTORIAL_ITEMS: TutorialItemDef[] = [
     titleKey: 'tutorialHub_item_voice_title',
     descKey: 'tutorialHub_item_voice_desc',
     durationKey: 'tutorialHub_duration_short',
-    handbookHintKey: 'tutorialHub_handbook_ch4',
-    visible: () => true,
+    handbookHintKey: 'tutorialHub_handbook_voice_chat',
+    handbookAnchor: 'chatInterface',
   },
   {
     id: 'session_review',
@@ -64,8 +73,8 @@ const TUTORIAL_ITEMS: TutorialItemDef[] = [
     titleKey: 'tutorialHub_item_session_review_title',
     descKey: 'tutorialHub_item_session_review_desc',
     durationKey: 'tutorialHub_duration_medium',
-    handbookHintKey: 'tutorialHub_handbook_ch4',
-    visible: ({ isRegistered }) => isRegistered,
+    handbookHintKey: 'tutorialHub_handbook_session_review',
+    handbookAnchor: 'sessionReview',
   },
   {
     id: 'transcript',
@@ -74,8 +83,8 @@ const TUTORIAL_ITEMS: TutorialItemDef[] = [
     descKey: 'tutorialHub_item_transcript_desc',
     durationKey: 'tutorialHub_duration_medium',
     handbookHintKey: 'tutorialHub_handbook_transcript',
+    handbookAnchor: 'transcriptEval',
     tryAction: 'transcriptEval',
-    visible: () => true,
   },
   {
     id: 'connector',
@@ -84,8 +93,8 @@ const TUTORIAL_ITEMS: TutorialItemDef[] = [
     descKey: 'tutorialHub_item_connector_desc',
     durationKey: 'tutorialHub_duration_medium',
     handbookHintKey: 'tutorialHub_handbook_connector',
+    handbookAnchor: 'connector',
     tryAction: 'connector',
-    visible: ({ isRegistered }) => isRegistered,
   },
   {
     id: 'coach_practice',
@@ -94,8 +103,8 @@ const TUTORIAL_ITEMS: TutorialItemDef[] = [
     descKey: 'tutorialHub_item_practice_desc',
     durationKey: 'tutorialHub_duration_long',
     handbookHintKey: 'tutorialHub_handbook_practice',
+    handbookAnchor: 'coachPractice',
     tryAction: 'practiceSetup',
-    visible: ({ showPractice }) => showPractice,
   },
   {
     id: 'pep',
@@ -104,7 +113,7 @@ const TUTORIAL_ITEMS: TutorialItemDef[] = [
     descKey: 'tutorialHub_item_pep_desc',
     durationKey: 'tutorialHub_duration_short',
     handbookHintKey: 'tutorialHub_handbook_pep',
-    visible: ({ showPep }) => showPep,
+    handbookAnchor: 'pep',
   },
 ];
 
@@ -123,12 +132,14 @@ const ITEM_CATEGORY: Record<string, CategoryId> = {
 
 export interface TutorialHubViewProps {
   currentUser: User | null;
-  onOpenHandbook: () => void;
+  onBack: () => void;
+  onOpenHandbook: (anchorId: string) => void;
   onTry: (action: TutorialTryAction) => void;
 }
 
 const TutorialHubView: React.FC<TutorialHubViewProps> = ({
   currentUser,
+  onBack,
   onOpenHandbook,
   onTry,
 }) => {
@@ -137,20 +148,19 @@ const TutorialHubView: React.FC<TutorialHubViewProps> = ({
     () => getKommunikationTutorialTilePosition(),
   );
 
-  const practiceAccess = useMemo(
-    () => resolvePracticeAccess(currentUser ?? null),
+  const visibilityCtx = useMemo(
+    () => resolveTutorialHubVisibilityContext(currentUser),
     [currentUser],
   );
-  const isRegistered = !!currentUser;
-  const showPep = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
-  const visibilityCtx = {
-    isRegistered,
-    showPractice: practiceAccess.canAccessPractice,
-    showPep,
-  };
+  const showTranscriptEvalChapter = !!(
+    currentUser?.isPremium ||
+    currentUser?.isClient ||
+    currentUser?.isAdmin ||
+    currentUser?.isDeveloper
+  );
 
-  const visibleItems = TUTORIAL_ITEMS.filter(
-    (item) => item.visible?.(visibilityCtx) ?? true,
+  const visibleItems = TUTORIAL_ITEMS.filter((item) =>
+    isTutorialHubItemVisible(item.id as TutorialHubItemId, visibilityCtx),
   );
 
   const handleTilePositionChange = (next: KommunikationTutorialTilePosition) => {
@@ -171,6 +181,14 @@ const TutorialHubView: React.FC<TutorialHubViewProps> = ({
 
   return (
     <div className="w-full max-w-3xl mx-auto p-4 sm:p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
+      <button
+        type="button"
+        onClick={onBack}
+        className="text-sm text-content-secondary hover:text-content-primary self-start -mt-1 mb-1"
+      >
+        ← {t('practice_back')}
+      </button>
+
       <div className="text-center space-y-2">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-section-bronze/15 ring-1 ring-section-bronze/25 text-section-bronze mx-auto">
           <BookOpen className="w-6 h-6" aria-hidden />
@@ -248,7 +266,16 @@ const TutorialHubView: React.FC<TutorialHubViewProps> = ({
                     <div className="flex flex-col sm:flex-row gap-2">
                       <button
                         type="button"
-                        onClick={onOpenHandbook}
+                        onClick={() =>
+                          onOpenHandbook(
+                            userGuideAnchorId(
+                              tutorialHandbookAnchorKey(item.id, item.handbookAnchor, {
+                                showTranscriptEvalChapter,
+                                showTranscriptToolsSection: showTranscriptEvalChapter,
+                              }),
+                            ),
+                          )
+                        }
                         className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-semibold border border-border-primary bg-background-primary hover:border-section-bronze/50 text-content-primary transition-colors"
                       >
                         <BookOpen className="w-4 h-4 shrink-0" aria-hidden />

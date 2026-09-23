@@ -105,6 +105,7 @@ function appendBekkyAuditTasksFromMessages(
 const App: React.FC = () => {
     const { t, language } = useLocalization();
     const [view, setView] = useState<NavView>('welcome');
+    const [userGuideFocusAnchor, setUserGuideFocusAnchor] = useState<string | null>(null);
     const [menuView, setMenuView] = useState<NavView | null>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [authRedirectReason, setAuthRedirectReason] = useState<string | null>(null);
@@ -2145,6 +2146,8 @@ const App: React.FC = () => {
         setLifeContextEditorReturnView,
         buildEmptyLifeContextTemplate,
         t,
+        userGuideFocusAnchor,
+        setUserGuideFocusAnchor,
     };
 
     const isAnyModalOpen = useIsAnyModalOpen();
@@ -2176,11 +2179,15 @@ const App: React.FC = () => {
 
     // Scroll to top on every view change so the heading is always visible.
     // Chat view is excluded because it manages its own scroll (bottom-anchored).
+    // User guide deep links scroll themselves — avoid resetting to Kapitel 1.
     useEffect(() => {
         if (view !== 'chat') {
+            if (view === 'userGuide' && userGuideFocusAnchor) {
+                return;
+            }
             window.scrollTo(0, 0);
         }
-    }, [view]);
+    }, [view, userGuideFocusAnchor]);
 
     const handleNativeGamificationBarAction = useCallback((action: string) => {
         if (action === 'menu') {

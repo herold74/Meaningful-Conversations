@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info, BookOpen } from 'lucide-react';
+import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -16,6 +16,7 @@ import { brand } from '../config/brand';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import TranscriptMicAvatar from './icons/TranscriptMicAvatar';
 import ConnectorTileAvatar from './icons/ConnectorTileAvatar';
+import TutorialTileAvatar from './icons/TutorialTileAvatar';
 import {
   getCoachSessionRing,
   getCoachSessionRingClass,
@@ -449,7 +450,7 @@ interface TutorialsTileProps {
   onTutorials?: () => void;
 }
 
-/** Anleitungen & Tutorials — first utility tile in Kommunikation (position user-configurable). */
+/** QuickStart & Tutorials — first utility tile in Kommunikation (position user-configurable). */
 const TutorialsTile: React.FC<TutorialsTileProps> = ({ onTutorials }) => {
   const { t } = useLocalization();
 
@@ -474,12 +475,12 @@ const TutorialsTile: React.FC<TutorialsTileProps> = ({ onTutorials }) => {
         className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)}`}
         title={t(COACH_SESSION_RING_I18N.tool)}
       >
-        <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-section-bronze/10 overflow-hidden flex items-center justify-center">
-          <BookOpen className="w-9 h-9 text-section-bronze" aria-hidden />
+        <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center">
+          <TutorialTileAvatar className="w-[4.75rem] h-[4.75rem]" />
         </div>
       </div>
 
-      <div className="mt-3 flex flex-col flex-1 w-full justify-between">
+      <div className="mt-3 flex flex-col flex-1 w-full justify-between min-h-0">
         <div>
           <h3 className="text-xl font-semibold text-content-primary tracking-tight">
             {t('tutorialTile_title')}
@@ -489,13 +490,13 @@ const TutorialsTile: React.FC<TutorialsTileProps> = ({ onTutorials }) => {
           </p>
         </div>
 
-        <div className="mt-4 w-full">
+        <div className="mt-auto pt-4 w-full">
+          <p className="text-[0.6875rem] text-content-subtle leading-snug pb-2 min-h-[2.25rem] flex items-end justify-center">
+            {t('tutorialTile_hint')}
+          </p>
           <span className="inline-flex items-center justify-center gap-1.5 w-full px-2 py-2.5 rounded-lg text-sm font-semibold transition-all border border-section-bronze bg-section-bronze/10 text-section-bronze hover:bg-section-bronze hover:text-button-foreground-on-accent">
             <span className="truncate">{t('tutorialTile_open')}</span>
           </span>
-          <p className="text-[0.6875rem] text-content-subtle leading-snug pt-1">
-            {t('tutorialTile_hint')}
-          </p>
         </div>
       </div>
     </motion.div>

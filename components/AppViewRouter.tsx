@@ -63,6 +63,7 @@ import TranscriptRecorder from './TranscriptRecorder';
 import AchievementsView from './AchievementsView';
 import UserGuideView from './UserGuideView';
 import TutorialHubView, { type TutorialTryAction } from './TutorialHubView';
+import { stashPendingUserGuideAnchor } from '../utils/userGuideAnchors';
 import FormattingHelpView from './FormattingHelpView';
 import FAQView from './FAQView';
 import AboutView from './AboutView';
@@ -255,6 +256,9 @@ export interface AppViewRouterProps {
 
   // Translation
   t: (key: string, params?: Record<string, string>) => string;
+
+  userGuideFocusAnchor: string | null;
+  setUserGuideFocusAnchor: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
@@ -395,6 +399,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     buildEmptyLifeContextTemplate,
     isSessionQualified,
     t,
+    userGuideFocusAnchor,
+    setUserGuideFocusAnchor,
   } = props;
 
   const currentView = menuView || view;
@@ -1158,12 +1164,22 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     case 'achievements':
       return <AchievementsView gamificationState={gamificationState} />;
     case 'userGuide':
-      return <UserGuideView currentUser={currentUser} />;
+      return (
+        <UserGuideView
+          currentUser={currentUser}
+          focusAnchor={userGuideFocusAnchor}
+          onFocusAnchorHandled={() => setUserGuideFocusAnchor(null)}
+        />
+      );
     case 'tutorialHub': {
       const handleTutorialTry = (action: TutorialTryAction) => {
         switch (action) {
-          case 'botSelection':
-            setView('botSelection');
+          case 'lifeContext':
+            if (currentUser && lifeContext.trim()) {
+              setView('contextChoice');
+            } else {
+              setView('landing');
+            }
             break;
           case 'transcriptEval':
             setTeStep('pre');
@@ -1186,7 +1202,12 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       return (
         <TutorialHubView
           currentUser={currentUser}
-          onOpenHandbook={() => setView('userGuide')}
+          onBack={() => setView('botSelection')}
+          onOpenHandbook={(anchorId) => {
+            stashPendingUserGuideAnchor(anchorId);
+            setUserGuideFocusAnchor(anchorId);
+            setView('userGuide');
+          }}
           onTry={handleTutorialTry}
         />
       );

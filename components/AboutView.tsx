@@ -27,7 +27,7 @@ const de_markdown_part2 = `
 
 const de_final_sentence = `Diese Anwendung ist ein Projekt, das aus Leidenschaft für persönliches Wachstum und Technologie entstanden ist. Wir hoffen, dass sie Ihnen auf Ihrem Weg eine wertvolle Unterstützung ist.`;
 
-const de_highlight = `Und wenn Sie den direkten Austausch wünschen, können Sie über [**${brand.providerName}**](${brand.providerUrl}) jederzeit einen zertifizierten Lebens- und Sozialberater kontaktieren.`;
+const de_highlight = `Und wenn Sie den direkten Austausch wünschen, können Sie über [**${brand.providerName}**](mailto:${brand.contactEmail}) jederzeit einen zertifizierten Lebens- und Sozialberater kontaktieren.`;
 
 const en_markdown_part1 = `Do you want to deepen the insights from your coaching in your daily life or are you looking for a straightforward way to self-reflection? "${brand.appName}" was developed precisely for this purpose. The app is your intelligent complement to professional coaching and a modern alternative to a self-help book – a personal space for your development that is available to you at any time.
 
@@ -46,7 +46,7 @@ const en_markdown_part2 = `
 
 const en_final_sentence = `This application is a project born from a passion for personal growth and technology. We hope it serves as a valuable support on your journey.`;
 
-const en_highlight = `And if you want direct exchange, you can contact a certified life and social counselor at any time via [**${brand.providerName}**](${brand.providerUrl}).`;
+const en_highlight = `And if you want direct exchange, you can contact a certified life and social counselor at any time via [**${brand.providerName}**](mailto:${brand.contactEmail}).`;
 
 
 type AboutTab = 'about' | 'coach' | 'practice';

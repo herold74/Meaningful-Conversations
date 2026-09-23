@@ -31,3 +31,9 @@ export const brand = {
 
 export type Brand = typeof brand;
 export type BrandLoaderType = Brand['loader'];
+
+/** Markdown link to contact the provider by e-mail (handbook, about, terms). */
+export function brandProviderMailtoMarkdown(linkLabel?: string): string {
+  const label = linkLabel ?? brand.providerName;
+  return `[${label}](mailto:${brand.contactEmail})`;
+}
