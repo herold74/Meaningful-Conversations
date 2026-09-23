@@ -107,17 +107,17 @@ const IntentPickerCard: React.FC<IntentPickerCardProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: motionDelay, duration: 0.4, ease: 'easeOut' }}
-      className={`w-full h-full rounded-card transition-all group ${styles.card}`}
+      className={`intent-picker-tile w-full max-md:h-full md:h-full rounded-card transition-all group ${styles.card}`}
     >
-      <div className="flex gap-0.5 items-stretch p-4 md:p-5 h-full">
+      <div className="flex gap-0.5 items-stretch p-4 md:p-5 h-full min-h-0">
         <motion.button
           type="button"
           whileTap={{ scale: 0.98 }}
           onClick={onSelect}
           aria-label={t('intent_card_select_label', { title })}
-          className="flex-1 min-w-0 flex flex-col text-left"
+          className="flex-1 min-w-0 min-h-0 flex flex-col text-left h-full"
         >
-          <div className="flex items-start gap-3 mb-2 md:mb-0 md:block">
+          <div className="flex items-start gap-3 mb-2 md:mb-0 md:block shrink-0">
             <div className={`w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center flex-shrink-0 md:mb-4 ${styles.iconBox}`}>
               <Icon className={`w-5 h-5 ${styles.icon}`} aria-hidden="true" />
             </div>
@@ -127,11 +127,12 @@ const IntentPickerCard: React.FC<IntentPickerCardProps> = ({
           </div>
           <p
             ref={descRef}
-            className={`text-sm leading-snug md:leading-relaxed flex-1 line-clamp-3 md:line-clamp-none ${styles.desc}`}
+            className={`text-sm leading-snug md:leading-relaxed shrink-0 line-clamp-3 md:line-clamp-none ${styles.desc}`}
           >
             {description}
           </p>
-          <div className={`mt-2 md:mt-auto pt-1 md:pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${styles.cta}`}>
+          <div className="flex-1 min-h-0 max-md:min-h-[0.25rem] md:min-h-0" aria-hidden="true" />
+          <div className={`pt-2 md:pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${styles.cta}`}>
             <span>{t('intent_card_cta')}</span>
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </div>
@@ -183,7 +184,7 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
         </p>
       </motion.div>
 
-      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-5 md:items-stretch min-h-0 flex-1 max-md:content-center">
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-5 md:items-stretch max-md:min-h-0 max-md:flex-1 max-md:content-center">
         {INTENTS.map((intent, i) => {
           const description = isGuest && t(`${intent.descKey}_guest`) !== `${intent.descKey}_guest`
             ? t(`${intent.descKey}_guest`)

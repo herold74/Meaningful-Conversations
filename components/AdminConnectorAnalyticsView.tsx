@@ -107,6 +107,20 @@ const VIGNETTE_LABEL_KEYS: Record<string, string> = {
   'nina-review': 'connector_lab_vignette_nina',
 };
 
+const OPEN_LENGTH_LABEL_KEYS: Record<string, string> = {
+  short: 'admin_connector_stats_length_short',
+  standard: 'admin_connector_stats_length_standard',
+  long: 'admin_connector_stats_length_long',
+};
+
+const OPEN_RELATIONSHIP_LABEL_KEYS: Record<string, string> = {
+  colleague: 'admin_connector_stats_rel_colleague',
+  friend: 'admin_connector_stats_rel_friend',
+  family: 'admin_connector_stats_rel_family',
+  partner: 'admin_connector_stats_rel_partner',
+  other: 'admin_connector_stats_rel_other',
+};
+
 const AdminConnectorAnalyticsView: React.FC = () => {
   const { t, language } = useLocalization();
   const [days, setDays] = useState<PeriodDays>(90);
@@ -145,6 +159,11 @@ const AdminConnectorAnalyticsView: React.FC = () => {
     heard: t('admin_connector_stats_end_heard'),
     timeout: t('admin_connector_stats_end_timeout'),
     aborted: t('admin_connector_stats_end_aborted'),
+  };
+
+  const openBucketLabel = (id: string, map: Record<string, string>) => {
+    const key = map[id];
+    return key ? t(key) : id;
   };
 
   const topVignettes = useMemo(
@@ -239,7 +258,7 @@ const AdminConnectorAnalyticsView: React.FC = () => {
               <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('admin_connector_stats_open_length')}</h4>
               {stats.openSituation.byLengthPreset.map((row) => (
                 <div key={row.id} className="flex justify-between text-xs text-gray-600 dark:text-gray-400 py-0.5">
-                  <span>{row.id}</span>
+                  <span>{openBucketLabel(row.id, OPEN_LENGTH_LABEL_KEYS)}</span>
                   <span>{row.displayCount}</span>
                 </div>
               ))}
@@ -248,7 +267,7 @@ const AdminConnectorAnalyticsView: React.FC = () => {
               <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('admin_connector_stats_open_relationship')}</h4>
               {stats.openSituation.byRelationshipBucket.map((row) => (
                 <div key={row.id} className="flex justify-between text-xs text-gray-600 dark:text-gray-400 py-0.5">
-                  <span>{row.id}</span>
+                  <span>{openBucketLabel(row.id, OPEN_RELATIONSHIP_LABEL_KEYS)}</span>
                   <span>{row.displayCount}</span>
                 </div>
               ))}
