@@ -13,7 +13,6 @@ const plugins = [
   '@revenuecat/purchases-capacitor',
   '@capacitor/filesystem',
   '@capacitor/share',
-  '@capacitor-community/native-audio',
 ];
 
 function isValidPackageSwift(content) {

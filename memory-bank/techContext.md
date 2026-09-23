@@ -15,8 +15,7 @@
 - **Mobile/Native:** Capacitor 8.x (iOS)
     - `@capacitor/core`: Native bridge
     - `@capacitor/ios`: iOS platform
-    - `@capacitor-community/native-audio`: Audio handling
-    - `@capacitor-community/speech-recognition`: Native speech recognition
+    - `@capacitor-community/speech-recognition`: listed dependency (STT uses custom `NativeSTT` in `ios/App`)
 - **PDF:** `@react-pdf/renderer` via `utils/pdfGeneratorReact.tsx`
 - **Animation:** Framer Motion (page transitions, micro-interactions, loader animations)
 - **Font:** Inter Variable (self-hosted in `public/fonts/`)
@@ -57,8 +56,7 @@
 - **Native Plugins:**
   - `SplashScreen`: Launch screen control
   - `StatusBar`: Status bar styling
-  - `SpeechRecognition`: Native iOS speech recognition (avoids Safari limitations)
-  - `NativeAudio`: Audio session management
+  - **`NativeSTT` / `NativeTTS`**: Custom Capacitor plugins in `ios/App/App/` (voice STT/TTS + `AVAudioSession`)
   - `RevenueCat`: In-App Purchase (StoreKit 2)
 - **Compliance Pages (Nginx-served static HTML):**
   - `/privacy` → `public/privacy.html`

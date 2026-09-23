@@ -212,7 +212,7 @@ To build and run the iOS app, you need a Mac with Xcode installed.
     - Select a simulator (e.g., iPhone 15) or your connected iPhone
     - Click the "Run" (Play) button
 
-**Note:** Native features like `native-audio` and `speech-recognition` require the app to be running in the iOS environment (Simulator or Device).
+**Note:** Native voice (custom `NativeSTT` / `NativeTTS` plugins) requires the iOS app (Simulator or Device). Browser/Android use Web Speech API.
 
 ---
 
