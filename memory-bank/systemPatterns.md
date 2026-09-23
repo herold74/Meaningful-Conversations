@@ -229,3 +229,8 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Client streaming TTS enqueues sentences from SSE chunks; tail text left in the holdback buffer never reached TTS, so the last sentence was often silent. Coaching/practice streams have no holdback — unaffected.
 - **Implementation:** `routes/gemini/connector.js` — after the generator loop, emit `pending` (marker stripped) as one last SSE chunk. Frontend: `reconcileStreamingWithFinalText()` as safety net in `ChatView` + streaming playback wait in `useTts.ts`.
 
+### 28. Multi-tile grids — aligned baselines (2026-09-23)
+- **Decision:** Side-by-side (or visually grouped) **selection tiles** must keep **aligned content rails**: same vertical start for body copy, **CTA/footer pinned to the card bottom** (`flex-col` + `mt-auto` on the link row). Use a **fixed min-height on the title block** (typically two lines) so shorter titles do not shift description start.
+- **Reasoning:** Product owner explicitly rejects neighboring tiles where text or links sit on different vertical levels.
+- **Implementation:** Pattern in `IntentPickerView` (`min-h` on `h3`, `flex-1` description, `mt-auto` CTA, grid `items-stretch` + tile `height: 100%` from `md` up). Apply the same rule to future card grids (catalog pickers, hub rows).
+
