@@ -22,6 +22,10 @@ import ComfortCheckModal from './ComfortCheckModal';
 import ProfileRefinementModal from './ProfileRefinementModal';
 import { RefinementPreviewResult } from '../services/api';
 import { createDiff } from '../utils/diff';
+import {
+  botSupportsDpflSessionFlow,
+  getEffectiveCoachingMode,
+} from '../utils/coachingMode';
 
 
 const removeGamificationKey = (text: string) => {
@@ -271,13 +275,14 @@ const SessionReview: React.FC<SessionReviewProps> = ({
     // Sessions with score >= 3 and not opted-out are considered "authentic"
     // and used for profile refinement calculations.
     //
-    // Never shown for:
-    // - Nobody bot (nexus-goal-path-solution) - not a full coaching session
-    // - Users without coachingMode === 'dpfl'
+    // Never shown for DPC-only bots (Nobody, Sam) or when effective mode is not DPFL
     useEffect(() => {
-        const isNobodyBot = selectedBot.id === 'nexus-goal-path-solution';
-        const isDPFLTest = isTestMode && refinementPreview && !isNobodyBot;
-        const isDPFLProduction = currentUser?.coachingMode === 'dpfl' && !isTestMode && !isNobodyBot;
+        const supportsDpfl = botSupportsDpflSessionFlow(
+            selectedBot.id,
+            currentUser?.coachingMode,
+        );
+        const isDPFLTest = isTestMode && refinementPreview && supportsDpfl;
+        const isDPFLProduction = supportsDpfl && !isTestMode;
         const userMessageCount = chatHistory.filter(m => m.role === 'user').length;
         const msgThreshold = import.meta.env.DEV ? 3 : 10;
         const hasProperClosure = hasConversationalEnd || hasSessionGoalAchieved;
@@ -1211,7 +1216,10 @@ const SessionReview: React.FC<SessionReviewProps> = ({
                 <ComfortCheckModal
                     chatHistory={chatHistory}
                     sessionId={sessionId}
-                    coachingMode={currentUser?.coachingMode}
+                    coachingMode={getEffectiveCoachingMode(
+                        selectedBot.id,
+                        currentUser?.coachingMode,
+                    )}
                     onComplete={() => {
                         setShowComfortCheck(false);
                         // After comfort check, show refinement modal if there are suggestions

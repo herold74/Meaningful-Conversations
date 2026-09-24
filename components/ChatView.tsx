@@ -33,6 +33,7 @@ import { useTts } from '../hooks/useTts';
 import { resolvePracticeCoacheeGender } from '../utils/botGender';
 import { getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
 import { usePracticeSessionUILabels } from '../hooks/usePracticeSessionUILabels';
+import { getEffectiveCoachingMode } from '../utils/coachingMode';
 import { useMeditation } from '../hooks/useMeditation';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { parseMeditationMarkers } from '../hooks/useMeditation';
@@ -202,7 +203,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
   const isGuest = !currentUser;
 
   const coachingMode = currentUser?.coachingMode || 'off';
-  const effectiveCoachingMode = (bot.id === 'nexus-goal-path-solution' && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
+  const effectiveCoachingMode = getEffectiveCoachingMode(bot.id, coachingMode);
 
   const handleReferralSwitchClick = useCallback((targetBotId: string, botMessageIndex: number) => {
     if (!onReferralSwitch) return;

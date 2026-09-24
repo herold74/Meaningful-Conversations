@@ -1,5 +1,17 @@
 # Active Context
 
+## Session handoff (2026-09-24) — Coaching LC return + Sam DPC-only
+
+- **Coaching session draft:** `utils/coachingSessionDraft.ts` — resume banner/prompt, LC editor save → back to chat; new coach requires discard confirm. Skills: `ux-flow`, `gdpr-compliance`.
+- **DPC-only bots:** `utils/coachingMode.ts` — Nobody + Sam downgrade DPFL → DPC (card, chat, Comfort Check). Handbuch §4.4 DE/EN; `systemPatterns.md` #29.
+- **Deploy:** staging after commit (see Current Status below).
+
+## Session handoff (2026-09-24) — BotSelection utility tile icons
+
+- **Assets:** `public/avatars/tutorial-tile.png`, `connector-tile.png`, `transcript-tile.png`; **`nobody.png`** replaced with approved v3 (abstract bust, glossy 3D line).
+- **Frontend:** `TutorialTileAvatar`, `ConnectorTileAvatar`, `TranscriptMicAvatar` now load raster assets via `resolveAssetUrl` (Capacitor parity with coach avatars).
+- **Review refs:** `DOCUMENTATION/design/botselection-icons-review/` (mockups + alternates; not shipped as runtime deps).
+
 ## Current Status
 **Version:** 2.6.0 **Build 30** (repo + staging)
 **Branch:** `main` @ `f0e2208b` (build 30 sync) · `52aaaf51` remove unused native-audio · `5239a0b9` patch-package.
@@ -24,7 +36,7 @@
 - **patch-package:** `scripts/postinstall-patches.mjs` + Dockerfile COPY so staging Docker build succeeds.
 - **Staging b30** deploy OK; **`npm run sync:ios-staging`** done; `CURRENT_PROJECT_VERSION` **30**.
 
-## Session handoff (2026-09-23) — Tutorial Hub handbook links
+## Session handoff (2026-09-23) — Intent picker layout + staging b28
 
 - **`IntentPickerView` / `index.css`:** `flex-1` grid nur mobile; Spacer statt `flex-1` auf Beschreibung; drei CTAs bündig ohne Viewport-Löcher.
 - **Admin:** `AdminConnectorAnalyticsView` + `admin_connector_stats_*` DE; EN parity keys.

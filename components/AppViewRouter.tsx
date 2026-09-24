@@ -28,6 +28,9 @@ import ForgotPasswordView from './ForgotPasswordView';
 import ResetPasswordView from './ResetPasswordView';
 import UnsubscribeView from './UnsubscribeView';
 import ContextChoiceView from './ContextChoiceView';
+import CoachingSessionResumeBanner, {
+  type CoachingSessionResumeBannerProps,
+} from './CoachingSessionResumeBanner';
 import PaywallView from './PaywallView';
 import LandingPage from './LandingPage';
 import PIIWarningView from './PIIWarningView';
@@ -224,6 +227,8 @@ export interface AppViewRouterProps {
   handleFileUpload: (context: string) => void;
   handleQuestionnaireSubmit: (context: string) => void;
   handlePiiConfirm: () => void;
+  handleLcEditorSaveFromContextChoice: (newContext: string) => Promise<void>;
+  handleLcEditorSaveFromLanding: (newContext: string) => Promise<void>;
   handleSelectBot: (bot: Bot) => void;
   handleReferralSwitch: (targetBotId: string, seedUserMessage: string) => void;
   handleStartSessionFromEval: (botId: string, examplePrompt: string) => void;
@@ -259,6 +264,8 @@ export interface AppViewRouterProps {
 
   userGuideFocusAnchor: string | null;
   setUserGuideFocusAnchor: React.Dispatch<React.SetStateAction<string | null>>;
+
+  coachingSessionResume: CoachingSessionResumeBannerProps | null;
 }
 
 const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
@@ -370,6 +377,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handleFileUpload,
     handleQuestionnaireSubmit,
     handlePiiConfirm,
+    handleLcEditorSaveFromContextChoice,
+    handleLcEditorSaveFromLanding,
     handleSelectBot,
     handleReferralSwitch,
     handleStartSessionFromEval,
@@ -401,6 +410,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     t,
     userGuideFocusAnchor,
     setUserGuideFocusAnchor,
+    coachingSessionResume,
   } = props;
 
   const currentView = menuView || view;
@@ -472,6 +482,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           user={currentUser!}
           savedContext={lifeContext}
           gamificationState={gamificationState}
+          coachingResume={coachingSessionResume}
           onContinue={() => {
             setCameFromContextChoice(true);
             setView('botSelection');
@@ -556,6 +567,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           }}
           existingContext={lifeContext || undefined}
           isTemplateContext={isTemplateContext}
+          coachingResume={coachingSessionResume}
         />
       );
     }
@@ -577,58 +589,42 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       );
     case 'lcEditorFromLanding':
       return (
+        <div className="space-y-4">
+          {coachingSessionResume && (
+            <div className="container mx-auto px-4 max-w-4xl pt-4">
+              <CoachingSessionResumeBanner {...coachingSessionResume} />
+            </div>
+          )}
         <LifeContextEditorView
           lifeContext={lifeContext}
           showPiiTips={false}
           title={t('lc_editor_title')}
           description={t('lc_editor_desc')}
           allowSaveWithoutChanges
-          onSave={async (newContext: string) => {
-            setLifeContext(newContext);
-            if (!currentUser) {
-              const guestName = resolveGuestName(newContext, questionnaireAnswers.profile_name);
-              if (guestName) syncGuestSession(guestName, newContext);
-            } else if (encryptionKey) {
-              try {
-                await userService.saveUserData(
-                  newContext,
-                  serializeGamificationState(gamificationState),
-                  encryptionKey
-                );
-              } catch (error) {
-                console.error('Failed to save edited context:', error);
-              }
-            }
-            applyIntentLogic(null, { lifeContextOverride: newContext });
-          }}
+          saveLabel={coachingSessionResume ? t('lc_editor_save_return_chat') : undefined}
+          onSave={handleLcEditorSaveFromLanding}
           onCancel={() => setView('landing')}
         />
+        </div>
       );
     case 'lcEditorFromContextChoice':
       return (
+        <div className="space-y-4">
+          {coachingSessionResume && (
+            <div className="container mx-auto px-4 max-w-4xl pt-4">
+              <CoachingSessionResumeBanner {...coachingSessionResume} />
+            </div>
+          )}
         <LifeContextEditorView
           lifeContext={lifeContext}
           showPiiTips={false}
           title={t('lc_editor_title')}
           description={t('lc_editor_desc')}
-          onSave={async (newContext: string) => {
-            setLifeContext(newContext);
-            if (currentUser && encryptionKey) {
-              try {
-                await userService.saveUserData(
-                  newContext,
-                  serializeGamificationState(gamificationState),
-                  encryptionKey
-                );
-              } catch (error) {
-                console.error('Failed to save edited context:', error);
-              }
-            }
-            setCameFromContextChoice(true);
-            setView('botSelection');
-          }}
+          saveLabel={coachingSessionResume ? t('lc_editor_save_return_chat') : undefined}
+          onSave={handleLcEditorSaveFromContextChoice}
           onCancel={() => setView('contextChoice')}
         />
+        </div>
       );
     case 'intentPicker':
       return (
@@ -750,6 +746,12 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       );
     case 'botSelection':
       return (
+        <>
+        {coachingSessionResume && (
+          <div className="container mx-auto px-4 max-w-4xl pt-4">
+            <CoachingSessionResumeBanner {...coachingSessionResume} />
+          </div>
+        )}
         <BotSelection
           onSelect={handleSelectBot}
           onTranscriptEval={() => {
@@ -781,6 +783,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onHighlightDone={() => setHighlightSection(null)}
           entryIntent={getStoredUserIntent()}
         />
+        </>
       );
     case 'chat':
       return (

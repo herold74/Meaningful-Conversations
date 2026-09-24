@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey } from './types';
 import { resolveConnectorPremiumAccess } from './utils/connectorAccess';
 import { userHasSavedConnector } from './utils/connectorProfile';
@@ -64,6 +64,9 @@ import { getNextThemeInCycle, HAS_MULTIPLE_THEMES } from './config/themes';
 import { brand } from './config/brand';
 import { hexToRgb } from './utils/colorUtils';
 import PracticeResumePrompt from './components/PracticeResumePrompt';
+import CoachingResumePrompt from './components/CoachingResumePrompt';
+import CoachingDiscardSessionModal from './components/CoachingDiscardSessionModal';
+import type { CoachingSessionResumeBannerProps } from './components/CoachingSessionResumeBanner';
 import { isNativeApp } from './utils/platformDetection';
 import {
     botFromPracticeConfig,
@@ -72,6 +75,14 @@ import {
     savePracticeSessionDraft,
     type PracticeSessionDraft,
 } from './utils/practiceSessionDraft';
+import {
+    clearCoachingSessionDraft,
+    getCoachingDraftOwnerId,
+    isStandardCoachingChatBotId,
+    loadCoachingSessionDraft,
+    saveCoachingSessionDraft,
+    type CoachingSessionDraft,
+} from './utils/coachingSessionDraft';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -179,6 +190,8 @@ const App: React.FC = () => {
     const [practiceEvalArtifactLanguage, setPracticeEvalArtifactLanguage] = useState<Language | null>(null);
     const [practiceSelfRating, setPracticeSelfRating] = useState<number | undefined>(undefined);
     const [practiceDraftPrompt, setPracticeDraftPrompt] = useState<PracticeSessionDraft | null>(null);
+    const [coachingDraftPrompt, setCoachingDraftPrompt] = useState<CoachingSessionDraft | null>(null);
+    const [pendingBotSelection, setPendingBotSelection] = useState<Bot | null>(null);
     const [practicePhase2Context, setPracticePhase2Context] = useState<PracticePhase2Context | null>(null);
     const [practiceTranscriptForPhase2, setPracticeTranscriptForPhase2] = useState<string>('');
     const [practiceEvalError, setPracticeEvalError] = useState<string | null>(null);
@@ -321,6 +334,188 @@ const App: React.FC = () => {
             baselineMessageCount,
         });
     }, [currentUser?.id, practiceConfig, chatHistory, userMessageCount, baselineMessageCount, view, practiceEvaluation]);
+
+    const coachingDraftOwnerId = useMemo(
+        () => getCoachingDraftOwnerId(
+            currentUser?.id,
+            resolveGuestName(lifeContext, questionnaireAnswers.profile_name),
+        ),
+        [currentUser?.id, lifeContext, questionnaireAnswers.profile_name],
+    );
+
+    const clearCoachingDraftState = useCallback(() => {
+        clearCoachingSessionDraft();
+        setCoachingDraftPrompt(null);
+    }, []);
+
+    const hasInMemoryStandardCoachingSession = useCallback(() => {
+        if (isTestMode || practiceConfig || connectorRun || !selectedBot) return false;
+        if (!isStandardCoachingChatBotId(selectedBot.id)) return false;
+        return chatHistory.some((m) => m.role === 'user');
+    }, [isTestMode, practiceConfig, connectorRun, selectedBot, chatHistory]);
+
+    const getActiveCoachingCoachName = useCallback((): string => {
+        if (hasInMemoryStandardCoachingSession() && selectedBot) {
+            return selectedBot.name;
+        }
+        const draft = coachingDraftOwnerId
+            ? loadCoachingSessionDraft(coachingDraftOwnerId)
+            : null;
+        return draft?.bot.name ?? selectedBot?.name ?? '';
+    }, [coachingDraftOwnerId, hasInMemoryStandardCoachingSession, selectedBot]);
+
+    const hasActiveStandardCoachingSession = useCallback(() => {
+        if (hasInMemoryStandardCoachingSession()) return true;
+        if (!coachingDraftOwnerId) return false;
+        return loadCoachingSessionDraft(coachingDraftOwnerId) !== null;
+    }, [coachingDraftOwnerId, hasInMemoryStandardCoachingSession]);
+
+    useEffect(() => {
+        if (!coachingDraftOwnerId || practiceConfig || connectorRun) return;
+        if (hasInMemoryStandardCoachingSession()) return;
+        const draft = loadCoachingSessionDraft(coachingDraftOwnerId);
+        if (draft) setCoachingDraftPrompt(draft);
+    }, [coachingDraftOwnerId, practiceConfig, connectorRun, hasInMemoryStandardCoachingSession]);
+
+    useEffect(() => {
+        if (!coachingDraftOwnerId || !selectedBot || isTestMode || practiceConfig || connectorRun) return;
+        if (!isStandardCoachingChatBotId(selectedBot.id)) return;
+        if (view === 'sessionReview') return;
+        if (!chatHistory.some((m) => m.role === 'user')) return;
+        saveCoachingSessionDraft({
+            ownerId: coachingDraftOwnerId,
+            bot: selectedBot,
+            chatHistory,
+            userMessageCount,
+            baselineMessageCount,
+        });
+    }, [
+        coachingDraftOwnerId,
+        selectedBot,
+        chatHistory,
+        userMessageCount,
+        baselineMessageCount,
+        view,
+        isTestMode,
+        practiceConfig,
+        connectorRun,
+    ]);
+
+    const handleResumeCoachingSession = useCallback(() => {
+        if (hasInMemoryStandardCoachingSession()) {
+            setView('chat');
+            setCoachingDraftPrompt(null);
+            return;
+        }
+        const draft = coachingDraftPrompt
+            ?? (coachingDraftOwnerId ? loadCoachingSessionDraft(coachingDraftOwnerId) : null);
+        if (!draft) return;
+        const bot = BOTS.find((b) => b.id === draft.bot.id) ?? draft.bot;
+        setSelectedBot(bot);
+        setChatHistory(draft.chatHistory);
+        setUserMessageCount(draft.userMessageCount);
+        setBaselineMessageCount(draft.baselineMessageCount);
+        setView('chat');
+        setCoachingDraftPrompt(null);
+    }, [
+        coachingDraftOwnerId,
+        coachingDraftPrompt,
+        hasInMemoryStandardCoachingSession,
+    ]);
+
+    const handleDiscardCoachingDraft = useCallback(() => {
+        clearCoachingDraftState();
+        setSelectedBot(null);
+        setChatHistory([]);
+        setUserMessageCount(0);
+        setBaselineMessageCount(0);
+    }, [clearCoachingDraftState]);
+
+    const persistLifeContextEdits = useCallback(async (newContext: string) => {
+        setLifeContext(newContext);
+        if (!currentUser) {
+            const guestName = resolveGuestName(newContext, questionnaireAnswers.profile_name);
+            if (guestName) syncGuestSession(guestName, newContext);
+            return;
+        }
+        if (encryptionKey) {
+            try {
+                await userService.saveUserData(
+                    newContext,
+                    serializeGamificationState(gamificationState),
+                    encryptionKey,
+                );
+            } catch (error) {
+                console.error('Failed to save edited context:', error);
+            }
+        }
+    }, [currentUser, encryptionKey, gamificationState, questionnaireAnswers.profile_name]);
+
+    const handleLcEditorSaveFromContextChoice = useCallback(async (newContext: string) => {
+        await persistLifeContextEdits(newContext);
+        if (hasActiveStandardCoachingSession()) {
+            handleResumeCoachingSession();
+            return;
+        }
+        setCameFromContextChoice(true);
+        setView('botSelection');
+    }, [
+        persistLifeContextEdits,
+        hasActiveStandardCoachingSession,
+        handleResumeCoachingSession,
+    ]);
+
+    const handleLcEditorSaveFromLanding = useCallback(async (newContext: string) => {
+        await persistLifeContextEdits(newContext);
+        if (hasActiveStandardCoachingSession()) {
+            handleResumeCoachingSession();
+            return;
+        }
+        applyIntentLogic(null, { lifeContextOverride: newContext });
+    }, [
+        persistLifeContextEdits,
+        hasActiveStandardCoachingSession,
+        handleResumeCoachingSession,
+        applyIntentLogic,
+    ]);
+
+    const coachingSessionResume: CoachingSessionResumeBannerProps | null = useMemo(() => {
+        const resumeViews: NavView[] = [
+            'landing',
+            'contextChoice',
+            'lcEditorFromLanding',
+            'lcEditorFromContextChoice',
+            'botSelection',
+        ];
+        if (view === 'chat' || practiceConfig || connectorRun || !resumeViews.includes(view)) {
+            return null;
+        }
+        if (hasInMemoryStandardCoachingSession() && selectedBot) {
+            return {
+                coachName: selectedBot.name,
+                messageCount: chatHistory.length,
+                onResume: handleResumeCoachingSession,
+            };
+        }
+        const draft = coachingDraftOwnerId
+            ? loadCoachingSessionDraft(coachingDraftOwnerId)
+            : null;
+        if (!draft) return null;
+        return {
+            coachName: draft.bot.name,
+            messageCount: draft.chatHistory.length,
+            onResume: handleResumeCoachingSession,
+        };
+    }, [
+        view,
+        practiceConfig,
+        connectorRun,
+        hasInMemoryStandardCoachingSession,
+        selectedBot,
+        chatHistory.length,
+        coachingDraftOwnerId,
+        handleResumeCoachingSession,
+    ]);
     
     const calculateNewGamificationState = useCallback((
         currentState: GamificationState,
@@ -816,12 +1011,15 @@ const App: React.FC = () => {
         }
     };
     
-    const handleSelectBot = (bot: Bot) => {
+    const confirmSelectBot = (bot: Bot) => {
+        clearCoachingDraftState();
+        setPendingBotSelection(null);
+
         // Stop any ongoing voice output
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
-        
+
         // Stop server audio if playing
         const audioElements = document.querySelectorAll('audio');
         audioElements.forEach(audio => {
@@ -838,12 +1036,30 @@ const App: React.FC = () => {
             setView('gloriaInterviewIntro');
             return;
         }
-        
+
         setSelectedBot(bot);
         setUserMessageCount(0);
         setBaselineMessageCount(0);
         setChatHistory([]);
         setView('chat');
+    };
+
+    const handleSelectBot = (bot: Bot) => {
+        if (hasActiveStandardCoachingSession()) {
+            setPendingBotSelection(bot);
+            return;
+        }
+        confirmSelectBot(bot);
+    };
+
+    const handleConfirmDiscardCoachingForNewBot = () => {
+        if (pendingBotSelection) {
+            confirmSelectBot(pendingBotSelection);
+        }
+    };
+
+    const handleCancelDiscardCoachingForNewBot = () => {
+        setPendingBotSelection(null);
     };
 
     const handleStartGloriaInterview = (mode: GloriaInterviewMode) => {
@@ -885,6 +1101,8 @@ const App: React.FC = () => {
         const targetBot = BOTS.find((b) => b.id === targetBotId);
         if (!targetBot) return;
 
+        clearCoachingDraftState();
+
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
@@ -907,7 +1125,7 @@ const App: React.FC = () => {
             },
         ]);
         setView('chat');
-    }, []);
+    }, [clearCoachingDraftState]);
 
     const handleStartSessionFromEval = (botId: string, examplePrompt: string) => {
         const bot = BOTS.find(b => b.id === botId);
@@ -1060,12 +1278,14 @@ const App: React.FC = () => {
         // --- Standard Session Analysis for all other bots ---
         // In test mode, skip the "no messages" check since test scenarios always have messages
         if ((userMessageCount - baselineMessageCount) === 0 && !isTestMode) {
+            clearCoachingDraftState();
             setSelectedBot(null);
             setChatHistory([]);
             applyIntentLogic(null);
             return;
         }
 
+        clearCoachingDraftState();
         setIsAnalyzing(true);
         try {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
@@ -1314,6 +1534,7 @@ const App: React.FC = () => {
             await new Promise(resolve => setTimeout(resolve, 50));
         }
         
+        clearCoachingDraftState();
         setSelectedBot(null);
         setChatHistory([]);
         applyIntentLogic(null);
@@ -1334,6 +1555,7 @@ const App: React.FC = () => {
         setPracticeEvalError(null);
         setPracticeDraftPrompt(null);
         clearPracticeSessionDraft();
+        clearCoachingDraftState();
         setHighlightSection(null);
         
         // Close menu
@@ -1341,7 +1563,7 @@ const App: React.FC = () => {
         setMenuView(null);
 
         setView('intentPicker');
-    }, []);
+    }, [clearCoachingDraftState]);
 
     const resumeGuestFromAuth = useCallback(() => {
         setMenuView(null);
@@ -2118,6 +2340,8 @@ const App: React.FC = () => {
         handleFileUpload,
         handleQuestionnaireSubmit,
         handlePiiConfirm,
+        handleLcEditorSaveFromContextChoice,
+        handleLcEditorSaveFromLanding,
         handleSelectBot,
         handleReferralSwitch,
         handleStartSessionFromEval,
@@ -2148,6 +2372,7 @@ const App: React.FC = () => {
         t,
         userGuideFocusAnchor,
         setUserGuideFocusAnchor,
+        coachingSessionResume,
     };
 
     const isAnyModalOpen = useIsAnyModalOpen();
@@ -2380,6 +2605,20 @@ const App: React.FC = () => {
                     draft={practiceDraftPrompt}
                     onResume={handleResumePracticeDraft}
                     onDiscard={handleDiscardPracticeDraft}
+                />
+            )}
+            {coachingDraftPrompt && !practiceConfig && view !== 'chat' && !hasInMemoryStandardCoachingSession() && (
+                <CoachingResumePrompt
+                    draft={coachingDraftPrompt}
+                    onResume={handleResumeCoachingSession}
+                    onDiscard={handleDiscardCoachingDraft}
+                />
+            )}
+            {pendingBotSelection && hasActiveStandardCoachingSession() && (
+                <CoachingDiscardSessionModal
+                    coachName={getActiveCoachingCoachName()}
+                    onConfirm={handleConfirmDiscardCoachingForNewBot}
+                    onCancel={handleCancelDiscardCoachingForNewBot}
                 />
             )}
         </div>

@@ -15,6 +15,9 @@ import { serializeGamificationState } from '../utils/gamificationSerializer';
 import Button from './shared/Button';
 import { downloadTextFile } from '../utils/fileDownload';
 import { useFocusTrap } from '../utils/useFocusTrap';
+import CoachingSessionResumeBanner, {
+  type CoachingSessionResumeBannerProps,
+} from './CoachingSessionResumeBanner';
 
 interface ContextChoiceViewProps {
   user: User;
@@ -23,6 +26,7 @@ interface ContextChoiceViewProps {
   onStartNew: () => void;
   onEdit?: () => void;
   gamificationState: GamificationState;
+  coachingResume?: CoachingSessionResumeBannerProps | null;
 }
 
 const removeGamificationKey = (text: string) => {
@@ -62,6 +66,7 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({
   onContinue,
   onStartNew,
   onEdit,
+  coachingResume,
 }) => {
   const { t, language } = useLocalization();
   const [isConfirmingStartNew, setIsConfirmingStartNew] = useState(false);
@@ -127,6 +132,13 @@ const ContextChoiceView: React.FC<ContextChoiceViewProps> = ({
           transition={{ delay: 0.1, duration: 0.4 }}
           className="w-full space-y-4 text-left"
         >
+          {coachingResume && (
+            <CoachingSessionResumeBanner
+              coachName={coachingResume.coachName}
+              messageCount={coachingResume.messageCount}
+              onResume={coachingResume.onResume}
+            />
+          )}
           <div className="p-4 space-y-4 bg-background-secondary/90 backdrop-blur-sm border border-border-primary rounded-card shadow-card">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 p-2 bg-accent-primary/20 rounded-lg">
