@@ -549,6 +549,7 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 - Nach jeder Sitzung findet ein **Comfort Check** statt: Sie bewerten, wie authentisch Sie waren. Profilanpassungen werden erst nach mindestens zwei authentischen Sitzungen vorgeschlagen.
 - Wenn Sie zurück zu DPC oder Aus wechseln, bleiben gesammelte Verfeinerungen erhalten
 - Ideal für: Selbstentdeckung & kontinuierliches Wachstum
+- **Ausnahme:** **Nobody** und **Sam** (Management & Kommunikation) nutzen bei aktiviertem DPFL-Konto weiterhin nur **DPC** — kein Comfort Check und keine Profilverfeinerung nach deren Sitzungen.
 
 ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines neuen Persönlichkeitstests werden alle bisherigen DPFL-Verfeinerungen überschrieben. Das Erstellen oder Aktualisieren der <strong>Persönlichkeits-Signatur</strong> (siehe 4.3) hat hingegen keinen Einfluss auf Ihre Verfeinerungen — im Gegenteil: Es ist besonders sinnvoll, die Signatur nach einigen DPFL-Sitzungen neu zu generieren.</p>')}
 
@@ -1739,6 +1740,7 @@ Having a personality profile alone does not change coaching. Only when you activ
 - After each session, a **Comfort Check** takes place: you rate how authentic you were. Profile adjustments are only suggested after at least two authentic sessions.
 - If you switch back to DPC or Off, collected refinements are preserved
 - Ideal for: Self-discovery & continuous growth
+- **Exception:** **Nobody** and **Sam** (Management & Communication) still use **DPC only** when your account is on DPFL — no Comfort Check or profile refinement after their sessions.
 
 ${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personality test will overwrite all previous DPFL refinements. Creating or updating your <strong>Personality Signature</strong> (see 4.3) does not affect your refinements — on the contrary, regenerating the signature after a few DPFL sessions is especially useful.</p>')}
 

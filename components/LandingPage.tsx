@@ -10,6 +10,9 @@ import { LogoIcon } from './icons/LogoIcon';
 import Button from './shared/Button';
 import { isNativeIOS } from '../utils/platformDetection';
 import { MessageCircle, Mic, ChevronRight } from 'lucide-react';
+import CoachingSessionResumeBanner, {
+  type CoachingSessionResumeBannerProps,
+} from './CoachingSessionResumeBanner';
 
 interface LandingPageProps {
   onSubmit: (context: string) => void;
@@ -18,13 +21,14 @@ interface LandingPageProps {
   onEditContext?: (context: string) => void;
   existingContext?: string;
   isTemplateContext?: boolean;
+  coachingResume?: CoachingSessionResumeBannerProps | null;
 }
 
 const removeGamificationKey = (text: string) => {
     return text.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->\s*$/, '').trim();
 };
 
-const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, onEditContext, existingContext, isTemplateContext }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, onEditContext, existingContext, isTemplateContext, coachingResume }) => {
   const { t, language } = useLocalization();
   const native = isNativeIOS() && window.innerWidth < 768;
   const hideUploadDropzone = isNativeIOS();
@@ -149,6 +153,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
             {t('landing_welcome_subtitle')}
           </p>
         </div>
+
+        {coachingResume && (
+          <div className="w-full max-w-2xl mx-auto text-left">
+            <CoachingSessionResumeBanner
+              coachName={coachingResume.coachName}
+              messageCount={coachingResume.messageCount}
+              onResume={coachingResume.onResume}
+            />
+          </div>
+        )}
 
         <input
           ref={fileInputRef}

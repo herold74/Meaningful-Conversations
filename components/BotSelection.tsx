@@ -23,6 +23,7 @@ import {
   COACH_SESSION_RING_I18N,
   CoachSessionRing,
 } from '../utils/coachSessionRing';
+import { getEffectiveCoachingMode } from '../utils/coachingMode';
 import { resolvePracticeAccess, type PracticeAccessReason } from '../utils/practiceAccess';
 import { isNativeIOS } from '../utils/platformDetection';
 import type { UserIntent } from './IntentPickerView';
@@ -664,11 +665,10 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     const isLocked = !bot.isAvailable;
     const sessionRing = getCoachSessionRing(bot.id);
     const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-resilience' || bot.id === 'chloe-structured-reflection';
-    // Nobody (nexus-goal-path-solution) doesn't support DPFL - show DPC instead
-    // DPFL requires full coaching sessions which Nobody doesn't conduct
+    // Nobody & Sam: DPC only (no DPFL session learning) — see utils/coachingMode.ts
     // Gloria Interview has no coaching integration at all - never show badge
     const isNonCoachingBot = bot.id === 'gloria-interview';
-    const effectiveCoachingMode = isNonCoachingBot ? undefined : ((bot.id === 'nexus-goal-path-solution' || bot.id === 'sam-forward-focused') && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
+    const effectiveCoachingMode = isNonCoachingBot ? undefined : getEffectiveCoachingMode(bot.id, coachingMode);
     // Show coaching mode badge for all bots if profile exists and mode is active
     const showCoachingBadge = hasPersonalityProfile && effectiveCoachingMode && effectiveCoachingMode !== 'off' && !isLocked;
     
