@@ -10,6 +10,8 @@ export const brand = {
   providerName:     import.meta.env.VITE_BRAND_PROVIDER_NAME      || 'manualmode.at',
   providerUrl:      import.meta.env.VITE_BRAND_PROVIDER_URL       || 'https://www.manualmode.at',
   contactEmail:     import.meta.env.VITE_BRAND_CONTACT_EMAIL      || 'support@manualmode.at',
+  /** Coaching / client access inquiries (not general app support). */
+  connectEmail:     import.meta.env.VITE_BRAND_CONNECT_EMAIL      || 'connect@manualmode.at',
   ownerName:        import.meta.env.VITE_BRAND_OWNER_NAME         || 'Günter Herold',
   primaryColor:     import.meta.env.VITE_BRAND_PRIMARY_COLOR      || '#1B7272',
   primaryColorDark: import.meta.env.VITE_BRAND_PRIMARY_COLOR_DARK || '#165a5a',
@@ -36,4 +38,10 @@ export type BrandLoaderType = Brand['loader'];
 export function brandProviderMailtoMarkdown(linkLabel?: string): string {
   const label = linkLabel ?? brand.providerName;
   return `[${label}](mailto:${brand.contactEmail})`;
+}
+
+export type BrandMailPurpose = 'coaching' | 'support';
+
+export function brandEmailForPurpose(purpose: BrandMailPurpose): string {
+  return purpose === 'coaching' ? brand.connectEmail : brand.contactEmail;
 }
