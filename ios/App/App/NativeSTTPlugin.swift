@@ -35,7 +35,7 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
             switch status {
             case .authorized:
                 // Also request microphone permission
-                AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                NativeSTTPlugin.requestMicrophonePermission { granted in
                     call.resolve(["granted": granted && status == .authorized])
                 }
             case .denied, .restricted, .notDetermined:
@@ -62,7 +62,7 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
             SFSpeechRecognizer.requestAuthorization { [weak self] status in
                 if status == .authorized {
                     // Also need mic permission
-                    AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                    NativeSTTPlugin.requestMicrophonePermission { granted in
                         if granted {
                             self?.startRecognition(language: language, call: call)
                         } else {
@@ -79,10 +79,9 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
         }
         
         // Check mic permission
-        let micStatus = AVAudioSession.sharedInstance().recordPermission
-        guard micStatus == .granted else {
+        guard NativeSTTPlugin.microphonePermissionGranted else {
             print("[NativeSTT] Microphone not granted, requesting...")
-            AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+            NativeSTTPlugin.requestMicrophonePermission { [weak self] granted in
                 if granted {
                     self?.startRecognition(language: language, call: call)
                 } else {
@@ -102,6 +101,32 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve()
     }
     
+    // MARK: - Microphone Permission Helpers (iOS 17+ / legacy)
+
+    /// Wraps AVAudioApplication (iOS 17+) / AVAudioSession (< iOS 17) mic permission request
+    /// to avoid deprecation warnings while still supporting the app's iOS 15 deployment target.
+    private static func requestMicrophonePermission(completion: @escaping (Bool) -> Void) {
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission { granted in
+                completion(granted)
+            }
+        } else {
+            AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                completion(granted)
+            }
+        }
+    }
+
+    /// Wraps AVAudioApplication (iOS 17+) / AVAudioSession (< iOS 17) mic permission status
+    /// to avoid deprecation warnings while still supporting the app's iOS 15 deployment target.
+    private static var microphonePermissionGranted: Bool {
+        if #available(iOS 17.0, *) {
+            return AVAudioApplication.shared.recordPermission == .granted
+        } else {
+            return AVAudioSession.sharedInstance().recordPermission == .granted
+        }
+    }
+
     // MARK: - Private Methods
     
     private func startRecognition(language: String, call: CAPPluginCall) {
