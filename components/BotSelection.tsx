@@ -14,9 +14,11 @@ import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { speechService } from '../services/capacitorSpeechService';
 import { brand } from '../config/brand';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import CoachingContactPrompt from './shared/CoachingContactPrompt';
 import TranscriptMicAvatar from './icons/TranscriptMicAvatar';
 import ConnectorTileAvatar from './icons/ConnectorTileAvatar';
 import TutorialTileAvatar from './icons/TutorialTileAvatar';
+import PracticeTileAvatar from './icons/PracticeTileAvatar';
 import {
   getCoachSessionRing,
   getCoachSessionRingClass,
@@ -363,6 +365,7 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
   const { t } = useLocalization();
   const evalLocked = !isPremiumPlus;
   const recordLocked = !isClientPlus;
+  const bothActionsLocked = evalLocked && recordLocked;
 
   const handleLockedAction = (locked: boolean, onUnlocked: () => void) => {
     if (!locked) {
@@ -380,15 +383,24 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
     <motion.div
       className={`flex flex-col items-center text-center p-6 h-full
         bg-background-secondary border border-border-primary rounded-card shadow-card
-        ${isGuest ? 'opacity-75' : ''}`}
+        ${bothActionsLocked ? 'opacity-70' : ''}`}
       title={t(COACH_SESSION_RING_I18N.tool)}
-      whileHover={isGuest ? undefined : { y: -3 }}
+      whileHover={bothActionsLocked ? undefined : { y: -3 }}
       transition={{ duration: 0.15 }}
     >
-      <div className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)} ${isGuest ? 'opacity-60' : ''}`}>
-        <div className={`w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center ${isGuest ? 'filter grayscale opacity-80' : ''}`}>
-          <TranscriptMicAvatar className="w-[4.75rem] h-[4.75rem]" />
+      <div className="relative flex-shrink-0" title={t(COACH_SESSION_RING_I18N.tool)}>
+        <div className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', bothActionsLocked)}`}>
+          <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center">
+            <TranscriptMicAvatar
+              className={`w-[4.75rem] h-[4.75rem] ${bothActionsLocked ? 'filter grayscale opacity-80' : ''}`}
+            />
+          </div>
         </div>
+        {bothActionsLocked && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background-primary/50 backdrop-blur-[2px] rounded-full">
+            <LockIcon className="w-7 h-7 text-content-primary" />
+          </div>
+        )}
       </div>
 
       <div className="mt-3 flex flex-col flex-1 w-full justify-between">
@@ -430,15 +442,9 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
           </div>
           {(evalLocked || recordLocked) && (
             <p className="text-[0.6875rem] text-content-subtle leading-snug pt-1">
-              {isGuest ? (
-                t('botSearch_login_hint')
-              ) : (
-                <>
-                  {evalLocked && t('te_premium_required')}
-                  {evalLocked && recordLocked && ' · '}
-                  {recordLocked && t('botSelection_client_required')}
-                </>
-              )}
+              {evalLocked && t('te_premium_required')}
+              {evalLocked && recordLocked && ' · '}
+              {recordLocked && t('botSelection_client_required')}
             </p>
           )}
         </div>
@@ -638,8 +644,15 @@ const CoachPracticeHero: React.FC<CoachPracticeHeroProps> = ({
             <LockIcon className="w-5 h-5 text-content-secondary" />
           </div>
         )}
-        <div className="rounded-full p-3 bg-accent-primary/10 mb-4">
-          <GraduationCap className="w-10 h-10 text-accent-primary" aria-hidden />
+        <div
+          className={`rounded-full p-0.5 shrink-0 mb-4 ${getCoachSessionRingClass('tool', locked)} ${locked ? 'opacity-60' : ''}`}
+          title={t(COACH_SESSION_RING_I18N.tool)}
+        >
+          <div
+            className={`w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center ${locked ? 'filter grayscale opacity-80' : ''}`}
+          >
+            <PracticeTileAvatar className="w-[4.75rem] h-[4.75rem]" />
+          </div>
         </div>
         <h3 className="text-xl font-semibold text-content-primary">{t('practice_title')}</h3>
         <p className="mt-2 text-sm text-content-secondary leading-relaxed">
@@ -1059,21 +1072,6 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                 className="inline-flex bot-section-pill-silver p-1 items-center gap-1"
                 role="presentation"
               >
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-section-silver/80 hover:text-section-silver transition-colors shrink-0"
-                  onClick={() => setCoachingSectionOpen(prev => !prev)}
-                  aria-expanded={coachingSectionOpen}
-                  aria-label={coachingSectionOpen ? t('botSelection_section_collapse') : t('botSelection_section_expand')}
-                >
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${coachingSectionOpen ? 'rotate-180' : ''}`}
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
                 <div
                   className="inline-flex p-1"
                   role="tablist"
@@ -1114,6 +1112,21 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                   <span>{t('botSelection_tab_practice')}</span>
                 </button>
                 </div>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-section-silver/80 hover:text-section-silver transition-colors shrink-0"
+                  onClick={() => setCoachingSectionOpen(prev => !prev)}
+                  aria-expanded={coachingSectionOpen}
+                  aria-label={coachingSectionOpen ? t('botSelection_section_collapse') : t('botSelection_section_expand')}
+                >
+                  <svg
+                    className={`w-4 h-4 text-section-silver shrink-0 transition-transform duration-200 ${coachingSectionOpen ? 'rotate-180' : ''}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
               </div>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-silver/50 to-transparent" />
             </div>
@@ -1223,10 +1236,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               
               {/* Client contact info for non-clients */}
               {!currentUser?.isClient && (
-                <div className="max-w-4xl mx-auto mt-6">
-                  <p className="text-sm text-section-gold p-3 bg-section-gold-bg dark:bg-section-gold/10 border border-section-gold/30 text-center rounded-lg">
-                    {t('botSelection_clientContactMessage')}
-                  </p>
+                <div className="max-w-4xl mx-auto mt-6 px-1 sm:px-0">
+                  <CoachingContactPrompt
+                    userEmail={currentUser?.email}
+                    messageParams={{ providerName: brand.providerName }}
+                  />
                 </div>
               )}
             </>

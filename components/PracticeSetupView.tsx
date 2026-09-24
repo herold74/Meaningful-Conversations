@@ -26,6 +26,7 @@ import {
 } from '../utils/practiceSetupProgress';
 import PracticeFollowUpReminderModal from './PracticeFollowUpReminderModal';
 import ModalOverlay from './shared/ModalOverlay';
+import CoachingContactPrompt from './shared/CoachingContactPrompt';
 import { resolvePracticeAccess } from '../utils/practiceAccess';
 import {
   getPracticeDifficultyLabel,
@@ -284,6 +285,11 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
     return unlocks.hardUnlockedPairs.some((p) => p.scenarioId === contractingScenarioId);
   }, [isPrivileged, unlocks, contractingScenarioId]);
 
+  const showClientCoachingContact = useMemo(() => {
+    if (practiceAccess.canUseClientFrameworks) return false;
+    return (catalog?.frameworks ?? []).some((f) => f.locked);
+  }, [practiceAccess.canUseClientFrameworks, catalog]);
+
   const currentMatchTier: PracticeMatchTier = useMemo(() => {
     if (!selectedScenario || !selectedFramework) return 'neutral';
     return selectedScenario.frameworkMatches?.[selectedFramework.id] ?? 'neutral';
@@ -536,6 +542,16 @@ const PracticeSetupView: React.FC<PracticeSetupViewProps> = ({
           </div>
         )}
       </div>
+
+      {showClientCoachingContact && (
+        <div className="mb-6">
+          <CoachingContactPrompt
+            tone="default"
+            messageKey="practice_client_contact_hint"
+            userEmail={currentUser?.email}
+          />
+        </div>
+      )}
 
       {/* Entry: concern clarification (blind contracting) */}
       <section className="mb-4 rounded-xl border border-accent-primary/30 overflow-hidden">

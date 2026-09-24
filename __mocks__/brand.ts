@@ -5,6 +5,7 @@ export const brand = {
   providerName: 'manualmode.at',
   providerUrl: 'https://www.manualmode.at',
   contactEmail: 'test@example.com',
+  connectEmail: 'connect@example.com',
   ownerName: 'Test User',
   primaryColor: '#1B7272',
   primaryColorDark: '#165a5a',
