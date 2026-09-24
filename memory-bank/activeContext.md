@@ -8,7 +8,8 @@
 - **PracticeSetupView:** `CoachingContactPrompt` hint shown to non-client users when any client-only framework is locked (`practice_client_contact_hint`).
 - **PracticeTileAvatar:** raster icon (ring frame, parity with other utility tiles) replaces the generic `GraduationCap` icon in `CoachPracticeHero`.
 - **i18n:** DE/EN keys `contact_*`, `practice_client_contact_hint`, reworded `botSelection_clientContactMessage`.
-- **Commits:** `5b3089c9` (iOS fix) · `a3a41c3d` (contact prompt + tile polish) on `main`. Not yet deployed to staging — local `npx tsc --noEmit` + `mailto.test.ts` pass; iOS simulator build clean.
+- **Commits:** `5b3089c9` (iOS fix) · `a3a41c3d` (contact prompt + tile polish) · `e23eec82` (docs) on `main`. Local `npx tsc --noEmit` + `mailto.test.ts` pass; iOS simulator build clean.
+- **Deploy:** **staging b36** **2026-09-24** — `e0b0f2c8` (build sync); https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b36`); frontend + backend health OK. `npm run sync:ios-staging` done — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **36**; Xcode project opened for local Run/Archive (scheme **App**, staging API target).
 
 ## Session handoff (2026-09-24) — Coaching LC return + Sam DPC-only
 
@@ -29,9 +30,9 @@
 - **Coach Practice tile:** `public/avatars/practice-tile.png` (v2 cap + clipboard); `PracticeTileAvatar` in `CoachPracticeHero` with same ring frame as other utility tiles. Review: `DOCUMENTATION/design/practice-tile-icons-review/`.
 
 ## Current Status
-**Version:** 2.6.0 **Build 35** (repo + staging)
-**Branch:** `main` (build 33 sync after tile/practice UI deploy).
-**Staging:** Deployed **2026-09-24**, v**2.6.0** Build **35** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b35`; tutorial-tile single-book + lightbulb icon).
+**Version:** 2.6.0 **Build 36** (repo + staging)
+**Branch:** `main` @ `e0b0f2c8` (build 36 sync after coaching contact prompt + iOS deprecation fix).
+**Staging:** Deployed **2026-09-24**, v**2.6.0** Build **36** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b36`; coaching contact mailto prompt, PracticeTileAvatar, iOS AVAudioApplication fix).
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
 **App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **30** (matches staging b30). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Xcode:** Local **`npm run sync:ios-staging`** done **2026-09-24** after staging b35 — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **35**; scheme **App**, clean build + reinstall on device. API target: **mc-beta** (staging). `@capacitor-community/native-audio` removed from SPM (no AVAudioSession init at plugin load).
