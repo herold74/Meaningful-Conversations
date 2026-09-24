@@ -1,5 +1,15 @@
 # Active Context
 
+## Session handoff (2026-09-24) — Coaching contact prompt (mailto) + iOS deprecation fix
+
+- **iOS:** `NativeSTTPlugin.swift` — wrapped `AVAudioSession.requestRecordPermission`/`recordPermission` behind `#available(iOS 17, *)` helpers (`AVAudioApplication` on 17+, `AVAudioSession` fallback for the iOS 15 deployment target). No functional change; removes 5 Xcode deprecation warnings.
+- **Coaching contact:** new `connect@manualmode.at` (`VITE_BRAND_CONNECT_EMAIL`, `brandEmailForPurpose`) kept separate from general `support@` contact. `utils/mailto.ts` (+ tests) → `ContactMailLink` → `CoachingContactPrompt` (reusable mailto CTA, prefilled subject/body, logged-in vs guest copy).
+- **BotSelection:** non-client footer message now uses `CoachingContactPrompt` instead of static text; Transcript Tools tile lock/hover state keys off `evalLocked && recordLocked` (not guest-only) so partially-unlocked users don't see a dimmed tile; section-collapse chevron moved after the tab pills.
+- **PracticeSetupView:** `CoachingContactPrompt` hint shown to non-client users when any client-only framework is locked (`practice_client_contact_hint`).
+- **PracticeTileAvatar:** raster icon (ring frame, parity with other utility tiles) replaces the generic `GraduationCap` icon in `CoachPracticeHero`.
+- **i18n:** DE/EN keys `contact_*`, `practice_client_contact_hint`, reworded `botSelection_clientContactMessage`.
+- **Commits:** `5b3089c9` (iOS fix) · `a3a41c3d` (contact prompt + tile polish) on `main`. Not yet deployed to staging — local `npx tsc --noEmit` + `mailto.test.ts` pass; iOS simulator build clean.
+
 ## Session handoff (2026-09-24) — Coaching LC return + Sam DPC-only
 
 - **Coaching session draft:** `utils/coachingSessionDraft.ts` — resume banner/prompt, LC editor save → back to chat; new coach requires discard confirm. Skills: `ux-flow`, `gdpr-compliance`.
@@ -13,17 +23,18 @@
 
 ## Session handoff (2026-09-24) — BotSelection utility tile icons
 
-- **Assets:** `public/avatars/tutorial-tile.png`, `connector-tile.png`, `transcript-tile.png`; **`nobody.png`** replaced with approved v3 (abstract bust, glossy 3D line).
+- **Assets:** `public/avatars/tutorial-tile.png` — single open book, no cap (small-display legibility fix, 2026-09-24), left page now shows a schematic lightbulb (insight) + right page schematic text lines (guide-book layout); `connector-tile.png`, `transcript-tile.png`; **`nobody.png`** replaced with approved v3 (abstract bust, glossy 3D line).
 - **Frontend:** `TutorialTileAvatar`, `ConnectorTileAvatar`, `TranscriptMicAvatar` now load raster assets via `resolveAssetUrl` (Capacitor parity with coach avatars).
 - **Review refs:** `DOCUMENTATION/design/botselection-icons-review/` (mockups + alternates; not shipped as runtime deps).
+- **Coach Practice tile:** `public/avatars/practice-tile.png` (v2 cap + clipboard); `PracticeTileAvatar` in `CoachPracticeHero` with same ring frame as other utility tiles. Review: `DOCUMENTATION/design/practice-tile-icons-review/`.
 
 ## Current Status
-**Version:** 2.6.0 **Build 30** (repo + staging)
-**Branch:** `main` @ `f0e2208b` (build 30 sync) · `52aaaf51` remove unused native-audio · `5239a0b9` patch-package.
-**Staging:** Deployed **2026-09-24**, v**2.6.0** Build **32** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b32`).
+**Version:** 2.6.0 **Build 35** (repo + staging)
+**Branch:** `main` (build 33 sync after tile/practice UI deploy).
+**Staging:** Deployed **2026-09-24**, v**2.6.0** Build **35** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b35`; tutorial-tile single-book + lightbulb icon).
 **Production:** Deployed **2026-09-16**, v**2.6.0** Build **19** — https://mc-app.manualmode.at (health OK; Connector routes live; parity with staging b19 until next production promote).
 **App Store:** iOS **2.5.7 live**; **2.6.0** Xcode prep done **2026-09-21** — `npm ci`, `npm run build`, `npx cap sync ios`, `verify:ios-iap` OK. `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **30** (matches staging b30). Copy/Screenshots: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
-**Xcode:** Local **`npm run sync:ios-staging`** done **2026-09-23** after staging b30 — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **30**; scheme **App**, clean build + reinstall on device. API target: **mc-beta** (staging). `@capacitor-community/native-audio` removed from SPM (no AVAudioSession init at plugin load).
+**Xcode:** Local **`npm run sync:ios-staging`** done **2026-09-24** after staging b35 — `MARKETING_VERSION` **2.6.0**, `CURRENT_PROJECT_VERSION` **35**; scheme **App**, clean build + reinstall on device. API target: **mc-beta** (staging). `@capacitor-community/native-audio` removed from SPM (no AVAudioSession init at plugin load).
 **Connector chat UX (`04d34335`):** Header subline = relationship on short viewports, else first sentence of `scenarioBrief`; full `scenarioBrief` on avatar info modal. Local `npm run build && npx cap sync ios` done for Xcode — reinstall from Xcode (build 23).
 **Connector catalog (`5a717d0c` + `718865d9`):** „Eigene Situation“ row + Verbindungs-Signatur-Info-Modal; a11y label/describedby; vignette `scenarioBrief` line-clamp-2; per-card Info → full scenario modal (DE/EN i18n).
 **Intent picker + admin (`ecedb021`, staging b28):** Mobile tile height + desktop grid ohne Viewport-Stretch; Admin Connector tab DE (Markenname „The Connector“); open-situation bucket labels i18n.
