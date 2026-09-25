@@ -3,6 +3,7 @@ import { Mail } from 'lucide-react';
 import { useLocalization } from '../../context/LocalizationContext';
 import { brandEmailForPurpose, type BrandMailPurpose } from '../../config/brand';
 import { buildMailtoHref } from '../../utils/mailto';
+import { openMailtoLink } from '../../utils/openMailto';
 
 export interface ContactMailLinkProps {
   purpose?: BrandMailPurpose;
@@ -79,10 +80,17 @@ const ContactMailLink: React.FC<ContactMailLinkProps> = ({
       ? t('contact_mailto_aria_coaching', { email: destination })
       : t('contact_mailto_aria_support', { email: destination });
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    openMailtoLink(href);
+  };
+
   if (variant === 'link') {
     return (
       <a
         href={href}
+        onClick={handleClick}
         className={`inline-flex items-center justify-center gap-1.5 font-medium underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-sm ${toneLinkClasses[tone]} ${className}`}
         aria-label={ariaLabel}
       >
@@ -95,6 +103,7 @@ const ContactMailLink: React.FC<ContactMailLinkProps> = ({
   return (
     <a
       href={href}
+      onClick={handleClick}
       className={`
         inline-flex items-center justify-center gap-2
         min-h-[44px] w-full sm:w-auto max-w-full
