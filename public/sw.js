@@ -47,6 +47,14 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
     return;
   }
+  try {
+    const protocol = new URL(event.request.url).protocol;
+    if (protocol !== 'http:' && protocol !== 'https:') {
+      return;
+    }
+  } catch {
+    return;
+  }
   // Use a stale-while-revalidate strategy for all GET requests.
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
