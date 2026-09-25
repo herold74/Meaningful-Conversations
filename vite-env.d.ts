@@ -18,6 +18,14 @@ interface ImportMetaEnv {
   readonly VITE_BRAND_CONTACT_EMAIL?: string;
   readonly VITE_BRAND_CONNECT_EMAIL?: string;
   readonly VITE_BRAND_OWNER_NAME?: string;
+  readonly VITE_BRAND_OWNER_LEGAL_NAME?: string;
+  readonly VITE_BRAND_OWNER_PROFESSION_DE?: string;
+  readonly VITE_BRAND_OWNER_PROFESSION_EN?: string;
+  readonly VITE_BRAND_INVOICE_STREET?: string;
+  readonly VITE_BRAND_INVOICE_POSTAL_CODE?: string;
+  readonly VITE_BRAND_INVOICE_CITY?: string;
+  readonly VITE_BRAND_INVOICE_COUNTRY_DE?: string;
+  readonly VITE_BRAND_INVOICE_COUNTRY_EN?: string;
   readonly VITE_BRAND_PRIMARY_COLOR?: string;
   readonly VITE_BRAND_PRIMARY_COLOR_DARK?: string;
   readonly VITE_BRAND_DOMAIN_STAGING?: string;

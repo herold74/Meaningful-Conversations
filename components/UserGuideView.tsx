@@ -289,7 +289,7 @@ ${isNative ? '' : `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
 <div style="padding: 16px;">
 
-Die ${brand.appName} App (MyCoach AI) ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
+Die ${brand.appName} App ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
 
 ### 3.1 Native iOS App (empfohlen für iPhone/iPad)
 
@@ -1506,7 +1506,7 @@ ${isNative ? '' : `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
 <div style="padding: 16px;">
 
-The ${brand.appName} app (MyCoach AI) is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
+The ${brand.appName} app is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
 
 ### 3.1 Native iOS App (recommended for iPhone/iPad)
 
