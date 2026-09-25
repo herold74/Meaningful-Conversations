@@ -441,10 +441,21 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
             </button>
           </div>
           {(evalLocked || recordLocked) && (
-            <p className="text-[0.6875rem] text-content-subtle leading-snug pt-1">
-              {evalLocked && t('te_premium_required')}
-              {evalLocked && recordLocked && ' · '}
-              {recordLocked && t('botSelection_client_required')}
+            <p
+              className="text-[0.625rem] sm:text-[0.6875rem] text-content-subtle leading-snug pt-1 whitespace-nowrap overflow-hidden text-ellipsis"
+              title={
+                evalLocked && recordLocked
+                  ? t('botSelection_transcript_lockedBoth')
+                  : evalLocked
+                    ? t('te_premium_required')
+                    : t('botSelection_client_required')
+              }
+            >
+              {evalLocked && recordLocked
+                ? t('botSelection_transcript_lockedBoth')
+                : evalLocked
+                  ? t('te_premium_required')
+                  : t('botSelection_client_required')}
             </p>
           )}
         </div>

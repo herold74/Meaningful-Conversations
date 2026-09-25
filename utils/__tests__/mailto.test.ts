@@ -21,4 +21,11 @@ describe('buildMailtoHref', () => {
   it('ignores empty subject and body', () => {
     expect(buildMailtoHref({ to: 'a@b.c', subject: '  ', body: '' })).toBe('mailto:a@b.c');
   });
+
+  it('encodes spaces as %20, not literal + (mailto is not form-urlencoded)', () => {
+    const href = buildMailtoHref({ to: 'a@b.c', subject: 'Hello World', body: 'Line one two' });
+    expect(href).not.toContain('+');
+    expect(href).toContain('Hello%20World');
+    expect(href).toContain('Line%20one%20two');
+  });
 });
