@@ -24,3 +24,23 @@ export function buildMailtoHref({ to, subject, body }: MailtoParams): string {
   const query = parts.join('&');
   return query ? `mailto:${trimmedTo}?${query}` : `mailto:${trimmedTo}`;
 }
+
+/** Gmail web compose — works in Chrome without a system mailto handler. */
+export function buildGmailComposeUrl({ to, subject, body }: MailtoParams): string {
+  const params = new URLSearchParams();
+  params.set('view', 'cm');
+  params.set('fs', '1');
+  params.set('to', to.trim());
+  if (subject?.trim()) params.set('su', subject.trim());
+  if (body?.trim()) params.set('body', body.trim());
+  return `https://mail.google.com/mail/?${params.toString()}`;
+}
+
+/** Outlook web compose (personal Microsoft accounts). */
+export function buildOutlookComposeUrl({ to, subject, body }: MailtoParams): string {
+  const params = new URLSearchParams();
+  params.set('to', to.trim());
+  if (subject?.trim()) params.set('subject', subject.trim());
+  if (body?.trim()) params.set('body', body.trim());
+  return `https://outlook.live.com/mail/0/deeplink/compose?${params.toString()}`;
+}

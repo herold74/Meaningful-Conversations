@@ -1,4 +1,4 @@
-import { buildMailtoHref } from '../mailto';
+import { buildGmailComposeUrl, buildMailtoHref } from '../mailto';
 
 describe('buildMailtoHref', () => {
   it('returns bare mailto when only address is set', () => {
@@ -20,6 +20,19 @@ describe('buildMailtoHref', () => {
 
   it('ignores empty subject and body', () => {
     expect(buildMailtoHref({ to: 'a@b.c', subject: '  ', body: '' })).toBe('mailto:a@b.c');
+  });
+
+  it('builds Gmail compose URL with su and body params', () => {
+    const url = buildGmailComposeUrl({
+      to: 'connect@manualmode.at',
+      subject: 'Hello',
+      body: 'Test body',
+    });
+    expect(url.startsWith('https://mail.google.com/mail/?')).toBe(true);
+    const params = new URLSearchParams(url.split('?')[1]);
+    expect(params.get('to')).toBe('connect@manualmode.at');
+    expect(params.get('su')).toBe('Hello');
+    expect(params.get('body')).toBe('Test body');
   });
 
   it('encodes spaces as %20, not literal + (mailto is not form-urlencoded)', () => {
