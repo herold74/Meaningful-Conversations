@@ -1,0 +1,14 @@
+{
+  "$schema": "https://cursor.com/schemas/environment.schema.json",
+  "name": "meaningful-conversations-ui-only",
+  "install": "bash templates/cursor-cloud-environment/install.sh",
+  "start": "bash -lc 'echo UI-only cloud env — frontend uses staging API by default'",
+  "ports": [{ "name": "frontend", "port": 5173 }],
+  "terminals": [
+    {
+      "name": "frontend",
+      "command": "bash -lc 'npm run dev -- --host 0.0.0.0 --port 5173'",
+      "description": "Vite; default backend = staging (no local MariaDB)"
+    }
+  ]
+}
