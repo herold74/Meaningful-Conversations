@@ -1,0 +1,19 @@
+# Minimal MariaDB for Cursor Cloud Agents and local hybrid dev.
+# Podman stacks (podman-compose-staging.yml) stay for server deploy; Cloud VMs use Docker.
+services:
+  mariadb:
+    image: docker.io/library/mariadb:11.2
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootchangeme}
+      MARIADB_DATABASE: ${DB_NAME:-meaningful_conversations_dev}
+      MARIADB_USER: ${DB_USER:-mcdev}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-mcdevchangeme}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
