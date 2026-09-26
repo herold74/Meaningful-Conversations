@@ -106,9 +106,11 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Production v2.6.0 (2026-09-16):** Build **19** — https://mc-app.manualmode.at, health OK (`sw.js` v2.6.0-b19; Connector routes live; parity staging b19)
-- [x] **Staging v2.6.0 (2026-09-21):** Build **23** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.6.0-b23; Connector open situation + catalog polish; deploy `make deploy-staging`, sync commit `bd64ccc4`, feature `2776454b`)
-- [x] **Staging v2.6.0 (2026-09-14):** Build **19** — superseded by Build 23
+- [x] **Production v2.6.0 (2026-09-26):** Build **39** — https://mc-app.manualmode.at, health OK (`sw.js` v2.6.0-b39; parity with staging b39)
+- [x] **Staging v2.6.0 (2026-09-26):** Build **39** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.6.0-b39)
+- [x] **Production v2.6.0 (2026-09-16):** Build **19** — superseded by Build 39
+- [x] **Staging v2.6.0 (2026-09-21):** Build **23** — superseded by Build 39 (Connector open situation + catalog polish; `bd64ccc4`, `2776454b`)
+- [x] **Staging v2.6.0 (2026-09-14):** Build **19** — superseded by Build 39
 - [x] **Production v2.5.6 (2026-08-09):** Build **26** — superseded by v2.6.0
 - [x] **Staging v2.5.6 (2026-08-09):** Build **26** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b26)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **11** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b11; FAQ Intent-Picker-Nachfolger entfernt `bc14105`)
@@ -211,7 +213,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging + Production:** v**2.6.0** Build **19** — production **2026-09-16**, staging **2026-09-14** (`sw.js` v2.6.0-b19, parity verified)
+- **Staging + Production:** v**2.6.0** Build **39** — **2026-09-26** (`sw.js` v2.6.0-b39 on mc-beta + mc-app, parity verified)
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
