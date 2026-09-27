@@ -83,8 +83,12 @@ ssh root@<YOUR_SERVER_IP> 'podman restart meaningful-conversations-tts-productio
 ```
 
 ### Images aufräumen
+Behält **laufende Container** plus die **2 neuesten** Images je Repository, das von einem laufenden Container genutzt wird. Cron täglich **05:45** (`CRON_TZ=Europe/Vienna`), Log `/var/log/podman-image-cleanup.log`.
+
 ```bash
-ssh root@<YOUR_SERVER_IP> 'podman image prune -f'
+ssh root@<YOUR_SERVER_IP> '/usr/local/bin/podman-image-cleanup.sh --dry-run'
+ssh root@<YOUR_SERVER_IP> '/usr/local/bin/podman-image-cleanup.sh'
+# Skript im Repo: scripts/podman-image-cleanup.sh
 ```
 
 ---
