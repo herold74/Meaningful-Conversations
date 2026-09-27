@@ -89,6 +89,24 @@ ssh root@<YOUR_SERVER_IP> 'podman image prune -f'
 
 ---
 
+## 📧 Server-Ops E-Mail-Report
+
+Automatischer Check (Backups, Health, Container, Disk, Security-Patches) — Mail **nur bei WARN/FAIL**, plus **Montag 07:45** kurze OK-Zusammenfassung (Europe/Vienna, vor Production-Deploy).
+
+```bash
+# Auf dem Server (manuell)
+/usr/local/bin/server-ops-report.sh --dry-run
+/usr/local/bin/server-ops-report.sh --test-mail   # Betreff: MC ops report test
+
+# Empfänger (nur auf Server, nicht im Repo)
+# /root/.mc-ops-report.env → MC_OPS_REPORT_EMAIL=support@manualmode.at
+# Vorlage: scripts/mc-ops-report.env.example
+```
+
+Log: `/var/log/mc-ops-report.log` · Cron: root, `CRON_TZ=Europe/Vienna` (07:30 täglich, 07:45 Montag `--weekly-summary`)
+
+---
+
 ## 🚨 Bei Problemen
 
 ### CPU-Last hoch
