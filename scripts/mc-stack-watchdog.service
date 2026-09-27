@@ -1,0 +1,10 @@
+[Unit]
+Description=MC Podman stack watchdog (prod + staging)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/mc-stack-watchdog.sh
+
+[Install]
+WantedBy=multi-user.target

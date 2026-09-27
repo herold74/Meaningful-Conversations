@@ -84,11 +84,11 @@ ssh root@<YOUR_SERVER_IP> 'podman restart meaningful-conversations-tts-productio
 
 ### Podman nach Reboot (MC Prod + Staging)
 
-Stacks starten mit **podman-compose** (kein Docker). Skript: `scripts/podman-compose-boot.sh` → Server `/usr/local/bin/`, Cron `@reboot`.
+Stacks starten mit **podman-compose** (kein Docker). Skript `scripts/podman-compose-boot.sh` → `/usr/local/bin/`; **systemd** `mc-podman-compose-boot.service` (`After=network-online.target`, `After=podman-boot-all.service`).
 
 ```bash
-ssh root@<YOUR_SERVER_IP> '/usr/local/bin/podman-compose-boot.sh'
-ssh root@<YOUR_SERVER_IP> 'crontab -l | grep podman-compose-boot'
+ssh root@<YOUR_SERVER_IP> 'systemctl status mc-podman-compose-boot.service'
+ssh root@<YOUR_SERVER_IP> '/usr/local/bin/podman-compose-boot.sh'   # manuell
 ```
 
 Log: `/var/log/podman-compose-boot.log`
