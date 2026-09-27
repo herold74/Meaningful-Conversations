@@ -145,6 +145,12 @@
 
 ## 📊 Monitoring
 
+### Server-Ops E-Mail-Report
+- **Script (Repo):** `scripts/server-ops-report.sh` → auf Server: `/usr/local/bin/server-ops-report.sh` und `/opt/manualmode-production/scripts/`
+- **Empfänger:** `/root/.mc-ops-report.env` (`MC_OPS_REPORT_EMAIL`, z. B. support@manualmode.at)
+- **Cron:** täglich 07:30 + Montag 07:45 weekly OK (`CRON_TZ=Europe/Vienna`)
+- **Backups geprüft:** `/var/log/meaningful-conversations-backup.log`, Verzeichnisse u. a. `/var/backups/meaningful-conversations/`
+
 ### System Resources
 ```bash
 # Dashboard (interactive)
