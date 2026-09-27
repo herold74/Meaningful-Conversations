@@ -238,11 +238,9 @@ check_monday_logs() {
   if [[ -f /var/log/schema-drift.log ]]; then
     append "schema-drift.log (tail):"
     while IFS= read -r line; do append "  $line"; done < <(tail -n 8 /var/log/schema-drift.log)
-    if grep -q "DRIFT DETECTED\|drift detected\|Unterschied" /var/log/schema-drift.log 2>/dev/null; then
-      if tail -n 30 /var/log/schema-drift.log | grep -qi "drift"; then
-        bump_status WARN
-        append "  -> WARN possible schema drift (see log)"
-      fi
+    if tail -n 25 /var/log/schema-drift.log | grep -qiE 'drift detected|schema drift found|unterschied|✗.*schema'; then
+      bump_status WARN
+      append "  -> WARN possible schema drift (see log)"
     fi
   fi
 }
