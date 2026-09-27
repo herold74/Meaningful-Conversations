@@ -93,6 +93,8 @@ ssh root@<YOUR_SERVER_IP> '/usr/local/bin/podman-compose-boot.sh'   # manuell
 
 Log: `/var/log/podman-compose-boot.log`
 
+Legacy `meaningful-conversations-{staging,production}.service` wurden **2026-09-27** vom Server entfernt (nur noch Boot + Watchdog); siehe `scripts/legacy-systemd-units.md`.
+
 Optional statt `@reboot`-Cron: `scripts/mc-podman-compose-boot.service` (`After=network-online.target`).
 
 ### Geplantes Wartungsfenster (In-App-Banner)
