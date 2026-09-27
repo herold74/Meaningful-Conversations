@@ -218,6 +218,7 @@
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
 - [x] **Admin UI:** Fully responsive design for mobile management
+- [x] **Maintenance windows (local, not deployed):** public banner for registered users and guests; admin section above tabs; migration `20260927130000_add_maintenance_windows` applies on next backend deploy
 
 ## Mobile App (Capacitor)
 - [x] **iOS Integration:** (iPhone and iPad only — macOS availability disabled)

@@ -36,6 +36,7 @@ import TestRunner from './TestRunner';
 import TranscriptRatingsView from './TranscriptRatingsView';
 import AdminPracticeAnalyticsView from './AdminPracticeAnalyticsView';
 import AdminConnectorAnalyticsView from './AdminConnectorAnalyticsView';
+import AdminMaintenancePanel from './AdminMaintenancePanel';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 
 interface AdminViewProps {
@@ -1829,6 +1830,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     </div>
                 )}
             </div>
+            <AdminMaintenancePanel />
             {renderTabs()}
             {renderContent()}
             {resetSuccessData && (

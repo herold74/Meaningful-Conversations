@@ -234,6 +234,10 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Management & communication / brief forward-focused sessions are poor fit for adaptive profile learning; avoids UI/runtime mismatch.
 - **Implementation:** `utils/coachingMode.ts` (`getEffectiveCoachingMode`, `botSupportsDpflSessionFlow`) used in `BotSelection`, `ChatView`, `SessionReview`; client sends effective mode to chat API.
 
+### 30. Maintenance windows — public banner, no extra admin tab (2026-09-27)
+- **Decision:** Scheduled downtime is a `MaintenanceWindow` row. `GET /api/maintenance/current` is public. The banner shows for **registered users and guests** on in-app views including the auth chooser; it stays off login, register, and password screens. Upcoming notices dismiss per browser via `maintenanceNoticeDismissedId` (window id). An **active** window stays visible. Admin editing lives in a collapsible section above the admin tabs — not a new icon tab (Decision #26).
+- **Reasoning:** Guests use the same host; a login-only notice would miss them. Dismiss-by-id avoids a user table (GDPR-minimal) and still resurfaces the next window. Active downtime should not be dismissible.
+
 ### 28. Multi-tile grids — aligned baselines (2026-09-23)
 - **Decision:** Side-by-side (or visually grouped) **selection tiles** must keep **aligned content rails**: same vertical start for body copy, **CTA/footer pinned to the card bottom** (`flex-col` + `mt-auto` on the link row). Use a **fixed min-height on the title block** (typically two lines) so shorter titles do not shift description start.
 - **Reasoning:** Product owner explicitly rejects neighboring tiles where text or links sit on different vertical levels.

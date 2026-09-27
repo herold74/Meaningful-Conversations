@@ -10,6 +10,14 @@
 
 **Deploy note (2026-09-24):** Multiple incremental staging builds **b28–b36** during that week; superseded by **b39** on staging + production (see above).
 
+## Session handoff (2026-09-27) — Maintenance window banner
+
+- **Backend:** `MaintenanceWindow` + migration `20260927130000_add_maintenance_windows`; public `GET /api/maintenance/current`; admin CRUD `/api/admin/maintenance-windows`.
+- **Banner:** under the app header for registered users **and guests** (including the auth chooser). Hidden on login, register, password, and the welcome splash. Upcoming notices dismiss per browser (`maintenanceNoticeDismissedId` = window id). Active windows stay visible. Times in the viewer timezone, plus Europe/Vienna when that differs.
+- **Admin:** collapsible **Wartung** section above the icon tabs (no new tab — Decision #26).
+- **Ops:** `scripts/MONITORING-QUICK-REFERENCE.md`. Not deployed yet — migration runs on next backend deploy.
+- **Decision:** `systemPatterns.md` #30.
+
 ## Session handoff (2026-09-24) — Coaching contact prompt (mailto) + iOS deprecation fix
 
 - **iOS:** `NativeSTTPlugin.swift` — wrapped `AVAudioSession.requestRecordPermission`/`recordPermission` behind `#available(iOS 17, *)` helpers (`AVAudioApplication` on 17+, `AVAudioSession` fallback for the iOS 15 deployment target). No functional change; removes 5 Xcode deprecation warnings.

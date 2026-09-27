@@ -67,6 +67,8 @@ import PracticeResumePrompt from './components/PracticeResumePrompt';
 import CoachingResumePrompt from './components/CoachingResumePrompt';
 import CoachingDiscardSessionModal from './components/CoachingDiscardSessionModal';
 import type { CoachingSessionResumeBannerProps } from './components/CoachingSessionResumeBanner';
+import MaintenanceNoticeBanner from './components/MaintenanceNoticeBanner';
+import { isMaintenanceBannerHidden } from './utils/maintenanceNotice';
 import { isNativeApp } from './utils/platformDetection';
 import {
     botFromPracticeConfig,
@@ -2387,6 +2389,24 @@ const App: React.FC = () => {
     const isChatLandscapeNoSpacer = false;
     const spacerBarHeight = baseSpacerBarHeight;
 
+    const maintenanceBannerTop = useMemo(() => {
+        const safe = effectiveSafeAreaTop;
+        if (!showGamificationBar) {
+            return `calc(0.5rem + ${safe}px)`;
+        }
+        if (useNativeGamificationBar) {
+            return `calc(${spacerBarHeight}px + ${safe}px + 0.5rem)`;
+        }
+        const barRem = minimalBar ? 4 : 5;
+        return `calc(${barRem}rem + ${safe}px + 0.25rem)`;
+    }, [
+        showGamificationBar,
+        useNativeGamificationBar,
+        spacerBarHeight,
+        effectiveSafeAreaTop,
+        minimalBar,
+    ]);
+
     useEffect(() => {
         const handleResize = () => {
             const nextIsLandscape = window.innerWidth > window.innerHeight;
@@ -2518,6 +2538,9 @@ const App: React.FC = () => {
             )}
             {showGamificationBar && useNativeGamificationBar && (
                 <div ref={nativeSpacerRef} style={{ height: `calc(${spacerBarHeight}px + ${effectiveSafeAreaTop}px + 20px)` }} />
+            )}
+            {!isMaintenanceBannerHidden(menuView || view) && (
+                <MaintenanceNoticeBanner top={maintenanceBannerTop} />
             )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-0' : ''}`}>
                 <PageTransition viewKey={menuView || view}>

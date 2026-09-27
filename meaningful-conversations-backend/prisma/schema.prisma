@@ -322,3 +322,24 @@ model ConnectorRunStat {
   @@index([createdAt])
   @@map("connector_run_stats")
 }
+
+/// Scheduled maintenance windows (public notice + admin-managed).
+model MaintenanceWindow {
+  id         String    @id @default(cuid())
+  startsAt   DateTime
+  endsAt     DateTime
+  announceAt DateTime
+  titleDe    String    @db.VarChar(200)
+  titleEn    String    @db.VarChar(200)
+  bodyDe     String    @db.Text
+  bodyEn     String    @db.Text
+  createdBy  String?
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([announceAt])
+  @@index([startsAt])
+  @@index([archivedAt])
+  @@map("maintenance_windows")
+}
