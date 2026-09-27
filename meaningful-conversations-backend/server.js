@@ -336,6 +336,7 @@ async function startServer() {
         app.use('/api/tts', ttsLimiter, require('./routes/tts.js'));
         app.use('/api/personality', require('./routes/personality.js'));
         app.use('/api/debug', require('./routes/debug.js'));
+        app.use('/api/maintenance', require('./routes/maintenance.js'));
 
         // --- Health Check Endpoint ---
         app.get('/api/health', async (req, res) => {

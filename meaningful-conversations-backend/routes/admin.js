@@ -9,6 +9,11 @@ const aiProviderService = require('../services/aiProviderService.js');
 const { getActivityStats } = require('../services/activityTracker.js');
 const { computePracticeAdminStats } = require('../services/practiceStatsService.js');
 const { computeConnectorAdminStats } = require('../services/connectorStatsService.js');
+const {
+    getCurrentMaintenanceNotice,
+    validateMaintenancePayload,
+    maintenanceDbErrorResponse,
+} = require('../services/maintenanceService.js');
 const brand = require('../config/brand');
 
 // Configure marked for email-safe HTML
@@ -879,6 +884,112 @@ router.get('/connector-stats', async (req, res) => {
     } catch (error) {
         console.error('[Admin] connector-stats error:', error);
         res.status(500).json({ error: 'Failed to load connector statistics.' });
+    }
+});
+
+// --- Maintenance windows ---
+
+router.get('/maintenance-windows', async (req, res) => {
+    try {
+        const windows = await prisma.maintenanceWindow.findMany({
+            orderBy: { startsAt: 'desc' },
+            take: 50,
+        });
+        res.json(windows);
+    } catch (error) {
+        const dbErr = maintenanceDbErrorResponse(error);
+        if (dbErr) {
+            return res.status(dbErr.status).json(dbErr.body);
+        }
+        console.error('[Admin] maintenance-windows list error:', error);
+        res.status(500).json({ error: 'Failed to load maintenance windows.' });
+    }
+});
+
+router.post('/maintenance-windows', async (req, res) => {
+    const validationError = validateMaintenancePayload(req.body);
+    if (validationError) {
+        return res.status(400).json({ error: validationError });
+    }
+    const { startsAt, endsAt, announceAt, titleDe, titleEn, bodyDe, bodyEn } = req.body;
+    try {
+        const row = await prisma.maintenanceWindow.create({
+            data: {
+                startsAt: new Date(startsAt),
+                endsAt: new Date(endsAt),
+                announceAt: new Date(announceAt),
+                titleDe: titleDe.trim(),
+                titleEn: titleEn.trim(),
+                bodyDe: bodyDe.trim(),
+                bodyEn: bodyEn.trim(),
+                createdBy: req.userId || null,
+            },
+        });
+        res.status(201).json(row);
+    } catch (error) {
+        const dbErr = maintenanceDbErrorResponse(error);
+        if (dbErr) {
+            return res.status(dbErr.status).json(dbErr.body);
+        }
+        console.error('[Admin] maintenance-windows create error:', error);
+        res.status(500).json({ error: 'Failed to create maintenance window.' });
+    }
+});
+
+router.put('/maintenance-windows/:id', async (req, res) => {
+    const { id } = req.params;
+    const validationError = validateMaintenancePayload(req.body);
+    if (validationError) {
+        return res.status(400).json({ error: validationError });
+    }
+    const { startsAt, endsAt, announceAt, titleDe, titleEn, bodyDe, bodyEn } = req.body;
+    try {
+        const row = await prisma.maintenanceWindow.update({
+            where: { id },
+            data: {
+                startsAt: new Date(startsAt),
+                endsAt: new Date(endsAt),
+                announceAt: new Date(announceAt),
+                titleDe: titleDe.trim(),
+                titleEn: titleEn.trim(),
+                bodyDe: bodyDe.trim(),
+                bodyEn: bodyEn.trim(),
+            },
+        });
+        res.json(row);
+    } catch (error) {
+        if (error?.code === 'P2025') {
+            return res.status(404).json({ error: 'Maintenance window not found.' });
+        }
+        console.error('[Admin] maintenance-windows update error:', error);
+        res.status(500).json({ error: 'Failed to update maintenance window.' });
+    }
+});
+
+router.post('/maintenance-windows/:id/archive', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const row = await prisma.maintenanceWindow.update({
+            where: { id },
+            data: { archivedAt: new Date() },
+        });
+        res.json(row);
+    } catch (error) {
+        if (error?.code === 'P2025') {
+            return res.status(404).json({ error: 'Maintenance window not found.' });
+        }
+        console.error('[Admin] maintenance-windows archive error:', error);
+        res.status(500).json({ error: 'Failed to archive maintenance window.' });
+    }
+});
+
+router.get('/maintenance-windows/preview', async (req, res) => {
+    try {
+        const notice = await getCurrentMaintenanceNotice();
+        res.json({ notice });
+    } catch (error) {
+        console.error('[Admin] maintenance preview error:', error);
+        res.status(500).json({ error: 'Failed to preview maintenance notice.' });
     }
 });
 
