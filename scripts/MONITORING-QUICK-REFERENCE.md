@@ -93,6 +93,19 @@ ssh root@<YOUR_SERVER_IP> 'crontab -l | grep podman-compose-boot'
 
 Log: `/var/log/podman-compose-boot.log`
 
+Optional statt `@reboot`-Cron: `scripts/mc-podman-compose-boot.service` (`After=network-online.target`).
+
+### Geplantes Wartungsfenster (In-App-Banner)
+
+Reboot oder erwartete Nicht-Verfügbarkeit mindestens **48 h** vorher ankündigen (besser 72 h). Bevorzugtes Fenster: **So–Do, 02:00–05:00 Europe/Vienna** — nicht Montag 08:00 (Production-Deploy).
+
+1. Admin → Abschnitt **Wartung** (über den Tabs): Beginn, Ende, „Ankündigen ab“ (Button **Jetzt ankündigen** setzt den Zeitpunkt auf jetzt), Titel und Text DE + EN.
+2. Banner erscheint für **eingeloggte Nutzer und Gäste**, sobald `announceAt` erreicht ist — nicht auf Login/Registrierung.
+3. Vorankündigung kann pro Browser weggeklickt werden (`localStorage`, an die Fenster-ID gebunden). Während das Fenster läuft, bleibt der Banner sichtbar.
+4. Nach Ende oder **Archivieren** verschwindet er. Ein neues Fenster hat eine neue ID und wird wieder angezeigt.
+
+Öffentlicher Endpoint: `GET /api/maintenance/current` (ohne Auth).
+
 ### Images aufräumen
 Behält **laufende Container** plus die **2 neuesten** Images je Repository, das von einem laufenden Container genutzt wird. Cron täglich **05:45** (`CRON_TZ=Europe/Vienna`), Log `/var/log/podman-image-cleanup.log`.
 

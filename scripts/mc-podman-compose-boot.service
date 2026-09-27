@@ -1,0 +1,13 @@
+[Unit]
+Description=Meaningful Conversations Podman Compose stacks (prod + staging)
+Documentation=file:/usr/local/bin/podman-compose-boot.sh
+Wants=network-online.target
+After=network-online.target podman-boot-all.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/podman-compose-boot.sh
+
+[Install]
+WantedBy=multi-user.target
