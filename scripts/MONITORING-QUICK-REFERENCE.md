@@ -82,6 +82,17 @@ make restart-manualmode-production
 ssh root@<YOUR_SERVER_IP> 'podman restart meaningful-conversations-tts-production'
 ```
 
+### Podman nach Reboot (MC Prod + Staging)
+
+Stacks starten mit **podman-compose** (kein Docker). Skript: `scripts/podman-compose-boot.sh` → Server `/usr/local/bin/`, Cron `@reboot`.
+
+```bash
+ssh root@<YOUR_SERVER_IP> '/usr/local/bin/podman-compose-boot.sh'
+ssh root@<YOUR_SERVER_IP> 'crontab -l | grep podman-compose-boot'
+```
+
+Log: `/var/log/podman-compose-boot.log`
+
 ### Images aufräumen
 Behält **laufende Container** plus die **2 neuesten** Images je Repository, das von einem laufenden Container genutzt wird. Cron täglich **05:45** (`CRON_TZ=Europe/Vienna`), Log `/var/log/podman-image-cleanup.log`.
 
