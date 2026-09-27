@@ -10,6 +10,7 @@
 set -euo pipefail
 
 LOG_FILE="/var/log/podman-compose-boot.log"
+LOCK_FILE="/var/run/mc-compose.lock"
 NGINX_IP_SCRIPT="/opt/manualmode-production/update-nginx-ips-all.sh"
 MAX_NETWORK_WAIT=120
 
@@ -51,6 +52,12 @@ wait_for_network() {
   log "WARN: network wait timeout (${MAX_NETWORK_WAIT}s), continuing anyway"
   return 0
 }
+
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] SKIP: another compose operation holds lock" >> "$LOG_FILE"
+  exit 0
+fi
 
 log "=== podman-compose boot ==="
 wait_for_network
