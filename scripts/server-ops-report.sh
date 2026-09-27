@@ -254,11 +254,17 @@ send_mail() {
   fi
   if command -v msmtp >/dev/null && { [[ -f /etc/msmtprc ]] || [[ -f /root/.msmtprc ]]; }; then
     {
+      if [[ -n "${MC_OPS_REPORT_FROM:-}" ]]; then
+        echo "From: $MC_OPS_REPORT_FROM"
+      fi
       echo "To: $MC_OPS_REPORT_EMAIL"
       echo "Subject: $subject"
       echo ""
       echo "$body"
-    } | msmtp -a default "$MC_OPS_REPORT_EMAIL" 2>>"$LOG_FILE" && return 0
+    } | msmtp -a default "$MC_OPS_REPORT_EMAIL" 2>>"$LOG_FILE" && {
+      log_line "Mail sent via msmtp (account default; relay log: /var/log/msmtp.log)"
+      return 0
+    }
   fi
   if command -v mail >/dev/null; then
     echo "$body" | mail -r "mc-ops@$(hostname -f 2>/dev/null || hostname)" -s "$subject" "$MC_OPS_REPORT_EMAIL" 2>>"$LOG_FILE"

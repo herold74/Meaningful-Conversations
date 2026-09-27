@@ -105,6 +105,20 @@ Automatischer Check (Backups, Health, Container, Disk, Security-Patches) — Mai
 
 Log: `/var/log/mc-ops-report.log` · Cron: root, `CRON_TZ=Europe/Vienna` (07:30 täglich, 07:45 Montag `--weekly-summary`)
 
+**Versand (Production):** `msmtp` mit Mailjet-Relay — gleicher Dienst wie `mailService.js` (`MAILJET_*` in `/opt/manualmode-production/.env`). Kein lokales Postfix-Routing nötig.
+
+```bash
+# Auf dem Server (root): msmtp + /etc/msmtprc (chmod 600), Werte aus Production-.env
+# Host in-v3.mailjet.com, Port 587, STARTTLS, user=MAILJET_API_KEY, pass=MAILJET_SECRET_KEY,
+# from=MAILJET_SENDER_EMAIL, account default.
+dnf install -y msmtp   # AlmaLinux/RHEL; Debian: apt install msmtp
+
+/usr/local/bin/server-ops-report.sh --test-mail   # SMTP 250 = OK
+tail /var/log/msmtp.log                           # keine Secrets in Tickets/Chats loggen
+```
+
+Alte Postfix-Testqueues (z. B. Timeout zu mx04.secure-mailgate.com) optional leeren: `postsuper -d ALL`.
+
 ---
 
 ## 🚨 Bei Problemen
