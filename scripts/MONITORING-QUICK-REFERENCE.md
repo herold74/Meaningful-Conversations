@@ -141,7 +141,7 @@ Log: `/var/log/mc-ops-report.log` · Cron: root — **`CRON_TZ=Europe/Vienna` ga
 |------|-------|-----|----------------|
 | **05:45** | täglich | Podman-Image-Cleanup | `/usr/local/bin/podman-image-cleanup.sh` → `/var/log/podman-image-cleanup.log` |
 | **06:00** | täglich | DB-Backup | `backup-databases.sh` → `/var/log/meaningful-conversations-backup.log` |
-| **07:00** | Mo | Schema-Drift | `/usr/local/bin/check-schema-drift.sh` → `/var/log/schema-drift.log` |
+| **07:00** | Mo | Schema-Drift (MC only) | `scripts/check-schema-drift.sh` → `/usr/local/bin/` · `/var/log/schema-drift.log` |
 | **07:15** | Mo | DNF/Update-Check | `scripts/check-updates.sh` → `/var/log/update-check.log` |
 | **07:30** | täglich | Ops-Report | `/usr/local/bin/server-ops-report.sh` (strukturierte Mail: Gesamtstatus / HANDLUNG / KURZÜBERSICHT) |
 | **07:45** | Mo | Ops Wochen-OK-Mail | `server-ops-report.sh --weekly-summary` |
