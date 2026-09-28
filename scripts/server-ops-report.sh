@@ -17,7 +17,6 @@ LOG_FILE="/var/log/mc-ops-report.log"
 BACKUP_LOG="/var/log/meaningful-conversations-backup.log"
 BACKUP_DIRS=(
   "/var/backups/meaningful-conversations"
-  "/root/backups/meaningful-conversations-production"
 )
 BACKUP_MAX_AGE_HOURS=26
 BACKUP_MIN_BYTES=10240
@@ -238,9 +237,15 @@ check_monday_logs() {
   if [[ -f /var/log/schema-drift.log ]]; then
     append "schema-drift.log (tail):"
     while IFS= read -r line; do append "  $line"; done < <(tail -n 8 /var/log/schema-drift.log)
-    if tail -n 25 /var/log/schema-drift.log | grep -qiE 'drift detected|schema drift found|unterschied|✗.*schema'; then
-      bump_status WARN
-      append "  -> WARN possible schema drift (see log)"
+    # Only the latest weekly run (avoid stale DRIFT lines weeks ago in tail -n 25).
+    local last_run_start last_block
+    last_run_start=$(grep -n 'Weekly Schema Drift Check Started' /var/log/schema-drift.log 2>/dev/null | tail -1 | cut -d: -f1)
+    if [[ -n "$last_run_start" ]]; then
+      last_block=$(tail -n +"$last_run_start" /var/log/schema-drift.log 2>/dev/null)
+      if echo "$last_block" | grep -qiE 'drift detected|schema drift found|unterschied|✗.*schema'; then
+        bump_status WARN
+        append "  -> WARN possible schema drift (latest weekly run)"
+      fi
     fi
   fi
 }
