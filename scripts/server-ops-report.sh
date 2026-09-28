@@ -63,7 +63,10 @@ MC_OPS_REPORT_EMAIL="${MC_OPS_REPORT_EMAIL:-support@manualmode.at}"
 log_line() {
   local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $*"
   echo "$msg" >> "$LOG_FILE"
-  echo "$msg"
+  # Avoid duplicate lines when cron redirects stdout to LOG_FILE (see MONITORING-QUICK-REFERENCE).
+  if [[ -t 1 ]] || [[ "$DRY_RUN" == true ]]; then
+    echo "$msg"
+  fi
 }
 
 # Overall: 0=OK, 1=WARN, 2=FAIL
@@ -228,23 +231,57 @@ check_patches() {
   fi
 }
 
-check_monday_logs() {
-  section "Weekly maintenance logs (if present)"
-  if [[ -f /var/log/update-check.log ]]; then
-    append "update-check.log (tail):"
-    while IFS= read -r line; do append "  $line"; done < <(tail -n 8 /var/log/update-check.log)
+check_kernel_reboot() {
+  section "Kernel / reboot (live)"
+  local running latest
+  running=$(uname -r)
+  append "Running kernel: $running"
+  if command -v rpm >/dev/null; then
+    latest=$(rpm -q kernel --last 2>/dev/null | head -1 | sed 's/^kernel-//' | awk '{print $1}')
+    append "Latest installed kernel (rpm --last): ${latest:-unknown}"
+    if [[ -n "$latest" && "$running" != "$latest" ]]; then
+      append "  -> WARN reboot required to run latest installed kernel"
+      bump_status WARN
+    else
+      append "OK running kernel matches latest installed package"
+    fi
   fi
+  if command -v dnf >/dev/null; then
+    local nr_out
+    nr_out=$(dnf needs-restarting -r 2>&1) || true
+    append "dnf needs-restarting -r: ${nr_out//$'\n'/; }"
+    if ! dnf needs-restarting -r >/dev/null 2>&1; then
+      bump_status WARN
+    fi
+  fi
+}
+
+check_weekly_maintenance() {
+  section "Weekly maintenance (log references)"
+  if [[ -f /var/log/update-check.log ]]; then
+    local last_header
+    last_header=$(grep "^Update-Check:" /var/log/update-check.log 2>/dev/null | tail -1 || true)
+    if [[ -n "$last_header" ]]; then
+      append "Historical: last check-updates.sh run — $last_header (full log: /var/log/update-check.log)"
+    else
+      append "Historical: /var/log/update-check.log present (no Update-Check: header yet)"
+    fi
+  else
+    append "Historical: no /var/log/update-check.log (cron Mon 08:00 Vienna: scripts/check-updates.sh → /usr/local/bin/check-updates.sh)"
+  fi
+
   if [[ -f /var/log/schema-drift.log ]]; then
-    append "schema-drift.log (tail):"
-    while IFS= read -r line; do append "  $line"; done < <(tail -n 8 /var/log/schema-drift.log)
-    # Only the latest weekly run (avoid stale DRIFT lines weeks ago in tail -n 25).
     local last_run_start last_block
     last_run_start=$(grep -n 'Weekly Schema Drift Check Started' /var/log/schema-drift.log 2>/dev/null | tail -1 | cut -d: -f1)
     if [[ -n "$last_run_start" ]]; then
+      append "schema-drift.log (latest weekly run only):"
+      while IFS= read -r line; do append "  $line"; done < <(tail -n +"$last_run_start" /var/log/schema-drift.log | head -n 12)
       last_block=$(tail -n +"$last_run_start" /var/log/schema-drift.log 2>/dev/null)
       if echo "$last_block" | grep -qiE 'drift detected|schema drift found|unterschied|✗.*schema'; then
         bump_status WARN
-        append "  -> WARN possible schema drift (latest weekly run)"
+        append "  -> WARN schema drift in latest weekly run"
+      else
+        append "OK latest schema-drift weekly run: no drift reported"
       fi
     fi
   fi
@@ -294,7 +331,8 @@ check_backups
 check_health
 check_disk
 check_patches
-check_monday_logs
+check_kernel_reboot
+check_weekly_maintenance
 
 STATUS_LABEL=OK
 [[ "$OVERALL" -eq 1 ]] && STATUS_LABEL=WARN

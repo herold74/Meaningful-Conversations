@@ -133,7 +133,9 @@ Automatischer Check (Backups, Health, Container, Disk, Security-Patches) — Mai
 # Vorlage: scripts/mc-ops-report.env.example
 ```
 
-Log: `/var/log/mc-ops-report.log` · Cron: root, `CRON_TZ=Europe/Vienna` (07:30 täglich, 07:45 Montag `--weekly-summary`)
+Log: `/var/log/mc-ops-report.log` · Cron: root, `CRON_TZ=Europe/Vienna` (07:30 täglich, 07:45 Montag `--weekly-summary`; Cron nur Script aufrufen — `log_line` schreibt selbst, kein doppeltes `>>` nötig)
+
+Wöchentlicher DNF-Check: `scripts/check-updates.sh` → Server `/usr/local/bin/check-updates.sh`, Log `/var/log/update-check.log` (Montag 08:00 Vienna). Ops-Report nutzt **live** Kernel/`needs-restarting`, nicht veraltete Log-Tails.
 
 **Versand (Production):** `msmtp` mit Mailjet-Relay — gleicher Dienst wie `mailService.js` (`MAILJET_*` in `/opt/manualmode-production/.env`). Kein lokales Postfix-Routing nötig.
 
