@@ -139,15 +139,15 @@ Log: `/var/log/mc-ops-report.log` · Cron: root — **`CRON_TZ=Europe/Vienna` ga
 
 | Zeit | Mo–So | Job | Befehl / Log |
 |------|-------|-----|----------------|
-| **05:45** | täglich | Podman-Image-Cleanup | `/usr/local/bin/podman-image-cleanup.sh` |
+| **05:45** | täglich | Podman-Image-Cleanup | `/usr/local/bin/podman-image-cleanup.sh` → `/var/log/podman-image-cleanup.log` |
+| **06:00** | täglich | DB-Backup | `backup-databases.sh` → `/var/log/meaningful-conversations-backup.log` |
 | **07:00** | Mo | Schema-Drift | `/usr/local/bin/check-schema-drift.sh` → `/var/log/schema-drift.log` |
-| **07:15** | Mo | DNF/Update-Check | `scripts/check-updates.sh` auf Server → `/var/log/update-check.log` |
-| **07:30** | täglich | Ops-Report | `/usr/local/bin/server-ops-report.sh` |
+| **07:15** | Mo | DNF/Update-Check | `scripts/check-updates.sh` → `/var/log/update-check.log` |
+| **07:30** | täglich | Ops-Report | `/usr/local/bin/server-ops-report.sh` (strukturierte Mail: Gesamtstatus / HANDLUNG / KURZÜBERSICHT) |
 | **07:45** | Mo | Ops Wochen-OK-Mail | `server-ops-report.sh --weekly-summary` |
-| **08:00** | täglich | DB-Backup | `backup-databases.sh` → `/var/log/meaningful-conversations-backup.log` (war früher 06:00 **UTC** ≈ 08:00 Vienna) |
-| **08:00** | Mo | Production-Pull | `/root/deploy-mc-production.sh` → `/tmp/mc-deploy-production.log` |
+| **08:30** | Mo | Production-Pull | `/root/deploy-mc-production.sh` → `/tmp/mc-deploy-production.log` |
 
-Montag-Reihenfolge: Schema → Updates → Ops → Weekly-Mail → Backup + Deploy (beide 08:00).
+Montag-Reihenfolge: Backup (06:00) → Schema → Updates → Ops → Weekly-Mail → **Puffer** → Prod-Pull **08:30** (kein Overlap mit Backup). Siehe Project-Doc `server-cron-schedule-proposal.md` §5.
 
 Ops-Report: **live** Kernel/`needs-restarting`; kein veralteter Kernel-Tail aus `update-check.log`.
 
