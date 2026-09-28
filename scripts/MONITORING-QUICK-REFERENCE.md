@@ -149,6 +149,8 @@ Log: `/var/log/mc-ops-report.log` · Cron: root — **`CRON_TZ=Europe/Vienna` ga
 
 Montag-Reihenfolge: Backup (06:00) → Schema → Updates → Ops → Weekly-Mail → **Puffer** → Prod-Pull **08:30** (kein Overlap mit Backup). Siehe Project-Doc `server-cron-schedule-proposal.md` §5.
 
+**meaningful-operations** (eingestellt): 2026-09-28 vom Server entfernt (Container, nginx `mo-beta`, `/opt/*-operations-staging`). Alte DB-Volume optional löschen: `podman volume rm meaningful-operations-staging_mariadb_data`. Backups unter `/var/backups/meaningful-operations/` archiviert.
+
 Ops-Report: **live** Kernel/`needs-restarting`; kein veralteter Kernel-Tail aus `update-check.log`.
 
 **Versand (Production):** `msmtp` mit Mailjet-Relay — gleicher Dienst wie `mailService.js` (`MAILJET_*` in `/opt/manualmode-production/.env`). Kein lokales Postfix-Routing nötig.
