@@ -133,9 +133,23 @@ Automatischer Check (Backups, Health, Container, Disk, Security-Patches) — Mai
 # Vorlage: scripts/mc-ops-report.env.example
 ```
 
-Log: `/var/log/mc-ops-report.log` · Cron: root, `CRON_TZ=Europe/Vienna` (07:30 täglich, 07:45 Montag `--weekly-summary`; Cron nur Script aufrufen — `log_line` schreibt selbst, kein doppeltes `>>` nötig)
+Log: `/var/log/mc-ops-report.log` · Cron: root — **`CRON_TZ=Europe/Vienna` ganz oben**; Ops-Report nur Script aufrufen (`log_line` schreibt selbst, kein `>>`).
 
-Wöchentlicher DNF-Check: `scripts/check-updates.sh` → Server `/usr/local/bin/check-updates.sh`, Log `/var/log/update-check.log` (Montag 08:00 Vienna). Ops-Report nutzt **live** Kernel/`needs-restarting`, nicht veraltete Log-Tails.
+### Root-Cron (alle Zeiten Europe/Vienna)
+
+| Zeit | Mo–So | Job | Befehl / Log |
+|------|-------|-----|----------------|
+| **05:45** | täglich | Podman-Image-Cleanup | `/usr/local/bin/podman-image-cleanup.sh` |
+| **07:00** | Mo | Schema-Drift | `/usr/local/bin/check-schema-drift.sh` → `/var/log/schema-drift.log` |
+| **07:15** | Mo | DNF/Update-Check | `scripts/check-updates.sh` auf Server → `/var/log/update-check.log` |
+| **07:30** | täglich | Ops-Report | `/usr/local/bin/server-ops-report.sh` |
+| **07:45** | Mo | Ops Wochen-OK-Mail | `server-ops-report.sh --weekly-summary` |
+| **08:00** | täglich | DB-Backup | `backup-databases.sh` → `/var/log/meaningful-conversations-backup.log` (war früher 06:00 **UTC** ≈ 08:00 Vienna) |
+| **08:00** | Mo | Production-Pull | `/root/deploy-mc-production.sh` → `/tmp/mc-deploy-production.log` |
+
+Montag-Reihenfolge: Schema → Updates → Ops → Weekly-Mail → Backup + Deploy (beide 08:00).
+
+Ops-Report: **live** Kernel/`needs-restarting`; kein veralteter Kernel-Tail aus `update-check.log`.
 
 **Versand (Production):** `msmtp` mit Mailjet-Relay — gleicher Dienst wie `mailService.js` (`MAILJET_*` in `/opt/manualmode-production/.env`). Kein lokales Postfix-Routing nötig.
 
