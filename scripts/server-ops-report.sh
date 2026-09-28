@@ -1,8 +1,9 @@
 #!/bin/bash
 #
 # Meaningful Conversations — server ops report (health, backups, patches).
-# Run on production server as root (cron). Mail only on WARN/FAIL unless
-# --weekly-summary is used (brief OK line on Mondays before deploy).
+# Run on production server as root (cron, CRON_TZ=Europe/Vienna):
+#   07:30 daily; 07:45 Monday --weekly-summary (before deploy-mc-production 08:00).
+# Mail only on WARN/FAIL unless --weekly-summary (brief OK line on Mondays).
 #
 # Usage:
 #   server-ops-report.sh [--dry-run] [--weekly-summary] [--test-mail]
