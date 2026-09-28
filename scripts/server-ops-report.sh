@@ -160,7 +160,6 @@ check_backups() {
     SUMMARY_BACKUP="FAIL (kein Verzeichnis)"
     add_action "FAIL" "Backup-Verzeichnis fehlt" "SSH: mkdir/Permissions $BACKUP_DIRS; backup-databases.sh"
   fi
-  [[ "$backup_status" == "WARN" && "$SUMMARY_BACKUP" == OK ]] && SUMMARY_BACKUP="WARN"
 }
 
 check_health() {
