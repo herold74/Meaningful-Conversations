@@ -25,6 +25,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/scripts/registry-env.sh"
 # shellcheck source=scripts/ensure-local-podman.sh
 source "$SCRIPT_DIR/scripts/ensure-local-podman.sh"
+# shellcheck source=scripts/prune-local-mc-podman-images.sh
+source "$SCRIPT_DIR/scripts/prune-local-mc-podman-images.sh"
 
 # Will be set after parsing arguments
 ENV_FILE=""
@@ -247,6 +249,8 @@ if [[ "$SKIP_BUILD" == false && "$DRY_RUN" == false ]]; then
         exit 1
     fi
     echo -e "${GREEN}✓ Local Podman ready${NC}"
+    echo -e "${BLUE}Pruning old local MC images (keep last 2 builds per component)...${NC}"
+    prune_local_mc_podman_images 2 "$REGISTRY_URL" "$REGISTRY_IMAGE_PREFIX" "$VERSION"
     echo ""
 fi
 
