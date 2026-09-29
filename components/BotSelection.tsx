@@ -36,6 +36,10 @@ import {
   type KommunikationTutorialTilePosition,
 } from '../utils/kommunikationTutorialTilePrefs';
 
+/** Utility tile icons — same footprint as coach avatars on Bot Selection (no 4.75rem inset). */
+const UTILITY_TILE_AVATAR_CLASS =
+  'w-20 h-20 rounded-full border-2 border-background-secondary object-cover';
+
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   onTranscriptEval?: () => void;
@@ -390,11 +394,9 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
     >
       <div className="relative flex-shrink-0" title={t(COACH_SESSION_RING_I18N.tool)}>
         <div className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', bothActionsLocked)}`}>
-          <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center">
             <TranscriptMicAvatar
-              className={`w-[4.75rem] h-[4.75rem] ${bothActionsLocked ? 'filter grayscale opacity-80' : ''}`}
+              className={`${UTILITY_TILE_AVATAR_CLASS} ${bothActionsLocked ? 'filter grayscale opacity-80' : ''}`}
             />
-          </div>
         </div>
         {bothActionsLocked && (
           <div className="absolute inset-0 flex items-center justify-center bg-background-primary/50 backdrop-blur-[2px] rounded-full">
@@ -493,9 +495,7 @@ const TutorialsTile: React.FC<TutorialsTileProps> = ({ onTutorials }) => {
         className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)}`}
         title={t(COACH_SESSION_RING_I18N.tool)}
       >
-        <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center">
-          <TutorialTileAvatar className="w-[4.75rem] h-[4.75rem]" />
-        </div>
+        <TutorialTileAvatar className={UTILITY_TILE_AVATAR_CLASS} />
       </div>
 
       <div className="mt-3 flex flex-col flex-1 w-full justify-between min-h-0">
@@ -561,11 +561,9 @@ const ConnectorTile: React.FC<ConnectorTileProps> = ({ isGuest, onConnector, onA
         className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', isGuest)} ${isGuest ? 'opacity-60' : ''}`}
         title={t(COACH_SESSION_RING_I18N.tool)}
       >
-        <div
-          className={`w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center ${isGuest ? 'filter grayscale opacity-80' : ''}`}
-        >
-          <ConnectorTileAvatar className="w-[4.75rem] h-[4.75rem]" />
-        </div>
+        <ConnectorTileAvatar
+          className={`${UTILITY_TILE_AVATAR_CLASS} ${isGuest ? 'filter grayscale opacity-80' : ''}`}
+        />
       </div>
 
       <div className="mt-3 flex flex-col flex-1 w-full justify-between">
@@ -659,11 +657,9 @@ const CoachPracticeHero: React.FC<CoachPracticeHeroProps> = ({
           className={`rounded-full p-0.5 shrink-0 mb-4 ${getCoachSessionRingClass('tool', locked)} ${locked ? 'opacity-60' : ''}`}
           title={t(COACH_SESSION_RING_I18N.tool)}
         >
-          <div
-            className={`w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center ${locked ? 'filter grayscale opacity-80' : ''}`}
-          >
-            <PracticeTileAvatar className="w-[4.75rem] h-[4.75rem]" />
-          </div>
+          <PracticeTileAvatar
+            className={`${UTILITY_TILE_AVATAR_CLASS} ${locked ? 'filter grayscale opacity-80' : ''}`}
+          />
         </div>
         <h3 className="text-xl font-semibold text-content-primary">{t('practice_title')}</h3>
         <p className="mt-2 text-sm text-content-secondary leading-relaxed">
