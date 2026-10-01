@@ -2,11 +2,14 @@ const prisma = require('../prismaClient.js');
 
 /**
  * API Pricing (USD per 1 million tokens/characters)
- * Updated: November 2024
- * 
+ * Updated: October 2026
+ *
  * Gemini API Pricing: https://ai.google.dev/pricing
- * Mistral API Pricing: https://mistral.ai/technology/#pricing
+ * Mistral API Pricing: https://mistral.ai/pricing/api/
  * TTS is self-hosted (Piper) and has no API costs
+ *
+ * Mistral `-latest` aliases roll to current GA models; pinned IDs below match
+ * Medium 3.5, Large 3, and Small 4 serverless rates (cached input not modeled).
  */
 const PRICING = {
   // Gemini Models
@@ -18,13 +21,22 @@ const PRICING = {
   'gemini-1.5-pro': { input: 1.25, output: 5.00 },
   'gemini-1.5-flash': { input: 0.075, output: 0.30 },
   
-  // Mistral Models
-  'mistral-small-latest': { input: 0.2, output: 0.6 },       // Mistral Small (2024)
-  'mistral-medium-latest': { input: 2.7, output: 8.1 },      // Mistral Medium (2024)
-  'mistral-large-latest': { input: 3.0, output: 9.0 },       // Mistral Large (2024)
-  'open-mistral-nemo': { input: 0.15, output: 0.15 },        // Open source Mistral Nemo
-  'open-mixtral-8x7b': { input: 0.7, output: 0.7 },          // Open source Mixtral 8x7B
-  'open-mixtral-8x22b': { input: 2.0, output: 6.0 },         // Open source Mixtral 8x22B
+  // Mistral Models (GA serverless, USD / 1M tokens)
+  'mistral-small-latest': { input: 0.15, output: 0.6 },      // Small 4 (alias)
+  'mistral-small-2603': { input: 0.15, output: 0.6 },        // Small 4 pinned
+  'mistral-medium-latest': { input: 1.5, output: 7.5 },      // Medium 3.5 (alias)
+  'mistral-medium-3-5': { input: 1.5, output: 7.5 },
+  'mistral-medium-3': { input: 1.5, output: 7.5 },           // major alias → Medium 3.5
+  'mistral-large-latest': { input: 0.5, output: 1.5 },       // Large 3 (alias)
+  'mistral-large-2512': { input: 0.5, output: 1.5 },         // Large 3 pinned
+  // Legacy / retired IDs (historical ApiUsage rows)
+  'mistral-medium-2508': { input: 0.4, output: 2.0 },        // Medium 3.1 (retired 2026-08)
+  'mistral-medium-2505': { input: 0.4, output: 2.0 },        // Medium 3
+  'mistral-large-2411': { input: 2.0, output: 6.0 },         // Large 2.1 (retired 2026-05)
+  'open-mistral-nemo': { input: 0.15, output: 0.15 },        // Nemo (retired; approximate)
+  'open-mistral-nemo-2407': { input: 0.15, output: 0.15 },
+  'open-mixtral-8x7b': { input: 0.7, output: 0.7 },
+  'open-mixtral-8x22b': { input: 2.0, output: 6.0 },
   
   // TTS Models (self-hosted, no API costs)
   'piper-tts': { input: 0, output: 0 },                      // Self-hosted, free
