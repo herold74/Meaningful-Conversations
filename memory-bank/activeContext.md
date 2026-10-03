@@ -1,14 +1,20 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 39** (repo `BUILD_NUMBER` + `public/sw.js`)
-**Branch:** `main` @ `1c8ca973`
-**Staging:** v**2.6.0** Build **39** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b39`; frontend + backend health OK)
-**Production:** v**2.6.0** Build **39** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b39`; health OK; parity with staging b39)
+**Version:** 2.6.0 **Build 44** (repo `BUILD_NUMBER` + `public/sw.js`)
+**Branch:** `main` @ `070ca109`
+**Staging:** v**2.6.0** Build **44** — https://mc-beta.manualmode.at (deploy **2026-10-01**: backend Mistral API usage pricing `da4dd784`; frontend+backend health OK)
+**Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b44** until next production deploy)
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Connector / docs:** `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md`, `CONNECTOR` routes under `/api/gemini/connector/*`; QA lab + admin analytics per Sept 2026 handoffs below.
 
 **Deploy note (2026-09-24):** Multiple incremental staging builds **b28–b36** during that week; superseded by **b39** on staging + production (see above).
+
+## Session handoff (2026-10-03) — Ops-Report Container-Check
+
+- **Issue:** Daily ops mail (~07:30 Vienna / 05:30 UTC log) falsely reported missing prod containers while `/api/health` was OK.
+- **Cause:** `podman ps | grep -qx` under `set -o pipefail` (SIGPIPE).
+- **Fix:** `server-ops-report.sh` uses filtered `podman ps -q`; live on server `/usr/local/bin/`; repo `070ca109`. Docs: ops log timestamps UTC vs cron Vienna in `MONITORING-QUICK-REFERENCE.md`.
 
 ## Session handoff (2026-09-27) — Maintenance window banner
 
@@ -200,7 +206,7 @@
 - [x] **Staging v2.4.0 deploy** — Build 3 live at mc-beta.manualmode.at
 - [x] **DB migration staging** — 2 practice_evaluations rows migrated (grow → four-stage-coaching)
 - [x] **Production deploy 2.5.0** — done **2026-07-30** (after App Store approval); `migrate-method-ids.js` on production (0 rows)
-- [x] **Staging + Production v2.6.0 Build 39** — parity **2026-09-26** (`sw.js` `v2.6.0-b39` on mc-beta + mc-app)
+- [x] **Staging v2.6.0 Build 43** — **2026-09-29** (mc-beta); **Production Build 41** (mc-app) — not b39
 - [ ] **Remove legacy aliases** — when obsolete per `DOCUMENTATION/LEGACY-ALIASES-REMOVAL.md` (not before App Store ≥2.4.x + DB clean)
 - [ ] **Console.log Cleanup:** ~43 frontend files with hundreds of console.log calls. TTS debug logs (`[TTS-DBG]`) intentionally kept for stability monitoring.
 - [ ] W4F: Update DNS for `w4f-beta.manualmode.at`, then run `certbot`
