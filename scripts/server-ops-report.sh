@@ -211,7 +211,9 @@ check_health() {
 
   section "Production containers (podman)"
   for c in "${PROD_CONTAINERS[@]}"; do
-    if podman ps --format '{{.Names}}' 2>/dev/null | grep -qx "$c"; then
+    # Avoid `podman ps | grep` under pipefail (SIGPIPE → false "not running").
+    running_id=$(podman ps --filter "name=^${c}$" --filter status=running -q 2>/dev/null | head -1)
+    if [[ -n "$running_id" ]]; then
       status=$(podman ps --filter "name=^${c}$" --format '{{.Status}}' 2>/dev/null | head -1)
       append "OK $c: $status"
     else
