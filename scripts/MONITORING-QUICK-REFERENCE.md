@@ -133,7 +133,7 @@ Automatischer Check (Backups, Health, Container, Disk, Security-Patches) — Mai
 # Vorlage: scripts/mc-ops-report.env.example
 ```
 
-Log: `/var/log/mc-ops-report.log` · Cron: root — **`CRON_TZ=Europe/Vienna` ganz oben**; Ops-Report nur Script aufrufen (`log_line` schreibt selbst, kein `>>`).
+Log: `/var/log/mc-ops-report.log` (Zeitstempel **UTC**, Server `timedatectl`; Cron-Zeiten **Europe/Vienna**) · Cron: root — **`CRON_TZ=Europe/Vienna` ganz oben**; Ops-Report nur Script aufrufen (`log_line` schreibt selbst, kein `>>`).
 
 ### Root-Cron (alle Zeiten Europe/Vienna)
 
