@@ -57,6 +57,7 @@ function getPhoneticReplacements(language) {
         phonetic: pattern.phonetic,
         caseSensitive: pattern.caseSensitive !== false,  // Default to true if not specified
         ttsBehavior: pattern.ttsBehavior || null,
+        matchMode: pattern.matchMode || null,
     }));
 }
 
