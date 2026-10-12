@@ -1,5 +1,5 @@
 {
-  "version": "1.0.7",
+  "version": "1.0.8",
   "languages": {
     "de": {
       "description": "Phonetische Ersetzungen für deutsche TTS-Stimmen",
@@ -92,13 +92,15 @@
           "term": "Team",
           "phonetic": "Tiem",
           "caseSensitive": true,
-          "notes": "Team-Begriff"
+          "matchMode": "germanCompound",
+          "notes": "Team-Begriff, Plural Teams, Komposita (Teamleistung, Teammotivation, …)"
         },
         {
           "term": "team",
           "phonetic": "tiem",
           "caseSensitive": true,
-          "notes": "Kleingeschrieben"
+          "matchMode": "germanCompound",
+          "notes": "Kleingeschrieben, Plural teams, Komposita"
         },
         {
           "term": "Goal",

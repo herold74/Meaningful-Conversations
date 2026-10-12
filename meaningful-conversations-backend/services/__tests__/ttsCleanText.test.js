@@ -20,3 +20,26 @@ describe('cleanTextForSpeech — ellipsis pause', () => {
     expect(out).toMatch(/Well,\s+maybe\./);
   });
 });
+
+describe('cleanTextForSpeech — German Team compounds', () => {
+  test('standalone Team', () => {
+    expect(cleanTextForSpeech('Dein Team ist stark.', 'de')).toBe('Dein Tiem ist stark.');
+  });
+
+  test('plural Teams', () => {
+    expect(cleanTextForSpeech('Harmonie in kleinen Teams.', 'de')).toBe(
+      'Harmonie in kleinen Tiems.',
+    );
+  });
+
+  test('compounds Teamleistung and Teammotivation', () => {
+    const out = cleanTextForSpeech('Teamleistung und Teammotivation zählen.', 'de');
+    expect(out).toBe('Tiemleistung und Tiemmotivation zählen.');
+  });
+
+  test('other common compounds', () => {
+    expect(cleanTextForSpeech('Teamgeist beim Teammeeting.', 'de')).toBe(
+      'Tiemgeist beim Tiemmeeting.',
+    );
+  });
+});

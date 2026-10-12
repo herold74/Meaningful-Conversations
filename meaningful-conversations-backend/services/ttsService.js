@@ -246,6 +246,19 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
  * @param {string} language - Language code for phonetic replacements (default: 'de')
  * @returns {string} - Cleaned text ready for TTS
  */
+/**
+ * Build regex for a phonetic term (whole word or German compound prefix).
+ * @param {string} escapedTerm - Regex-safe term
+ * @param {string|null} matchMode - e.g. 'germanCompound' for Team → Teamleistung, Teams
+ */
+function buildPhoneticTermRegex(escapedTerm, matchMode) {
+    if (matchMode === 'germanCompound') {
+        // Standalone, plural (Teams), or compound (Teamleistung)
+        return `\\b${escapedTerm}(?=[a-zäöüß]|s\\b|\\b)`;
+    }
+    return `\\b${escapedTerm}\\b`;
+}
+
 function applyPausePatterns(text, language) {
     const patterns = getPhoneticReplacements(language).filter((p) => p.ttsBehavior === 'pause');
     let out = text;
@@ -287,14 +300,14 @@ function cleanTextForSpeech(text, language = 'de') {
     const replacementLog = [];
     for (const pattern of phoneticReplacements) {
         if (pattern.ttsBehavior === 'pause') continue;
-        const { term, phonetic, caseSensitive } = pattern;
+        const { term, phonetic, caseSensitive, matchMode } = pattern;
         
         // Escape special regex characters in the term
         const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         
         // Create regex with appropriate flags (case-sensitive or not)
         const flags = caseSensitive ? 'g' : 'gi';
-        const regex = new RegExp(`\\b${escapedTerm}\\b`, flags);
+        const regex = new RegExp(buildPhoneticTermRegex(escapedTerm, matchMode), flags);
         
         const matches = cleanedText.match(regex);
         if (matches) {
