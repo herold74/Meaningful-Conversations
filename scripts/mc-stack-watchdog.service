@@ -4,6 +4,8 @@ After=network-online.target
 
 [Service]
 Type=oneshot
+# Backend recreate + nginx IP update can exceed default 90s (Oct 2026 incident: repair killed by timeout).
+TimeoutStartSec=600
 ExecStart=/usr/local/bin/mc-stack-watchdog.sh
 
 [Install]
