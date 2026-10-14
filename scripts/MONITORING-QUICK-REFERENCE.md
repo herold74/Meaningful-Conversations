@@ -73,6 +73,19 @@ make setup-swap-manualmode
 make stop-manualmode-staging
 ```
 
+### MC stack watchdog (auto-heal)
+```bash
+# Timer (every ~3 min)
+systemctl status mc-stack-watchdog.timer
+tail -50 /var/log/mc-stack-watchdog.log
+
+# One-shot repair (prod + staging); uses flock — safe alongside boot script
+systemctl start mc-stack-watchdog.service
+journalctl -u mc-stack-watchdog.service -n 30 --no-pager
+```
+
+Detects **zombie backends** (container running but unhealthy or `:8080` refused), **recreates backend**, then **updates nginx IPs**. Service timeout: **600s**.
+
 ### Container neu starten
 ```bash
 # Production

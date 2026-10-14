@@ -1,20 +1,32 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 44** (repo `BUILD_NUMBER` + `public/sw.js`)
-**Branch:** `main` @ `070ca109`
-**Staging:** v**2.6.0** Build **44** — https://mc-beta.manualmode.at (deploy **2026-10-01**: backend Mistral API usage pricing `da4dd784`; frontend+backend health OK)
-**Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b44** until next production deploy)
+**Version:** 2.6.0 **Build 45** (repo `BUILD_NUMBER` + `public/sw.js`)
+**Branch:** `main` @ `6e65257e` (phonetic Team compounds `f5e49d46`; build sync `6e65257e`)
+**Staging:** v**2.6.0** Build **45** — https://mc-beta.manualmode.at (deploy **2026-10-12**: DE TTS `germanCompound` for Team/Teams/Komposita; frontend+backend health OK)
+**Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b45** until next production deploy)
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Connector / docs:** `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md`, `CONNECTOR` routes under `/api/gemini/connector/*`; QA lab + admin analytics per Sept 2026 handoffs below.
 
 **Deploy note (2026-09-24):** Multiple incremental staging builds **b28–b36** during that week; superseded by **b39** on staging + production (see above).
+
+## Session handoff (2026-10-14) — Prod API 502 + watchdog heal
+
+- **Incident:** `mc-app` **502** ~31h; backend container **running/unhealthy**, `:8080` refused; manual `compose up -d backend` + nginx IP update fixed.
+- **Watchdog gap:** only `compose up -d` when containers “running”; no **backend recreate** or local health probe.
+- **Fix (repo + server):** `mc-stack-watchdog.sh` — `app_tier_ok`, `repair_backend` (`--force-recreate`), public API check; `TimeoutStartSec=600` on unit; ops-report FAIL + HANDLUNG → watchdog log. Timer ~**3 min** auto-heal target.
+- **Post-mortem (store):** `docs/incidents/2026-10-14-prod-backend-502.md` (project agent store).
 
 ## Session handoff (2026-10-03) — Ops-Report Container-Check
 
 - **Issue:** Daily ops mail (~07:30 Vienna / 05:30 UTC log) falsely reported missing prod containers while `/api/health` was OK.
 - **Cause:** `podman ps | grep -qx` under `set -o pipefail` (SIGPIPE).
 - **Fix:** `server-ops-report.sh` uses filtered `podman ps -q`; live on server `/usr/local/bin/`; repo `070ca109`. Docs: ops log timestamps UTC vs cron Vienna in `MONITORING-QUICK-REFERENCE.md`.
+
+## Session handoff (2026-10-03) — AlmaLinux security updates + reboot
+
+- **`dnf update --security`:** kernel `.53.1`, openssh, expat, gawk (no pending security updates after).
+- **Reboot** ~06:25 UTC; kernel now `5.14.0-687.53.1.el9_8.x86_64`; Podman stacks up via boot; nginx IPs refreshed; prod + staging health **HTTP 200**.
 
 ## Session handoff (2026-09-27) — Maintenance window banner
 

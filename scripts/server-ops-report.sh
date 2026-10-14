@@ -30,6 +30,8 @@ PROD_CONTAINERS=(
   meaningful-conversations-frontend-production
   meaningful-conversations-tts-production
 )
+WATCHDOG_LOG="/var/log/mc-stack-watchdog.log"
+WATCHDOG_HANDLUNG="mc-stack-watchdog.timer (alle ~3 min) soll reparieren; Log: $WATCHDOG_LOG; ggf. systemctl start mc-stack-watchdog.service"
 
 DRY_RUN=false
 WEEKLY_SUMMARY=false
@@ -162,45 +164,71 @@ check_backups() {
   fi
 }
 
+_ops_http_code() {
+  curl -s -o "$2" -w '%{http_code}' --connect-timeout 15 --max-time 30 "$1" 2>/dev/null || echo "000"
+}
+
+_ops_backend_ip() {
+  podman inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$1" 2>/dev/null || true
+}
+
+_ops_backend_local_ok() {
+  local name="$1" ip code
+  ip=$(_ops_backend_ip "$name")
+  [[ -z "$ip" ]] && return 1
+  code=$(_ops_http_code "http://${ip}:8080/api/health" /dev/null)
+  [[ "$code" == "200" ]]
+}
+
+_ops_podman_health_status() {
+  podman inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$1" 2>/dev/null || echo "none"
+}
+
+_ops_prod_stack_running() {
+  local c
+  for c in "${PROD_CONTAINERS[@]}"; do
+    podman ps --filter "name=^${c}$" --filter status=running -q 2>/dev/null | grep -q . || return 1
+  done
+  return 0
+}
+
 check_health() {
   section "Health / availability"
-  local code body missing=0
+  local code body missing=0 prod_public_ok=false
+  local prod_backend="meaningful-conversations-backend-production"
 
-  if code=$(curl -sf -o /tmp/mc-ops-health-prod.json -w '%{http_code}' --connect-timeout 15 --max-time 30 "$HEALTH_PROD_URL"); then
-    body=$(head -c 120 /tmp/mc-ops-health-prod.json 2>/dev/null || true)
-    append "Production $HEALTH_PROD_URL -> HTTP $code $body"
-    if [[ "$code" == "200" ]] && grep -q '"status":"ok"' /tmp/mc-ops-health-prod.json 2>/dev/null; then
-      SUMMARY_PROD="OK (HTTP 200)"
-    else
-      bump_status FAIL
-      SUMMARY_PROD="FAIL (HTTP $code)"
-      add_action "FAIL" "Production Health nicht OK" "curl -sS $HEALTH_PROD_URL; SSH: podman ps; podman-compose-production logs backend"
-    fi
-  else
-    append "Production health unreachable: $HEALTH_PROD_URL"
+  code=$(_ops_http_code "$HEALTH_PROD_URL" /tmp/mc-ops-health-prod.json)
+  body=$(head -c 120 /tmp/mc-ops-health-prod.json 2>/dev/null || true)
+  append "Production $HEALTH_PROD_URL -> HTTP $code ${body:-(no body)}"
+  if [[ "$code" == "200" ]] && grep -q '"status":"ok"' /tmp/mc-ops-health-prod.json 2>/dev/null; then
+    SUMMARY_PROD="OK (HTTP 200)"
+    prod_public_ok=true
+  elif [[ "$code" == "502" ]] || [[ "$code" == "503" ]] || [[ "$code" == "504" ]]; then
+    bump_status FAIL
+    SUMMARY_PROD="FAIL (HTTP $code)"
+    add_action "FAIL" "Production API $code (Gateway)" "$WATCHDOG_HANDLUNG"
+  elif [[ "$code" == "000" ]]; then
     bump_status FAIL
     SUMMARY_PROD="FAIL (unreachable)"
-    add_action "FAIL" "Production Health nicht erreichbar" "curl -sS $HEALTH_PROD_URL; nginx + podman ps auf Server"
+    add_action "FAIL" "Production Health nicht erreichbar" "curl -v $HEALTH_PROD_URL; nginx + podman ps; $WATCHDOG_HANDLUNG"
+  else
+    bump_status FAIL
+    SUMMARY_PROD="FAIL (HTTP $code)"
+    add_action "FAIL" "Production Health nicht OK (HTTP $code)" "curl -sS $HEALTH_PROD_URL; podman logs $prod_backend; $WATCHDOG_HANDLUNG"
   fi
 
   if [[ "$CHECK_STAGING_HEALTH" == true ]]; then
     if staging_running=$(podman ps --filter "name=meaningful-conversations-backend-staging" --format '{{.Names}}' 2>/dev/null | wc -l); then
       if [[ "${staging_running:-0}" -gt 0 ]]; then
-        if code=$(curl -sf -o /tmp/mc-ops-health-staging.json -w '%{http_code}' --connect-timeout 15 --max-time 30 "$HEALTH_STAGING_URL"); then
-          body=$(head -c 120 /tmp/mc-ops-health-staging.json 2>/dev/null || true)
-          append "Staging $HEALTH_STAGING_URL -> HTTP $code $body"
-          if [[ "$code" == "200" ]] && grep -q '"status":"ok"' /tmp/mc-ops-health-staging.json 2>/dev/null; then
-            SUMMARY_STAGING="OK (HTTP 200)"
-          else
-            bump_status WARN
-            SUMMARY_STAGING="WARN (HTTP $code)"
-            add_action "WARN" "Staging Health nicht OK" "curl -sS $HEALTH_STAGING_URL; podman ps staging; ggf. compose up"
-          fi
+        code=$(_ops_http_code "$HEALTH_STAGING_URL" /tmp/mc-ops-health-staging.json)
+        body=$(head -c 120 /tmp/mc-ops-health-staging.json 2>/dev/null || true)
+        append "Staging $HEALTH_STAGING_URL -> HTTP $code ${body:-(no body)}"
+        if [[ "$code" == "200" ]] && grep -q '"status":"ok"' /tmp/mc-ops-health-staging.json 2>/dev/null; then
+          SUMMARY_STAGING="OK (HTTP 200)"
         else
-          append "Staging health check failed (containers running)"
           bump_status WARN
-          SUMMARY_STAGING="WARN (curl failed)"
-          add_action "WARN" "Staging Health curl fehlgeschlagen" "curl -sS $HEALTH_STAGING_URL; nginx IPs / staging containers"
+          SUMMARY_STAGING="WARN (HTTP $code)"
+          add_action "WARN" "Staging Health nicht OK (HTTP $code)" "$WATCHDOG_HANDLUNG"
         fi
       else
         append "Staging: not running (skipped)"
@@ -224,7 +252,28 @@ check_health() {
   if [[ "$missing" -gt 0 ]]; then
     bump_status FAIL
     SUMMARY_PROD="FAIL ($missing Container fehlen)"
-    add_action "FAIL" "$missing Production-Container fehlen" "SSH: podman ps -a; cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml up -d; watchdog-Log prüfen"
+    add_action "FAIL" "$missing Production-Container fehlen" "SSH: podman ps -a; cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml up -d; $WATCHDOG_HANDLUNG"
+  elif _ops_prod_stack_running; then
+    local hstatus local_ok front_code
+    hstatus=$(_ops_podman_health_status "$prod_backend")
+    append "Production backend podman health: $hstatus"
+    if [[ "$hstatus" == "unhealthy" ]]; then
+      bump_status FAIL
+      SUMMARY_PROD="FAIL (backend unhealthy)"
+      add_action "FAIL" "Production-Backend podman unhealthy" "$WATCHDOG_HANDLUNG"
+    fi
+    if ! _ops_backend_local_ok "$prod_backend"; then
+      bump_status FAIL
+      SUMMARY_PROD="FAIL (backend :8080 nicht erreichbar)"
+      add_action "FAIL" "Production-Backend lokal :8080/api/health fehlgeschlagen" "$WATCHDOG_HANDLUNG"
+    fi
+    if [[ "$prod_public_ok" == false ]]; then
+      front_code=$(_ops_http_code "https://mc-app.manualmode.at/" /dev/null)
+      append "Production site root -> HTTP $front_code (API war nicht 200)"
+      if [[ "$front_code" == "200" ]]; then
+        append "Hinweis: Frontend erreichbar, API nicht — typisch nginx-IP oder Zombie-Backend"
+      fi
+    fi
   fi
 }
 

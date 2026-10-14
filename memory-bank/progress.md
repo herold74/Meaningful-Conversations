@@ -106,8 +106,10 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Production v2.6.0 (2026-09-26):** Build **39** — https://mc-app.manualmode.at, health OK (`sw.js` v2.6.0-b39; parity with staging b39)
-- [x] **Staging v2.6.0 (2026-09-26):** Build **39** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.6.0-b39)
+- [x] **Staging v2.6.0 (2026-10-12):** Build **45** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b45; DE phonetic Team plurals/compounds `f5e49d46`)
+- [x] **Production v2.6.0:** Build **41** — https://mc-app.manualmode.at (`sw.js` v2.6.0-b41; verified 2026-09-29)
+- [x] **Staging v2.6.0 (2026-09-29):** Build **43** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b43; utility-tile avatar fix + Podman prune hook)
+- [x] **Staging + Production v2.6.0 (2026-09-26):** Build **39** — superseded (production now b41, staging b43)
 - [x] **Production v2.6.0 (2026-09-16):** Build **19** — superseded by Build 39
 - [x] **Staging v2.6.0 (2026-09-21):** Build **23** — superseded by Build 39 (Connector open situation + catalog polish; `bd64ccc4`, `2776454b`)
 - [x] **Staging v2.6.0 (2026-09-14):** Build **19** — superseded by Build 39
@@ -213,7 +215,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging + Production:** v**2.6.0** Build **39** — **2026-09-26** (`sw.js` v2.6.0-b39 on mc-beta + mc-app, parity verified)
+- **Staging:** v**2.6.0** Build **45** (mc-beta) · **Production:** Build **41** (mc-app) — staging verified **2026-10-12** via `sw.js` v2.6.0-b45
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
