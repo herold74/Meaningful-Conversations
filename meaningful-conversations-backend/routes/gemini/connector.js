@@ -577,6 +577,7 @@ router.post('/connector/evaluate', authMiddleware, async (req, res) => {
     evaluationResult.endTypes = prepared.map((p) => p.endType);
     evaluationResult.completedAt = new Date().toISOString();
     evaluationResult.contentLanguage = lang;
+    evaluationResult.primaryLocale = lang;
 
     const durationMs = Date.now() - startTime;
     await trackApiUsage({
