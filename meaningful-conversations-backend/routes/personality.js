@@ -713,6 +713,116 @@ router.post('/translate-external-perspective', authMiddleware, async (req, res) 
   }
 });
 
+const {
+  translateConnectorSignatureSchema,
+  pickTranslatableTexts,
+  buildTranslatePrompt,
+  CONNECTOR_DIMENSIONS: CONNECTOR_TRANSLATE_DIMS,
+} = require('../connector/translateConnectorSignature.js');
+
+/**
+ * POST /api/personality/translate-connector-signature
+ * Translates saved Connector text blocks to the UI / profile language (scores unchanged).
+ */
+router.post('/translate-connector-signature', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  const userId = req.userId;
+  try {
+    const { connector, sourceLang, targetLang } = req.body;
+    if (!connector || typeof connector !== 'object') {
+      return res.status(400).json({ error: 'Missing connector payload.' });
+    }
+
+    const normalizedSource = sourceLang === 'en' ? 'en' : 'de';
+    const normalizedTarget = targetLang === 'en' ? 'en' : 'de';
+    const payload = pickTranslatableTexts(connector);
+    if (!payload.summary?.trim() && payload.strengths.length === 0) {
+      return res.status(400).json({ error: 'Nothing to translate.' });
+    }
+
+    if (normalizedSource === normalizedTarget) {
+      return res.json({
+        success: true,
+        texts: payload,
+        contentLanguage: normalizedTarget,
+      });
+    }
+
+    const costCheck = await checkDailyCostCap(userId);
+    if (!costCheck.allowed) {
+      return res.status(429).json({
+        error: 'Daily usage limit reached. Please try again tomorrow.',
+        errorCode: 'DAILY_COST_CAP',
+      });
+    }
+
+    const prompt = buildTranslatePrompt(payload, normalizedSource, normalizedTarget);
+    const result = await withTimeout(
+      aiProvider.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          temperature: 0.2,
+          maxOutputTokens: 4096,
+          responseMimeType: 'application/json',
+          responseSchema: translateConnectorSignatureSchema,
+        },
+        userRegionPreference: 'optimal',
+        language: normalizedTarget,
+        context: 'analysis',
+      }),
+      60000,
+      'Connector signature translation timed out',
+    );
+
+    let translated;
+    try {
+      translated = parseStructuredJsonResponse(result.text, 'connector signature translation');
+    } catch (parseErr) {
+      console.error('[Personality] connector translate parse error:', parseErr.message);
+      return res.status(500).json({ error: 'Failed to parse translation response.' });
+    }
+
+    for (const dim of CONNECTOR_TRANSLATE_DIMS) {
+      if (!translated[dim]?.evidence) translated[dim] = { evidence: [] };
+    }
+    if (!Array.isArray(translated.strengths)) translated.strengths = [];
+    if (!Array.isArray(translated.growthAreas)) translated.growthAreas = [];
+    if (!Array.isArray(translated.perVignette)) translated.perVignette = payload.perVignette;
+
+    res.json({
+      success: true,
+      texts: translated,
+      contentLanguage: normalizedTarget,
+    });
+
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/translate-connector-signature',
+      model: result.model || 'gemini-2.5-flash',
+      botId: 'connector-signature-translate',
+      inputTokens: result.usage?.inputTokens || 0,
+      outputTokens: result.usage?.outputTokens || 0,
+      durationMs: Date.now() - startTime,
+      success: true,
+    });
+  } catch (error) {
+    console.error('Error translating connector signature:', error);
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/translate-connector-signature',
+      model: 'gemini-2.5-flash',
+      botId: 'connector-signature-translate',
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: Date.now() - startTime,
+      success: false,
+      errorMessage: error.message,
+    }).catch(() => {});
+    res.status(500).json({ error: 'Failed to translate connection signature' });
+  }
+});
+
 /**
  * POST /api/personality/preview-refinement
  * Preview profile refinement based on chat history (dry-run, no save)

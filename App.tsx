@@ -1793,7 +1793,10 @@ const App: React.FC = () => {
                 setView('connectorOpenResults');
             } else {
                 const result = await geminiService.evaluateConnectorRun(evaluable, language, liveMode);
-                setConnectorEvaluation(result.evaluation);
+                setConnectorEvaluation({
+                    ...result.evaluation,
+                    contentLanguage: language,
+                });
                 setConnectorQualitativeEvaluation(null);
                 setSelectedBot(null);
                 setChatHistory([]);
@@ -1901,7 +1904,11 @@ const App: React.FC = () => {
                         : (existing.completedLenses || []);
                 } catch { completedLenses = []; }
             }
-            decrypted.connector = connectorEvaluation;
+            const connectorToSave = {
+                ...connectorEvaluation,
+                contentLanguage: connectorEvaluation.contentLanguage ?? language,
+            };
+            decrypted.connector = connectorToSave;
             if (decrypted.narrativeProfile?.externalPerspectiveNote) {
                 const { externalPerspectiveNote: _removed, ...narrativeWithoutNote } = decrypted.narrativeProfile;
                 decrypted.narrativeProfile = narrativeWithoutNote;
@@ -1916,7 +1923,7 @@ const App: React.FC = () => {
                 big5: decrypted.big5,
                 narratives: decrypted.narratives,
                 narrativeProfile: decrypted.narrativeProfile,
-                connector: connectorEvaluation,
+                connector: connectorToSave,
             }, encryptionKey);
             await api.savePersonalityProfile({
                 testType,
