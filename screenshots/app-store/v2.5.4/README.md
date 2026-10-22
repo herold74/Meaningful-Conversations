@@ -14,6 +14,15 @@
 | 8 | 08-landing-hub-iphone-de.png | Landing / Lebenskontext |
 | 9–10 | 09–10-practice-* | Practice (optional) |
 
-**ASC-Upload:** Nur Dateien aus **`screenshots/app-store/v2.5.4/iphone/`**. Quellen: siehe `manifest.json`.
+**ASC-Upload (Roh-UI):** Dateien in **`iphone/`** — siehe `manifest.json`.
 
-Regenerate: `python3 scripts/prepare-asc-screenshots-from-assets.py`
+**Marketing (Silber-Rahmen + Überschrift):** **`iphone-framed/`** — 1284×2778, Rahmen = frameit-Asset *iPhone 14 Pro Max Silver*, lokal mit Alpha-Maske komponiert (keine Ecken außerhalb des Geräts), Headline oben, Gerät darunter.
+
+> **Achtung:** In `iphone/` sind `04-coaching-chat` (nur Ladescreen) sowie `06`/`07` (Kopien des Welcome-Screens) inhaltlich falsch. Die gerahmte Version nutzt dafür `journey/05-chat/06-coaching-deep-tts-active`, `journey/06-session-review/05-review-findings` und `06-review-updates-diff`.
+
+```bash
+python3 scripts/frame-asc-marketing-device.py v254
+python3 scripts/frame-asc-marketing-device.py v254 --all   # inkl. 09–10 Practice
+```
+
+Regenerate Roh-UI: `python3 scripts/prepare-asc-screenshots-from-assets.py`
