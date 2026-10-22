@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey } from './types';
 import { resolveConnectorPremiumAccess } from './utils/connectorAccess';
 import { userHasSavedConnector } from './utils/connectorProfile';
+import { sealConnectorForProfile } from './utils/connectorSignatureTranslation';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
 import * as userService from './services/userService';
@@ -1796,6 +1797,7 @@ const App: React.FC = () => {
                 setConnectorEvaluation({
                     ...result.evaluation,
                     contentLanguage: language,
+                    primaryLocale: language,
                 });
                 setConnectorQualitativeEvaluation(null);
                 setSelectedBot(null);
@@ -1904,10 +1906,10 @@ const App: React.FC = () => {
                         : (existing.completedLenses || []);
                 } catch { completedLenses = []; }
             }
-            const connectorToSave = {
-                ...connectorEvaluation,
-                contentLanguage: connectorEvaluation.contentLanguage ?? language,
-            };
+            const connectorToSave = sealConnectorForProfile(
+                connectorEvaluation,
+                connectorEvaluation.primaryLocale ?? connectorEvaluation.contentLanguage ?? language,
+            );
             decrypted.connector = connectorToSave;
             if (decrypted.narrativeProfile?.externalPerspectiveNote) {
                 const { externalPerspectiveNote: _removed, ...narrativeWithoutNote } = decrypted.narrativeProfile;

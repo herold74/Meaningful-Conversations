@@ -4,6 +4,8 @@ import { brand } from '../config/brand';
 import { buildAiContentHumanLabel } from './aiContentMarking';
 import { SurveyResult } from '../components/PersonalitySurvey';
 import { extractOperatingSystemText, getExternalPerspectiveText, resolveProfileContentLanguage } from './profileContentLanguage';
+import { resolveConnectorForDisplay } from './connectorSignatureTranslation';
+import type { ConnectorEvaluationResult } from '../types';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -846,6 +848,9 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
   const hasOcean = !!result.big5;
   const hasNarrative = !!result.narrativeProfile;
   const hasConnector = !!result.connector;
+  const connectorForPdf = result.connector
+    ? resolveConnectorForDisplay(result.connector as ConnectorEvaluationResult, language)
+    : null;
 
   const footnotes: { text: string; section: string }[] = [];
   if (hasSD) {
@@ -1061,15 +1066,15 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           </SectionBlock>
         )}
 
-        {hasConnector && result.connector && (
+        {hasConnector && connectorForPdf && (
           <SectionBlock>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>{t.connectorTitle}</Text>
               <Text style={styles.cardSubtitle}>{t.connectorSubtitle}</Text>
-              {result.connector.overallScore != null && (
-                <Text style={styles.connectorScore}>{t.connectorOverall}: {result.connector.overallScore}/10</Text>
+              {connectorForPdf.overallScore != null && (
+                <Text style={styles.connectorScore}>{t.connectorOverall}: {connectorForPdf.overallScore}/10</Text>
               )}
-              {result.connector.summary ? <Text style={styles.connectorSummary}>{result.connector.summary}</Text> : null}
+              {connectorForPdf.summary ? <Text style={styles.connectorSummary}>{connectorForPdf.summary}</Text> : null}
               {(
                 [
                   { key: 'empathy', label: t.connectorDimEmpathy },
@@ -1079,7 +1084,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                   { key: 'steadiness', label: t.connectorDimSteadiness },
                 ] as const
               ).map(({ key, label }) => {
-                const score = result.connector![key]?.score;
+                const score = connectorForPdf![key]?.score;
                 if (typeof score !== 'number') return null;
                 return (
                   <View key={key} style={styles.barRow}>
@@ -1090,10 +1095,10 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                   </View>
                 );
               })}
-              {result.connector.strengths && result.connector.strengths.length > 0 && (
+              {connectorForPdf.strengths && connectorForPdf.strengths.length > 0 && (
                 <View style={{ marginTop: 6 }}>
                   <Text style={{ fontSize: 8.5, fontWeight: 'bold', color: colors.gray700, marginBottom: 3 }}>{t.connectorStrengths}</Text>
-                  {result.connector.strengths.slice(0, 3).map((s: string, i: number) => (
+                  {connectorForPdf.strengths.slice(0, 3).map((s: string, i: number) => (
                     <Text key={i} style={{ fontSize: 8, color: colors.gray600, marginBottom: 2 }}>• {s}</Text>
                   ))}
                 </View>

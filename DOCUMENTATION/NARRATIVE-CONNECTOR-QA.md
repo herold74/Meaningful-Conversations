@@ -72,4 +72,4 @@ For LLM regression on staging, see [`.cursor/skills/meaningful-conversations/llm
 
 Saved `connector` text (summary, strengths, growthAreas, evidence, per-vignette notes) is generated in the **UI language at evaluation time** (`contentLanguage` on the blob). Radar dimension **labels** always follow the current UI locale.
 
-When `contentLanguage` ≠ UI language, the profile view auto-calls `POST /api/personality/translate-connector-signature` (same pattern as Fremdsicht translation), persists the translated blob E2EE, and sets `contentLanguage` to the target language.
+Connector copy is stored in `locales.de` / `locales.en`. The assessment run sets `primaryLocale` and `locales[primary]` only (`sealConnectorForProfile` drops any other locale). A derived locale includes `sourceCompletedAt` === parent `completedAt`; if missing or stale after a new run, the profile view calls `POST /api/personality/translate-connector-signature` once, merges into `locales[target]`, and persists E2EE — no overwrite of the primary locale, no re-translate on later visits while the run is unchanged.

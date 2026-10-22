@@ -20,9 +20,10 @@ import type { ConnectorEvaluationResult } from '../types';
 import type { ExternalPerspectiveNote } from './PersonalitySurvey';
 import { isConnectorStale, isExternalPerspectiveOutdated } from '../utils/connectorProfile';
 import {
-  isConnectorLanguageMismatch,
-  mergeConnectorTranslation,
-  pickConnectorTranslatableTexts,
+  getPrimaryLocaleTexts,
+  mergeDerivedLocale,
+  needsConnectorLocaleTranslation,
+  normalizeConnectorLocales,
   resolveConnectorSourceLanguage,
 } from '../utils/connectorSignatureTranslation';
 import type { ConnectorTranslatableTexts } from '../utils/connectorSignatureTranslation';
@@ -706,11 +707,11 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   useEffect(() => {
     if (!encryptionKey || !profileMetadata || !decryptedData?.connector) return;
 
-    const connector = decryptedData.connector as ConnectorEvaluationResult;
+    const connector = normalizeConnectorLocales(decryptedData.connector as ConnectorEvaluationResult);
     const uiLang = language === 'en' ? 'en' : 'de';
-    if (!isConnectorLanguageMismatch(connector, uiLang)) return;
+    if (!needsConnectorLocaleTranslation(connector, uiLang)) return;
 
-    const attemptKey = `${connector.completedAt || ''}:${connector.summary}:${uiLang}`;
+    const attemptKey = `${connector.completedAt || ''}:${connector.primaryLocale}:${uiLang}`;
     if (connectorTranslationKeyRef.current === attemptKey) return;
     connectorTranslationKeyRef.current = attemptKey;
 
@@ -721,7 +722,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
       try {
         const sourceLang = resolveConnectorSourceLanguage(connector, uiLang);
         const response = await api.translateConnectorSignature({
-          connector: pickConnectorTranslatableTexts(connector) as unknown as Record<string, unknown>,
+          connector: getPrimaryLocaleTexts(connector) as unknown as Record<string, unknown>,
           sourceLang,
           targetLang: uiLang,
         });
@@ -729,7 +730,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         if (cancelled) return;
 
         const translated = response.texts as ConnectorTranslatableTexts;
-        const updatedConnector = mergeConnectorTranslation(connector, translated, uiLang);
+        const updatedConnector = mergeDerivedLocale(connector, uiLang, translated);
         const updatedData = { ...decryptedData, connector: updatedConnector };
         setDecryptedData(updatedData);
         await persistProfileBlob(updatedData);

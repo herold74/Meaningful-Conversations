@@ -514,8 +514,26 @@ export interface ConnectorDimensionScore {
 
 export type ConnectorDimensionKey = 'empathy' | 'presence' | 'curiosity' | 'nonJudgment' | 'steadiness';
 
+/** Localized Connector copy (scores live on the parent result). */
+export interface ConnectorLocaleBundle {
+    summary: string;
+    strengths: string[];
+    growthAreas: string[];
+    perVignette: { vignetteId: string; highlight: string; missedCue: string }[];
+    empathy: { evidence: string[] };
+    presence: { evidence: string[] };
+    curiosity: { evidence: string[] };
+    nonJudgment: { evidence: string[] };
+    steadiness: { evidence: string[] };
+    /** Set on translated locale: must match parent `completedAt` or locale is stale. */
+    sourceCompletedAt?: string;
+}
+
 export interface ConnectorEvaluationResult {
-    /** Language of AI-generated text blocks (summary, strengths, evidence, …). */
+    /** Language of the assessment run (canonical text in `locales[primaryLocale]`). */
+    primaryLocale?: 'de' | 'en';
+    locales?: Partial<Record<'de' | 'en', ConnectorLocaleBundle>>;
+    /** @deprecated Use `primaryLocale` + `locales`; kept for legacy blobs and flat fallbacks. */
     contentLanguage?: 'de' | 'en';
     summary: string;
     empathy: ConnectorDimensionScore;
