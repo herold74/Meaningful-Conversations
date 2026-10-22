@@ -67,3 +67,9 @@ For LLM regression on staging, see [`.cursor/skills/meaningful-conversations/llm
 
 - Modal hint when connector present: `narrative_regenerate_connector_hint`
 - Stale connector confirm: `narrative_regenerate_stale_connector_confirm`
+
+## Connector signature language
+
+Saved `connector` text (summary, strengths, growthAreas, evidence, per-vignette notes) is generated in the **UI language at evaluation time** (`contentLanguage` on the blob). Radar dimension **labels** always follow the current UI locale.
+
+When `contentLanguage` ≠ UI language, the profile view auto-calls `POST /api/personality/translate-connector-signature` (same pattern as Fremdsicht translation), persists the translated blob E2EE, and sets `contentLanguage` to the target language.

@@ -20,6 +20,13 @@ import type { ConnectorEvaluationResult } from '../types';
 import type { ExternalPerspectiveNote } from './PersonalitySurvey';
 import { isConnectorStale, isExternalPerspectiveOutdated } from '../utils/connectorProfile';
 import {
+  isConnectorLanguageMismatch,
+  mergeConnectorTranslation,
+  pickConnectorTranslatableTexts,
+  resolveConnectorSourceLanguage,
+} from '../utils/connectorSignatureTranslation';
+import type { ConnectorTranslatableTexts } from '../utils/connectorSignatureTranslation';
+import {
   extractOperatingSystemText,
   getExternalPerspectiveText,
   isExternalPerspectiveLanguageMismatch,
@@ -385,6 +392,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [externalPerspectiveTranslatedNotice, setExternalPerspectiveTranslatedNotice] = useState(false);
   const [isAutoTranslatingExternalPerspective, setIsAutoTranslatingExternalPerspective] = useState(false);
   const externalPerspectiveTranslationKeyRef = useRef<string | null>(null);
+  const [isAutoTranslatingConnector, setIsAutoTranslatingConnector] = useState(false);
+  const connectorTranslationKeyRef = useRef<string | null>(null);
   useModalOpen(showDpcWarning || showDeleteWarning || showExternalPerspectivePreview);
 
   const contentLanguage = useMemo(
@@ -686,6 +695,49 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         externalPerspectiveTranslationKeyRef.current = null;
       } finally {
         if (!cancelled) setIsAutoTranslatingExternalPerspective(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [decryptedData, encryptionKey, profileMetadata, language]);
+
+  useEffect(() => {
+    if (!encryptionKey || !profileMetadata || !decryptedData?.connector) return;
+
+    const connector = decryptedData.connector as ConnectorEvaluationResult;
+    const uiLang = language === 'en' ? 'en' : 'de';
+    if (!isConnectorLanguageMismatch(connector, uiLang)) return;
+
+    const attemptKey = `${connector.completedAt || ''}:${connector.summary}:${uiLang}`;
+    if (connectorTranslationKeyRef.current === attemptKey) return;
+    connectorTranslationKeyRef.current = attemptKey;
+
+    let cancelled = false;
+
+    (async () => {
+      setIsAutoTranslatingConnector(true);
+      try {
+        const sourceLang = resolveConnectorSourceLanguage(connector, uiLang);
+        const response = await api.translateConnectorSignature({
+          connector: pickConnectorTranslatableTexts(connector) as unknown as Record<string, unknown>,
+          sourceLang,
+          targetLang: uiLang,
+        });
+
+        if (cancelled) return;
+
+        const translated = response.texts as ConnectorTranslatableTexts;
+        const updatedConnector = mergeConnectorTranslation(connector, translated, uiLang);
+        const updatedData = { ...decryptedData, connector: updatedConnector };
+        setDecryptedData(updatedData);
+        await persistProfileBlob(updatedData);
+      } catch (err) {
+        console.error('Auto-translate connector signature failed:', err);
+        connectorTranslationKeyRef.current = null;
+      } finally {
+        if (!cancelled) setIsAutoTranslatingConnector(false);
       }
     })();
 
@@ -1308,6 +1360,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
               <ConnectorProfileSection
                 connector={decryptedData.connector as ConnectorEvaluationResult}
                 nested
+                isTranslating={isAutoTranslatingConnector}
               />
             )}
           </section>
@@ -1326,6 +1379,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             </div>
             <ConnectorProfileSection
               connector={decryptedData.connector as ConnectorEvaluationResult}
+              isTranslating={isAutoTranslatingConnector}
             />
           </section>
         )}

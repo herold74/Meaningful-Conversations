@@ -2604,6 +2604,7 @@
   "profile_connector_subtitle": "Beobachtete Fremdsicht in Gesprächen — Ergänzung zu deinem Selbstbild unter „Wie du interagierst“",
   "profile_connector_completed_at": "Erstellt am {{date}}",
   "profile_connector_disclaimer": "KI-Beobachtung aus drei simulierten Gesprächen (The Connector), kein psychologisches Gutachten.",
+  "profile_connector_translating": "Verbindungs-Signatur wird in deine Profilsprache übertragen…",
   "profile_connector_signature_bridge": "Ergänzung zur Signatur: Deine Verbindungs-Signatur (unter „Wie du interagierst“) kann die Signatur um eine Fremdsicht erweitern — nutze dafür „Signatur mit Fremdsicht anreichern“.",
   "profile_external_perspective_title": "Fremdsicht — Ergänzung zur Signatur",
   "profile_external_perspective_disclaimer": "KI-generiert aus deiner Verbindungs-Signatur (The Connector). Ergänzt dein Selbstbild — ersetzt es nicht.",

@@ -515,6 +515,8 @@ export interface ConnectorDimensionScore {
 export type ConnectorDimensionKey = 'empathy' | 'presence' | 'curiosity' | 'nonJudgment' | 'steadiness';
 
 export interface ConnectorEvaluationResult {
+    /** Language of AI-generated text blocks (summary, strengths, evidence, …). */
+    contentLanguage?: 'de' | 'en';
     summary: string;
     empathy: ConnectorDimensionScore;
     presence: ConnectorDimensionScore;

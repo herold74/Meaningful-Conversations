@@ -392,6 +392,23 @@ export const generateExternalPerspectiveNote = async (data: {
   return response.json();
 };
 
+export const translateConnectorSignature = async (data: {
+  connector: Record<string, unknown>;
+  sourceLang: 'de' | 'en';
+  targetLang: 'de' | 'en';
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/personality/translate-connector-signature`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to translate connection signature');
+  }
+  return response.json();
+};
+
 export const translateExternalPerspectiveNote = async (data: {
   text: string;
   sourceLang: 'de' | 'en';

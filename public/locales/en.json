@@ -2604,6 +2604,7 @@
   "profile_connector_subtitle": "Observed perspective in conversation — complements your self-report under “How you interact”",
   "profile_connector_completed_at": "Created on {{date}}",
   "profile_connector_disclaimer": "AI observation from three simulated conversations (The Connector), not a psychological assessment.",
+  "profile_connector_translating": "Translating your connection signature to your profile language…",
   "profile_connector_signature_bridge": "Signature complement: Your connection signature (under “How you interact”) can extend your signature with an external view — use “Enrich signature with external view”.",
   "profile_external_perspective_title": "External view — complement to your signature",
   "profile_external_perspective_disclaimer": "AI-generated from your connection signature (The Connector). Complements your self-view — does not replace it.",

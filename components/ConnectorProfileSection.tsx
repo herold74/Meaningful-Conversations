@@ -7,11 +7,13 @@ interface ConnectorProfileSectionProps {
   connector: ConnectorEvaluationResult;
   /** When nested under Riemann, use compact heading */
   nested?: boolean;
+  isTranslating?: boolean;
 }
 
 const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
   connector,
   nested = false,
+  isTranslating = false,
 }) => {
   const { t, language } = useLocalization();
 
@@ -66,7 +68,10 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
         <ConnectorRadarChart evaluation={connector} labels={labels} />
       </div>
 
-      {connector.summary && (
+      {isTranslating && (
+        <p className="mt-4 text-sm text-content-tertiary italic">{t('profile_connector_translating')}</p>
+      )}
+      {!isTranslating && connector.summary && (
         <p className="mt-4 text-sm text-content-secondary leading-relaxed">{connector.summary}</p>
       )}
 
@@ -82,7 +87,7 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
         ))}
       </div>
 
-      {connector.strengths?.length > 0 && (
+      {!isTranslating && connector.strengths?.length > 0 && (
         <div className="mt-4">
           <p className="text-sm font-medium text-content-primary mb-2">
             {t('connector_results_strengths_title')}
