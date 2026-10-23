@@ -31,7 +31,7 @@ container_ip() {
 
 http_code() {
   local url="$1"
-  curl -sf -o /dev/null -w '%{http_code}' --connect-timeout 8 --max-time 15 "$url" 2>/dev/null || echo "000"
+  curl -s -o /dev/null -w '%{http_code}' --connect-timeout 8 --max-time 15 "$url" 2>/dev/null || echo "000"
 }
 
 backend_local_health_ok() {
@@ -129,6 +129,58 @@ public_health_ok() {
   [[ "$(http_code "$1")" == "200" ]]
 }
 
+wait_app_tier() {
+  local env="$1" tries=0
+  while [[ $tries -lt 12 ]]; do
+    if app_tier_ok "$env"; then
+      return 0
+    fi
+    sleep 5
+    tries=$((tries + 1))
+  done
+  return 1
+}
+
+nginx_backend_ip_mismatch() {
+  local env="$1"
+  local conf="/etc/nginx/conf.d/${env}-meaningful-conversations.conf"
+  local backend="meaningful-conversations-backend-${env}"
+  local ip upstream
+  [[ -f "$conf" ]] || return 1
+  ip=$(container_ip "$backend")
+  [[ -z "$ip" ]] && return 1
+  upstream=$(grep -m1 'proxy_pass http://' "$conf" 2>/dev/null | sed -n 's|.*http://\([0-9.]*\):8080.*|\1|p')
+  [[ -n "$upstream" && "$ip" != "$upstream" ]]
+}
+
+handle_public_api() {
+  local env="$1" url="$2"
+  if public_health_ok "$url"; then
+    return 0
+  fi
+  log "WARN: public API health not 200 ($env) HTTP $(http_code "$url")"
+  if app_tier_ok "$env" || nginx_backend_ip_mismatch "$env"; then
+    log "INFO: backend local OK or nginx IP mismatch ($env) — refresh nginx only"
+    update_nginx
+    if public_health_ok "$url"; then
+      return 0
+    fi
+  fi
+  repair_backend "$env" && repaired=true
+  wait_app_tier "$env" || true
+  update_nginx
+  if public_health_ok "$url"; then
+    return 0
+  fi
+  if ! app_tier_ok "$env"; then
+    log "WARN: app tier still bad after backend repair ($env) — full stack up"
+    repair_stack "$env" && repaired=true
+    wait_app_tier "$env" || true
+    update_nginx
+  fi
+  public_health_ok "$url"
+}
+
 update_nginx() {
   if [[ -x "$NGINX_IP_SCRIPT" ]]; then
     log "Updating nginx IPs after repair..."
@@ -147,29 +199,16 @@ for env in production staging; do
   elif ! app_tier_ok "$env"; then
     log "WARN: app tier unhealthy ($env) — backend local health or podman health failed"
     repair_backend "$env" && repaired=true
+    wait_app_tier "$env" || true
+    update_nginx
+  elif nginx_backend_ip_mismatch "$env"; then
+    log "WARN: nginx backend IP mismatch ($env)"
+    update_nginx
   fi
 done
 
-# Public URL checks (catches nginx stale IP or API 502 while static frontend may work)
-if ! public_health_ok "https://mc-app.manualmode.at/api/health"; then
-  log "WARN: production public API health not 200"
-  repair_backend production && repaired=true
-  if ! public_health_ok "https://mc-app.manualmode.at/api/health"; then
-    repair_stack production && repaired=true
-  fi
-fi
-
-if ! public_health_ok "https://mc-beta.manualmode.at/api/health"; then
-  log "WARN: staging public API health not 200"
-  repair_backend staging && repaired=true
-  if ! public_health_ok "https://mc-beta.manualmode.at/api/health"; then
-    repair_stack staging && repaired=true
-  fi
-fi
-
-if [[ "$repaired" == true ]]; then
-  update_nginx
-fi
+handle_public_api production "https://mc-app.manualmode.at/api/health" || true
+handle_public_api staging "https://mc-beta.manualmode.at/api/health" || true
 
 if stack_containers_running production && stack_containers_running staging \
   && public_health_ok "https://mc-app.manualmode.at/api/health" \
