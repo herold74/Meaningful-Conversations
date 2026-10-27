@@ -86,6 +86,7 @@ import {
     saveCoachingSessionDraft,
     type CoachingSessionDraft,
 } from './utils/coachingSessionDraft';
+import { canOfferCoachingSessionResume } from './utils/coachingSessionResume';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -288,6 +289,7 @@ const App: React.FC = () => {
     const handleLogout = useCallback(() => {
         clearPracticeSessionDraft();
         setPracticeDraftPrompt(null);
+        setCoachingDraftPrompt(null);
         authLogout();
     }, [authLogout]);
 
@@ -374,11 +376,14 @@ const App: React.FC = () => {
     }, [coachingDraftOwnerId, hasInMemoryStandardCoachingSession]);
 
     useEffect(() => {
+        if (!canOfferCoachingSessionResume(view)) {
+            return;
+        }
         if (!coachingDraftOwnerId || practiceConfig || connectorRun) return;
         if (hasInMemoryStandardCoachingSession()) return;
         const draft = loadCoachingSessionDraft(coachingDraftOwnerId);
         if (draft) setCoachingDraftPrompt(draft);
-    }, [coachingDraftOwnerId, practiceConfig, connectorRun, hasInMemoryStandardCoachingSession]);
+    }, [view, coachingDraftOwnerId, practiceConfig, connectorRun, hasInMemoryStandardCoachingSession]);
 
     useEffect(() => {
         if (!coachingDraftOwnerId || !selectedBot || isTestMode || practiceConfig || connectorRun) return;
@@ -490,7 +495,13 @@ const App: React.FC = () => {
             'lcEditorFromContextChoice',
             'botSelection',
         ];
-        if (view === 'chat' || practiceConfig || connectorRun || !resumeViews.includes(view)) {
+        if (
+            !canOfferCoachingSessionResume(view)
+            || view === 'chat'
+            || practiceConfig
+            || connectorRun
+            || !resumeViews.includes(view)
+        ) {
             return null;
         }
         if (hasInMemoryStandardCoachingSession() && selectedBot) {
@@ -2639,7 +2650,11 @@ const App: React.FC = () => {
                     onDiscard={handleDiscardPracticeDraft}
                 />
             )}
-            {coachingDraftPrompt && !practiceConfig && view !== 'chat' && !hasInMemoryStandardCoachingSession() && (
+            {coachingDraftPrompt
+                && canOfferCoachingSessionResume(view)
+                && !practiceConfig
+                && view !== 'chat'
+                && !hasInMemoryStandardCoachingSession() && (
                 <CoachingResumePrompt
                     draft={coachingDraftPrompt}
                     onResume={handleResumeCoachingSession}
