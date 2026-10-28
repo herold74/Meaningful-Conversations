@@ -1,4 +1,4 @@
-import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog, ConnectorVignettePublic, ConnectorVignetteCatalogEntry, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorChatHandoff } from '../types';
+import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog, ConnectorVignettePublic, ConnectorVignetteCatalogEntry, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorChatHandoff, ConnectorHandoffPayload } from '../types';
 import { apiFetch, getApiBaseUrl, getSession } from './api';
 import type { ConnectorRunMode } from '../utils/connectorRun';
 
@@ -13,6 +13,7 @@ export const sendMessage = async (
     coachingMode?: string,
     decryptedPersonalityProfile?: any,
     connectorChatHandoff?: ConnectorChatHandoff | null,
+    connectorHandoffPayload?: ConnectorHandoffPayload | null,
 ): Promise<{ text: string; provider?: string | null }> => {
 
     return await apiFetch('/gemini/chat/send-message', {
@@ -26,6 +27,7 @@ export const sendMessage = async (
             coachingMode,
             decryptedPersonalityProfile,
             connectorChatHandoff: connectorChatHandoff ?? undefined,
+            connectorHandoffPayload: connectorHandoffPayload ?? undefined,
         }),
     });
 };
@@ -46,6 +48,7 @@ export const sendMessageStream = async (
     coachingMode?: string,
     decryptedPersonalityProfile?: any,
     connectorChatHandoff?: ConnectorChatHandoff | null,
+    connectorHandoffPayload?: ConnectorHandoffPayload | null,
 ): Promise<{ text: string; provider?: string | null }> => {
     const session = getSession();
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -61,6 +64,7 @@ export const sendMessageStream = async (
             botId, context, history, language, isNewSession,
             coachingMode, decryptedPersonalityProfile,
             connectorChatHandoff: connectorChatHandoff ?? undefined,
+            connectorHandoffPayload: connectorHandoffPayload ?? undefined,
             stream: true,
         }),
     });

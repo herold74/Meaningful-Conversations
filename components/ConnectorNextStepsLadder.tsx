@@ -11,6 +11,7 @@ import {
   isConnectorCoachBotAvailable,
   microExerciseKey,
 } from '../utils/connectorNextSteps';
+import { buildConnectorHandoffPayload } from '../utils/connectorHandoffPayload';
 
 interface ConnectorNextStepsLadderProps {
   evaluation: ConnectorEvaluationResult;
@@ -200,7 +201,12 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={() => onStartCoachSession(coach.botId, starterPrompt, { serverHandoff: true })}
+                        onClick={() =>
+                          onStartCoachSession(coach.botId, starterPrompt, {
+                            serverHandoff: true,
+                            handoffPayload: buildConnectorHandoffPayload(evaluation, selectedDimension),
+                          })
+                        }
                         className="inline-flex items-center gap-1 text-xs font-medium text-button-foreground-on-accent bg-accent-primary hover:bg-accent-primary-hover px-3 py-1.5 rounded-md transition-colors"
                       >
                         {t('connector_ladder_step3_start_coach', { coach: coachBot.name })}

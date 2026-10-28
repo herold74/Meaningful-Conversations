@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions, ConnectorHandoffPayload } from './types';
 import { resolveConnectorPremiumAccess } from './utils/connectorAccess';
 import { userHasSavedConnector } from './utils/connectorProfile';
 import { sealConnectorForProfile } from './utils/connectorSignatureTranslation';
@@ -212,12 +212,18 @@ const App: React.FC = () => {
     const [gloriaConnectionPrep, setGloriaConnectionPrep] = useState(false);
     /** Invisible Connector ladder handoff for chat API (Start conversation button only). */
     const [connectorChatHandoff, setConnectorChatHandoff] = useState<ConnectorChatHandoff | null>(null);
+    /** One-turn API payload for Connector scene context (cleared after first assistant reply). */
+    const [connectorHandoffPayload, setConnectorHandoffPayload] = useState<ConnectorHandoffPayload | null>(null);
 
     const connectorHandoffForBot = (botId: string): ConnectorChatHandoff | null => {
         if (botId === 'gloria-interview') return 'gloria';
         if (botId === 'sam-forward-focused' || botId === 'nexus-goal-path-solution') return 'coaching';
         return null;
     };
+
+    const handleConnectorHandoffPayloadConsumed = useCallback(() => {
+        setConnectorHandoffPayload(null);
+    }, []);
 
     const routeToCoachPractice = useCallback(() => {
         if (!currentUser || !resolvePracticeAccess(currentUser).canAccessPractice) {
@@ -1056,6 +1062,7 @@ const App: React.FC = () => {
             setChatHistory([]);
             setGloriaConnectionPrep(false);
             setConnectorChatHandoff(null);
+            setConnectorHandoffPayload(null);
             setView('gloriaInterviewIntro');
             return;
         }
@@ -1065,6 +1072,7 @@ const App: React.FC = () => {
         setBaselineMessageCount(0);
         setChatHistory([]);
         setConnectorChatHandoff(null);
+        setConnectorHandoffPayload(null);
         setView('chat');
     };
 
@@ -1102,6 +1110,7 @@ const App: React.FC = () => {
         const connectionPrep = mode === 'connectionPrep';
         setGloriaConnectionPrep(connectionPrep);
         setConnectorChatHandoff(null);
+        setConnectorHandoffPayload(null);
         setSelectedBot(bot);
         setUserMessageCount(0);
         setBaselineMessageCount(0);
@@ -1143,6 +1152,7 @@ const App: React.FC = () => {
         setBaselineMessageCount(0);
         setCameFromContextChoice(false);
         setConnectorChatHandoff(null);
+        setConnectorHandoffPayload(null);
         if (targetBotId === 'gloria-interview') {
             setGloriaConnectionPrep(isGloriaConnectionPrepMessage(seedUserMessage));
         } else {
@@ -1191,8 +1201,10 @@ const App: React.FC = () => {
         setCameFromContextChoice(false);
         if (options?.serverHandoff) {
             setConnectorChatHandoff(connectorHandoffForBot(botId));
+            setConnectorHandoffPayload(options.handoffPayload ?? null);
         } else {
             setConnectorChatHandoff(null);
+            setConnectorHandoffPayload(null);
         }
         if (botId === 'gloria-interview') {
             setGloriaConnectionPrep(
@@ -1253,6 +1265,7 @@ const App: React.FC = () => {
         // --- Special Handling for Gloria Interview Bot ---
         if (selectedBot.id === 'gloria-interview') {
             setConnectorChatHandoff(null);
+            setConnectorHandoffPayload(null);
             if (userMessageCount === 0 && !isTestMode) {
                 setSelectedBot(null);
                 setChatHistory([]);
@@ -1332,6 +1345,7 @@ const App: React.FC = () => {
 
         clearCoachingDraftState();
         setConnectorChatHandoff(null);
+        setConnectorHandoffPayload(null);
         setIsAnalyzing(true);
         try {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
@@ -2382,6 +2396,8 @@ const App: React.FC = () => {
         gloriaConnectionPrep,
         setGloriaConnectionPrep,
         connectorChatHandoff,
+        connectorHandoffPayload,
+        onConnectorHandoffPayloadConsumed: handleConnectorHandoffPayloadConsumed,
         handleStartGloriaInterview,
         handleOpenConnectorIntro,
         handleStartConnectorRun,

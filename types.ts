@@ -519,6 +519,16 @@ export type ConnectorChatHandoff = 'gloria' | 'coaching';
 
 export interface ConnectorCoachSessionStartOptions {
   serverHandoff?: boolean;
+  /** Sent once on first chat turn when serverHandoff is true (not copy/paste). */
+  handoffPayload?: ConnectorHandoffPayload | null;
+}
+
+/** Minimal Connector eval slice for server-side vignette context (one injection per session). */
+export interface ConnectorHandoffPayload {
+  vignetteId: string;
+  focusDimension: ConnectorDimensionKey;
+  highlight?: string;
+  missedCue?: string;
 }
 
 /** Localized Connector copy (scores live on the parent result). */

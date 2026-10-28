@@ -16,15 +16,22 @@ const {
 } = require('../../bots/contentSafetyPromptBlocks.js');
 const {
   CONNECTOR_COACH_BOTS,
+  detectConnectorCoachingPrepFromHistory,
   getConnectorCoachingPrepOverride,
   getGloriaConnectionPrepHandoffOverride,
 } = require('../../utils/connectorCoachingPrep.js');
+const {
+  buildConnectorHandoffContext,
+  getConnectorHandoffContinuationReminder,
+  isFirstConnectorHandoffTurn,
+} = require('../../utils/connectorHandoffContext.js');
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const {
         botId, context, history, language, isNewSession, coachingMode, decryptedPersonalityProfile,
         connectorChatHandoff,
+        connectorHandoffPayload,
         // Test mode support
         testProfileOverride, includeTestTelemetry, userMessage: testUserMessage
     } = req.body;
@@ -127,12 +134,36 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         }
     }
 
+    const historyForPrep = (history || []).map((msg) => ({
+        role: msg.role,
+        text: msg.text || msg.parts?.[0]?.text || '',
+    }));
+    const firstConnectorHandoffTurn = isFirstConnectorHandoffTurn(historyForPrep);
+
     if (bot.id === 'gloria-interview' && connectorChatHandoff === 'gloria') {
-        systemInstruction += getGloriaConnectionPrepHandoffOverride(lang);
+        if (firstConnectorHandoffTurn) {
+            systemInstruction += getGloriaConnectionPrepHandoffOverride(lang);
+            if (connectorHandoffPayload) {
+                systemInstruction += buildConnectorHandoffContext(connectorHandoffPayload, lang);
+            }
+        } else {
+            systemInstruction += getConnectorHandoffContinuationReminder(lang, 'gloria');
+        }
     }
 
-    if (CONNECTOR_COACH_BOTS.has(bot.id) && connectorChatHandoff === 'coaching') {
-        systemInstruction += getConnectorCoachingPrepOverride(lang);
+    const connectorCoachingPrepActive =
+        CONNECTOR_COACH_BOTS.has(bot.id) &&
+        (connectorChatHandoff === 'coaching' || detectConnectorCoachingPrepFromHistory(historyForPrep));
+
+    if (connectorCoachingPrepActive) {
+        if (firstConnectorHandoffTurn) {
+            systemInstruction += getConnectorCoachingPrepOverride(lang);
+            if (connectorChatHandoff === 'coaching' && connectorHandoffPayload) {
+                systemInstruction += buildConnectorHandoffContext(connectorHandoffPayload, lang);
+            }
+        } else {
+            systemInstruction += getConnectorHandoffContinuationReminder(lang, 'coaching');
+        }
     } else if (isInitialMessage && isNewSession && !isInterviewBot) {
         if (lang === 'de') {
             systemInstruction += "\n\n## Besondere Anweisung für diese erste Nachricht:\nDies ist die allererste Interaktion des Benutzers in dieser Sitzung. Sie MÜSSEN alle Regeln der 'Priorität bei der ersten Interaktion' bezüglich der Überprüfung von 'Nächsten Schritten' ignorieren. Ihre erste Nachricht MUSS Ihre standardmäßige, herzliche Begrüßung sein, in der Sie fragen, was den Benutzer beschäftigt. Erwähnen Sie nichts von 'willkommen zurück' oder früheren Schritten.";
