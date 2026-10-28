@@ -128,7 +128,7 @@ Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector**
 
 **Eigene Situation (Premium):** Beschreiben Sie Beziehung und Kontext mit **fiktiven Namen** — die KI erstellt ein Übungsgespräch. Sie erhalten **qualitatives Feedback** (kürzer als beim Hauptlauf). Diese Ergebnisse fließen **nicht** in Ihre Verbindungs-Signatur ein.
 
-**In der Chat-Ansicht:** In der Kopfzeile sehen Sie die Beziehung bzw. eine Kurzbeschreibung; das vollständige Szenario öffnen Sie über **Tipp auf den Avatar**.
+**In der Chat-Ansicht:** Das vollständige Szenario öffnen Sie über **Tipp auf den Avatar**.
 
 **Datenschutz:** Die Gespräche werden nur für die Auswertung verwendet und **nicht als Chat-Verlauf gespeichert**. Ihr Ergebnis können Sie optional **Ende-zu-Ende-verschlüsselt** in Ihrem Persönlichkeitsprofil sichern — unter **„Wie du interagierst“** (Verbindungs-Signatur) und im **PDF-Export**. Optional können Sie in der Signatur per **„Signatur mit Fremdsicht anreichern“** einen kurzen 360°-Brückentext ergänzen (Vorschau vor dem Speichern).
 
@@ -166,7 +166,7 @@ In the **Management & Communication** section, you'll find **The Connector** car
 
 **Your own situation (Premium):** Describe relationship and context using **fictional names** — the AI creates a practice conversation. You receive **qualitative feedback** (shorter than the main run). These results are **not** included in your Connection Signature.
 
-**In chat:** The header shows the relationship or a short description; tap the **avatar** for the full scenario brief.
+**In chat:** Tap the **avatar** for the full scenario brief.
 
 **Privacy:** The conversations are only used for the evaluation and are **not stored as chat history**. You can optionally save your result **end-to-end encrypted** in your personality profile — under **“How you interact”** (Connection Signature) and in the **PDF export**. Optionally, use **“Enrich signature with external view”** to add a short 360° bridge text to your signature (preview before saving).
 
@@ -215,10 +215,6 @@ ${guideInfoBox('<p class="m-0"><strong>Kein Gesprächstagebuch nötig:</strong> 
 <div style="padding: 16px;">
 
 Wenn Sie die App zum ersten Mal öffnen, werden Sie durch einen kurzen Onboarding-Prozess geführt.
-
-### 1.0 Willkommensbildschirm
-
-Nach dem Login erscheint kurz der **Willkommensbildschirm**: Logo, Coach-Avatare im Kreis und der Hinweis „Deine Sitzung wird geladen…“, während Ihre Daten vorbereitet werden.
 
 ### 1.1 Intent Picker & Name
 
@@ -659,7 +655,6 @@ ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines n
 <div style="padding: 16px;">
 
 ### ${coachingSub.coachSelect} Einen Coach auswählen
-Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
 
 Haben Sie zuvor einen **Intent** gewählt, passt die Coach-Auswahl daran an (siehe Kapitel 1.1) — **Kommunikation** öffnet Management & Kommunikation; **Coaching** hebt bei Registrierten die **Anliegen-Suche** hervor (Bereiche eingeklappt), bei **Gästen** den **Coaching-Bereich**; **Coach üben** führt berechtigte Nutzer oft direkt zum Übungs-Setup.
 
@@ -1042,14 +1037,7 @@ Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe ${deChapterLabel(pro
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${deChapterLabel(gamificationChapterNum(isNative, isRegistered))}: Ihren Fortschritt verstehen (Gamification)</summary>
 <div style="padding: 16px;">
 
-Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren.
-
-### 7.1 Die Gamification-Leiste
-Oben auf dem Bildschirm sehen Sie:
-- **Level:** Ihr Gesamtfortschritt.
-- **Serie:** Die Anzahl der aufeinanderfolgenden Tage, an denen Sie eine Sitzung abgeschlossen haben.
-- **XP-Balken:** Zeigt Ihren Fortschritt zum nächsten Level.
-- **Trophäen-Symbol:** **Klicken Sie hier**, um Ihre **Erfolge**-Seite anzuzeigen.
+Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren. Über das **Trophäen-Symbol** in der Leiste öffnen Sie **Erfolge**.
 
 ### 7.2 Wie man XP verdient
 
@@ -1428,10 +1416,6 @@ ${guideInfoBox('<p class="m-0"><strong>No conversation journal needed:</strong> 
 <div style="padding: 16px;">
 
 When you first open the app, you'll be guided through a brief onboarding process.
-
-### 1.0 Welcome Screen
-
-After login, the **Welcome Screen** appears briefly: logo, orbiting coach avatars, and a “Loading your session…” message while your data is prepared.
 
 ### 1.1 Intent Picker & Name
 
@@ -1846,7 +1830,6 @@ ${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personal
 <div style="padding: 16px;">
 
 ### ${coachingSub.coachSelect} Choosing Your Coach
-On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
 
 If you chose an **intent** earlier, coach selection adapts (see Chapter 1.1) — **communication** opens Management & Communication; **coaching** highlights **topic search** for registered users (sections collapsed) or the **Coaching section** for **guests**; **practice as coach** often sends entitled users straight to practice setup.
 
@@ -2229,14 +2212,7 @@ If you have the **DPFL coaching mode** activated (see ${enChapterLabel(profileCh
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${enChapterLabel(gamificationChapterNum(isNative, isRegistered))}: Understanding Your Progress (Gamification)</summary>
 <div style="padding: 16px;">
 
-The app uses game-like elements to motivate you to engage in regular self-reflection.
-
-### 7.1 The Gamification Bar
-At the top of the screen, you will see:
-- **Level:** Your overall progress.
-- **Streak:** The number of consecutive days you've completed a session.
-- **XP Bar:** Shows your progress to the next level.
-- **Trophy Icon:** **Click this** to view your **Achievements** page.
+The app uses game-like elements to motivate you to engage in regular self-reflection. Tap the **trophy icon** in the bar to open **Achievements**.
 
 ### 7.2 How to Earn XP
 
