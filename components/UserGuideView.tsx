@@ -10,9 +10,16 @@ import { User } from '../types';
 import { resolvePracticeAccess } from '../utils/practiceAccess';
 import { USER_GUIDE_ANCHORS, scrollUserGuideToAnchorWhenReady, takePendingUserGuideAnchor } from '../utils/userGuideAnchors';
 import {
+  audioTranscriptionChapterNum,
+  coachPracticeChapterNum,
   coachingChapterNum,
   computeCoachingSessionSubsections,
+  computeSessionReviewSubsections,
+  connectorChapterNum,
+  gamificationChapterNum,
   profileChapterNum,
+  sessionReviewChapterNum,
+  transcriptEvalChapterNum,
 } from '../utils/userGuideStructure';
 
 interface InfoViewProps {
@@ -48,11 +55,10 @@ const deTranscriptToolsSection = (
     sectionNum: string | null,
 ): string => {
     if (!sectionNum) return '';
-    const base = coachingChapterNum(isNative, true);
     return `<h3 id="${USER_GUIDE_ANCHORS.transcriptTools}">${sectionNum} Transkript-Tools (Premium)</h3>
 
 Im Bereich **Management & Kommunikation** (Nobody, Sam, Gloria) finden Sie die Karte **Transkript-Tools** — ab **Premium** (nach Anmeldung):
-- **Transkript-Auswertung** — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(base + 3)}.
+- **Transkript-Auswertung** — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(transcriptEvalChapterNum(isNative))}.
 - **Gäste:** Die Karte ist sichtbar, aber gesperrt — ein Klick führt zur **Anmeldung oder Registrierung**, nicht direkt zum Upgrade-Dialog.
 `;
 };
@@ -62,10 +68,9 @@ const dePracticeTabSection = (
     sectionNum: string | null,
 ): string => {
     if (!sectionNum) return '';
-    const base = coachingChapterNum(isNative, true);
     return `### ${sectionNum} Coaching üben (Premium+, Trial oder Klient)
 
-Im **Coaching-Bereich** wechseln Sie über den Tab **Coaching üben** (neben „Coaching“) in den Übungsmodus. Dort starten Sie eine Session als Coach — die KI spielt Ihren Klienten. Ausführliche Anleitung: ${deChapterLabel(base + 5)}.
+Im **Coaching-Bereich** wechseln Sie über den Tab **Coaching üben** (neben „Coaching“) in den Übungsmodus. Dort starten Sie eine Session als Coach — die KI spielt Ihren Klienten. Ausführliche Anleitung: ${deChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Zugang:** Aktives **Premium+**-Abo, **9-Tage-Testphase** nach Registrierung oder **Klienten**-Zugang. Standard-Premium ohne Premium+ enthält Coach Practice nicht.
 `;
@@ -76,11 +81,10 @@ const enTranscriptToolsSection = (
     sectionNum: string | null,
 ): string => {
     if (!sectionNum) return '';
-    const base = coachingChapterNum(isNative, true);
     return `<h3 id="${USER_GUIDE_ANCHORS.transcriptTools}">${sectionNum} Transcript Tools (Premium)</h3>
 
 In the **Management & Communication** section (Nobody, Sam, Gloria), you'll find the **Transcript Tools** card — from **Premium** onward (after sign-in):
-- **Transcript Evaluation** — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(base + 3)}.
+- **Transcript Evaluation** — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(transcriptEvalChapterNum(isNative))}.
 - **Guests:** The card is visible but locked — tapping it prompts you to **sign in or register**, not the upgrade dialog directly.
 `;
 };
@@ -90,13 +94,96 @@ const enPracticeTabSection = (
     sectionNum: string | null,
 ): string => {
     if (!sectionNum) return '';
-    const base = coachingChapterNum(isNative, true);
     return `### ${sectionNum} Coach Practice (Premium+, trial, or Client)
 
-In the **Coaching** section, switch to the **Coach Practice** tab (next to "Coaching") to enter training mode. You play the coach and the AI plays your client. Full instructions: ${enChapterLabel(base + 5)}.
+In the **Coaching** section, switch to the **Coach Practice** tab (next to "Coaching") to enter training mode. You play the coach and the AI plays your client. Full instructions: ${enChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Access:** Active **Premium+** subscription, **9-day trial** after registration, or **Client** access. Standard Premium without Premium+ does not include Coach Practice.
 `;
+};
+
+const deConnectorChapter = (
+    isNative: boolean,
+    isRegistered: boolean,
+    showPracticeChapter: boolean,
+) => {
+    const ch = connectorChapterNum(isNative, isRegistered);
+    const practiceLink = showPracticeChapter
+        ? ` Wer tiefer einsteigen möchte, findet in **Coach Practice** (${deChapterLabel(coachPracticeChapterNum(isNative))}) den passenden Übungsraum.`
+        : '';
+    return `<details id="${USER_GUIDE_ANCHORS.connector}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${deChapterLabel(ch)}: The Connector — Verbindung herstellen (Registriert)</summary>
+<div style="padding: 16px;">
+
+**Wann lohnt sich das?** Wenn Sie noch kein konkretes Coaching-Thema haben oder sich schwer tun, womit Sie starten sollen: The Connector ist ein **niedrigschwelliger Einstieg** — kurze Alltagsdialoge, **ohne** Lebens-Kontext und **ohne** Bewertung Ihrer Person. Sie erhalten ein Bild davon, **wie** Sie im Gespräch wirken — als Impuls zur Selbstwahrnehmung, nicht als Defizit-Check.
+
+Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector** — verfügbar für registrierte Benutzer.
+
+**Was ist das?** Drei kurze Alltagsgespräche mit KI-Personas — zum Beispiel ein Kollege nach einem frustrierenden Meeting, eine Freundin nach einer Trennung oder ein Bruder vor einer schwierigen Entscheidung. Sie führen die Gespräche so, wie Sie es im echten Leben tun würden. Es gibt **kein richtig oder falsch**.
+
+**So läuft es ab:**
+- Wählen Sie beim Start **Text** oder **Stimme** (Sprachmodus mit Vorlesen und Diktat).
+- Pro Gespräch schreiben bzw. sprechen Sie **3–5 Antworten**. Die Gespräche enden natürlich — entweder fühlt sich Ihr Gegenüber verstanden, oder der Alltag ruft (z. B. das nächste Meeting).
+- Sie können ein Gespräch jederzeit über **Sitzung beenden** abbrechen; ausgewertet wird dann, was bereits stattgefunden hat.
+
+**Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — **Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität** — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist **mehr Fähigkeit als Talent**: Das Profil zeigt, worauf Sie aufbauen können.${practiceLink}
+
+**Übungskatalog (Premium):** Nach einem abgeschlossenen Hauptlauf können Sie **einzelne kuratierte Szenarien** erneut üben — mit Auswertung für diese Einheit (ohne Ihre gespeicherte Signatur zu überschreiben).
+
+**Eigene Situation (Premium):** Beschreiben Sie Beziehung und Kontext mit **fiktiven Namen** — die KI erstellt ein Übungsgespräch. Sie erhalten **qualitatives Feedback** (kürzer als beim Hauptlauf). Diese Ergebnisse fließen **nicht** in Ihre Verbindungs-Signatur ein.
+
+**In der Chat-Ansicht:** In der Kopfzeile sehen Sie die Beziehung bzw. eine Kurzbeschreibung; das vollständige Szenario öffnen Sie über **Tipp auf den Avatar**.
+
+**Datenschutz:** Die Gespräche werden nur für die Auswertung verwendet und **nicht als Chat-Verlauf gespeichert**. Ihr Ergebnis können Sie optional **Ende-zu-Ende-verschlüsselt** in Ihrem Persönlichkeitsprofil sichern — unter **„Wie du interagierst“** (Verbindungs-Signatur) und im **PDF-Export**. Optional können Sie in der Signatur per **„Signatur mit Fremdsicht anreichern“** einen kurzen 360°-Brückentext ergänzen (Vorschau vor dem Speichern).
+
+${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächspartner sind KI-Personas, die Auswertung erstellt eine KI. Das Ergebnis ist ein Impuls zur Selbstreflexion — kein psychologisches Gutachten und kein Coaching-Zertifikat.</p>')}
+
+**Gäste:** Die Karte ist sichtbar, aber gesperrt — ein Klick führt zur **Registrierung**.
+
+</div>
+</details>`;
+};
+
+const enConnectorChapter = (
+    isNative: boolean,
+    isRegistered: boolean,
+    showPracticeChapter: boolean,
+) => {
+    const ch = connectorChapterNum(isNative, isRegistered);
+    const practiceLink = showPracticeChapter
+        ? ` If you want to go deeper, **Coach Practice** (${enChapterLabel(coachPracticeChapterNum(isNative))}) is the matching training space.`
+        : '';
+    return `<details id="${USER_GUIDE_ANCHORS.connector}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${enChapterLabel(ch)}: The Connector — Connecting, not just communicating (Registered)</summary>
+<div style="padding: 16px;">
+
+**When is it a good fit?** If you do not yet have a concrete coaching topic—or find it hard to imagine what to work on—The Connector is a **low-threshold entry**: short everyday dialogues, **no** Life Context required, and **no** judgment of you as a person. You get a picture of **how** you show up in conversation—a prompt for self-awareness, not a deficit check.
+
+In the **Management & Communication** section, you'll find **The Connector** card — available for registered users.
+
+**What is it?** Three short everyday conversations with AI personas — for example a colleague after a frustrating meeting, a friend after a breakup, or a brother facing a difficult decision. Have the conversations the way you would in real life. There is **no right or wrong**.
+
+**How it works:**
+- Choose **Text** or **Voice** at the start (voice mode with read-aloud and dictation).
+- Per conversation, you write or speak **3–5 replies**. Conversations end naturally — either the other person feels heard, or everyday life calls (e.g. the next meeting).
+- You can abort a conversation at any time via **End Session**; whatever has already taken place will be evaluated.
+
+**Your result:** A **Connection Signature** with five dimensions — **empathy, presence, curiosity, non-judgment, and steadiness** — shown as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is **more skill than talent**: the profile shows what to build on.${practiceLink}
+
+**Practice catalog (Premium):** After a completed main run, you can replay **individual curated vignettes** with evaluation for that unit (without overwriting your saved signature).
+
+**Your own situation (Premium):** Describe relationship and context using **fictional names** — the AI creates a practice conversation. You receive **qualitative feedback** (shorter than the main run). These results are **not** included in your Connection Signature.
+
+**In chat:** The header shows the relationship or a short description; tap the **avatar** for the full scenario brief.
+
+**Privacy:** The conversations are only used for the evaluation and are **not stored as chat history**. You can optionally save your result **end-to-end encrypted** in your personality profile — under **“How you interact”** (Connection Signature) and in the **PDF export**. Optionally, use **“Enrich signature with external view”** to add a short 360° bridge text to your signature (preview before saving).
+
+${guideInfoBox('<p class="m-0"><strong>AI transparency:</strong> Your conversation partners are AI personas, and the evaluation is AI-generated. The result is a prompt for self-reflection — not a psychological assessment and not a coaching certificate.</p>')}
+
+**Guests:** The card is visible but locked — tapping it leads to **registration**.
+
+</div>
+</details>`;
 };
 
 const de_markdown = (
@@ -112,6 +199,11 @@ const de_markdown = (
         isRegistered,
         showTranscriptTools: showChapter8,
         showPracticeTab: showChapter10,
+    });
+    const sessionReviewSub = computeSessionReviewSubsections({
+        isNative,
+        isRegistered,
+        showDpflBlock: isPremium,
     });
     return `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
@@ -849,31 +941,6 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 
 ${deTranscriptToolsSection(isNative, coachingSub.transcriptTools)}
 ${dePracticeTabSection(isNative, coachingSub.practiceTab)}
-<h3 id="${USER_GUIDE_ANCHORS.connector}">${coachingSub.connector} The Connector — Verbindung herstellen, anstatt nur zu kommunizieren (Registriert)</h3>
-
-Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector** — verfügbar für registrierte Benutzer.
-
-**Was ist das?** Drei kurze Alltagsgespräche mit KI-Personas — zum Beispiel ein Kollege nach einem frustrierenden Meeting, eine Freundin nach einer Trennung oder ein Bruder vor einer schwierigen Entscheidung. Sie führen die Gespräche so, wie Sie es im echten Leben tun würden. Es gibt **kein richtig oder falsch**.
-
-**So läuft es ab:**
-- Wählen Sie beim Start **Text** oder **Stimme** (Sprachmodus mit Vorlesen und Diktat).
-- Pro Gespräch schreiben bzw. sprechen Sie **3–5 Antworten**. Die Gespräche enden natürlich — entweder fühlt sich Ihr Gegenüber verstanden, oder der Alltag ruft (z. B. das nächste Meeting).
-- Sie können ein Gespräch jederzeit über **Sitzung beenden** abbrechen; ausgewertet wird dann, was bereits stattgefunden hat.
-
-**Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — **Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität** — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist **mehr Fähigkeit als Talent**: Das Profil zeigt, worauf Sie aufbauen können. Wer tiefer einsteigen möchte, findet in **Coach Practice** (siehe 5.3) den passenden Übungsraum.
-
-**Übungskatalog (Premium):** Nach einem abgeschlossenen Hauptlauf können Sie **einzelne kuratierte Szenarien** erneut üben — mit Auswertung für diese Einheit (ohne Ihre gespeicherte Signatur zu überschreiben).
-
-**Eigene Situation (Premium):** Beschreiben Sie Beziehung und Kontext mit **fiktiven Namen** — die KI erstellt ein Übungsgespräch. Sie erhalten **qualitatives Feedback** (kürzer als beim Hauptlauf). Diese Ergebnisse fließen **nicht** in Ihre Verbindungs-Signatur ein.
-
-**In der Chat-Ansicht:** In der Kopfzeile sehen Sie die Beziehung bzw. eine Kurzbeschreibung; das vollständige Szenario öffnen Sie über **Tipp auf den Avatar**.
-
-**Datenschutz:** Die Gespräche werden nur für die Auswertung verwendet und **nicht als Chat-Verlauf gespeichert**. Ihr Ergebnis können Sie optional **Ende-zu-Ende-verschlüsselt** in Ihrem Persönlichkeitsprofil sichern — unter **„Wie du interagierst“** (Verbindungs-Signatur) und im **PDF-Export**. Optional können Sie in der Signatur per **„Signatur mit Fremdsicht anreichern“** einen kurzen 360°-Brückentext ergänzen (Vorschau vor dem Speichern).
-
-${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächspartner sind KI-Personas, die Auswertung erstellt eine KI. Das Ergebnis ist ein Impuls zur Selbstreflexion — kein psychologisches Gutachten und kein Coaching-Zertifikat.</p>')}
-
-**Gäste:** Die Karte ist sichtbar, aber gesperrt — ein Klick führt zur **Registrierung**.
-
 ### ${coachingSub.coachRecommendation} Coach-Empfehlung (KI-gestützte Suche)
 
 Über der Coach-Liste befindet sich ein Suchfeld, mit dem Sie sich einen passenden Coach empfehlen lassen können.
@@ -888,6 +955,7 @@ ${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächsp
 **Hinweis:** Diese Funktion steht nur registrierten Benutzern zur Verfügung. Die Empfehlungen basieren ausschließlich auf Ihrer Beschreibung und den verfügbaren Coach-Profilen.
 
 <h3 id="${USER_GUIDE_ANCHORS.chatInterface}">${coachingSub.chatInterface} Die Chat-Oberfläche</h3>
+
 - **Kopfzeile:** Name und Avatar des Coaches. **Tippen Sie auf die Kopfzeile** — ein Modal zeigt Stil und Methodik. Aktiver Coaching-Modus (DPC/DPFL) erscheint hier ebenfalls. Rechts: **Sitzung beenden**.
 - **Textmodus (Standard):**
   - Nachricht unten eingeben.
@@ -912,14 +980,18 @@ ${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Ger
 
 ---
 
+${deConnectorChapter(isNative, isRegistered, showChapter10)}
+
+---
+
 <details id="${USER_GUIDE_ANCHORS.sessionReview}">
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${deChapterLabel(coachingChapterNum(isNative, isRegistered) + 1)}: Nach der Sitzung - Der Analyseprozess</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${deChapterLabel(sessionReviewChapterNum(isNative, isRegistered))}: Nach der Sitzung - Der Analyseprozess</summary>
 <div style="padding: 16px;">
 
-### 6.1 Die Analyse
+### ${sessionReviewSub.analysis} Die Analyse
 Tippen Sie auf **Sitzung beenden** — die KI analysiert Ihr Gespräch. Der Ladebildschirm **Sitzung wird analysiert...** dauert meist 15–30 Sekunden.
 
-### 6.2 Der Bildschirm "Diskursanalyse"
+### ${sessionReviewSub.reviewScreen} Der Bildschirm "Diskursanalyse"
 Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
 
 - **Neue Einsichten:** Eine von der KI erstellte Zusammenfassung Ihrer wichtigsten Erkenntnisse aus der Sitzung.
@@ -948,7 +1020,7 @@ ${guideWarningBox(`<p class="m-0"><strong>Gäste:</strong> Siehe Abschnitt <stro
   - **Coach wechseln:** Speichert die Änderungen und bringt Sie zurück zum Coach-Auswahlbildschirm.
   - **(Nur für registrierte Benutzer) "Textänderungen nicht speichern...":** Wenn Sie dieses Kästchen ankreuzen, wird Ihr Gamification-Fortschritt gespeichert, aber die Textänderungen an Ihrem Lebenskontext werden verworfen.
 
-${isPremium ? `### 6.3 Authentizitäts-Check & Profilverfeinerung (DPFL-Modus)
+${isPremium ? `### ${sessionReviewSub.dpfl} Authentizitäts-Check & Profilverfeinerung (DPFL-Modus)
 
 Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe ${deChapterLabel(profileChapterNum(isNative))}), erscheinen nach der Sitzung zwei zusätzliche Schritte:
 
@@ -964,7 +1036,7 @@ Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe ${deChapterLabel(pro
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${deChapterLabel(coachingChapterNum(isNative, isRegistered) + 2)}: Ihren Fortschritt verstehen (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${deChapterLabel(gamificationChapterNum(isNative, isRegistered))}: Ihren Fortschritt verstehen (Gamification)</summary>
 <div style="padding: 16px;">
 
 Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren.
@@ -1008,7 +1080,7 @@ const de_chapter8 = (isNative: boolean) => `
 ---
 
 <details id="${USER_GUIDE_ANCHORS.transcriptEval}">
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${deChapterLabel(coachingChapterNum(isNative, true) + 3)}: Transkript-Auswertung (Premium-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${deChapterLabel(transcriptEvalChapterNum(isNative))}: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Transkript-Auswertung?
@@ -1114,7 +1186,7 @@ const de_chapter9 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${deChapterLabel(coachingChapterNum(isNative, true) + 4)}: Audio-Transkription (Klienten-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${deChapterLabel(audioTranscriptionChapterNum(isNative))}: Audio-Transkription (Klienten-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Audio-Transkription?
@@ -1147,7 +1219,7 @@ Nach der Aufnahme bzw. dem Upload wird die Audiodatei automatisch transkribiert.
 Nach der Transkription haben Sie folgende Möglichkeiten:
 - **Transkript glätten:** Die KI bereinigt das Transkript sprachlich (entfernt Füllwörter, korrigiert Grammatik, strukturiert Sprecherwechsel).
 - **Transkript herunterladen:** Speichern Sie das Roh- oder geglättete Transkript als Textdatei.
-- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (${deChapterLabel(coachingChapterNum(isNative, true) + 3)}) ein, um eine strukturierte Analyse zu erhalten.
+- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (${deChapterLabel(transcriptEvalChapterNum(isNative))}) ein, um eine strukturierte Analyse zu erhalten.
 
 ### Datenschutz
 
@@ -1209,7 +1281,7 @@ const de_chapter10 = (isNative: boolean) => `
 ---
 
 <details id="${USER_GUIDE_ANCHORS.coachPractice}">
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${deChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach-Übung (Premium+, Trial & Klienten)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${deChapterLabel(coachPracticeChapterNum(isNative))}: Coach-Übung (Premium+, Trial & Klienten)</summary>
 <div style="padding: 16px;">
 
 ### Was ist Coach-Übung?
@@ -1220,7 +1292,7 @@ Sie wählen Einstieg, Methode, Szenario und Schwierigkeit. Am Ende erhalten Sie 
 
 ### Wer kann es nutzen?
 
-Zugang und Tab: siehe Abschnitt **5.3**.
+Zugang und Tab: siehe ${coachingSub.practiceTab ? `Abschnitt **${coachingSub.practiceTab}**` : deChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Methodenumfang:** Premium+ und Trial: **8 Übungsmethoden**. Klienten: **12 Methoden** (zusätzlich Methoden der Klienten-Coaches Rob, Victor, Bekky und Dan).
 
@@ -1329,6 +1401,11 @@ const en_markdown = (
         isRegistered,
         showTranscriptTools: showChapter8,
         showPracticeTab: showChapter10,
+    });
+    const sessionReviewSub = computeSessionReviewSubsections({
+        isNative,
+        isRegistered,
+        showDpflBlock: isPremium,
     });
     return `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
@@ -2040,31 +2117,6 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 
 ${enTranscriptToolsSection(isNative, coachingSub.transcriptTools)}
 ${enPracticeTabSection(isNative, coachingSub.practiceTab)}
-<h3 id="${USER_GUIDE_ANCHORS.connector}">${coachingSub.connector} The Connector — Connecting, not just communicating (Registered)</h3>
-
-In the **Management & Communication** section, you'll find **The Connector** card — available for registered users.
-
-**What is it?** Three short everyday conversations with AI personas — for example a colleague after a frustrating meeting, a friend after a breakup, or a brother facing a difficult decision. Have the conversations the way you would in real life. There is **no right or wrong**.
-
-**How it works:**
-- Choose **Text** or **Voice** at the start (voice mode with read-aloud and dictation).
-- Per conversation, you write or speak **3–5 replies**. Conversations end naturally — either the other person feels heard, or everyday life calls (e.g. the next meeting).
-- You can abort a conversation at any time via **End Session**; whatever has already taken place will be evaluated.
-
-**Your result:** A **Connection Signature** with five dimensions — **empathy, presence, curiosity, non-judgment, and steadiness** — shown as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is **more skill than talent**: the profile shows what to build on. If you want to go deeper, **Coach Practice** (see 5.3) is the matching training space.
-
-**Practice catalog (Premium):** After a completed main run, you can replay **individual curated vignettes** with evaluation for that unit (without overwriting your saved signature).
-
-**Your own situation (Premium):** Describe relationship and context using **fictional names** — the AI creates a practice conversation. You receive **qualitative feedback** (shorter than the main run). These results are **not** included in your Connection Signature.
-
-**In chat:** The header shows the relationship or a short description; tap the **avatar** for the full scenario brief.
-
-**Privacy:** The conversations are only used for the evaluation and are **not stored as chat history**. You can optionally save your result **end-to-end encrypted** in your personality profile — under **“How you interact”** (Connection Signature) and in the **PDF export**. Optionally, use **“Enrich signature with external view”** to add a short 360° bridge text to your signature (preview before saving).
-
-${guideInfoBox('<p class="m-0"><strong>AI transparency:</strong> Your conversation partners are AI personas, and the evaluation is AI-generated. The result is a prompt for self-reflection — not a psychological assessment and not a coaching certificate.</p>')}
-
-**Guests:** The card is visible but locked — tapping it leads to **registration**.
-
 ### ${coachingSub.coachRecommendation} Coach Recommendation (AI-Powered Search)
 
 Above the coach list, you'll find a search field that lets the AI recommend a suitable coach for you.
@@ -2079,6 +2131,7 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
 **Note:** This feature is only available to registered users. Recommendations are based solely on your description and the available coach profiles.
 
 <h3 id="${USER_GUIDE_ANCHORS.chatInterface}">${coachingSub.chatInterface} The Chat Interface</h3>
+
 - **Header:** Coach name and avatar. **Tap the header** to open a modal with style and methodology. Active coaching mode (DPC/DPFL) appears here too. On the right: **End Session**.
 - **Text Mode (Default):**
   - Type your message at the bottom.
@@ -2103,14 +2156,18 @@ ${isNative ? `  - **Note:** The iOS app uses high-quality Apple device voices on
 
 ---
 
+${enConnectorChapter(isNative, isRegistered, showChapter10)}
+
+---
+
 <details id="${USER_GUIDE_ANCHORS.sessionReview}">
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${enChapterLabel(coachingChapterNum(isNative, isRegistered) + 1)}: After the Session - The Review Process</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${enChapterLabel(sessionReviewChapterNum(isNative, isRegistered))}: After the Session - The Review Process</summary>
 <div style="padding: 16px;">
 
-### 6.1 The Analysis
+### ${sessionReviewSub.analysis} The Analysis
 Tap **End Session** — the AI analyzes your conversation. The **Analyzing Session...** screen usually takes 15–30 seconds.
 
-### 6.2 The Session Review Screen
+### ${sessionReviewSub.reviewScreen} The Session Review Screen
 This is the most important screen for capturing your insights.
 
 - **New Findings:** An AI-generated summary of your key takeaways from the session.
@@ -2139,7 +2196,7 @@ ${guideWarningBox(`<p class="m-0"><strong>Guests:</strong> See section <strong>1
   - **Switch Coach:** Saves the changes and takes you back to the coach selection screen.
   - **(Registered Users Only) "Don't save text changes...":** If you check this box, your gamification progress will be saved, but the text changes to your Life Context will be discarded.
 
-${isPremium ? `### 6.3 Authenticity Check & Profile Refinement (DPFL Mode)
+${isPremium ? `### ${sessionReviewSub.dpfl} Authenticity Check & Profile Refinement (DPFL Mode)
 
 If you have the **DPFL coaching mode** activated (see ${enChapterLabel(profileChapterNum(isNative))}), two additional steps appear after the session:
 
@@ -2155,7 +2212,7 @@ If you have the **DPFL coaching mode** activated (see ${enChapterLabel(profileCh
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${enChapterLabel(coachingChapterNum(isNative, isRegistered) + 2)}: Understanding Your Progress (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${enChapterLabel(gamificationChapterNum(isNative, isRegistered))}: Understanding Your Progress (Gamification)</summary>
 <div style="padding: 16px;">
 
 The app uses game-like elements to motivate you to engage in regular self-reflection.
@@ -2199,7 +2256,7 @@ const en_chapter8 = (isNative: boolean) => `
 ---
 
 <details id="${USER_GUIDE_ANCHORS.transcriptEval}">
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${enChapterLabel(coachingChapterNum(isNative, true) + 3)}: Transcript Evaluation (Premium Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${enChapterLabel(transcriptEvalChapterNum(isNative))}: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Transcript Evaluation?
@@ -2305,7 +2362,7 @@ const en_chapter9 = (isNative: boolean) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${enChapterLabel(coachingChapterNum(isNative, true) + 4)}: Audio Transcription (Client Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${enChapterLabel(audioTranscriptionChapterNum(isNative))}: Audio Transcription (Client Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Audio Transcription?
@@ -2338,7 +2395,7 @@ After recording or uploading, the audio file is automatically transcribed. Depen
 After transcription, you have the following options:
 - **Smooth Transcript:** The AI cleans up the transcript linguistically (removes filler words, corrects grammar, structures speaker turns).
 - **Download Transcript:** Save the raw or smoothed transcript as a text file.
-- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (${enChapterLabel(coachingChapterNum(isNative, true) + 3)}) for a structured analysis.
+- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (${enChapterLabel(transcriptEvalChapterNum(isNative))}) for a structured analysis.
 
 ### Privacy
 
@@ -2400,7 +2457,7 @@ const en_chapter10 = (isNative: boolean) => `
 ---
 
 <details id="${USER_GUIDE_ANCHORS.coachPractice}">
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${enChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach Practice (Premium+, Trial & Client)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${enChapterLabel(coachPracticeChapterNum(isNative))}: Coach Practice (Premium+, Trial & Client)</summary>
 <div style="padding: 16px;">
 
 ### What is Coach Practice?
@@ -2411,7 +2468,7 @@ Choose entry path, method, scenario, and difficulty. At the end you receive a **
 
 ### Who Can Use It?
 
-Access and tab: see section **5.3**.
+Access and tab: see ${coachingSub.practiceTab ? `section **${coachingSub.practiceTab}**` : enChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Method scope:** Premium+ and trial: **8 practice methods**. Clients: **12 methods** (additionally methods from client coaches Rob, Victor, Bekky, and Dan).
 

@@ -20,7 +20,7 @@ export const USER_GUIDE_ANCHORS = {
  * | voice_text         | chatInterface     | «Die Chat-Oberfläche» (stable id; § no. tier-dependent) |
  * | session_review     | sessionReview     | Kap. N+1 Nach der Sitzung |
  * | transcript         | transcriptEval / transcriptTools / ch1 | Premium chapter / Transkript-Tools § / Kap. 1 |
- * | connector          | connector         | «The Connector» (stable id; § no. tier-dependent) |
+ * | connector          | connector         | «The Connector» (own chapter; stable id) |
  * | coach_practice     | coachPractice     | Coach-Übung chapter (Premium+) |
  * | pep                | pep               | PEP Klienten-Kapitel |
  */
