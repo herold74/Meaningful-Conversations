@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Bot, Message, User, CoachPracticeConfig, Language, ConnectorEndType } from '../types';
+import { Bot, Message, User, CoachPracticeConfig, Language, ConnectorEndType, ConnectorChatHandoff } from '../types';
 import type { ConnectorChatConfig } from '../utils/connectorRun';
 import * as geminiService from '../services/geminiService';
 import * as userService from '../services/userService';
@@ -75,6 +75,8 @@ interface ChatViewProps {
   practiceEvalError?: string | null;
   /** The Connector mode: AI plays a friend/colleague with a concern */
   connectorConfig?: ConnectorChatConfig | null;
+  /** Invisible Connector ladder handoff (Start conversation); sent on every turn this session. */
+  connectorChatHandoff?: ConnectorChatHandoff | null;
   /** Called when the connector persona ends the vignette ('heard' or 'timeout') */
   onConnectorEnded?: (endType: 'heard' | 'timeout') => void;
 }
@@ -87,7 +89,7 @@ function chatInitKey(botId: string, kind: 'greeting' | 'preseed', language: Lang
   return kind === 'greeting' ? `greeting:${botId}:${language}` : `preseed:${botId}:${language}:${seedMessageId ?? ''}`;
 }
 
-const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch, coachPracticeConfig, practiceEvalError, connectorConfig, onConnectorEnded }) => {
+const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setChatHistory, onEndSession, onMessageSent, currentUser, isNewSession, encryptionKey, isTestMode, onReferralSwitch, coachPracticeConfig, practiceEvalError, connectorConfig, connectorChatHandoff, onConnectorEnded }) => {
   const { t, language } = useLocalization();
 
   const [input, setInput] = useState('');
@@ -312,7 +314,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           false,
           onStreamChunk,
           effectiveCoachingMode,
-          decryptedProfile
+          decryptedProfile,
+          connectorChatHandoff,
         );
       }
 
@@ -400,7 +403,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     } finally {
       setIsLoading(false);
     }
-  }, [bot.id, lifeContext, chatHistory, setChatHistory, language, isLoading, isGuest, guestFingerprint, isVoiceMode, decryptedProfile, onMessageSent, t, meditation, tts, effectiveCoachingMode, coachPracticeConfig, connectorConfig, onConnectorEnded, showVoiceUi]);
+  }, [bot.id, lifeContext, chatHistory, setChatHistory, language, isLoading, isGuest, guestFingerprint, isVoiceMode, decryptedProfile, onMessageSent, t, meditation, tts, effectiveCoachingMode, coachPracticeConfig, connectorConfig, connectorChatHandoff, onConnectorEnded, showVoiceUi]);
 
   const speech = useSpeechRecognition({
     input,
@@ -615,7 +618,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
                     language,
                     true, // isNewSession — skip "Next Steps" check-in
                     effectiveCoachingMode,
-                    decryptedProfile
+                    decryptedProfile,
+                    connectorChatHandoff,
                 );
 
                 const pr = processAssistantReply(response.text);
@@ -653,7 +657,7 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         autoSendPreSeeded();
         return;
     }
-  }, [bot.id, lifeContext, language, setChatHistory, t, isNewSession, chatHistory.length, effectiveCoachingMode, decryptedProfile, coachPracticeConfig]);
+  }, [bot.id, lifeContext, language, setChatHistory, t, isNewSession, chatHistory.length, effectiveCoachingMode, decryptedProfile, coachPracticeConfig, connectorChatHandoff]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

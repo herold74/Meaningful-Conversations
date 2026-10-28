@@ -3,7 +3,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import ConnectorRadarChart, { CONNECTOR_DIMENSIONS } from './ConnectorRadarChart';
 import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
 import ConnectorEvaluationMarkdown from './ConnectorEvaluationMarkdown';
-import type { ConnectorDimensionKey, ConnectorEvaluationResult, ConnectorVignettePublic, User } from '../types';
+import type { ConnectorDimensionKey, ConnectorEvaluationResult, ConnectorVignettePublic, User, ConnectorCoachSessionStartOptions } from '../types';
 import { showConnectorPracticeLadder, connectorHighScoreNeedsCoachBridge } from '../utils/connectorNextSteps';
 
 const DIMENSION_EMOJI: Record<ConnectorDimensionKey, string> = {
@@ -28,7 +28,11 @@ interface ConnectorResultsViewProps {
   showPracticeCrossSell: boolean;
   onPracticeCrossSell: () => void;
   onRestartWithFocus: (focus: ConnectorDimensionKey) => void;
-  onStartCoachSession: (botId: string, starterPrompt: string) => void;
+  onStartCoachSession: (
+    botId: string,
+    starterPrompt: string,
+    options?: ConnectorCoachSessionStartOptions,
+  ) => void;
 }
 
 const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({

@@ -358,7 +358,11 @@ interface PersonalityProfileViewProps {
   onUserUpdate: (user: User) => void;
   lifeContext?: string; // For PII detection when activating DPC/DPFL
   onEditLifeContext?: () => void; // Navigate to Life Context editor for PII cleanup
-  onStartCoachSession?: (botId: string, starterPrompt: string) => void;
+  onStartCoachSession?: (
+    botId: string,
+    starterPrompt: string,
+    options?: import('../types').ConnectorCoachSessionStartOptions,
+  ) => void;
 }
 
 interface ProfileMetadata {

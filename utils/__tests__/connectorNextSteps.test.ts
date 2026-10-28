@@ -1,11 +1,13 @@
 import {
   buildCoachStarterPrompt,
+  buildConnectorGloriaHandoffStarter,
   connectorHighScoreNeedsCoachBridge,
   getConnectorDimensionsWithAvailableCoach,
   getPrimaryMissedCue,
   getWeakestConnectorDimension,
   isConnectorCoachBotAvailable,
   rankConnectorDimensions,
+  resolveConnectorHandoffPartnerName,
   shouldOfferConnectorCoachBridge,
   showConnectorPracticeLadder,
 } from '../connectorNextSteps';
@@ -48,17 +50,55 @@ describe('connectorNextSteps', () => {
     expect(showConnectorPracticeLadder(null)).toBe(true);
   });
 
-  it('builds coach starter with growth area', () => {
-    const prompt = buildCoachStarterPrompt('presence', 'Stay present longer', 'en');
-    expect(prompt).toContain('Stay present longer');
-    expect(prompt).toContain('prepare');
+  it('builds Sam connector coaching prep handoff for all dimension focus lines', () => {
+    const eval_ = baseEval();
+    eval_.perVignette = [{ vignetteId: 'nina-review', highlight: 'Ok', missedCue: 'x' }];
+    for (const dim of ['empathy', 'presence', 'steadiness'] as const) {
+      const prompt = buildCoachStarterPrompt(dim, 'long growth', 'en', 'sam-forward-focused', eval_);
+      expect(prompt).toContain('Nina');
+      expect(prompt).toContain('Keep it brief');
+      expect(prompt).not.toContain('long growth');
+      expect(prompt).not.toContain('connector coaching prep');
+    }
   });
 
-  it('builds Gloria-specific connection prep starter from connector handoff', () => {
+  it('builds Nobody connector coaching prep handoff', () => {
+    const eval_ = baseEval();
+    const prompt = buildCoachStarterPrompt(
+      'nonJudgment',
+      'Try **not** to judge',
+      'en',
+      'nexus-goal-path-solution',
+      eval_,
+    );
+    expect(prompt).toContain('listening without judging');
+    expect(prompt).not.toContain('**');
+    expect(prompt).not.toContain('connector coaching prep');
+  });
+
+  it('builds Gloria connector handoff starter with partner and dimension focus', () => {
+    const eval_ = baseEval();
+    eval_.perVignette = [{ vignetteId: 'nina-review', highlight: 'Good', missedCue: 'Jumped to fix' }];
+    expect(resolveConnectorHandoffPartnerName(eval_)).toBe('Nina');
+    const prompt = buildConnectorGloriaHandoffStarter('en', 'presence', eval_);
+    expect(prompt).toContain('Nina');
+    expect(prompt).toContain('staying with the person');
+    expect(prompt).toContain('questions only');
+    expect(prompt).not.toContain('connection prep');
+  });
+
+  it('builds Gloria handoff via buildCoachStarterPrompt when evaluation provided', () => {
+    const eval_ = baseEval();
+    eval_.perVignette = [{ vignetteId: 'jonas-meeting', highlight: 'Ok', missedCue: '' }];
+    const prompt = buildCoachStarterPrompt('empathy', 'Stay present longer', 'en', 'gloria-interview', eval_);
+    expect(prompt).toContain('Jonas');
+    expect(prompt).toContain('recognizing and naming feelings');
+  });
+
+  it('falls back to generic Gloria prep without evaluation', () => {
     const prompt = buildCoachStarterPrompt('curiosity', 'Ask before advising', 'en', 'gloria-interview');
-    expect(prompt).toContain('prepare for a conversation');
     expect(prompt).toContain('Ask before advising');
-    expect(prompt).not.toContain('practice everyday conversation skills');
+    expect(prompt).not.toContain('Connector practice');
   });
 
   it('filters connector coach dimensions by user access', () => {
