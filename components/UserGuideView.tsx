@@ -209,7 +209,7 @@ Ein guter Start dauert nur wenige Minuten. Hier erfahren Sie, wie Sie in die App
 
 ### 1.1 Ihre Startfrage: „Was möchten Sie heute erreichen?“
 
-Nach einem kurzen Willkommen stellt die App eine einzige Frage. Ihre Antwort führt Sie in wenigen Sekunden zu dem Coach, der heute am besten zu Ihnen passt. Drei Karten stehen zur Auswahl:
+Nach einem kurzen Willkommen stellt die App eine einzige Frage. Ihre Antwort führt Sie in wenigen Sekunden zu dem Coach oder Coachee, der heute am besten zu Ihnen passt. Drei Karten stehen zur Auswahl:
 
 - **Kommunikation & Management** — für ein Gespräch, das Sie vorbereiten oder besser verstehen möchten. Dort warten Nobody und Sam, mit Konto außerdem Gloria und mit Premium die Transkript-Tools.
 - **Coaching zu meinem Anliegen** (hervorgehoben) — für das Thema, das Sie gerade beschäftigt. Mit Konto beschreiben Sie es in eigenen Worten und erhalten eine Coach-Empfehlung; als Gast wählen Sie direkt aus Nobody, Max und Ava.
@@ -1098,12 +1098,11 @@ Jede Empfehlung enthält:
 - **Gesprächseinstieg:** Ein konkreter Beispielsatz, mit dem Sie die erste Sitzung zu diesem Thema starten können (per Klick in die Zwischenablage kopierbar). **Vorteil:** Wenn Sie den kopierten Einstieg manuell in den Chat einfügen, kann der Coach zunächst Ihre offenen Ziele aus früheren Sitzungen ansprechen, bevor er auf das neue Thema eingeht.
 - **Direkt-Start:** Alternativ können Sie über den **Sitzungs-Button** direkt eine Coaching-Sitzung mit dem vorgeschlagenen Gesprächseinstieg starten. Der Coach überspringt dabei seine üblichen Einleitungsfragen und geht sofort auf Ihr Thema ein – offene Ziele werden in diesem Fall nicht vorab besprochen.
 
-**Verfügbarkeit auf einen Blick:** Die Empfehlungskarten zeigen Ihnen farblich an, ob Sie Zugang zum jeweiligen Coach haben:
+**Verfügbarkeit auf einen Blick:** Die Empfehlungskarten zeigen Ihnen farblich, ob Sie den empfohlenen Coach sofort nutzen können:
 - 🟢 **Verfügbar** – Sie können diesen Coach sofort nutzen
-- 🔒 **Premium erforderlich** – Dieser Coach erfordert eine Premium-Zugangsstufe
 - 🔒 **Klient erforderlich** – Dieser Coach erfordert eine Klienten-Zugangsstufe
 
-Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre Entwicklungsplanung dokumentieren können.
+Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre persönliche Entwicklung planen können.
 
 ### Persönlichkeitsprofile & Personalisierung
 
@@ -1406,7 +1405,7 @@ A good start takes just a few minutes. Here you will find out how to get into th
 
 ### 1.1 Your Opening Question: “What would you like to achieve today?”
 
-After a short welcome, the app asks a single question. Your answer takes you within seconds to the coach who fits you best today. Three cards are available:
+After a short welcome, the app asks a single question. Your answer takes you within seconds to the coach or coachee who fits you best today. Three cards are available:
 
 - **Communication & Management** — for a conversation you want to prepare or understand better. Nobody and Sam are waiting there; with an account also Gloria, and with Premium the Transcript Tools.
 - **Coaching on my concern** (highlighted) — for the topic that is on your mind right now. With an account, you describe it in your own words and receive a coach recommendation; as a guest, you choose directly from Nobody, Max, and Ava.
@@ -2269,12 +2268,11 @@ Each recommendation includes:
 - **Conversation Starter:** A concrete example prompt to kick off your first session on this topic (click to copy to clipboard). **Advantage:** If you paste the copied starter manually into the chat, the coach can first address your open goals from previous sessions before diving into the new topic.
 - **Direct Start:** Alternatively, you can use the **Session button** to directly launch a coaching session with the suggested conversation starter. The coach skips its usual introductory questions and immediately addresses your topic—open goals are not discussed beforehand in this case.
 
-**Availability at a Glance:** The recommendation cards use color coding to show whether you have access to each coach:
+**Availability at a Glance:** The recommendation cards use color coding to show whether you can use each recommended coach right away:
 - 🟢 **Available** – You can use this coach right away
-- 🔒 **Premium Required** – This coach requires a Premium access tier
 - 🔒 **Client Required** – This coach requires a Client access tier
 
-The recommendations also appear in the **PDF export**, so you can document your development planning.
+The recommendations also appear in the **PDF export**, so you can plan your personal development.
 
 ### Personality Profiles & Personalization
 
