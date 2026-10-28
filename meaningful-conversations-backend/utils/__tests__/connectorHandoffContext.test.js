@@ -14,7 +14,7 @@ describe('connectorHandoffContext', () => {
     ).toBe(false);
   });
 
-  it('builds compact nina-review context in EN', () => {
+  it('builds generic behavior context without catalog scene or persona (EN)', () => {
     const block = buildConnectorHandoffContext(
       {
         vignetteId: 'nina-review',
@@ -24,11 +24,11 @@ describe('connectorHandoffContext', () => {
       },
       'en',
     );
-    expect(block).toContain('annual review');
-    expect(block).toContain('Nina');
     expect(block).toContain('Stayed calm');
-    expect(block).toContain('what do you already know');
-    expect(block.length).toBeLessThan(1200);
+    expect(block).toContain('real conversation');
+    expect(block).not.toContain('annual review');
+    expect(block).not.toContain('Nina');
+    expect(block.length).toBeLessThan(900);
   });
 
   it('returns empty without vignette id', () => {
