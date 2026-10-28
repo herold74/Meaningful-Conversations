@@ -8,7 +8,7 @@ import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorRea
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
-import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions } from '../types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions, ConnectorHandoffPayload } from '../types';
 import type { ConnectorRunState } from '../utils/connectorRun';
 import type { UserIntent } from './IntentPickerView';
 import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
@@ -191,6 +191,8 @@ export interface AppViewRouterProps {
   gloriaConnectionPrep: boolean;
   setGloriaConnectionPrep: React.Dispatch<React.SetStateAction<boolean>>;
   connectorChatHandoff: ConnectorChatHandoff | null;
+  connectorHandoffPayload: ConnectorHandoffPayload | null;
+  onConnectorHandoffPayloadConsumed: () => void;
   handleStartGloriaInterview: (mode: import('../utils/gloriaInterview').GloriaInterviewMode) => void;
   handleOpenConnectorIntro: () => void;
   handleStartConnectorRun: (liveMode: boolean) => void;
@@ -363,6 +365,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     gloriaConnectionPrep,
     setGloriaConnectionPrep,
     connectorChatHandoff,
+    connectorHandoffPayload,
+    onConnectorHandoffPayloadConsumed,
     handleStartGloriaInterview,
     handleOpenConnectorIntro,
     handleStartConnectorRun,
@@ -811,6 +815,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           isTestMode={isTestMode}
           onReferralSwitch={handleReferralSwitch}
           connectorChatHandoff={connectorChatHandoff}
+          connectorHandoffPayload={connectorHandoffPayload}
+          onConnectorHandoffPayloadConsumed={onConnectorHandoffPayloadConsumed}
         />
       );
     case 'practiceChat':
