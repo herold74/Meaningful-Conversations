@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import ConnectorRadarChart, { CONNECTOR_DIMENSIONS } from './ConnectorRadarChart';
 import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
-import type { ConnectorDimensionKey, ConnectorEvaluationResult, ConnectorVignettePublic } from '../types';
+import type { ConnectorDimensionKey, ConnectorEvaluationResult, ConnectorVignettePublic, User } from '../types';
 import { showConnectorPracticeLadder } from '../utils/connectorNextSteps';
 
 const DIMENSION_EMOJI: Record<ConnectorDimensionKey, string> = {
@@ -20,6 +20,7 @@ interface ConnectorResultsViewProps {
   onSaveToProfile: () => void;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
   canSave: boolean;
+  currentUser?: User | null;
   onRestart: () => void;
   onDone: () => void;
   /** Show Coach Practice cross-sell for strong results */
@@ -36,6 +37,7 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
   onSaveToProfile,
   saveState,
   canSave,
+  currentUser,
   onRestart,
   onDone,
   showPracticeCrossSell,
@@ -158,6 +160,7 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
         {showConnectorPracticeLadder(evaluation.overallScore) && (
           <ConnectorNextStepsLadder
             evaluation={evaluation}
+            currentUser={currentUser}
             onRestartWithFocus={onRestartWithFocus}
             onStartCoachSession={onStartCoachSession}
           />

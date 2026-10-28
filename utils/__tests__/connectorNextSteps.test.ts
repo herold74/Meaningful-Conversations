@@ -1,7 +1,9 @@
 import {
   buildCoachStarterPrompt,
+  getConnectorDimensionsWithAvailableCoach,
   getPrimaryMissedCue,
   getWeakestConnectorDimension,
+  isConnectorCoachBotAvailable,
   rankConnectorDimensions,
   showConnectorPracticeLadder,
 } from '../connectorNextSteps';
@@ -55,5 +57,17 @@ describe('connectorNextSteps', () => {
     expect(prompt).toContain('prepare for a conversation');
     expect(prompt).toContain('Ask before advising');
     expect(prompt).not.toContain('practice everyday conversation skills');
+  });
+
+  it('filters connector coach dimensions by user access', () => {
+    const eval_ = baseEval();
+    const guestDims = getConnectorDimensionsWithAvailableCoach(eval_, null);
+    expect(guestDims).toContain('nonJudgment');
+    expect(guestDims).not.toContain('empathy');
+
+    const registeredDims = getConnectorDimensionsWithAvailableCoach(eval_, { isPremium: false } as any);
+    expect(registeredDims.length).toBeGreaterThan(guestDims.length);
+    expect(isConnectorCoachBotAvailable('sam-forward-focused', { isPremium: false } as any)).toBe(true);
+    expect(isConnectorCoachBotAvailable('sam-forward-focused', null)).toBe(false);
   });
 });

@@ -1,6 +1,41 @@
 import { CONNECTOR_DIMENSIONS } from '../components/ConnectorRadarChart';
-import type { ConnectorDimensionKey, ConnectorEvaluationResult, Language } from '../types';
+import { BOTS } from '../constants';
+import type { BotAccessTier, ConnectorDimensionKey, ConnectorEvaluationResult, Language, User } from '../types';
 import { buildGloriaConnectionPrepStarter } from './gloriaInterview';
+
+const ACCESS_HIERARCHY: Record<BotAccessTier, number> = {
+  guest: 0,
+  registered: 1,
+  premium: 2,
+  client: 3,
+};
+
+function userAccessLevel(user: User | null | undefined): BotAccessTier {
+  if (!user) return 'guest';
+  if (user.isAdmin || user.isDeveloper || user.isClient) return 'client';
+  if (user.isPremium) return 'premium';
+  return 'registered';
+}
+
+/** Whether the user can start a session with this Kommunikation coach (tier + unlocks). */
+export function isConnectorCoachBotAvailable(botId: string, user: User | null | undefined): boolean {
+  const bot = BOTS.find((b) => b.id === botId);
+  if (!bot) return false;
+  const unlocked = user?.unlockedCoaches ?? [];
+  if (unlocked.includes(botId)) return true;
+  const required = ACCESS_HIERARCHY[bot.accessTier] ?? 0;
+  const userLevel = ACCESS_HIERARCHY[userAccessLevel(user)] ?? 0;
+  return userLevel >= required;
+}
+
+export function getConnectorDimensionsWithAvailableCoach(
+  evaluation: ConnectorEvaluationResult,
+  user: User | null | undefined,
+): ConnectorDimensionKey[] {
+  return rankConnectorDimensions(evaluation).filter((dim) =>
+    isConnectorCoachBotAvailable(CONNECTOR_KOMMUNIKATION_COACHES[dim].botId, user),
+  );
+}
 
 /** Kommunikation-section coaches only (registered tier). */
 export const CONNECTOR_KOMMUNIKATION_COACHES: Record<
