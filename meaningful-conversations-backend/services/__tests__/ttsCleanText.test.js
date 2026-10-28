@@ -21,6 +21,17 @@ describe('cleanTextForSpeech — ellipsis pause', () => {
   });
 });
 
+describe('cleanTextForSpeech — dash and line pacing', () => {
+  test('English: em dash becomes comma pause for Piper', () => {
+    const out = cleanTextForSpeech(
+      'It sounds like this is weighing on you—what\'s the hardest part?',
+      'en',
+    );
+    expect(out).toMatch(/you,\s+what/i);
+    expect(out).not.toMatch(/you-what/i);
+  });
+});
+
 describe('cleanTextForSpeech — German Team compounds', () => {
   test('standalone Team', () => {
     expect(cleanTextForSpeech('Dein Team ist stark.', 'de')).toBe('Dein Tiem ist stark.');

@@ -1,16 +1,15 @@
 import { apiFetch, getApiBaseUrl, getAuthHeaders } from './api';
 
+import { applyTtsPacingMarkers } from '../utils/ttsPacing';
+
 export { getBestServerVoiceForBot, resolveServerVoiceIdForSynthesis } from '../utils/ttsVoiceSelection';
 
 /** Below this length, finish with one speak() pass (after canceling stream chunks) for steady pacing. */
 export const TTS_SINGLE_SPEAK_MAX_CHARS = 500;
 
-/** Collapse layout whitespace for TTS (newlines, multiple spaces). */
+/** Collapse layout whitespace; line breaks and dashes become short pauses (commas). */
 export function normalizeTextForTts(text: string): string {
-    return (text || '')
-        .replace(/\n+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+    return applyTtsPacingMarkers(text);
 }
 
 export type TtsMode = 'local' | 'server';
@@ -144,8 +143,13 @@ export function splitIntoSentences(text: string): string[] {
 
     // Phase 4: Keep short continuations with the prior sentence (e.g. "). Keep it visible…")
     for (let i = 1; i < merged.length; i++) {
-        if (merged[i].length < 50 && /\)\.\s*$/.test(merged[i - 1])) {
-            merged[i - 1] = `${merged[i - 1]} ${merged[i]}`;
+        const prev = merged[i - 1];
+        const next = merged[i];
+        const glueAfterCloseParen =
+            /\)\.\s*$/.test(prev) &&
+            (next.length < 50 || /^Keep it visible/i.test(next.trim()));
+        if (glueAfterCloseParen) {
+            merged[i - 1] = `${prev} ${next}`;
             merged.splice(i, 1);
             i -= 1;
         }

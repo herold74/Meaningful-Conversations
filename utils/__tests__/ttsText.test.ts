@@ -51,7 +51,7 @@ describe('tts text splitting', () => {
     const enqueued: string[] = [];
     enqueueNewStreamingSentences(normalized, true, 0, (s) => enqueued.push(s));
     expect(enqueued.some((s) => s.trim() === 'Perfect.')).toBe(false);
-    expect(enqueued[0]).toMatch(/^Perfect\.\s+Your focus is set/i);
+    expect(enqueued[0]).toMatch(/^Perfect\.(?:,\s*)?Your focus is set/i);
     expect(enqueued.length).toBeGreaterThanOrEqual(2);
   });
 });
