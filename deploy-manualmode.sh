@@ -553,29 +553,92 @@ podman-compose -f "$COMPOSE_FILE" down 2>/dev/null || true
 echo "Starting services with $COMPOSE_FILE..."
 podman-compose -f "$COMPOSE_FILE" up -d
 
-echo "Waiting for services to be healthy..."
-sleep 10
+get_container_ip() {
+    local container_name=$1
+    podman inspect "$container_name" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 2>/dev/null
+}
 
-# Check service status
+wait_for_container_healthy() {
+    local container_name=$1
+    local max_attempts="${2:-30}"
+    local interval="${3:-5}"
+    local attempt=1
+    local health="" running=""
+
+    echo "Waiting for $container_name to be healthy (max ${max_attempts}x${interval}s)..."
+    while [[ $attempt -le $max_attempts ]]; do
+        if ! podman ps --format '{{.Names}}' | grep -qx "$container_name"; then
+            echo "  attempt $attempt/$max_attempts: $container_name is not running"
+        else
+            health=$(podman inspect "$container_name" --format '{{.State.Health.Status}}' 2>/dev/null || echo "unknown")
+            running=$(podman inspect "$container_name" --format '{{.State.Running}}' 2>/dev/null || echo "false")
+            if [[ "$health" == "healthy" ]]; then
+                echo "✓ $container_name is healthy"
+                return 0
+            fi
+            if [[ "$health" == "none" || "$health" == "unknown" ]] && [[ "$running" == "true" ]]; then
+                echo "✓ $container_name is running (no healthcheck)"
+                return 0
+            fi
+            echo "  attempt $attempt/$max_attempts: $container_name health=$health running=$running"
+        fi
+        sleep "$interval"
+        attempt=$((attempt + 1))
+    done
+
+    echo "ERROR: $container_name did not become healthy in time"
+    podman logs "$container_name" 2>&1 | tail -50 || true
+    return 1
+}
+
+wait_for_backend_http() {
+    local container_name=$1
+    local max_attempts="${2:-24}"
+    local interval="${3:-5}"
+    local attempt=1
+    local ip=""
+
+    echo "Waiting for $container_name HTTP /api/health on container IP..."
+    while [[ $attempt -le $max_attempts ]]; do
+        ip=$(get_container_ip "$container_name")
+        if [[ -n "$ip" ]] && curl -f -s -m 5 "http://${ip}:8080/api/health" >/dev/null 2>&1; then
+            echo "✓ $container_name responds on http://${ip}:8080/api/health"
+            return 0
+        fi
+        echo "  attempt $attempt/$max_attempts: backend HTTP not ready (ip=${ip:-none})"
+        sleep "$interval"
+        attempt=$((attempt + 1))
+    done
+
+    echo "ERROR: $container_name is not accepting HTTP on port 8080"
+    podman logs "$container_name" 2>&1 | tail -50 || true
+    return 1
+}
+
+MARIADB_CONTAINER="meaningful-conversations-mariadb-${ENVIRONMENT}"
+BACKEND_CONTAINER="meaningful-conversations-backend-${ENVIRONMENT}"
+FRONTEND_CONTAINER="meaningful-conversations-frontend-${ENVIRONMENT}"
+TTS_CONTAINER="meaningful-conversations-tts-${ENVIRONMENT}"
+
+# Wait for core app stack before nginx (backend start_period is 40s in compose)
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
+    wait_for_container_healthy "$MARIADB_CONTAINER" 24 5
+    wait_for_container_healthy "$BACKEND_CONTAINER" 36 5
+    wait_for_backend_http "$BACKEND_CONTAINER" 24 5
+fi
+
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "frontend" ]]; then
+    wait_for_container_healthy "$FRONTEND_CONTAINER" 24 5
+fi
+
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "tts" ]]; then
+    wait_for_container_healthy "$TTS_CONTAINER" 24 5
+fi
+
 echo "Service status:"
 podman-compose -f "$COMPOSE_FILE" ps
 
-# TTS must be running for app/all deploys (voice mode / server TTS)
-if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "tts" ]]; then
-    TTS_CONTAINER="meaningful-conversations-tts-${ENVIRONMENT}"
-    if ! podman ps --format '{{.Names}}' | grep -qx "$TTS_CONTAINER"; then
-        echo "ERROR: TTS container $TTS_CONTAINER is not running"
-        exit 1
-    fi
-    TTS_HEALTH=$(podman inspect "$TTS_CONTAINER" --format '{{.State.Health.Status}}' 2>/dev/null || echo "unknown")
-    if [[ "$TTS_HEALTH" == "unhealthy" ]]; then
-        echo "ERROR: TTS container $TTS_CONTAINER is unhealthy"
-        exit 1
-    fi
-    echo "TTS container $TTS_CONTAINER is running (health: ${TTS_HEALTH:-starting})"
-fi
-
-# Update nginx reverse proxy IPs
+# Update nginx reverse proxy IPs (only after containers pass health / HTTP checks)
 echo "Updating nginx reverse proxy configuration..."
 if [ -f "/usr/local/bin/update-nginx-ips.sh" ]; then
     /usr/local/bin/update-nginx-ips.sh $ENVIRONMENT || {
@@ -586,6 +649,30 @@ else
     echo "ERROR: nginx IP update script not found at /usr/local/bin/update-nginx-ips.sh"
     echo "This is critical - nginx will not route to the new containers!"
     exit 1
+fi
+
+# Verify nginx can reach backend after IP refresh (catches stale/zombie containers)
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend" ]]; then
+    if [[ "$ENVIRONMENT" == "staging" ]]; then
+        PUBLIC_HEALTH_URL="https://mc-beta.manualmode.at/api/health"
+    else
+        PUBLIC_HEALTH_URL="https://mc-app.manualmode.at/api/health"
+    fi
+    echo "Verifying public API through nginx..."
+    VERIFY_OK=false
+    for i in 1 2 3 4 5; do
+        if curl -f -s -m 10 "$PUBLIC_HEALTH_URL" >/dev/null 2>&1; then
+            echo "✓ Public API health OK ($PUBLIC_HEALTH_URL)"
+            VERIFY_OK=true
+            break
+        fi
+        echo "  attempt $i/5: public API not ready yet..."
+        sleep 5
+    done
+    if [[ "$VERIFY_OK" != true ]]; then
+        echo "ERROR: Public API health check failed after nginx update"
+        exit 1
+    fi
 fi
 
 echo "Deployment complete for $ENVIRONMENT!"

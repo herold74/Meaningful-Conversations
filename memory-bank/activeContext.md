@@ -1,12 +1,10 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 52** (repo `BUILD_NUMBER` + `public/sw.js`)
-**Branch:** `main` @ `9f16527c` (Connector invisible handoff `cd6ccfe5`; build sync `9f16527c`)
-**Staging:** v**2.6.0** Build **52** — https://mc-beta.manualmode.at
-
-**Recent (local):** Connector coach handoff — one-turn `connectorHandoffPayload` (vignette scene + eval slice) injected server-side on first Gloria/Sam/Nobody turn only; continuation uses short reminder; payload cleared after first assistant reply.
-**Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b52** until next production deploy)
+**Version:** 2.6.0 **Build 53** (repo `BUILD_NUMBER` + `public/sw.js`)
+**Branch:** `main` @ `5c26dbf1` (Connector handoff context `114914e0`; build 53 deploy sync)
+**Staging:** v**2.6.0** Build **53** — https://mc-beta.manualmode.at (deploy **2026-10-28**; Connector vignette context on coach handoff)
+**Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b53** until next production deploy)
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Connector / docs:** `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md`, `CONNECTOR` routes under `/api/gemini/connector/*`; QA lab + admin analytics per Sept 2026 handoffs below.
 
