@@ -30,6 +30,11 @@ import { resolveAssetUrl } from '../utils/assetUrl';
 import { useWakeLock } from '../hooks/useWakeLock';
 import CoachInfoModal from './CoachInfoModal';
 import { useTts } from '../hooks/useTts';
+import {
+  enqueueNewStreamingSentences,
+  TTS_SINGLE_SPEAK_MAX_CHARS,
+  normalizeTextForTts,
+} from '../services/ttsService';
 import { resolvePracticeCoacheeGender } from '../utils/botGender';
 import { getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
 import { usePracticeSessionUILabels } from '../hooks/usePracticeSessionUILabels';
@@ -250,29 +255,42 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
     const botMessageId = `bot-${Date.now()}`;
 
     try {
-      // Try streaming first; falls back to JSON if server responds non-SSE
-      const useStreamingTts = tts.initStreamingTts();
+      // Sentence streaming only for long replies; short coaching blocks use one speak() at the end.
+      let useStreamingTts = false;
       let sentenceBuffer = '';
       let streamedText = '';
       let chunkCount = 0;
+      let streamingEnqueuedCount = 0;
 
-      const flushSentences = (text: string, isFinal: boolean) => {
-        sentenceBuffer += text;
-        // Split on sentence-ending punctuation followed by whitespace
-        const parts = sentenceBuffer.split(/(?<=[.!?…;]+)\s+/);
-        // Keep the last part as buffer (may be incomplete sentence)
-        sentenceBuffer = isFinal ? '' : (parts.pop() || '');
-        for (const sentence of parts) {
-          if (sentence.trim()) tts.enqueueSentence(sentence.trim());
-        }
-        if (isFinal && sentenceBuffer.trim()) {
-          tts.enqueueSentence(sentenceBuffer.trim());
+      const flushSentences = (isFinal: boolean) => {
+        const added = enqueueNewStreamingSentences(
+          sentenceBuffer,
+          isFinal,
+          streamingEnqueuedCount,
+          (sentence) => tts.enqueueSentence(sentence),
+        );
+        streamingEnqueuedCount += added;
+        if (isFinal) {
           sentenceBuffer = '';
+          streamingEnqueuedCount = 0;
         }
+      };
+
+      const maybeStartStreamingTts = () => {
+        if (useStreamingTts) return true;
+        if (normalizeTextForTts(sentenceBuffer).length <= TTS_SINGLE_SPEAK_MAX_CHARS) {
+          return false;
+        }
+        useStreamingTts = tts.initStreamingTts();
+        if (useStreamingTts) {
+          flushSentences(false);
+        }
+        return useStreamingTts;
       };
 
       const onStreamChunk = (chunk: string) => {
         streamedText += chunk;
+        sentenceBuffer += chunk;
         chunkCount++;
         setChatHistory(prev => {
           const last = prev[prev.length - 1];
@@ -281,7 +299,9 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           }
           return [...prev, { id: botMessageId, text: streamedText, role: 'bot' as const, timestamp: new Date().toISOString() }];
         });
-        if (useStreamingTts) flushSentences(chunk, false);
+        if (maybeStartStreamingTts()) {
+          flushSentences(false);
+        }
       };
 
       let connectorEnd: { ended: boolean; endType: ConnectorEndType | null } | null = null;
@@ -373,7 +393,8 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
           });
         }, 1000);
       } else if (useStreamingTts) {
-        flushSentences('', true);
+        sentenceBuffer = meditationData.displayText;
+        flushSentences(true);
         tts.reconcileStreamingWithFinalText(meditationData.displayText);
         tts.finishStreamingTts(meditationData.displayText);
       } else {

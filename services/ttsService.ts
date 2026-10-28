@@ -2,6 +2,17 @@ import { apiFetch, getApiBaseUrl, getAuthHeaders } from './api';
 
 export { getBestServerVoiceForBot, resolveServerVoiceIdForSynthesis } from '../utils/ttsVoiceSelection';
 
+/** Below this length, finish with one speak() pass (after canceling stream chunks) for steady pacing. */
+export const TTS_SINGLE_SPEAK_MAX_CHARS = 500;
+
+/** Collapse layout whitespace for TTS (newlines, multiple spaces). */
+export function normalizeTextForTts(text: string): string {
+    return (text || '')
+        .replace(/\n+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 export type TtsMode = 'local' | 'server';
 
 export interface ServerVoice {
@@ -131,7 +142,56 @@ export function splitIntoSentences(text: string): string[] {
         }
     }
 
+    // Phase 4: Keep short continuations with the prior sentence (e.g. "). Keep it visible…")
+    for (let i = 1; i < merged.length; i++) {
+        if (merged[i].length < 50 && /\)\.\s*$/.test(merged[i - 1])) {
+            merged[i - 1] = `${merged[i - 1]} ${merged[i]}`;
+            merged.splice(i, 1);
+            i -= 1;
+        }
+    }
+
     return merged;
+}
+
+/**
+ * Incremental streaming TTS: enqueue newly complete sentences from growing buffer.
+ * Returns number of sentences enqueued this call.
+ */
+export function enqueueNewStreamingSentences(
+    rawBuffer: string,
+    isFinal: boolean,
+    alreadyEnqueued: number,
+    enqueue: (sentence: string) => void,
+): number {
+    const normalized = normalizeTextForTts(rawBuffer);
+    if (!normalized) return 0;
+
+    const sentences = splitIntoSentences(normalized);
+    let completeCount = sentences.length;
+    if (!isFinal && sentences.length > 0) {
+        const endsSentence = /[.!?…;][\"'”)]*\s*$/.test(normalized);
+        if (!endsSentence) {
+            completeCount = Math.max(0, sentences.length - 1);
+        }
+        // Hold lone short openers (e.g. "Good." / "Perfect.") until more text arrives.
+        // splitIntoSentences skips merge when the buffer is still a single segment.
+        while (completeCount > alreadyEnqueued) {
+            const candidate = sentences[completeCount - 1];
+            if (candidate.length < 15 && completeCount === sentences.length) {
+                completeCount -= 1;
+            } else {
+                break;
+            }
+        }
+    }
+
+    let enqueued = 0;
+    for (let i = alreadyEnqueued; i < completeCount; i++) {
+        enqueue(sentences[i]);
+        enqueued += 1;
+    }
+    return enqueued;
 }
 
 /**
