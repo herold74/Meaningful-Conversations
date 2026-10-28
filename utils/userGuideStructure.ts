@@ -8,12 +8,30 @@ export const coachingChapterNum = (isNative: boolean, isRegistered: boolean): nu
 
 export const profileChapterNum = (isNative: boolean): number => (isNative ? 3 : 4);
 
+export const connectorChapterNum = (isNative: boolean, isRegistered: boolean): number =>
+  coachingChapterNum(isNative, isRegistered) + 1;
+
+export const sessionReviewChapterNum = (isNative: boolean, isRegistered: boolean): number =>
+  coachingChapterNum(isNative, isRegistered) + 2;
+
+export const gamificationChapterNum = (isNative: boolean, isRegistered: boolean): number =>
+  coachingChapterNum(isNative, isRegistered) + 3;
+
+/** Premium handbook chapters (always use registered coaching index as base). */
+export const transcriptEvalChapterNum = (isNative: boolean): number =>
+  coachingChapterNum(isNative, true) + 4;
+
+export const audioTranscriptionChapterNum = (isNative: boolean): number =>
+  coachingChapterNum(isNative, true) + 5;
+
+export const coachPracticeChapterNum = (isNative: boolean): number =>
+  coachingChapterNum(isNative, true) + 6;
+
 export interface CoachingSessionSubsections {
   chapter: number;
   coachSelect: string;
   transcriptTools: string | null;
   practiceTab: string | null;
-  connector: string;
   coachRecommendation: string;
   chatInterface: string;
 }
@@ -32,7 +50,6 @@ export function computeCoachingSessionSubsections(ctx: {
   const coachSelect = next();
   const transcriptTools = ctx.showTranscriptTools ? next() : null;
   const practiceTab = ctx.showPracticeTab ? next() : null;
-  const connector = next();
   const coachRecommendation = next();
   const chatInterface = next();
 
@@ -41,10 +58,29 @@ export function computeCoachingSessionSubsections(ctx: {
     coachSelect,
     transcriptTools,
     practiceTab,
-    connector,
     coachRecommendation,
     chatInterface,
   };
+}
+
+export interface SessionReviewSubsections {
+  analysis: string;
+  reviewScreen: string;
+  dpfl: string | null;
+}
+
+export function computeSessionReviewSubsections(ctx: {
+  isNative: boolean;
+  isRegistered: boolean;
+  showDpflBlock: boolean;
+}): SessionReviewSubsections {
+  const chapter = sessionReviewChapterNum(ctx.isNative, ctx.isRegistered);
+  let index = 0;
+  const next = () => `${chapter}.${++index}`;
+  const analysis = next();
+  const reviewScreen = next();
+  const dpfl = ctx.showDpflBlock ? next() : null;
+  return { analysis, reviewScreen, dpfl };
 }
 
 /** Stable handbook section titles for deep-link copy (DE) — not numbered. */
