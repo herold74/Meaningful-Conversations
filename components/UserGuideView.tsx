@@ -230,7 +230,7 @@ ${guideInfoBox(`<p class="m-0"><strong>Tipp für Gäste:</strong> Laden Sie am E
 
 **Sprache:** Auf dem Anmelde- und Registrierungsbildschirm wählen Sie **Deutsch** oder **Englisch**. Die Sprache gilt für die gesamte App.
 
-**Überall dabei:** Ihr Konto funktioniert in der iOS-App ebenso wie im Web-Browser unter **${brand.domainProduction}**. Ihre Daten werden automatisch synchronisiert.
+${isNative ? '' : `**Überall dabei:** Ihr Konto funktioniert in der iOS-App ebenso wie im Web-Browser unter **${brand.domainProduction}**. Ihre Daten werden automatisch synchronisiert.`}
 
 ### 1.3 Ihr Lebenskontext — das Gedächtnis Ihres Coaches
 
@@ -317,9 +317,9 @@ Jede Stufe öffnet Ihnen weitere Möglichkeiten. Sie entscheiden, wie weit Sie g
 | :--- | :--- | :--- | :--- |
 | **Gast** | Ohne Registrierung | Nobody, Max, Ava (Gloria begleitet das Lebenskontext-Interview auf dem Startbildschirm) | Sofort ausprobieren: 50 Nachrichten pro Woche, Ihre Daten bleiben auf Ihrem Gerät |
 | **Registriert** | 9-tägige Premium-Testphase nach der Anmeldung, danach Registered-Abo (Preise im Upgrade-Dialog) | + Gloria, Sam, Gabrielle | Verschlüsselte Speicherung auf all Ihren Geräten, Persönlichkeitstest (OCEAN) mit persönlicher Signatur, Coaching, das sich Ihrem Profil anpasst (DPC), Profil als PDF, Fortschritt und Erfolge, Server-Stimmen (Web); in der Testphase zusätzlich Premium-Funktionen und Coach Practice (8 Methoden) |
-| **Premium** | Upgrade (PayPal im Web, Apple In-App-Kauf in der iOS-App) | + Kenji, Chloe, Mike | Zwei weitere Persönlichkeitstests (Spiral Dynamics, Riemann-Thomann), Coaching, das Ihr Profil mit jeder Sitzung verfeinert (DPFL), Transkript-Auswertung inklusive PDF |
+| **Premium** | ${isNative ? 'Upgrade in der App' : 'Upgrade (PayPal im Web, Apple In-App-Kauf in der iOS-App)'} | + Kenji, Chloe, Mike | Zwei weitere Persönlichkeitstests (Spiral Dynamics, Riemann-Thomann), Coaching, das Ihr Profil mit jeder Sitzung verfeinert (DPFL), Transkript-Auswertung inklusive PDF |
 | **Premium+** | Premium inklusive Practice-Zugang | wie Premium | Coach Practice dauerhaft (8 Methoden), solange das Practice-Abo aktiv ist |
-| **Klient** | ${isNative ? `Zugang über ${providerContact} (Web/Code, in der iOS-App nicht einlösbar)` : `Zugangscode von ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio-Transkription, PEP Lösungsblockaden, Coach Practice (12 Methoden), alle Funktionen |
+| **Klient** | ${isNative ? `Kontakt: ${providerContact}` : `Zugangscode von ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio-Transkription, PEP Lösungsblockaden, Coach Practice (12 Methoden), alle Funktionen |
 
 **So schalten Sie weitere Möglichkeiten frei:**
 ${isNative ? `- Direkt in der App über den **Apple In-App-Kauf** (Menü → **Upgrade**): Registered Monats- oder Jahresabo, Premium Monats- oder Jahresabo, Premium+ Monatsabo und Coach-Freischaltungen (Kenji, Chloe). Am Ende des Bildschirms finden Sie **Käufe wiederherstellen**. Ihre Abonnements verwalten Sie über Ihr Apple-Konto.` : `- **iOS-App:** Direkt in der App über den Apple In-App-Kauf. Wählen Sie **Premium** oder **Premium+** (Premium inklusive Coaching üben). Ihre Abonnements verwalten Sie über Ihr Apple-Konto.
@@ -1244,7 +1244,7 @@ In **Meaningful Conversations** ersetzt die App **keine** vollständige PEP-Sitz
 
 Nur **Klienten**-Nutzer (Zugang über ${providerContact}) sowie Admin/Developer-Testkonten. Premium, Premium+ und registrierte Standardnutzer sehen diesen Abschnitt **nicht**.
 
-${isNative ? `**Hinweis iOS:** Klienten-Zugang wird außerhalb der App vergeben — Code-Einlösung ist in der iOS-App nicht verfügbar.` : ''}
+${isNative ? `**Kontakt für Klienten-Zugang:** ${providerContact}` : ''}
 
 ### Wo finden Sie es?
 
@@ -1440,7 +1440,7 @@ ${guideInfoBox(`<p class="m-0"><strong>Tip for guests:</strong> At the end of ev
 
 **Language:** On the sign-in and registration screen, you choose **German** or **English**. The language applies to the whole app.
 
-**With you everywhere:** Your account works in the iOS app as well as in the web browser at **${brand.domainProduction}**. Your data is synchronized automatically.
+${isNative ? '' : `**With you everywhere:** Your account works in the iOS app as well as in the web browser at **${brand.domainProduction}**. Your data is synchronized automatically.`}
 
 ### 1.3 Your Life Context — Your Coach's Memory
 
@@ -1527,9 +1527,9 @@ Each tier opens up further possibilities. You decide how far you want to go — 
 | :--- | :--- | :--- | :--- |
 | **Guest** | No registration | Nobody, Max, Ava (Gloria guides the Life Context interview on the start screen) | Try it right away: 50 messages per week, your data stays on your device |
 | **Registered** | 9-day Premium trial after signing up, then Registered subscription (prices in the Upgrade dialog) | + Gloria, Sam, Gabrielle | Encrypted storage across all your devices, personality test (OCEAN) with a personal signature, coaching that adapts to your profile (DPC), profile as PDF, progress and achievements, server voices (web); during the trial, also Premium features and Coach Practice (8 methods) |
-| **Premium** | Upgrade (PayPal on the web, Apple In-App Purchase in the iOS app) | + Kenji, Chloe, Mike | Two further personality tests (Spiral Dynamics, Riemann-Thomann), coaching that refines your profile with every session (DPFL), transcript evaluation including PDF |
+| **Premium** | ${isNative ? 'Upgrade in the app' : 'Upgrade (PayPal on the web, Apple In-App Purchase in the iOS app)'} | + Kenji, Chloe, Mike | Two further personality tests (Spiral Dynamics, Riemann-Thomann), coaching that refines your profile with every session (DPFL), transcript evaluation including PDF |
 | **Premium+** | Premium including practice access | same as Premium | Coach Practice for as long as your practice subscription is active (8 methods) |
-| **Client** | ${isNative ? `Access via ${providerContact} (web/code, not redeemable in the iOS app)` : `Access code from ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio transcription, PEP solution blockages, Coach Practice (12 methods), all features |
+| **Client** | ${isNative ? `Contact: ${providerContact}` : `Access code from ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio transcription, PEP solution blockages, Coach Practice (12 methods), all features |
 
 **How to unlock more:**
 ${isNative ? `- Directly in the app via **Apple In-App Purchase** (Menu → **Upgrade**): Registered monthly or annual, Premium monthly or annual, Premium+ monthly, and coach unlocks (Kenji, Chloe). At the bottom of the screen you find **Restore Purchases**. You manage your subscriptions through your Apple account.` : `- **iOS app:** Directly in the app via Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). You manage your subscriptions through your Apple account.
@@ -2428,7 +2428,7 @@ The five patterns are: **self-reproach**, **blaming others**, **expectational at
 
 **Client** users only (access via ${providerContact}), plus admin/developer test accounts. Premium, Premium+, and standard registered users do **not** see this section.
 
-${isNative ? `**iOS note:** Client access is granted outside the app — code redemption is not available in the iOS app.` : ''}
+${isNative ? `**Contact for client access:** ${providerContact}` : ''}
 
 ### Where to find it
 
