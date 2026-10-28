@@ -107,7 +107,6 @@ In the **Coaching** section, switch to the **Coach Practice** tab (next to "Coac
 
 const deConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
     const ch = connectorChapterNum(isNative, isRegistered);
-    const teChapter = deChapterLabel(transcriptEvalChapterNum(isNative));
     return `<details id="${USER_GUIDE_ANCHORS.connector}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${deChapterLabel(ch)}: The Connector — Verbindung herstellen (Registriert)</summary>
 <div style="padding: 16px;">
@@ -125,7 +124,13 @@ Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector**
 
 **Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — **Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität** — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist **mehr Fähigkeit als Talent**: Das Profil zeigt, worauf Sie aufbauen können.
 
-**Ihr nächster Schritt (optional, in der App):** Liegt Ihr Gesamtergebnis unter 8/10, können Sie unter **„Dein nächster Schritt“** freiwillig weitergehen — ohne Bewertungsdruck: ein **kleiner Impuls** fürs nächste echte Gespräch, optional **The Connector** mit Schwerpunkt auf einer Dimension, optional ein **Coaching-Gespräch** mit einem **für Ihr Konto verfügbaren** Coach aus Management & Kommunikation (Vorschlag zum Einstieg und Direkt-Start — ähnlich wie **Empfohlene Coaching-Profile** in der Transkript-Auswertung, ${teChapter}).
+**Dein nächster Schritt (optional):** Nach der Auswertung können Sie unter **„Dein nächster Schritt“** freiwillig weitermachen — alles in Ihrem Tempo, nichts ist Pflicht:
+
+1. **Kleiner Impuls** — ein Gedanke fürs nächste echte Gespräch  
+2. **Noch einmal üben** — The Connector mit Schwerpunkt auf **einer** Dimension  
+3. **Mit einem Coach vertiefen** — kurzes Gespräch zur **Vorbereitung auf ein echtes Gespräch** (Vorschlag zum Start, vor dem Senden anpassbar); nur Coaches, die für Ihr Konto freigeschaltet sind  
+
+Je nach Ergebnis sehen Sie alle drei Punkte oder nur den Coach-Schritt. Denselben Coach-Einstieg finden Sie später auch im **Persönlichkeitsprofil** bei Ihrer Verbindungs-Signatur.
 
 **Übungskatalog (Premium):** Nach einem abgeschlossenen Hauptlauf können Sie **einzelne kuratierte Szenarien** erneut üben — mit Auswertung für diese Einheit (ohne Ihre gespeicherte Signatur zu überschreiben).
 
@@ -145,7 +150,6 @@ ${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächsp
 
 const enConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
     const ch = connectorChapterNum(isNative, isRegistered);
-    const teChapter = enChapterLabel(transcriptEvalChapterNum(isNative));
     return `<details id="${USER_GUIDE_ANCHORS.connector}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${enChapterLabel(ch)}: The Connector — Connecting, not just communicating (Registered)</summary>
 <div style="padding: 16px;">
@@ -163,7 +167,13 @@ In the **Management & Communication** section, you'll find **The Connector** car
 
 **Your result:** A **Connection Signature** with five dimensions — **empathy, presence, curiosity, non-judgment, and steadiness** — shown as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is **more skill than talent**: the profile shows what to build on.
 
-**Your next step (optional, in the app):** If your overall score is below 8/10, you may see **“Your next step”** — entirely optional, at your pace: a **small nudge** for your next real conversation, optionally **The Connector** again with focus on one dimension, optionally a **coaching conversation** with a coach **available on your account** from Management & Communication (suggested opener and direct start — similar to **Recommended Coaching Profiles** in transcript evaluation, ${teChapter}).
+**Your next step (optional):** After the evaluation, you can continue voluntarily under **“Your next step”** — everything at your own pace; nothing is required:
+
+1. **A small nudge** — one thought for your next real-life conversation  
+2. **Practice again** — The Connector with focus on **one** dimension  
+3. **Go deeper with a coach** — a short conversation to **prepare for a real talk** (suggested opening, editable before you send); only coaches unlocked on your account  
+
+Depending on your result, you may see all three options or only the coach step. The same coach entry point is also available later in your **personality profile** with your Connection Signature.
 
 **Practice catalog (Premium):** After a completed main run, you can replay **individual curated vignettes** with evaluation for that unit (without overwriting your saved signature).
 
