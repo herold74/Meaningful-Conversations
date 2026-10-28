@@ -1,8 +1,3 @@
-const { getVignetteById } = require('../connector/vignettes.js');
-
-const MAX_SCENE = 220;
-const MAX_OPENING = 120;
-const MAX_PLANNING = 90;
 const MAX_HIGHLIGHT = 80;
 const MAX_MISSED = 80;
 
@@ -29,12 +24,6 @@ function truncate(text, max) {
   return `${t.slice(0, max - 1)}…`;
 }
 
-function localized(vignette, field, lang) {
-  const block = vignette[field];
-  if (!block) return '';
-  return block[lang] || block.en || block.de || '';
-}
-
 function countAssistantTurns(history) {
   return (history || []).filter((m) => m.role === 'bot' || m.role === 'model').length;
 }
@@ -52,55 +41,29 @@ function buildConnectorHandoffContext(payload, lang) {
     lang === 'de' ? FOCUS_DE[focusKey] || FOCUS_DE.curiosity : FOCUS_EN[focusKey] || FOCUS_EN.curiosity;
   const highlight = truncate(payload.highlight, MAX_HIGHLIGHT);
   const missed = truncate(payload.missedCue, MAX_MISSED);
-
-  const vignette = getVignetteById(payload.vignetteId);
-  if (!vignette) {
-    if (lang === 'de') {
-      return `
-
-## Connector-Hintergrund (nur für Sie — nicht vorlesen)
-Kein Katalog-Szenario. Practice-Feedback: ${highlight || '—'}${missed ? `; Lücke: ${missed}` : ''}. Prep-Fokus: ${focus}.
-Fragen Sie einmal nach Kontext zum echten Gespräch; danach Perspektiven des Nutzers und des Gegenübers — nicht „was wissen Sie über …?" bei null Wissen.`;
-    }
-    return `
-
-## Connector background (interviewer-only — do not read aloud)
-No catalog vignette. Practice feedback: ${highlight || '—'}${missed ? `; gap: ${missed}` : ''}. Prep focus: ${focus}.
-Ask once for real-conversation context; then user vs. other perspectives — not “what do you know about …?” from zero.`;
-  }
-
-  const name = vignette.personaName || 'partner';
-  const scene = truncate(localized(vignette, 'scenarioBrief', lang), MAX_SCENE);
-  const rel = truncate(localized(vignette, 'relationship', lang), 40);
-  const opening = truncate(localized(vignette, 'opening', lang), MAX_OPENING);
-  const need = truncate(localized(vignette, 'innerNeed', lang), MAX_PLANNING);
+  const feedback = highlight || '—';
+  const missedPart = missed ? (lang === 'de' ? `; Entwicklung: ${missed}` : `; growth edge: ${missed}`) : '';
 
   if (lang === 'de') {
     return `
 
 ## Connector-Hintergrund (nur für Sie — nicht vorlesen)
-Szenario: ${scene}
-Beziehung: ${rel}. ${name} begann mit: „${opening}"
-Was sie/er brauchen könnte (Planung, nicht behaupten): ${need}
-Practice: + ${highlight || '—'}${missed ? ` / Lücke: ${missed}` : ''}. Prep-Fokus: ${focus}.
-Nutzen Sie das für informierte Fragen. Bitten Sie den Nutzer, fürs echte Gespräch zu bestätigen/korrigieren — nicht „Was wissen Sie über ${name}?" von null.`;
+Practice-Rückmeldung (Verhalten, nicht Rollenspiel): ${feedback}${missedPart}. Prep-Fokus: ${focus}.
+Erste Antwort: kurz bestätigen (z. B. „Alles klar. Konzentrieren wir uns auf dein echtes Gespräch."), dann **eine** Frage — mit wem es geht und was auf dem Spiel steht. Keine Übungspersonas oder Rollen nennen, es sei denn, der Nutzer bringt sie ein.`;
   }
 
   return `
 
 ## Connector background (interviewer-only — do not read aloud)
-Scene: ${scene}
-Relationship: ${rel}. ${name} opened with: "${opening}"
-What they may need (planning only): ${need}
-Practice: + ${highlight || '—'}${missed ? ` / gap: ${missed}` : ''}. Prep focus: ${focus}.
-Use this for informed questions. Ask the user to confirm/correct for their real talk — not “what do you already know about ${name}?” from zero.`;
+Practice feedback (behavior, not role-play): ${feedback}${missedPart}. Prep focus: ${focus}.
+First reply: briefly acknowledge (e.g. “Got it. Let's focus on the real conversation.”), then **one** question — who it is with and what's at stake. Do not name practice personas or roles unless the user does.`;
 }
 
 function getConnectorHandoffContinuationReminder(lang, mode) {
   if (mode === 'gloria') {
     return lang === 'de'
-      ? '\n\n## Connector-Vorbereitung (Fortsetzung)\nWeiter nur Fragen, keine Ratschläge. Bezug aus dem Thread oben — keine Wiederholung des Szenarios.'
-      : '\n\n## Connector prep (continuation)\nQuestions only, no advice. Use the thread above — do not re-introduce the scenario.';
+      ? '\n\n## Connector-Vorbereitung (Fortsetzung)\nWeiter nur Fragen, keine Ratschläge. Bezug aus dem Thread — keine Übungspersonas.'
+      : '\n\n## Connector prep (continuation)\nQuestions only, no advice. Use the thread — do not re-introduce practice personas.';
   }
   return lang === 'de'
     ? '\n\n## Connector-Coaching-Vorbereitung (Fortsetzung)\nKurz halten; Bezug aus dem Thread — kein volles Coaching/GPS.'

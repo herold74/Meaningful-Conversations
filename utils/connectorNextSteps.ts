@@ -119,30 +119,23 @@ export function resolveConnectorHandoffPartnerName(
 export function buildConnectorGloriaHandoffStarter(
   language: Language,
   dimension: ConnectorDimensionKey,
-  evaluation: ConnectorEvaluationResult,
+  _evaluation: ConnectorEvaluationResult,
 ): string {
-  const partner = resolveConnectorHandoffPartnerName(evaluation);
   const focus =
     language === 'de'
       ? CONNECTOR_PREP_DIMENSION_FOCUS[dimension].de
       : CONNECTOR_PREP_DIMENSION_FOCUS[dimension].en;
 
   if (language === 'de') {
-    const partnerClause = partner
-      ? `Ich bereite ein echtes Gespräch mit ${partner} vor. `
-      : 'Ich bereite ein echtes Gespräch vor. ';
     return (
-      `${partnerClause}` +
+      'Ich bereite ein echtes Gespräch in meinem Leben vor. ' +
       `Nach dem Connector-Üben möchte ich klarer werden, wie ich mich zeige — besonders: ${focus}. ` +
       `Bitte führe mich nur mit Fragen durch die Vorbereitung.`
     );
   }
 
-  const partnerClause = partner
-    ? `I'm preparing for a real conversation with ${partner}. `
-    : "I'm preparing for a real conversation. ";
   return (
-    `${partnerClause}` +
+    "I'm preparing for a real conversation in my life. " +
     `After Connector practice I want to be clearer on how I show up — especially: ${focus}. ` +
     `Please guide me through preparation with your questions only.`
   );
@@ -152,30 +145,23 @@ export function buildConnectorGloriaHandoffStarter(
 export function buildConnectorCoachingHandoffStarter(
   language: Language,
   dimension: ConnectorDimensionKey,
-  evaluation: ConnectorEvaluationResult,
+  _evaluation: ConnectorEvaluationResult,
 ): string {
-  const partner = resolveConnectorHandoffPartnerName(evaluation);
   const focus =
     language === 'de'
       ? CONNECTOR_PREP_DIMENSION_FOCUS[dimension].de
       : CONNECTOR_PREP_DIMENSION_FOCUS[dimension].en;
 
   if (language === 'de') {
-    const partnerClause = partner
-      ? `Ich bereite ein echtes Gespräch mit ${partner} vor. `
-      : 'Ich bereite ein echtes Gespräch vor. ';
     return (
-      `${partnerClause}` +
+      'Ich bereite ein echtes Gespräch in meinem Leben vor. ' +
       `Nach dem Connector-Üben brauche ich einen klaren Fokus: ${focus}. ` +
       `Bitte halte es kurz — hilf mir zu klären, wie ich mich im echten Gespräch zeigen möchte, höchstens mit einem kleinen nächsten Schritt.`
     );
   }
 
-  const partnerClause = partner
-    ? `I'm preparing for a real conversation with ${partner}. `
-    : "I'm preparing for a real conversation. ";
   return (
-    `${partnerClause}` +
+    "I'm preparing for a real conversation in my life. " +
     `After Connector practice I want one clear focus: ${focus}. ` +
     `Keep it brief — help me clarify how I want to show up in the real conversation, with at most one small next step.`
   );

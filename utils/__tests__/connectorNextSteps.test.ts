@@ -55,7 +55,8 @@ describe('connectorNextSteps', () => {
     eval_.perVignette = [{ vignetteId: 'nina-review', highlight: 'Ok', missedCue: 'x' }];
     for (const dim of ['empathy', 'presence', 'steadiness'] as const) {
       const prompt = buildCoachStarterPrompt(dim, 'long growth', 'en', 'sam-forward-focused', eval_);
-      expect(prompt).toContain('Nina');
+      expect(prompt).toContain('real conversation in my life');
+      expect(prompt).not.toContain('Nina');
       expect(prompt).toContain('Keep it brief');
       expect(prompt).not.toContain('long growth');
       expect(prompt).not.toContain('connector coaching prep');
@@ -76,12 +77,13 @@ describe('connectorNextSteps', () => {
     expect(prompt).not.toContain('connector coaching prep');
   });
 
-  it('builds Gloria connector handoff starter with partner and dimension focus', () => {
+  it('builds Gloria connector handoff starter with dimension focus (no practice persona)', () => {
     const eval_ = baseEval();
     eval_.perVignette = [{ vignetteId: 'nina-review', highlight: 'Good', missedCue: 'Jumped to fix' }];
     expect(resolveConnectorHandoffPartnerName(eval_)).toBe('Nina');
     const prompt = buildConnectorGloriaHandoffStarter('en', 'presence', eval_);
-    expect(prompt).toContain('Nina');
+    expect(prompt).toContain('real conversation in my life');
+    expect(prompt).not.toContain('Nina');
     expect(prompt).toContain('staying with the person');
     expect(prompt).toContain('questions only');
     expect(prompt).not.toContain('connection prep');
@@ -91,7 +93,8 @@ describe('connectorNextSteps', () => {
     const eval_ = baseEval();
     eval_.perVignette = [{ vignetteId: 'jonas-meeting', highlight: 'Ok', missedCue: '' }];
     const prompt = buildCoachStarterPrompt('empathy', 'Stay present longer', 'en', 'gloria-interview', eval_);
-    expect(prompt).toContain('Jonas');
+    expect(prompt).toContain('real conversation in my life');
+    expect(prompt).not.toContain('Jonas');
     expect(prompt).toContain('recognizing and naming feelings');
   });
 
