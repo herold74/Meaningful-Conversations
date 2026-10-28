@@ -14,9 +14,12 @@ import {
   coachPracticeChapterNum,
   coachingChapterNum,
   computeCoachingSessionSubsections,
+  computeGamificationSubsections,
+  computeProfileSubsections,
   computeSessionReviewSubsections,
   connectorChapterNum,
   gamificationChapterNum,
+  handbookSectionRef,
   profileChapterNum,
   sessionReviewChapterNum,
   transcriptEvalChapterNum,
@@ -197,6 +200,8 @@ const de_markdown = (
         isRegistered,
         showDpflBlock: isPremium,
     });
+    const profileSub = computeProfileSubsections(isNative);
+    const gamSub = computeGamificationSubsections(isNative, isRegistered);
     return `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
@@ -204,6 +209,8 @@ const de_markdown = (
 Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient.
 
 ${guideInfoBox('<p class="m-0"><strong>Kein Gesprächstagebuch nötig:</strong> Nach jeder Sitzung schlägt die App automatisch Aktualisierungen vor; Sie prüfen sie kurz und übernehmen nur, was für Sie passt — oder passen den Text an, bevor Sie speichern. So bleibt Ihr Coaching kontinuierlich und kontextbezogen, ohne Extra-Aufwand.</p>')}
+
+${isNative ? `${guideInfoBox('<p class="m-0"><strong>App-Updates:</strong> Neue Versionen erhalten Sie über den <strong>Apple App Store</strong> (Einstellungen → App Store → automatische Updates optional).</p>')}` : ''}
 
 </div>
 </details>
@@ -214,33 +221,34 @@ ${guideInfoBox('<p class="m-0"><strong>Kein Gesprächstagebuch nötig:</strong> 
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
 <div style="padding: 16px;">
 
-Wenn Sie die App zum ersten Mal öffnen, werden Sie durch einen kurzen Onboarding-Prozess geführt.
+Wenn Sie die App öffnen, sehen Sie zuerst den **Willkommensbildschirm** (Logo, Kurztext) — besonders nach Anmeldung oder Session-Wiederherstellung. Neue Nutzer gelangen zur **Anmeldung**; gespeicherte Sessions können direkt weitergeleitet werden.
 
-### 1.1 Intent Picker & Name
+### 1.1 Intent Picker, Name & typische Einstiege
 
-Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“:
-- **Kommunikation & Management** — Öffnet den Bereich Management & Kommunikation (Nobody, Sam, Gloria, Transkript-Tools)
-- **Coaching zu meinem Anliegen** (hervorgehoben) — **Registrierte:** Fokus auf die **Anliegen-Suche**; Coach-Bereiche bleiben eingeklappt, bis ein Vorschlag passt. **Gäste:** Keine Anliegen-Suche — der **Coaching-Bereich** wird hervorgehoben; Sie wählen den Coach direkt (jede Coach-Karte nutzt eine etablierte Methode).
-- **Als Coach üben** — Direkt zum Übungsbereich (Silber-Bereich, Practice-Tab); **überspringt Lebenskontext-Schirme**
+Nach Anmeldung (oder als Gast) folgt in der Regel der **Intent Picker** — drei Karten: „Was möchten Sie heute erreichen?“
+- **Kommunikation & Management** — Fokus **Management & Kommunikation** (Nobody, Sam; **registriert:** Gloria-Interview, ab Premium Transkript-Tools)
+- **Coaching zu meinem Anliegen** (hervorgehoben) — **Registrierte:** **Anliegen-Suche**; **Gäste:** **Coaching-Bereich**, Coaches Nobody, Max, Ava
+- **Als Coach üben** — Mit **Premium+, Trial oder Klient** oft **direkt Übungs-Setup**; **Gäste** nicht — Anmeldung/Upgrade nötig
 
-Der gewählte Intent wird in der App **gespeichert** und wirkt **erst auf der Coach-Auswahl** — oft erst nach Name, Lebenskontext, OCEAN oder Kontextauswahl. Dann gilt je nach Karte:
-- **Kommunikation & Management:** Bereich **Management & Kommunikation** wird **geöffnet** und kurz hervorgehoben.
-- **Coaching zu meinem Anliegen:** **Registrierte** — **Anliegen-Suche** wird hervorgehoben; Coach-Bereiche bleiben **eingeklappt**. **Gäste** — **Coaching-Bereich** wird **geöffnet** und hervorgehoben (keine Anliegen-Suche).
-- **Als Coach üben:** Mit **Premium+/Trial/Klient** oft **direkt** zum Übungs-Setup; sonst Coach-Auswahl mit Tab **Coaching üben** und passendem Fokus.
+Gespeicherter Intent steuert auf der Coach-Auswahl Highlight und geöffnete Bereiche (Kommunikation → Management; Coaching → Suche bzw. bei Gästen Coaching-Bereich; Üben → Setup oder Practice-Tab).
 
-**Ohne gespeicherten Intent** (Picker dauerhaft aus oder noch nicht gewählt): Management & Coaching sind auf der Coach-Auswahl **standardmäßig geöffnet**.
+**Intent Picker aus:** **Menü → Mein Account** (Toggle). Login mit LC + Profil → dann **Kontextauswahl** (§1.5) statt Picker.
 
-**Name (Gäste):** Haben Sie in **${isNative ? 'dieser App-Sitzung' : 'dieser Browser-Tab-Sitzung'}** noch keinen Namen angegeben, folgt nach dem Intent die Abfrage Ihres Vornamens (oder Pseudonyms). Daraus entsteht eine minimale Lebenskontext-Vorlage; Sie können den Schritt auch **überspringen**. Anschließend gelangen Sie zum **Startbildschirm** zur Lebenskontext-Einrichtung. Haben Sie in derselben Sitzung bereits einen Namen **und** einen Lebenskontext, springt die App nach dem Intent direkt zur **Coach-Auswahl**.
+**Registriert, erster Besuch:** Intent → **Name** → **OCEAN-Onboarding** (ohne Profil) → Startbildschirm oder Coach-Auswahl.
 
-**Name (registriert):** Ohne gespeicherten Lebenskontext werden Sie nach Ihrem Namen gefragt; er wird in den verschlüsselten Lebenskontext integriert (kein Überspringen).
+**Registriert, Wiedereinstieg:** Intent → optional **Profil-Hinweis** (Premium, fehlende SD/Riemann) → bei Kommunikation/Coaching meist **direkt Coach-Auswahl** (Cloud-LC geladen), nicht Kontextauswahl.
 
-**Hinweis:** Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
+**Gast:** Intent → Name (optional überspringen) → Startbildschirm; mit Name **und** substanziellem LC in derselben ${isNative ? 'App-Sitzung' : 'Tab-Sitzung'} → Coach-Auswahl.
+
+**Ohne gespeicherten Intent** (Picker aus, kein Intent gewählt): Management & Coaching auf Coach-Auswahl **standardmäßig geöffnet**.
 
 ### 1.2 Gast vs. Registrierter Benutzer
-- **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet.
-- **Registrieren/Anmelden:** Erstellen Sie ein zunächst kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
+- **Als Gast fortfahren:** Name, Lebenskontext und Gamification **lokal** (${isNative ? 'App-Sitzung' : 'Browser-Tab'} / localStorage) — **keine Cloud**.
+- **Registrieren/Anmelden:** **9-Tage-Premium-Trial**; Lebenskontext und Profil **E2EE** auf dem Server, Sync über Geräte.
 
-${guideWarningBox(`<p class="m-0"><strong>Gastmodus — bitte beachten:</strong> Name und Kontext gelten nur für <strong>${isNative ? 'diese App-Sitzung' : 'diese Browser-Tab-Sitzung'}</strong>. Ohne Download geht Ihr Fortschritt beim ${isNative ? 'Beenden der App' : 'Schließen des Tabs'} verloren. Laden Sie am Ende jeder Sitzung auf dem Analyse-Bildschirm Ihre Lebenskontext-Datei herunter, um sie dauerhaft zu speichern.</p>`)}
+${guideWarningBox(`<p class="m-0"><strong>Gastmodus:</strong> Ohne Download der .md-Datei am Sitzungs-Review geht Fortschritt beim ${isNative ? 'Beenden der App' : 'Schließen des Tabs'} verloren.</p>
+<p class="m-0 mt-2"><strong>Gast-Limit:</strong> Max. <strong>50 Chat-Nachrichten pro Woche</strong> — danach Registrierung nötig.</p>
+<p class="m-0 mt-2"><strong>Gast & TTS:</strong> Keine Server-Stimmen — nur Geräte-/Browser-Stimmen.</p>`)}
 
 **Sprachauswahl:** Auf dem Anmelde-/Registrierungsbildschirm können Sie zwischen **Deutsch** und **Englisch** wählen. Die Sprachwahl gilt für die gesamte App.
 
@@ -248,21 +256,19 @@ ${guideWarningBox(`<p class="m-0"><strong>Gastmodus — bitte beachten:</strong>
 
 ### 1.3 Der Lebenskontext-Startbildschirm
 
-Nach Auth, Intent und (bei Gästen) der Namensabfrage landen Sie auf dem **Startbildschirm** mit **drei Aktionskarten** und einem Upload-Bereich darunter:
+Den **Startbildschirm** (drei Karten + Upload) nutzen Sie nach Gast-Name, nach OCEAN, nach **Neue Sitzung** (Kontextauswahl) oder **Menü → Lebenskontext** (Gäste immer). **Typischer Login** mit vollem registrierten Profil: oft **ohne** Startbildschirm (Intent → Coach-Auswahl).
 
-- **Mit Lebenskontext fortfahren** — Lädt Ihren gespeicherten Kontext in die Vorschau oder öffnet den Datei-Picker, wenn noch keine substanzielle Datei vorhanden ist.
-- **Neues Gespräch starten** (hervorgehoben)
-  - **Mit angereichertem Kontext:** öffnet den **Markdown-Editor** zur Bearbeitung.
-  - **Ohne Kontext oder nur Name-Vorlage:** startet den Fragebogen.
-- **Mit Interview erstellen** — Beginnt ein geführtes Interview mit Gloria.
+- **Mit Lebenskontext fortfahren** — Vorschau oder Datei-Picker ohne substanziellen Kontext.
+- **Neues Gespräch starten** (hervorgehoben) — angereicherter Kontext → **Editor**; sonst **Fragebogen**.
+- **Mit Interview erstellen** — Gloria (**Lebenskontext-Interview**, nicht Coach-Katalog).
 
-**Datei hochladen:** Unter den Karten können Sie eine \`.md\`-Lebenskontext-Datei per Klick oder Drag & Drop hochladen. Das ist die typische Methode für Gäste, die eine frühere Sitzung fortsetzen.
+**Datei hochladen:** \`.md\` per Klick/Drag & Drop — typisch für Gäste zum Fortsetzen.
 
-**Menü → Lebenskontext:** Gäste gelangen immer zum **Startbildschirm**; registrierte Nutzer mit gespeichertem Kontext zur **Kontextauswahl**.
+**Menü → Lebenskontext:** Gäste → Startbildschirm; registrierte mit Cloud-Kontext → **Kontextauswahl** (§1.5).
 
-**Fragebogen (über „Neues Gespräch starten", wenn noch kein oder nur minimaler Kontext):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. **Gäste:** Der Datenschutzhinweis zu personenbezogenen Daten erscheint beim ersten Ausfüllen pro ${isNative ? 'App-Sitzung' : 'Tab-Sitzung'}. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
+**Fragebogen:** Nur Name Pflicht; optional Land/Bundesland. Gäste: Datenschutzhinweis beim ersten Mal pro ${isNative ? 'App-Sitzung' : 'Tab-Sitzung'}. **Datei erstellen & Weiter** → Coach-Auswahl.
 
-**Interview mit Gloria:** Gloria ist **kein** Coach, sondern stellt die Fragebogen-Themen in einem natürlichen Gespräch. Am Ende formatiert sie Ihre Antworten in eine Lebenskontext-Datei.
+**Interview mit Gloria:** Fragebogen-Themen im Dialog; Ergebnis = Lebenskontext; Abschluss im **Sitzungs-Review** (Gloria-Sonderpfad).
 
 ### 1.4 Lebenskontext-Vorschau und Bearbeitung
 
@@ -294,11 +300,25 @@ Der Editor ermöglicht Ihnen die direkte Bearbeitung Ihres Lebenskontexts:
 - **Wenn Sie gezielt einen bestehenden Bereich aktualisieren möchten**, respektiert Gloria das und hilft Ihnen dabei, statt auf der vorgegebenen Reihenfolge zu bestehen.
 - Am Ende des Gesprächs werden die neuen Informationen **mit Ihrem bestehenden Kontext zusammengeführt** — nichts geht verloren.
 
-### 1.5 Eine neue Sitzung beginnen (für wiederkehrende Benutzer)
-Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehren, sehen Sie den Bildschirm **Kontextauswahl**.
+### 1.5 Wiedereinstieg, Kontextauswahl & Neustart
 
-- **Mit gespeichertem Kontext fortfahren:** Lädt Ihren letzten Stand und bringt Sie zur Coach-Auswahl.
-- **Neue Sitzung starten:** Ermöglicht es Ihnen, mit einem leeren Kontext von vorne zu beginnen (ideal, wenn Sie ein völlig neues Thema erkunden möchten).
+**Typischer registrierter Wiedereinstieg:** Nach Login → **Intent Picker** → bei Intent Kommunikation/Coaching **direkt Coach-Auswahl** (Cloud-Lebenskontext bereits geladen). **Kontextauswahl** erscheint **nicht** auf diesem Standardpfad.
+
+**Kontextauswahl** (Bildschirm „Willkommen zurück“) sehen Sie vor allem:
+- **Menü (☰) → Lebenskontext** (registriert mit gespeichertem Kontext)
+- **Login**, wenn der Intent Picker unter Mein Account **deaktiviert** ist
+
+Dort: **Vorschau** des Kontexts, **Kontext bearbeiten**, optional **Banner „Gespräch fortsetzen“** (§1.6), dann:
+- **Mit gespeichertem Kontext fortfahren** → Coach-Auswahl
+- **Neue Sitzung starten** → Bestätigung (Warnung, optional **Kontext archivieren**) → **Startbildschirm** mit leerem Sitzungs-Kontext (Cloud wird beim nächsten Speichern überschrieben)
+
+**Menü → Neu anfangen:** Setzt Chat/Sitzung zurück und öffnet den **Intent Picker** (kein Leeren des Cloud-Kontexts allein).
+
+### 1.6 Unterbrochene Sitzungen fortsetzen
+
+**Classic Coaching:** Wurde ein Gespräch im selben ${isNative ? 'App-Tab' : 'Browser-Tab'} unterbrochen, bietet die App beim erneuten Öffnen von Kontextauswahl/Startbildschirm oder per Dialog **Fortsetzen** an. Entwurf liegt **nur lokal** (sessionStorage), nicht auf dem Server, bis Sie **Sitzung beenden** und auswerten.
+
+**Coach Practice:** Analog **Practice-Session fortsetzen** im selben Tab (Setup/Chat), ebenfalls lokal bis zur Auswertung.
 
 </div>
 </details>
@@ -320,7 +340,7 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 
 Über das Menü (☰) erreichen Sie die **Kontoverwaltung** mit folgenden Optionen:
 
-- **Profil bearbeiten:** Ändern Sie Ihren Namen und Ihre E-Mail-Adresse.
+- **Profil bearbeiten:** Ändern Sie Ihren Namen und Ihre E-Mail-Adresse. Hier können Sie auch den **Intent Picker** ein- oder ausschalten (Mein Account).
 - **Passwort ändern:** Aktualisieren Sie Ihr Passwort. **Hinweis:** Da Ihr Passwort den Verschlüsselungsschlüssel generiert, werden Ihre verschlüsselten Daten (Lebenskontext, Persönlichkeitsprofil) automatisch mit dem neuen Schlüssel neu verschlüsselt.
 - **Daten exportieren (DSGVO):** Laden Sie alle Ihre gespeicherten Daten herunter -- als HTML-Bericht oder JSON-Datei. Der Export umfasst: Kontodaten, Gamification-Fortschritt, Lebenskontext, Persönlichkeitsprofil, Feedbacks, eingelöste Codes, Coaching-Übungssessions, Transkript-Auswertungen und Nutzungsstatistiken.
 ${isNative ? '' : `- **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Klient).
@@ -333,10 +353,10 @@ Die App bietet mehrere Zugangsstufen mit steigendem Funktionsumfang:
 
 | Stufe | Zugang | Coaches | Funktionen |
 | :--- | :--- | :--- | :--- |
-| **Gast** | Ohne Registrierung | Nobody, Max, Ava, Gloria (Onboarding) | Grundfunktionen, lokale Daten |
-| **Registriert** | **9-Tage-Premium-Test** nach Registrierung; danach Registered-Abo (z. B. €3,90/Monat) | + Gloria (Interview), Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, Narrative Signatur, Server-TTS (Web), DPC-Modus, Profil-PDF, Gamification; im Test auch Premium-Features und Coach Practice (8 Methoden) |
-| **Premium** | Kostenpflichtiges Upgrade (z. B. €9,90/Monat) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung inkl. PDF |
-| **Premium+** | Premium inkl. Coach Practice (z. B. €14,90/Monat) | wie Premium | + **Coach Practice** (8 Übungsmethoden) |
+| **Gast** | Ohne Registrierung | Nobody, Max, Ava (+ Gloria nur fürs **Lebenskontext-Interview** auf dem Startbildschirm, nicht als Coach-Karte) | Grundfunktionen, lokale Daten, **50 Nachrichten/Woche**, Geräte-TTS |
+| **Registriert** | **9-Tage-Premium-Trial** nach Registrierung; danach Registered-Abo (Preise im Upgrade-Dialog) | + Gloria (Interview), Sam, Gabrielle | Cloud E2EE, OCEAN, Narrative Signatur, Server-TTS (Web), DPC, Profil-PDF, Gamification; **Trial:** Premium-Features inkl. **Coach Practice** (8 Methoden) |
+| **Premium** | Upgrade (PayPal Web / IAP iOS) | + Kenji, Chloe, Mike | Riemann-Thomann & SD, DPFL, adaptives Profil, Transkript-Auswertung inkl. PDF |
+| **Premium+** | Premium inkl. Practice-Entitlement | wie Premium | **Coach Practice** dauerhaft (8 Methoden), sofern Practice-Abo aktiv |
 | **Klient** | ${isNative ? `Zugang über ${providerContact} (Web/Code — **nicht** in der iOS-App einlösbar)` : `Zugangscode von ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio-Transkription, **PEP Lösungsblockaden**, **Coach Practice (12 Methoden)**, alle Features |
 
 **So upgraden Sie:**
@@ -371,6 +391,10 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Respektvolle Nutzung:</strong> Di
 <li><strong>Coach Practice:</strong> Sexuelle Grenzverletzungen durch Übende (z. B. explizite „Übungen“) sind unprofessionell; der simulierte Klient reagiert mit Abgrenzung, die Auswertung kritisiert solches Verhalten.</li>
 </ul>`)}
 
+### 2.5 Geplante Wartung
+
+Bei angekündigten Wartungsfenstern sehen angemeldete Nutzer und Gäste (außer auf Login-/Register-Screens) ein **Hinweis-Banner** unter der Kopfzeile mit Start-/Endzeit in Ihrer Anzeigezeitzone (zusätzlich Europe/Vienna, wenn abweichend). **Bevorstehende** Hinweise können pro Browser ausgeblendet werden; **aktive** Wartung bleibt sichtbar.
+
 </div>
 </details>
 
@@ -391,6 +415,7 @@ Die App ist als native iOS-App im **Apple App Store** verfügbar. Suchen Sie nac
 - In-App Purchases direkt über Ihr Apple-Konto
 - Hochwertige Apple-Sprachausgabe (Enhanced/Premium-Stimmen)
 - Native Spracherkennung
+- **Updates:** Über den **App Store** (wie bei anderen iOS-Apps); siehe auch Abschnitt 3.5 für Web/PWA.
 
 ### 3.2 Installation als PWA auf iOS (Alternative)
 
@@ -441,7 +466,7 @@ Nach größeren Updates kann eine zwischengespeicherte Version die App kurz bloc
 
 Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
 
-### 4.1 Überblick
+### ${profileSub.overview} Überblick
 
 Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönlichkeitsmerkmale erfasst. Es wird verwendet, um:
 - **Coaching-Modi** für personalisiertes Coaching mit allen Coaches freizuschalten
@@ -450,7 +475,7 @@ Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönli
 
 **Zugriff:** Öffnen Sie das Menü (☰) und wählen Sie **"Persönlichkeitsprofil"**.
 
-### 4.2 Die Persönlichkeitstests
+### ${profileSub.tests} Die Persönlichkeitstests
 
 Sie können aus drei im Coaching bewährten Verfahren wählen. Jedes beleuchtet einen anderen Aspekt Ihrer Persönlichkeit. Sie können nach dem ersten Test jederzeit weitere Tests absolvieren, um Ihr Profil mit zusätzlichen Perspektiven zu ergänzen.
 
@@ -601,7 +626,7 @@ ${guideWarningBox('<p class="m-0">Der PVQ-21 misst Werteprioritäten — <strong
 </div>
 </details>
 
-### 4.3 Die Persönlichkeits-Signatur
+### ${profileSub.signature} Die Persönlichkeits-Signatur
 
 Nach dem Test können Sie zwei **"Goldene Fragen"** beantworten:
 - **Flow-Erlebnis:** Eine Situation, in der Sie sich voll in Ihrem Element fühlten
@@ -617,7 +642,7 @@ Basierend auf Ihren Testergebnissen und diesen Geschichten generiert unsere KI e
 
 **PDF-Export:** Über die Schaltfläche **"Als PDF herunterladen"** können Sie Ihr vollständiges Persönlichkeitsprofil -- inklusive Testergebnisse, Signatur und Facetten -- als PDF-Datei exportieren und speichern.
 
-### 4.4 Coaching-Modi
+### ${profileSub.coachingModes} Coaching-Modi
 
 Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie einen **Coaching-Modus** aktivieren, fließt Ihr Profil in die Sitzungen ein. Sie können den Modus jederzeit in Ihrem Persönlichkeitsprofil wechseln.
 
@@ -641,7 +666,7 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 - Ideal für: Selbstentdeckung & kontinuierliches Wachstum
 - **Ausnahme:** **Nobody** und **Sam** (Management & Kommunikation) nutzen bei aktiviertem DPFL-Konto weiterhin nur **DPC** — kein Comfort Check und keine Profilverfeinerung nach deren Sitzungen.
 
-${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines neuen Persönlichkeitstests werden alle bisherigen DPFL-Verfeinerungen überschrieben. Das Erstellen oder Aktualisieren der <strong>Persönlichkeits-Signatur</strong> (siehe 4.3) hat hingegen keinen Einfluss auf Ihre Verfeinerungen — im Gegenteil: Es ist besonders sinnvoll, die Signatur nach einigen DPFL-Sitzungen neu zu generieren.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines neuen Persönlichkeitstests werden alle bisherigen DPFL-Verfeinerungen überschrieben. Das Erstellen oder Aktualisieren der <strong>Persönlichkeits-Signatur</strong> (siehe Abschnitt ' + profileSub.signature + ') hat hingegen keinen Einfluss auf Ihre Verfeinerungen — im Gegenteil: Es ist besonders sinnvoll, die Signatur nach einigen DPFL-Sitzungen neu zu generieren.</p>')}
 
 **Anzeige:** Der aktive Coaching-Modus wird im **Coach-Info-Modal** angezeigt (klicken Sie auf den Coach-Namen im Chat).
 
@@ -966,7 +991,8 @@ ${dePracticeTabSection(isNative, coachingSub.practiceTab)}
     - **Gerätestimmen:** Stimmen auf Ihrem Gerät. **Vorteil:** Sofortige Reaktion, auch offline.
 ${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium) — exzellente Qualität bei sofortiger Reaktionszeit.` : `    - **Server-Stimmen:** *(Nur im Web-Browser)* Professionelle Stimmen auf unserem Server.
   - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich Apple-Gerätestimmen (Enhanced/Premium) — Server-Stimmen entfallen.
-  - **Browser (Web):** Sprachausgabe (TTS) wurde **nur mit Google Chrome und Apple Safari** getestet.`}
+  - **Browser (Web):** Sprachausgabe (TTS) wurde **nur mit Google Chrome und Apple Safari** getestet.
+  - **Gäste (Web):** Keine Server-Stimmen — nur Geräte-/Browser-Stimmen (siehe auch §1.2).`}
 - **Sprachmodus:**
   - **Schallwellen-Symbol** wechselt in den reinen Sprachmodus.
   - **Großes Mikrofon-Symbol** startet die Aufnahme — sprechen Sie Ihre Nachricht.
@@ -990,7 +1016,9 @@ ${deConnectorChapter(isNative, isRegistered)}
 Tippen Sie auf **Sitzung beenden** — die KI analysiert Ihr Gespräch. Der Ladebildschirm **Sitzung wird analysiert...** dauert meist 15–30 Sekunden.
 
 ### ${sessionReviewSub.reviewScreen} Der Bildschirm "Diskursanalyse"
-Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
+Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse (in der App als **Diskursanalyse** betitelt).
+
+${guideInfoBox('<p class="m-0"><strong>Gloria-Lebenskontext-Interview:</strong> Nach dem Interview mit Gloria (Startbildschirm) erscheint ein angepasstes Review mit der erzeugten Lebenskontext-Datei — ohne klassische Coaching-Analyse, Ziele oder DPFL-Schritte.</p>')}
 
 - **Neue Einsichten:** Eine von der KI erstellte Zusammenfassung Ihrer wichtigsten Erkenntnisse aus der Sitzung.
 - **Bewerten Sie Ihre Sitzung:** Verwenden Sie die Sterne, um Feedback zu geben. Dies hilft uns, die Qualität der Coaches zu verbessern.
@@ -1037,9 +1065,11 @@ Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe ${deChapterLabel(pro
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${deChapterLabel(gamificationChapterNum(isNative, isRegistered))}: Ihren Fortschritt verstehen (Gamification)</summary>
 <div style="padding: 16px;">
 
+### ${gamSub.intro} Überblick
+
 Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren. Über das **Trophäen-Symbol** in der Leiste öffnen Sie **Erfolge**.
 
-### 7.2 Wie man XP verdient
+### ${gamSub.earnXp} Wie man XP verdient
 
 | Aktion | Erhaltene XP |
 | :--- | :--- |
@@ -1048,26 +1078,28 @@ Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexio
 | Erreichen eines bestehenden Ziels | 25 XP |
 | Formeller Abschluss der Sitzung | 50 XP |
 
-### 7.3 Wo wird der Fortschritt gespeichert?
+**Qualifikation:** XP gibt es nur ab **5 Nachrichten** in der Sitzung. Beim **Fortsetzen** mit demselben Coach zählen nur **neue** Nachrichten seit dem letzten Review (kein Doppelzählen). Streaks gelten ebenfalls nur für qualifizierte Sitzungen.
+
+### ${gamSub.storage} Wo wird der Fortschritt gespeichert?
 
 | Benutzertyp | Speicherort der Erfolge | Dauerhaftigkeit |
 | :--- | :--- | :--- |
 | **Registriert** | Auf dem Server, an Ihr Konto gebunden. | **Ja**, über alle Sitzungen und Geräte hinweg. |
 | **Gast** | In der \`.md\`-Datei in einem versteckten Kommentar. | **Nein**, nur wenn Sie dieselbe Datei wiederverwenden. |
 
-### 7.4 Darstellung & Farbschema
+### ${gamSub.appearance} Darstellung & Farbschema
 
-In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung:
+In der Gamification-Leiste finden Sie Symbole zur Anpassung der Darstellung:
 
 - **Hell-/Dunkelmodus (Mond-/Sonnen-Symbol):** Schaltet zwischen hellem und dunklem Erscheinungsbild um. Standardmäßig wechselt die App automatisch basierend auf der Uhrzeit: **Dunkelmodus** von 18:00 bis 6:00 Uhr, **Hellmodus** von 6:00 bis 18:00 Uhr. Ein manuelles Umschalten deaktiviert den automatischen Wechsel.
-- **Saisonales Farbschema (Paletten-Symbol):** Wechselt zwischen drei Farbschemata: Sommer, Herbst und Brand (W4F/manualmode.at je nach Marke). Die App wählt automatisch das passende saisonale Schema (Brand im Winter), Sie können es aber jederzeit manuell ändern.
+- **Saisonales Farbschema (Paletten-Symbol):** Wechselt zwischen Sommer, Herbst und Brand (manualmode.at bzw. W4F je nach Marke). Im Winter wird automatisch **Brand** gewählt; bei nur einer Marken-Palette entfällt das Paletten-Symbol.
 
 </div>
 </details>
 `;
 };
 
-const de_chapter8 = (isNative: boolean) => `
+const de_chapter8 = (isNative: boolean, transcriptToolsSection: string | null) => `
 ---
 
 <details id="${USER_GUIDE_ANCHORS.transcriptEval}">
@@ -1080,7 +1112,7 @@ Die Transkript-Auswertung hilft Ihnen, echte Gespräche – z.B. mit Kunden, Kol
 
 ### Wer kann es nutzen?
 
-Zugang und Ort in der App: siehe Abschnitt **5.2**. Unten beschreiben wir den Ablauf der Auswertung.
+Zugang und Ort in der App: siehe ${handbookSectionRef('de', 'transcriptTools', transcriptToolsSection)}. Unten beschreiben wir den Ablauf der Auswertung.
 
 ### Wie funktioniert es?
 
@@ -1173,7 +1205,7 @@ ${guideWarningBox('<p class="m-0"><strong>Wichtig:</strong> Sie sind dafür vera
 </details>
 `;
 
-const de_chapter9 = (isNative: boolean) => `
+const de_chapter9 = (isNative: boolean, transcriptToolsSection: string | null) => `
 ---
 
 <details>
@@ -1186,7 +1218,7 @@ Die Audio-Transkription ermöglicht es Ihnen, **echte Gespräche direkt in der A
 
 ### Wer kann es nutzen?
 
-Zugang und Karte: siehe Abschnitt **5.2**. Zusätzlich benötigen Sie die **Klienten**-Stufe — nutzen Sie **Aufnahme/Upload** in den Transkript-Tools.
+Zugang und Karte: siehe ${handbookSectionRef('de', 'transcriptTools', transcriptToolsSection)}. Zusätzlich benötigen Sie die **Klienten**-Stufe — nutzen Sie **Aufnahme/Upload** in den Transkript-Tools.
 
 ### Wie funktioniert es?
 
@@ -1326,6 +1358,10 @@ Oben finden Sie Links zu **Dein Fortschritt** und **Übungsverlauf**. Darunter w
 - **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in exakter Klientensprache bleiben“.
 - **Übung starten** — der Chat beginnt **leer**; **Sie** eröffnen als Coach.
 
+### Unterbrochene Übungssession
+
+Wurde eine Practice-Sitzung im selben ${isNative ? 'App-Tab' : 'Browser-Tab'} unterbrochen, erscheint beim erneuten Öffnen des Setup-Bildschirms ein Dialog **„Übungssession fortsetzen?“** (Methode, Szenario, Nachrichtenanzahl). Der Entwurf liegt **nur lokal** in sessionStorage — nicht auf dem Server, bis die **Auswertung** abgeschlossen ist.
+
 ### Übungssitzung führen
 
 - Sie sind der **Coach** — die KI antwortet als Klient. Es gibt **keine** automatische Begrüßung durch die KI.
@@ -1398,6 +1434,8 @@ const en_markdown = (
         isRegistered,
         showDpflBlock: isPremium,
     });
+    const profileSub = computeProfileSubsections(isNative);
+    const gamSub = computeGamificationSubsections(isNative, isRegistered);
     return `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
@@ -1405,6 +1443,8 @@ const en_markdown = (
 Welcome to ${brand.appName}! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory.
 
 ${guideInfoBox('<p class="m-0"><strong>No conversation journal needed:</strong> After each session, the app automatically proposes updates; you review them briefly and accept only what fits—or edit the text before saving. That keeps coaching continuous and contextual, without extra work.</p>')}
+
+${isNative ? `${guideInfoBox('<p class="m-0"><strong>App updates:</strong> Install new versions from the <strong>Apple App Store</strong> (Settings → App Store → optional automatic updates).</p>')}` : ''}
 
 </div>
 </details>
@@ -1415,55 +1455,54 @@ ${guideInfoBox('<p class="m-0"><strong>No conversation journal needed:</strong> 
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
 <div style="padding: 16px;">
 
-When you first open the app, you'll be guided through a brief onboarding process.
+When you open the app, you first see the **welcome screen** (logo, short subtitle)—especially after sign-in or session restore. New users go to **sign-in**; restored sessions may skip straight into the flow.
 
-### 1.1 Intent Picker & Name
+### 1.1 Intent Picker, name & typical entry paths
 
-On launch, the **Intent Picker** appears — a screen with **three cards** asking “What would you like to achieve today?”:
-- **Communication & management** — Opens the Management & Communication section (Nobody, Sam, Gloria, transcript tools)
-- **Coaching for my concern** (featured) — **Registered:** Focuses **topic search**; coach sections stay collapsed until you pick a suggestion. **Guests:** No topic search — the **Coaching section** is highlighted; you choose your coach directly (each coach uses an established method).
-- **Practice as a coach** — Goes straight to the practice area (Silver section, Practice tab); **skips Life Context screens**
+After sign-in (or as a guest), you usually see the **Intent Picker**—three cards: “What would you like to achieve today?”
+- **Communication & management** — Focus **Management & Communication** (Nobody, Sam; **registered:** Gloria interview, transcript tools from Premium)
+- **Coaching for my concern** (featured) — **Registered:** **topic search**; **Guests:** **Coaching section**, coaches Nobody, Max, Ava
+- **Practice as a coach** — With **Premium+, trial, or client** access, often **straight to practice setup**; **guests** cannot—sign-in/upgrade required
 
-Your chosen intent is **stored** in the app and applies **when you reach coach selection** — often only after name, Life Context, OCEAN, or context choice. Then, by card:
-- **Communication & management:** **Management & Communication** is **expanded** and briefly highlighted.
-- **Coaching for my concern:** **Registered** — **topic search** is highlighted; coach sections stay **collapsed**. **Guests** — **Coaching section** is **expanded** and highlighted (no topic search).
-- **Practice as a coach:** With **Premium+/trial/client** access, often **straight to practice setup**; otherwise coach selection on the **Coach Practice** tab with matching focus.
+Stored intent controls highlights and open sections on coach selection.
 
-**With no stored intent** (picker permanently off or not chosen yet): Management & Coaching are **open by default** on coach selection.
+**Picker off:** **Menu → My Account** toggle. Sign-in with Life Context + profile → **Context Choice** (§1.5) instead of the picker.
 
-**Name (guests):** If you have not entered a name in **this ${isNative ? 'app session' : 'browser tab session'}** yet, the app asks for your first name (or pseudonym) after the intent. This creates a minimal Life Context template; you can also **skip** this step. You then reach the **start screen** to set up your Life Context. If you already have a name **and** a Life Context in the same session, the app goes straight to **coach selection** after the intent.
+**Registered, first visit:** Intent → **name** → **OCEAN onboarding** (no profile yet) → start screen or coach selection.
 
-**Name (registered):** Without a saved Life Context, you are asked for your name; it is integrated into the encrypted Life Context (no skip option).
+**Registered, returning:** Intent → optional **profile hint** (Premium, missing SD/Riemann) → for communication/coaching intents, usually **coach selection** directly (cloud Life Context loaded)—not Context Choice.
 
-**Note:** Registered users can disable the Intent Picker under **My Account**.
+**Guest:** Intent → name (skippable) → start screen; with name **and** substantial Life Context in the same ${isNative ? 'app session' : 'tab session'} → coach selection.
+
+**No stored intent** (picker off, no intent chosen): Management & Coaching **open by default** on coach selection.
 
 ### 1.2 Guest vs. Registered User
-- **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device.
-- **Register/Login:** Start with a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
+- **Continue as Guest:** Name, Life Context, and gamification stay **local** (${isNative ? 'app session' : 'browser tab'} / localStorage)—**no cloud**.
+- **Register/Login:** **9-day Premium trial**; Life Context and profile **E2EE** on the server, synced across devices.
 
-${guideWarningBox(`<p class="m-0"><strong>Guest mode — please note:</strong> Your name and context apply only to <strong>this ${isNative ? 'app session' : 'browser tab session'}</strong>. Without a download, progress is lost when you ${isNative ? 'close the app' : 'close the tab'}. At the end of each session, download your Life Context file from the review screen to save it permanently.</p>`)}
+${guideWarningBox(`<p class="m-0"><strong>Guest mode:</strong> Without downloading the .md file on session review, progress is lost when you ${isNative ? 'close the app' : 'close the tab'}.</p>
+<p class="m-0 mt-2"><strong>Guest limit:</strong> Max. <strong>50 chat messages per week</strong>—then registration is required.</p>
+<p class="m-0 mt-2"><strong>Guest & TTS:</strong> No server voices—device/browser voices only.</p>`)}
 
-**Language selection:** On the login/registration screen, you can switch between **German** and **English**. The language setting applies to the entire app.
+**Language selection:** German or English on the sign-in/registration screen.
 
-**Cross-platform:** Your user account works both in the iOS app and via web browser at **${brand.domainProduction}**. All data is synchronized automatically.
+**Cross-platform:** Account at **${brand.domainProduction}** and in the iOS app; data syncs when registered.
 
 ### 1.3 The Life Context Start Screen
 
-After auth, intent, and (for guests) the name prompt, you arrive at the **start screen** with **three action cards** and an upload area below:
+You use the **start screen** (three cards + upload) after a guest name, after OCEAN, after **Start new session** from Context Choice, or **Menu → Life Context** (always for guests). **Typical login** with a full registered profile often **skips** it (intent → coach selection).
 
-- **Continue with your Life Context** — Loads your saved context into preview, or opens the file picker if no substantial file exists yet.
-- **Start a new conversation** (featured)
-  - **With enriched context:** opens the **Markdown editor** for editing.
-  - **Without context or name-only template:** starts the questionnaire.
-- **Build with an interview** — Begins a guided interview with Gloria.
+- **Continue with your Life Context** — Preview or file picker if no substantial context yet.
+- **Start a new conversation** (featured) — enriched context → **editor**; otherwise **questionnaire**.
+- **Build with an interview** — Gloria (**Life Context interview**, not a coach card).
 
-**Upload a file:** Below the cards, you can upload a \`.md\` Life Context file by click or drag & drop. This is the typical method for guests continuing a previous session.
+**Upload:** \`.md\` via click/drag & drop—typical for guests continuing a session.
 
-**Menu → Life Context:** Guests always reach the **start screen**; registered users with a saved context reach **Context Choice**.
+**Menu → Life Context:** Guests → start screen; registered with cloud context → **Context Choice** (§1.5).
 
-**Questionnaire (via “Start a new conversation” when no or only minimal context):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Guests:** The privacy notice about personal data appears on the first questionnaire submit per ${isNative ? 'app session' : 'tab session'}. **Generate File & Continue** takes you to coach selection.
+**Questionnaire:** Name required; optional country/state. Guests: privacy notice on first submit per ${isNative ? 'app session' : 'tab session'}. **Generate File & Continue** → coach selection.
 
-**Interview with Gloria:** Gloria is **not** a coach; she asks the questionnaire topics in a natural conversation. At the end, she formats your answers into a Life Context file.
+**Interview with Gloria:** Questionnaire topics in dialogue; result = Life Context; finishes on **session review** (Gloria-specific path).
 
 ### 1.4 Life Context Preview & Editing
 
@@ -1495,11 +1534,25 @@ The editor allows you to directly edit your Life Context:
 - **If you specifically want to update an existing section**, Gloria respects that and helps you with it, rather than insisting on a fixed order.
 - At the end of the conversation, the new information is **merged with your existing context** — nothing is lost.
 
-### 1.5 Starting a New Session (for Returning Users)
-If you are a registered user returning with a saved context, you will see the **Context Choice** screen.
+### 1.5 Return visits, Context Choice & reset
 
-- **Continue with Saved Context:** Loads your last state and takes you to coach selection.
-- **Start a New Session:** Allows you to begin fresh with a blank context (great for exploring a completely new topic).
+**Typical registered return:** After login → **Intent Picker** → for communication/coaching intents, usually **coach selection** directly (cloud Life Context already loaded). **Context Choice** is **not** on this default path.
+
+**Context Choice** (“Welcome back”) appears mainly:
+- **Menu (☰) → Life Context** (registered with saved context)
+- **Login** when the Intent Picker is **disabled** under My Account
+
+There: context **preview**, **edit context**, optional **resume conversation** banner (§1.6), then:
+- **Continue with Saved Context** → coach selection
+- **Start a New Session** → confirmation (warning, optional **archive context**) → **start screen** with empty session context (cloud overwritten on next save)
+
+**Menu → Start over:** Resets chat/session state and opens the **Intent Picker** (does not silently wipe cloud context alone).
+
+### 1.6 Resuming interrupted sessions
+
+**Classic coaching:** If a conversation was interrupted in the same ${isNative ? 'app tab' : 'browser tab'}, Context Choice/start screen or a dialog offers **Resume**. Draft is **local only** (sessionStorage) until you **end session** and complete review.
+
+**Coach Practice:** Similarly **Resume practice session** in the same tab until evaluation.
 
 </div>
 </details>
@@ -1521,7 +1574,7 @@ Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life 
 
 Via the menu (☰), you can access **Account Management** with the following options:
 
-- **Edit Profile:** Change your name and email address.
+- **Edit Profile:** Change your name and email address. You can also toggle the **Intent Picker** on or off here (My Account).
 - **Change Password:** Update your password. **Note:** Since your password generates the encryption key, your encrypted data (Life Context, Personality Profile) is automatically re-encrypted with the new key.
 - **Export Data (GDPR):** Download all your stored data -- as an HTML report or JSON file. The export includes: account data, gamification progress, Life Context, Personality Profile, feedback, redeemed codes, coach practice sessions, transcript evaluations, and usage statistics.
 ${isNative ? '' : `- **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
@@ -1534,10 +1587,10 @@ The app offers several access tiers with increasing functionality:
 
 | Tier | Access | Coaches | Features |
 | :--- | :--- | :--- | :--- |
-| **Guest** | No registration | Nobody, Max, Ava, Gloria (onboarding) | Basic features, local data |
-| **Registered** | **9-day Premium trial** after signup; then Registered subscription (e.g. €3.90/month) | + Gloria (interview), Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, narrative signature, server TTS (web), DPC mode, profile PDF, Gamification; during trial also Premium features and Coach Practice (8 methods) |
-| **Premium** | Paid upgrade (e.g. €9.90/month) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation incl. PDF |
-| **Premium+** | Premium incl. Coach Practice (e.g. €14.90/month) | same as Premium | + **Coach Practice** (8 practice methods) |
+| **Guest** | No registration | Nobody, Max, Ava (+ Gloria only for **Life Context interview** on the start screen, not as a coach card) | Basic features, local data, **50 messages/week**, device TTS |
+| **Registered** | **9-day Premium trial** after signup; then Registered subscription (prices in Upgrade) | + Gloria (interview), Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, narrative signature, server TTS (web), DPC mode, profile PDF, gamification; trial includes Premium features and Coach Practice (8 methods) |
+| **Premium** | Paid upgrade (PayPal web / IAP iOS) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation incl. PDF |
+| **Premium+** | Premium incl. practice entitlement | same as Premium | **Coach Practice** while practice subscription is active (8 methods) |
 | **Client** | ${isNative ? `Access via ${providerContact} (web/code — **not** redeemable in the iOS app)` : `Access code from ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio transcription, **PEP solution blockages**, **Coach Practice (12 methods)**, all features |
 
 **How to upgrade:**
@@ -1572,6 +1625,10 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Respectful use:</strong> Coaches 
 <li><strong>Coach Practice:</strong> Sexual boundary violations by trainees (e.g. explicit “exercises”) are unprofessional; the simulated client pushes back and evaluations criticize such behavior.</li>
 </ul>`)}
 
+### 2.5 Scheduled maintenance
+
+During announced maintenance windows, signed-in users and guests (except on login/register screens) see a **notice banner** below the header with start/end times in your display timezone (plus Europe/Vienna when different). **Upcoming** notices can be dismissed per browser; **active** maintenance stays visible.
+
 </div>
 </details>
 
@@ -1592,6 +1649,7 @@ The app is available as a native iOS app on the **Apple App Store**. Search for 
 - In-App Purchases directly through your Apple account
 - High-quality Apple voice output (Enhanced/Premium voices)
 - Native speech recognition
+- **Updates:** Via the **App Store** (like other iOS apps); see also section 3.5 for web/PWA refresh.
 
 ### 3.2 PWA Installation on iOS (Alternative)
 
@@ -1642,7 +1700,7 @@ After major updates, a cached version can briefly block the app (e.g. a **blank 
 
 This feature is exclusively available to registered users and enables a personalized coaching experience.
 
-### 4.1 Overview
+### ${profileSub.overview} Overview
 
 The Personality Profile is an encrypted document that captures your personality traits. It is used to:
 - Unlock **coaching modes** for personalized coaching with all coaches
@@ -1651,7 +1709,7 @@ The Personality Profile is an encrypted document that captures your personality 
 
 **Access:** Open the menu (☰) and select **"Personality Profile"**.
 
-### 4.2 The Personality Tests
+### ${profileSub.tests} The Personality Tests
 
 You can choose from three methods proven in coaching. Each illuminates a different aspect of your personality. You can take additional tests at any time after the first one.
 
@@ -1776,7 +1834,7 @@ ${guideWarningBox('<p class="m-0">The PVQ-21 measures value priorities — <stro
 
 **Note:** After completing your first test, you can take additional tests at any time to enrich your profile with additional perspectives.
 
-### 4.3 The Personality Signature
+### ${profileSub.signature} The Personality Signature
 
 After the test, you can answer two **"Golden Questions"**:
 - **Flow Experience:** A situation where you felt completely in your element
@@ -1792,7 +1850,7 @@ Based on your test results and these stories, our AI generates a unique **Person
 
 **PDF Export:** Use the **"Download as PDF"** button to export your complete personality profile -- including test results, signature, and facets -- as a PDF file.
 
-### 4.4 Coaching Modes
+### ${profileSub.coachingModes} Coaching Modes
 
 Having a personality profile alone does not change coaching. Only when you activate a **coaching mode** does your profile feed into sessions. You can switch modes at any time in your personality profile.
 
@@ -1816,7 +1874,7 @@ Having a personality profile alone does not change coaching. Only when you activ
 - Ideal for: Self-discovery & continuous growth
 - **Exception:** **Nobody** and **Sam** (Management & Communication) still use **DPC only** when your account is on DPFL — no Comfort Check or profile refinement after their sessions.
 
-${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personality test will overwrite all previous DPFL refinements. Creating or updating your <strong>Personality Signature</strong> (see 4.3) does not affect your refinements — on the contrary, regenerating the signature after a few DPFL sessions is especially useful.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personality test will overwrite all previous DPFL refinements. Creating or updating your <strong>Personality Signature</strong> (see section ' + profileSub.signature + ') does not affect your refinements — on the contrary, regenerating the signature after a few DPFL sessions is especially useful.</p>')}
 
 **Display:** The active coaching mode is shown in the **Coach Info Modal** (click on the coach's name in the chat).
 
@@ -2141,7 +2199,8 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
     - **Device Voices:** Generated on your device. **Advantage:** Instant response, works offline.
 ${isNative ? `  - **Note:** The iOS app uses high-quality Apple device voices only (Enhanced/Premium) — excellent quality with instant response.` : `    - **Server Voices:** *(Web browser only)* Professional voices on our server.
   - **Note for iOS app:** Uses Apple device voices only — no server voices.
-  - **Browsers (Web):** Voice output (TTS) has been tested **only in Google Chrome and Apple Safari**.`}
+  - **Browsers (Web):** Voice output (TTS) has been tested **only in Google Chrome and Apple Safari**.
+  - **Guests (web):** No server voices — device/browser voices only (see also §1.2).`}
 - **Voice Mode:**
   - **Sound wave icon** switches to pure voice mode.
   - **Large microphone icon** starts recording — speak your message.
@@ -2165,7 +2224,9 @@ ${enConnectorChapter(isNative, isRegistered)}
 Tap **End Session** — the AI analyzes your conversation. The **Analyzing Session...** screen usually takes 15–30 seconds.
 
 ### ${sessionReviewSub.reviewScreen} The Session Review Screen
-This is the most important screen for capturing your insights.
+This is the most important screen for capturing your insights (titled **Session Review** / **Diskursanalyse** in the app).
+
+${guideInfoBox('<p class="m-0"><strong>Gloria Life Context interview:</strong> After the Gloria interview from the start screen, you get a tailored review with the generated Life Context file—not a classic coaching analysis, goals, or DPFL steps.</p>')}
 
 - **New Findings:** An AI-generated summary of your key takeaways from the session.
 - **Rate Your Session:** Use the stars to provide feedback. This helps us improve coach quality.
@@ -2212,9 +2273,11 @@ If you have the **DPFL coaching mode** activated (see ${enChapterLabel(profileCh
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${enChapterLabel(gamificationChapterNum(isNative, isRegistered))}: Understanding Your Progress (Gamification)</summary>
 <div style="padding: 16px;">
 
+### ${gamSub.intro} Overview
+
 The app uses game-like elements to motivate you to engage in regular self-reflection. Tap the **trophy icon** in the bar to open **Achievements**.
 
-### 7.2 How to Earn XP
+### ${gamSub.earnXp} How to Earn XP
 
 | Action | XP Awarded |
 | :--- | :--- |
@@ -2223,26 +2286,28 @@ The app uses game-like elements to motivate you to engage in regular self-reflec
 | Accomplishing a pre-existing goal | 25 XP |
 | Formally concluding the session | 50 XP |
 
-### 7.3 Where is Progress Saved?
+**Qualification:** XP is awarded only from **5 messages** onward in a session. When **continuing** with the same coach, only **new** messages since the last review count (no double counting). Streaks require qualified sessions too.
+
+### ${gamSub.storage} Where is Progress Saved?
 
 | User Type | Achievement Storage Location | Persistence |
 | :--- | :--- | :--- |
 | **Registered** | On the server, tied to your account. | **Yes**, across all sessions and devices. |
 | **Guest** | In the \`.md\` file in a hidden comment. | **No**, only if you reuse the same file. |
 
-### 7.4 Appearance & Color Scheme
+### ${gamSub.appearance} Appearance & Color Scheme
 
-In the Gamification Bar, you'll find two icons to customize the appearance:
+In the Gamification Bar, you'll find appearance controls:
 
 - **Light/Dark Mode (Moon/Sun Icon):** Switches between light and dark appearance. By default, the app switches automatically based on the time of day: **Dark mode** from 6:00 PM to 6:00 AM, **Light mode** from 6:00 AM to 6:00 PM. Manually toggling disables the automatic switching.
-- **Seasonal Color Scheme (Palette Icon):** Cycles between three color schemes: Summer, Autumn, and Brand (W4F/manualmode.at depending on active brand). The app automatically selects the matching seasonal scheme (Brand in winter), but you can change it manually at any time.
+- **Seasonal Color Scheme (Palette Icon):** Cycles summer, autumn, and brand (manualmode.at or W4F depending on brand). **Brand** is chosen automatically in winter; single-theme brands hide the palette icon.
 
 </div>
 </details>
 `;
 };
 
-const en_chapter8 = (isNative: boolean) => `
+const en_chapter8 = (isNative: boolean, transcriptToolsSection: string | null) => `
 ---
 
 <details id="${USER_GUIDE_ANCHORS.transcriptEval}">
@@ -2255,7 +2320,7 @@ Transcript Evaluation helps you reflect on real conversations—e.g., with clien
 
 ### Who Can Use It?
 
-Access and location in the app: see section **5.2**. Below we describe the evaluation workflow.
+Access and location in the app: see ${handbookSectionRef('en', 'transcriptTools', transcriptToolsSection)}. Below we describe the evaluation workflow.
 
 ### How Does It Work?
 
@@ -2348,7 +2413,7 @@ ${guideWarningBox('<p class="m-0"><strong>Important:</strong> You are responsibl
 </details>
 `;
 
-const en_chapter9 = (isNative: boolean) => `
+const en_chapter9 = (isNative: boolean, transcriptToolsSection: string | null) => `
 ---
 
 <details>
@@ -2361,7 +2426,7 @@ Audio Transcription allows you to **record live conversations directly in the ap
 
 ### Who Can Use It?
 
-Access and card location: see section **5.2**. You also need **Client** tier — use **record/upload** in Transcript Tools.
+Access and card location: see ${handbookSectionRef('en', 'transcriptTools', transcriptToolsSection)}. You also need **Client** tier — use **record/upload** in Transcript Tools.
 
 ### How Does It Work?
 
@@ -2501,6 +2566,10 @@ At the top you will find links to **Your progress** and **Practice history**. Be
 - **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in client exact language".
 - **Start practice** — the chat starts **empty**; **you** open as coach.
 
+### Resuming an interrupted practice session
+
+If a practice session was interrupted in the same ${isNative ? 'app tab' : 'browser tab'}, reopening the setup screen shows **“Resume practice session?”** (method, scenario, message count). The draft is stored **locally** in sessionStorage only — not on the server until you complete the **evaluation**.
+
 ### Run the practice session
 
 - You are the **coach** — the AI responds as the client. There is **no** automatic greeting from the AI.
@@ -2570,15 +2639,19 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser, focusAnchor, onFo
         const base = language === 'de'
             ? de_markdown(isRegistered, !!isPremiumUser, native, showChapter8, showChapter9, showChapter10)
             : en_markdown(isRegistered, !!isPremiumUser, native, showChapter8, showChapter9, showChapter10);
-        const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
-        const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
-        const ch9pep = language === 'de' ? de_chapter9_pep(native) : en_chapter9_pep(native);
         const coachingSub = computeCoachingSessionSubsections({
             isNative: native,
             isRegistered,
             showTranscriptTools: showChapter8,
             showPracticeTab: showChapter10,
         });
+        const ch8 = language === 'de'
+            ? de_chapter8(native, coachingSub.transcriptTools)
+            : en_chapter8(native, coachingSub.transcriptTools);
+        const ch9 = language === 'de'
+            ? de_chapter9(native, coachingSub.transcriptTools)
+            : en_chapter9(native, coachingSub.transcriptTools);
+        const ch9pep = language === 'de' ? de_chapter9_pep(native) : en_chapter9_pep(native);
         const ch10 = language === 'de'
             ? de_chapter10(native, coachingSub.practiceTab)
             : en_chapter10(native, coachingSub.practiceTab);
