@@ -1,10 +1,12 @@
 import {
   buildCoachStarterPrompt,
+  connectorHighScoreNeedsCoachBridge,
   getConnectorDimensionsWithAvailableCoach,
   getPrimaryMissedCue,
   getWeakestConnectorDimension,
   isConnectorCoachBotAvailable,
   rankConnectorDimensions,
+  shouldOfferConnectorCoachBridge,
   showConnectorPracticeLadder,
 } from '../connectorNextSteps';
 import type { ConnectorEvaluationResult } from '../../types';
@@ -69,5 +71,26 @@ describe('connectorNextSteps', () => {
     expect(registeredDims.length).toBeGreaterThan(guestDims.length);
     expect(isConnectorCoachBotAvailable('sam-forward-focused', { isPremium: false } as any)).toBe(true);
     expect(isConnectorCoachBotAvailable('sam-forward-focused', null)).toBe(false);
+  });
+
+  it('offers coach bridge for high overall score with weak dimension', () => {
+    const eval_ = baseEval();
+    eval_.overallScore = 8;
+    eval_.curiosity = { score: 6, evidence: [] };
+    expect(connectorHighScoreNeedsCoachBridge(eval_)).toBe(true);
+    expect(showConnectorPracticeLadder(8)).toBe(false);
+    expect(shouldOfferConnectorCoachBridge(eval_, { isPremium: false } as any)).toBe(true);
+  });
+
+  it('skips high-score coach bridge when all dimensions above 6 and no missed cue', () => {
+    const eval_ = baseEval();
+    eval_.overallScore = 8;
+    eval_.empathy = { score: 7, evidence: [] };
+    eval_.presence = { score: 7, evidence: [] };
+    eval_.curiosity = { score: 7, evidence: [] };
+    eval_.nonJudgment = { score: 7, evidence: [] };
+    eval_.steadiness = { score: 8, evidence: [] };
+    eval_.perVignette = [{ vignetteId: 'jonas-meeting', highlight: 'Good', missedCue: '' }];
+    expect(connectorHighScoreNeedsCoachBridge(eval_)).toBe(false);
   });
 });

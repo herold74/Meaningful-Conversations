@@ -103,3 +103,23 @@ export function getCoachForDimension(dimension: ConnectorDimensionKey) {
 export function showConnectorPracticeLadder(overallScore: number | null): boolean {
   return overallScore === null || overallScore < 8;
 }
+
+/** High overall score (≥8) but a dimension or vignette cue still warrants a coach handoff. */
+export function connectorHighScoreNeedsCoachBridge(evaluation: ConnectorEvaluationResult): boolean {
+  const score = evaluation.overallScore;
+  if (score === null || score < 8) return false;
+  const weakest = getWeakestConnectorDimension(evaluation);
+  const weakestScore = evaluation[weakest]?.score ?? 10;
+  if (weakestScore <= 6) return true;
+  return getPrimaryMissedCue(evaluation) != null;
+}
+
+/** Offer coach step when user has at least one unlocked Kommunikation coach for the evaluation. */
+export function shouldOfferConnectorCoachBridge(
+  evaluation: ConnectorEvaluationResult,
+  user: User | null | undefined,
+): boolean {
+  if (getConnectorDimensionsWithAvailableCoach(evaluation, user).length === 0) return false;
+  if (showConnectorPracticeLadder(evaluation.overallScore)) return true;
+  return connectorHighScoreNeedsCoachBridge(evaluation);
+}

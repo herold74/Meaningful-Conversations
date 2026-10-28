@@ -1,24 +1,36 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import ConnectorRadarChart, { CONNECTOR_DIMENSIONS } from './ConnectorRadarChart';
-import type { ConnectorDimensionKey, ConnectorEvaluationResult } from '../types';
+import ConnectorEvaluationMarkdown from './ConnectorEvaluationMarkdown';
+import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
+import type { ConnectorDimensionKey, ConnectorEvaluationResult, User } from '../types';
 import { resolveConnectorForDisplay } from '../utils/connectorSignatureTranslation';
+import { shouldOfferConnectorCoachBridge } from '../utils/connectorNextSteps';
 
 interface ConnectorProfileSectionProps {
   connector: ConnectorEvaluationResult;
   /** When nested under Riemann, use compact heading */
   nested?: boolean;
   isTranslating?: boolean;
+  currentUser?: User | null;
+  onStartCoachSession?: (botId: string, starterPrompt: string) => void;
 }
 
 const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
   connector,
   nested = false,
   isTranslating = false,
+  currentUser,
+  onStartCoachSession,
 }) => {
   const { t, language } = useLocalization();
   const uiLang = language === 'en' ? 'en' : 'de';
   const display = resolveConnectorForDisplay(connector, uiLang);
+
+  const showCoachBridge = useMemo(
+    () => !!onStartCoachSession && shouldOfferConnectorCoachBridge(connector, currentUser),
+    [connector, currentUser, onStartCoachSession],
+  );
 
   const labels: Record<ConnectorDimensionKey, string> = {
     empathy: t('connector_dim_empathy'),
@@ -35,6 +47,8 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
         day: 'numeric',
       })
     : null;
+
+  const noopFocus = (_focus: ConnectorDimensionKey) => {};
 
   return (
     <div
@@ -75,7 +89,7 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
         <p className="mt-4 text-sm text-content-tertiary italic">{t('profile_connector_translating')}</p>
       )}
       {!isTranslating && display.summary && (
-        <p className="mt-4 text-sm text-content-secondary leading-relaxed">{display.summary}</p>
+        <ConnectorEvaluationMarkdown text={display.summary} className="mt-4 text-sm text-content-secondary leading-relaxed" />
       )}
 
       <div className="mt-4 grid sm:grid-cols-2 gap-3">
@@ -98,11 +112,39 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
           <ul className="space-y-1 text-sm text-content-secondary">
             {display.strengths.map((s, i) => (
               <li key={i} className="flex gap-2">
-                <span>•</span>
-                <span>{s}</span>
+                <span className="shrink-0">•</span>
+                <ConnectorEvaluationMarkdown text={s} className="text-sm text-content-secondary leading-relaxed flex-1 min-w-0" />
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {!isTranslating && display.growthAreas?.length > 0 && (
+        <div className="mt-4">
+          <p className="text-sm font-medium text-content-primary mb-2">
+            {t('connector_results_growth_title')}
+          </p>
+          <ul className="space-y-1 text-sm text-content-secondary">
+            {display.growthAreas.map((g, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="shrink-0">→</span>
+                <ConnectorEvaluationMarkdown text={g} className="text-sm text-content-secondary leading-relaxed flex-1 min-w-0" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {!isTranslating && showCoachBridge && onStartCoachSession && (
+        <div className="mt-6">
+          <ConnectorNextStepsLadder
+            evaluation={connector}
+            currentUser={currentUser}
+            variant="coachOnly"
+            onRestartWithFocus={noopFocus}
+            onStartCoachSession={onStartCoachSession}
+          />
         </div>
       )}
 
