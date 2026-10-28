@@ -130,11 +130,11 @@ Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector**
 2. **Noch einmal üben** — The Connector mit Schwerpunkt auf **einer** Dimension  
 3. **Mit einem Coach vertiefen** — kurzes Gespräch zur **Vorbereitung auf ein echtes Gespräch** (Vorschlag zum Start, vor dem Senden anpassbar); nur Coaches, die für Ihr Konto freigeschaltet sind  
 
-Je nach Ergebnis sehen Sie alle drei Punkte oder nur den Coach-Schritt. Denselben Coach-Einstieg finden Sie später auch im **Persönlichkeitsprofil** bei Ihrer Verbindungs-Signatur.
+Je nach Ergebnis sehen Sie alle drei Punkte oder nur den Coach-Schritt; bei sehr starkem Gesamtergebnis ohne klaren Entwicklungsschwerpunkt kann der Block entfallen. Denselben Coach-Einstieg finden Sie später auch im **Persönlichkeitsprofil** bei Ihrer Verbindungs-Signatur.
 
-**Übungskatalog (Premium):** Nach einem abgeschlossenen Hauptlauf können Sie **einzelne kuratierte Szenarien** erneut üben — mit Auswertung für diese Einheit (ohne Ihre gespeicherte Signatur zu überschreiben).
+**Übungskatalog (Premium):** Nach einem abgeschlossenen Hauptlauf können Sie **einzelne kuratierte Szenarien** erneut üben — mit Auswertung für diese Einheit (ohne Ihre gespeicherte Signatur zu überschreiben). Nach **einer** solchen Einheit kann dieselbe optionale Leiter **„Dein nächster Schritt“** erscheinen wie nach dem Hauptlauf.
 
-**Eigene Situation (Premium):** Beschreiben Sie Beziehung und Kontext mit **fiktiven Namen** — die KI erstellt ein Übungsgespräch. Sie erhalten **qualitatives Feedback** (kürzer als beim Hauptlauf). Diese Ergebnisse fließen **nicht** in Ihre Verbindungs-Signatur ein.
+**Eigene Situation (Premium):** Beschreiben Sie Beziehung und Kontext mit **fiktiven Namen** — die KI erstellt ein Übungsgespräch. Sie erhalten **qualitatives Feedback** (kürzer als beim Hauptlauf). Diese Ergebnisse fließen **nicht** in Ihre Verbindungs-Signatur ein; von dort gibt es **keinen** „Dein nächster Schritt“ und **keinen** Coach-Handoff.
 
 **In der Chat-Ansicht:** Das vollständige Szenario öffnen Sie über **Tipp auf den Avatar**.
 
@@ -173,11 +173,11 @@ In the **Management & Communication** section, you'll find **The Connector** car
 2. **Practice again** — The Connector with focus on **one** dimension  
 3. **Go deeper with a coach** — a short conversation to **prepare for a real talk** (suggested opening, editable before you send); only coaches unlocked on your account  
 
-Depending on your result, you may see all three options or only the coach step. The same coach entry point is also available later in your **personality profile** with your Connection Signature.
+Depending on your result, you may see all three options or only the coach step; with a very strong overall result and no clear development focus, the block may not appear. The same coach entry point is also available later in your **personality profile** with your Connection Signature.
 
-**Practice catalog (Premium):** After a completed main run, you can replay **individual curated vignettes** with evaluation for that unit (without overwriting your saved signature).
+**Practice catalog (Premium):** After a completed main run, you can replay **individual curated vignettes** with evaluation for that unit (without overwriting your saved signature). After **one** catalog unit, the same optional **“Your next step”** ladder may appear as after the main run.
 
-**Your own situation (Premium):** Describe relationship and context using **fictional names** — the AI creates a practice conversation. You receive **qualitative feedback** (shorter than the main run). These results are **not** included in your Connection Signature.
+**Your own situation (Premium):** Describe relationship and context using **fictional names** — the AI creates a practice conversation. You receive **qualitative feedback** (shorter than the main run). These results are **not** included in your Connection Signature; there is **no** “Your next step” and **no** coach handoff from that flow.
 
 **In chat:** Tap the **avatar** for the full scenario brief.
 

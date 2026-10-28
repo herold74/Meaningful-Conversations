@@ -223,16 +223,18 @@ const InterviewTranscriptView: React.FC<InterviewTranscriptViewProps> = ({
             </section>
 
             {/* Action Buttons */}
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center items-stretch sm:items-center gap-3 pb-[max(2rem,env(safe-area-inset-bottom,0px))]">
                 <button
+                    type="button"
                     onClick={handleDownloadAll}
-                    className="px-6 py-3 rounded-lg border border-border-primary bg-background-secondary hover:bg-background-tertiary text-content-primary transition-colors font-medium text-sm"
+                    className="inline-flex items-center justify-center min-h-[3rem] px-6 py-3 rounded-lg border border-border-primary bg-background-secondary hover:bg-background-tertiary text-content-primary transition-colors font-medium leading-normal text-center"
                 >
                     {t('interview_transcript_download_all')}
                 </button>
                 <button
+                    type="button"
                     onClick={onBack}
-                    className="px-8 py-3 rounded-lg bg-accent-primary text-button-foreground-on-accent hover:bg-accent-primary-hover transition-colors font-medium"
+                    className="inline-flex items-center justify-center min-h-[3rem] px-8 py-3 rounded-lg bg-accent-primary text-button-foreground-on-accent hover:bg-accent-primary-hover transition-colors font-medium leading-normal text-center"
                 >
                     {t('interview_transcript_back')}
                 </button>
