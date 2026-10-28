@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions } from './types';
 import { resolveConnectorPremiumAccess } from './utils/connectorAccess';
 import { userHasSavedConnector } from './utils/connectorProfile';
 import { sealConnectorForProfile } from './utils/connectorSignatureTranslation';
@@ -210,6 +210,14 @@ const App: React.FC = () => {
     const [connectorSaveState, setConnectorSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [connectorPracticeFocus, setConnectorPracticeFocus] = useState<ConnectorDimensionKey | null>(null);
     const [gloriaConnectionPrep, setGloriaConnectionPrep] = useState(false);
+    /** Invisible Connector ladder handoff for chat API (Start conversation button only). */
+    const [connectorChatHandoff, setConnectorChatHandoff] = useState<ConnectorChatHandoff | null>(null);
+
+    const connectorHandoffForBot = (botId: string): ConnectorChatHandoff | null => {
+        if (botId === 'gloria-interview') return 'gloria';
+        if (botId === 'sam-forward-focused' || botId === 'nexus-goal-path-solution') return 'coaching';
+        return null;
+    };
 
     const routeToCoachPractice = useCallback(() => {
         if (!currentUser || !resolvePracticeAccess(currentUser).canAccessPractice) {
@@ -1047,6 +1055,7 @@ const App: React.FC = () => {
             setBaselineMessageCount(0);
             setChatHistory([]);
             setGloriaConnectionPrep(false);
+            setConnectorChatHandoff(null);
             setView('gloriaInterviewIntro');
             return;
         }
@@ -1055,6 +1064,7 @@ const App: React.FC = () => {
         setUserMessageCount(0);
         setBaselineMessageCount(0);
         setChatHistory([]);
+        setConnectorChatHandoff(null);
         setView('chat');
     };
 
@@ -1091,6 +1101,7 @@ const App: React.FC = () => {
 
         const connectionPrep = mode === 'connectionPrep';
         setGloriaConnectionPrep(connectionPrep);
+        setConnectorChatHandoff(null);
         setSelectedBot(bot);
         setUserMessageCount(0);
         setBaselineMessageCount(0);
@@ -1126,10 +1137,17 @@ const App: React.FC = () => {
             audio.currentTime = 0;
         });
 
+        setMenuView(null);
         setSelectedBot(targetBot);
-        setUserMessageCount(0);
+        setUserMessageCount(1);
         setBaselineMessageCount(0);
         setCameFromContextChoice(false);
+        setConnectorChatHandoff(null);
+        if (targetBotId === 'gloria-interview') {
+            setGloriaConnectionPrep(isGloriaConnectionPrepMessage(seedUserMessage));
+        } else {
+            setGloriaConnectionPrep(false);
+        }
         setChatHistory([
             {
                 id: `user-${Date.now()}`,
@@ -1141,7 +1159,11 @@ const App: React.FC = () => {
         setView('chat');
     }, [clearCoachingDraftState]);
 
-    const handleStartSessionFromEval = (botId: string, examplePrompt: string) => {
+    const handleStartSessionFromEval = (
+        botId: string,
+        examplePrompt: string,
+        options?: ConnectorCoachSessionStartOptions,
+    ) => {
         const bot = BOTS.find(b => b.id === botId);
         if (!bot) return;
 
@@ -1161,13 +1183,21 @@ const App: React.FC = () => {
             role: 'user',
             timestamp: new Date().toISOString(),
         };
+        setMenuView(null);
         setSelectedBot(bot);
         setChatHistory([userMessage]);
-        setUserMessageCount(0);
+        setUserMessageCount(1);
         setBaselineMessageCount(0);
         setCameFromContextChoice(false);
+        if (options?.serverHandoff) {
+            setConnectorChatHandoff(connectorHandoffForBot(botId));
+        } else {
+            setConnectorChatHandoff(null);
+        }
         if (botId === 'gloria-interview') {
-            setGloriaConnectionPrep(isGloriaConnectionPrepMessage(examplePrompt));
+            setGloriaConnectionPrep(
+                options?.serverHandoff === true || isGloriaConnectionPrepMessage(examplePrompt),
+            );
         } else {
             setGloriaConnectionPrep(false);
         }
@@ -1222,6 +1252,7 @@ const App: React.FC = () => {
         
         // --- Special Handling for Gloria Interview Bot ---
         if (selectedBot.id === 'gloria-interview') {
+            setConnectorChatHandoff(null);
             if (userMessageCount === 0 && !isTestMode) {
                 setSelectedBot(null);
                 setChatHistory([]);
@@ -1300,6 +1331,7 @@ const App: React.FC = () => {
         }
 
         clearCoachingDraftState();
+        setConnectorChatHandoff(null);
         setIsAnalyzing(true);
         try {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
@@ -1969,9 +2001,20 @@ const App: React.FC = () => {
         setView('connectorIntro');
     };
 
-    const handleConnectorStartCoachSession = (botId: string, starterPrompt: string) => {
-        resetConnectorState();
-        handleStartSessionFromEval(botId, starterPrompt);
+    const handleConnectorStartCoachSession = (
+        botId: string,
+        starterPrompt: string,
+        options?: ConnectorCoachSessionStartOptions,
+    ) => {
+        handleStartSessionFromEval(botId, starterPrompt, {
+            serverHandoff: options?.serverHandoff ?? true,
+        });
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorQualitativeEvaluation(null);
+        setConnectorAwaitingNext(null);
+        setConnectorSaveState('idle');
+        setConnectorPracticeFocus(null);
     };
 
     const handleConnectorDone = () => {
@@ -2338,6 +2381,7 @@ const App: React.FC = () => {
         connectorPracticeFocus,
         gloriaConnectionPrep,
         setGloriaConnectionPrep,
+        connectorChatHandoff,
         handleStartGloriaInterview,
         handleOpenConnectorIntro,
         handleStartConnectorRun,

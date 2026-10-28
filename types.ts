@@ -514,6 +514,13 @@ export interface ConnectorDimensionScore {
 
 export type ConnectorDimensionKey = 'empathy' | 'presence' | 'curiosity' | 'nonJudgment' | 'steadiness';
 
+/** Invisible API flag when Connector ladder uses “Start conversation” (not copy/paste). */
+export type ConnectorChatHandoff = 'gloria' | 'coaching';
+
+export interface ConnectorCoachSessionStartOptions {
+  serverHandoff?: boolean;
+}
+
 /** Localized Connector copy (scores live on the parent result). */
 export interface ConnectorLocaleBundle {
     summary: string;

@@ -2,6 +2,7 @@ import { CONNECTOR_DIMENSIONS } from '../components/ConnectorRadarChart';
 import { BOTS } from '../constants';
 import type { BotAccessTier, ConnectorDimensionKey, ConnectorEvaluationResult, Language, User } from '../types';
 import { buildGloriaConnectionPrepStarter } from './gloriaInterview';
+import { CONNECTOR_LAB_VIGNETTES } from './connectorLabScripts';
 
 const ACCESS_HIERARCHY: Record<BotAccessTier, number> = {
   guest: 0,
@@ -73,14 +74,132 @@ export function microExerciseKey(dimension: ConnectorDimensionKey): string {
   return `connector_micro_exercise_${dimension}`;
 }
 
+/** Plain text for handoff prompts (strip markdown from Connector growth lines). */
+export function plainTextForCoachHandoff(text: string | undefined): string {
+  return (text ?? '').replace(/\*\*/g, '').trim();
+}
+
+const CONNECTOR_PREP_DIMENSION_FOCUS: Record<
+  ConnectorDimensionKey,
+  { en: string; de: string }
+> = {
+  empathy: {
+    en: 'recognizing and naming feelings before moving to solutions',
+    de: 'Gefühle wahrnehmen und benennen, bevor ich zu Lösungen gehe',
+  },
+  presence: {
+    en: 'staying with the person instead of jumping ahead',
+    de: 'bei der Person bleiben, statt vorwegzugehen',
+  },
+  curiosity: {
+    en: 'asking genuine questions before giving advice',
+    de: 'echte Fragen stellen, bevor ich Ratschläge gebe',
+  },
+  nonJudgment: {
+    en: 'listening without judging or instantly reassuring',
+    de: 'zuhören, ohne zu bewerten oder reflexhaft zu beruhigen',
+  },
+  steadiness: {
+    en: 'staying calm when the conversation gets tense',
+    de: 'ruhig bleiben, wenn das Gespräch hitzig wird',
+  },
+};
+
+/** Persona name from saved Connector eval (catalog vignettes only). */
+export function resolveConnectorHandoffPartnerName(
+  evaluation: ConnectorEvaluationResult,
+): string | undefined {
+  const withCue = evaluation.perVignette.find((pv) => pv.missedCue?.trim());
+  const vignetteId = withCue?.vignetteId ?? evaluation.perVignette[0]?.vignetteId ?? evaluation.vignetteIds[0];
+  if (!vignetteId) return undefined;
+  return CONNECTOR_LAB_VIGNETTES.find((v) => v.id === vignetteId)?.personaName;
+}
+
+/** Sharper Gloria opener after Connector — real talk + practice focus, not homework paste. */
+export function buildConnectorGloriaHandoffStarter(
+  language: Language,
+  dimension: ConnectorDimensionKey,
+  evaluation: ConnectorEvaluationResult,
+): string {
+  const partner = resolveConnectorHandoffPartnerName(evaluation);
+  const focus =
+    language === 'de'
+      ? CONNECTOR_PREP_DIMENSION_FOCUS[dimension].de
+      : CONNECTOR_PREP_DIMENSION_FOCUS[dimension].en;
+
+  if (language === 'de') {
+    const partnerClause = partner
+      ? `Ich bereite ein echtes Gespräch mit ${partner} vor. `
+      : 'Ich bereite ein echtes Gespräch vor. ';
+    return (
+      `${partnerClause}` +
+      `Nach dem Connector-Üben möchte ich klarer werden, wie ich mich zeige — besonders: ${focus}. ` +
+      `Bitte führe mich nur mit Fragen durch die Vorbereitung.`
+    );
+  }
+
+  const partnerClause = partner
+    ? `I'm preparing for a real conversation with ${partner}. `
+    : "I'm preparing for a real conversation. ";
+  return (
+    `${partnerClause}` +
+    `After Connector practice I want to be clearer on how I show up — especially: ${focus}. ` +
+    `Please guide me through preparation with your questions only.`
+  );
+}
+
+/** Lightweight Sam / Nobody opener — connector focus, not full coaching. */
+export function buildConnectorCoachingHandoffStarter(
+  language: Language,
+  dimension: ConnectorDimensionKey,
+  evaluation: ConnectorEvaluationResult,
+): string {
+  const partner = resolveConnectorHandoffPartnerName(evaluation);
+  const focus =
+    language === 'de'
+      ? CONNECTOR_PREP_DIMENSION_FOCUS[dimension].de
+      : CONNECTOR_PREP_DIMENSION_FOCUS[dimension].en;
+
+  if (language === 'de') {
+    const partnerClause = partner
+      ? `Ich bereite ein echtes Gespräch mit ${partner} vor. `
+      : 'Ich bereite ein echtes Gespräch vor. ';
+    return (
+      `${partnerClause}` +
+      `Nach dem Connector-Üben brauche ich einen klaren Fokus: ${focus}. ` +
+      `Bitte halte es kurz — hilf mir zu klären, wie ich mich im echten Gespräch zeigen möchte, höchstens mit einem kleinen nächsten Schritt.`
+    );
+  }
+
+  const partnerClause = partner
+    ? `I'm preparing for a real conversation with ${partner}. `
+    : "I'm preparing for a real conversation. ";
+  return (
+    `${partnerClause}` +
+    `After Connector practice I want one clear focus: ${focus}. ` +
+    `Keep it brief — help me clarify how I want to show up in the real conversation, with at most one small next step.`
+  );
+}
+
 export function buildCoachStarterPrompt(
   dimension: ConnectorDimensionKey,
   growthArea: string | undefined,
   language: Language,
   botId?: string,
+  evaluation?: ConnectorEvaluationResult,
 ): string {
   if (botId === 'gloria-interview') {
-    return buildGloriaConnectionPrepStarter(language, growthArea);
+    if (evaluation) {
+      return buildConnectorGloriaHandoffStarter(language, dimension, evaluation);
+    }
+    return buildGloriaConnectionPrepStarter(language, plainTextForCoachHandoff(growthArea));
+  }
+
+  if (
+    evaluation &&
+    (botId === 'sam-forward-focused' || botId === 'nexus-goal-path-solution')
+  ) {
+    return buildConnectorCoachingHandoffStarter(language, dimension, evaluation);
   }
 
   const topic = growthArea?.trim() || '';

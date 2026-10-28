@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { BOTS } from '../constants';
-import type { ConnectorDimensionKey, ConnectorEvaluationResult, User } from '../types';
+import type { ConnectorDimensionKey, ConnectorEvaluationResult, User, ConnectorCoachSessionStartOptions } from '../types';
 import {
   buildCoachStarterPrompt,
   getCoachForDimension,
@@ -18,7 +18,11 @@ interface ConnectorNextStepsLadderProps {
   /** full = micro + connector retry + coach; coachOnly = coach handoff (e.g. strong overall but weak dimension). */
   variant?: 'full' | 'coachOnly';
   onRestartWithFocus: (focus: ConnectorDimensionKey) => void;
-  onStartCoachSession: (botId: string, starterPrompt: string) => void;
+  onStartCoachSession: (
+    botId: string,
+    starterPrompt: string,
+    options?: ConnectorCoachSessionStartOptions,
+  ) => void;
 }
 
 const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
@@ -58,15 +62,15 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
     steadiness: t('connector_dim_steadiness'),
   };
 
-  const selectedGrowthArea = evaluation.growthAreas[0];
   const coach = getCoachForDimension(selectedDimension);
   const coachBot = BOTS.find((b) => b.id === coach.botId);
   const coachAvailable = coachBot && isConnectorCoachBotAvailable(coach.botId, currentUser);
   const starterPrompt = buildCoachStarterPrompt(
     selectedDimension,
-    selectedGrowthArea,
+    evaluation.growthAreas[0],
     language as 'de' | 'en',
     coach.botId,
+    evaluation,
   );
 
   const handleCopyStarter = () => {
@@ -196,7 +200,7 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={() => onStartCoachSession(coach.botId, starterPrompt)}
+                        onClick={() => onStartCoachSession(coach.botId, starterPrompt, { serverHandoff: true })}
                         className="inline-flex items-center gap-1 text-xs font-medium text-button-foreground-on-accent bg-accent-primary hover:bg-accent-primary-hover px-3 py-1.5 rounded-md transition-colors"
                       >
                         {t('connector_ladder_step3_start_coach', { coach: coachBot.name })}

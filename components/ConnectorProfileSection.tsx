@@ -3,7 +3,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import ConnectorRadarChart, { CONNECTOR_DIMENSIONS } from './ConnectorRadarChart';
 import ConnectorEvaluationMarkdown from './ConnectorEvaluationMarkdown';
 import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
-import type { ConnectorDimensionKey, ConnectorEvaluationResult, User } from '../types';
+import type { ConnectorDimensionKey, ConnectorEvaluationResult, User, ConnectorCoachSessionStartOptions } from '../types';
 import { resolveConnectorForDisplay } from '../utils/connectorSignatureTranslation';
 import { shouldOfferConnectorCoachBridge } from '../utils/connectorNextSteps';
 
@@ -13,7 +13,11 @@ interface ConnectorProfileSectionProps {
   nested?: boolean;
   isTranslating?: boolean;
   currentUser?: User | null;
-  onStartCoachSession?: (botId: string, starterPrompt: string) => void;
+  onStartCoachSession?: (
+    botId: string,
+    starterPrompt: string,
+    options?: ConnectorCoachSessionStartOptions,
+  ) => void;
 }
 
 const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({

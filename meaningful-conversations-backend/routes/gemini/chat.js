@@ -14,11 +14,17 @@ const {
   getContentSafetyBlock,
   getChatContentSafetySurface,
 } = require('../../bots/contentSafetyPromptBlocks.js');
+const {
+  CONNECTOR_COACH_BOTS,
+  getConnectorCoachingPrepOverride,
+  getGloriaConnectionPrepHandoffOverride,
+} = require('../../utils/connectorCoachingPrep.js');
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const {
         botId, context, history, language, isNewSession, coachingMode, decryptedPersonalityProfile,
+        connectorChatHandoff,
         // Test mode support
         testProfileOverride, includeTestTelemetry, userMessage: testUserMessage
     } = req.body;
@@ -119,6 +125,14 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
         } else {
             systemInstruction += "\n\n## ⚠️ CRITICAL — The user has already stated their topic:\nThe user has clearly defined their topic in the first message. You MUST address this topic directly. COMPLETELY IGNORE any 'Initial Interaction Priority' rules and any 'Achievable Next Steps' from the life context. Do NOT ask about previous intentions or goals. Start directly with the user's topic.";
         }
+    }
+
+    if (bot.id === 'gloria-interview' && connectorChatHandoff === 'gloria') {
+        systemInstruction += getGloriaConnectionPrepHandoffOverride(lang);
+    }
+
+    if (CONNECTOR_COACH_BOTS.has(bot.id) && connectorChatHandoff === 'coaching') {
+        systemInstruction += getConnectorCoachingPrepOverride(lang);
     } else if (isInitialMessage && isNewSession && !isInterviewBot) {
         if (lang === 'de') {
             systemInstruction += "\n\n## Besondere Anweisung für diese erste Nachricht:\nDies ist die allererste Interaktion des Benutzers in dieser Sitzung. Sie MÜSSEN alle Regeln der 'Priorität bei der ersten Interaktion' bezüglich der Überprüfung von 'Nächsten Schritten' ignorieren. Ihre erste Nachricht MUSS Ihre standardmäßige, herzliche Begrüßung sein, in der Sie fragen, was den Benutzer beschäftigt. Erwähnen Sie nichts von 'willkommen zurück' oder früheren Schritten.";

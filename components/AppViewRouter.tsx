@@ -8,7 +8,7 @@ import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorRea
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
-import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorDimensionKey } from '../types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions } from '../types';
 import type { ConnectorRunState } from '../utils/connectorRun';
 import type { UserIntent } from './IntentPickerView';
 import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
@@ -190,6 +190,7 @@ export interface AppViewRouterProps {
   connectorPracticeFocus: ConnectorDimensionKey | null;
   gloriaConnectionPrep: boolean;
   setGloriaConnectionPrep: React.Dispatch<React.SetStateAction<boolean>>;
+  connectorChatHandoff: ConnectorChatHandoff | null;
   handleStartGloriaInterview: (mode: import('../utils/gloriaInterview').GloriaInterviewMode) => void;
   handleOpenConnectorIntro: () => void;
   handleStartConnectorRun: (liveMode: boolean) => void;
@@ -209,7 +210,11 @@ export interface AppViewRouterProps {
   handleConnectorSaveToProfile: () => void;
   handleConnectorRestart: () => void;
   handleConnectorRestartWithFocus: (focus: ConnectorDimensionKey) => void;
-  handleConnectorStartCoachSession: (botId: string, starterPrompt: string) => void;
+  handleConnectorStartCoachSession: (
+    botId: string,
+    starterPrompt: string,
+    options?: ConnectorCoachSessionStartOptions,
+  ) => void;
   handleConnectorDone: () => void;
   handleConnectorPracticeCrossSell: () => void;
 
@@ -231,7 +236,11 @@ export interface AppViewRouterProps {
   handleLcEditorSaveFromLanding: (newContext: string) => Promise<void>;
   handleSelectBot: (bot: Bot) => void;
   handleReferralSwitch: (targetBotId: string, seedUserMessage: string) => void;
-  handleStartSessionFromEval: (botId: string, examplePrompt: string) => void;
+  handleStartSessionFromEval: (
+    botId: string,
+    examplePrompt: string,
+    options?: ConnectorCoachSessionStartOptions,
+  ) => void;
   handleStartInterview: () => void;
   handleIntentSelected: (intent: UserIntent) => void;
   handleOceanOnboardingComplete: (big5: Big5Result) => Promise<void>;
@@ -353,6 +362,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     connectorPracticeFocus,
     gloriaConnectionPrep,
     setGloriaConnectionPrep,
+    connectorChatHandoff,
     handleStartGloriaInterview,
     handleOpenConnectorIntro,
     handleStartConnectorRun,
@@ -800,6 +810,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           encryptionKey={encryptionKey}
           isTestMode={isTestMode}
           onReferralSwitch={handleReferralSwitch}
+          connectorChatHandoff={connectorChatHandoff}
         />
       );
     case 'practiceChat':
