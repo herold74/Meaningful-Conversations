@@ -26,9 +26,11 @@ describe('connectorHandoffContext', () => {
     );
     expect(block).toContain('Stayed calm');
     expect(block).toContain('real conversation');
+    expect(block).toContain('Phase 2');
+    expect(block).toContain('team member');
     expect(block).not.toContain('annual review');
     expect(block).not.toContain('Nina');
-    expect(block.length).toBeLessThan(900);
+    expect(block.length).toBeLessThan(1200);
   });
 
   it('returns empty without vignette id', () => {
