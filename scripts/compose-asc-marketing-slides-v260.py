@@ -32,10 +32,41 @@ BODY_LINE = 50
 ISLAND_BAND_FRAC = 0.065
 
 
-def strip_ios_status_bar(shot: Image.Image) -> Image.Image:
-    """Crop native iPhone exports: time/LTE/battery row + Dynamic Island column."""
+def neutralize_ios_status_chrome(shot: Image.Image) -> Image.Image:
+    """Paint over time / signal / battery on light iOS status bars (native device exports)."""
     w, h = shot.size
     if h < 2400 or w < 1100:
+        return shot
+    band = max(int(h * 0.048), 44)
+    px = shot.load()
+    margin = max(12, w // 18)
+    ref_y = min(int(h * 0.085), h - 1)
+    side = [px[x, ref_y] for x in range(0, margin)] + [px[x, ref_y] for x in range(w - margin, w)]
+    fill = tuple(sum(c[i] for c in side) // len(side) for i in range(3))
+    out = shot.copy()
+    ImageDraw.Draw(out).rectangle((0, 0, w, band), fill=fill)
+    return out
+
+
+def _has_light_ios_status_bar(shot: Image.Image) -> bool:
+    """Modern device shots: grey status bar + Dynamic Island — do not top-crop (keeps XP row)."""
+    w, h = shot.size
+    if h < 2400 or w < 1100:
+        return False
+    margin = max(12, w // 18)
+    ref_y = min(int(h * 0.06), h - 1)
+    px = shot.load()
+    side = [px[x, ref_y] for x in range(0, margin)] + [px[x, ref_y] for x in range(w - margin, w)]
+    avg = sum(sum(p) / 3 for p in side) / len(side)
+    return avg >= 165
+
+
+def strip_ios_status_bar(shot: Image.Image) -> Image.Image:
+    """Crop legacy dark status-bar exports (Playwright). Skip for light native device chrome."""
+    w, h = shot.size
+    if h < 2400 or w < 1100:
+        return shot
+    if _has_light_ios_status_bar(shot):
         return shot
 
     ymax = int(h * 0.075)
@@ -115,7 +146,10 @@ def remove_dynamic_island(shot: Image.Image) -> Image.Image:
 
 
 def clean_phone_screenshot(shot: Image.Image) -> Image.Image:
-    return remove_dynamic_island(strip_ios_status_bar(shot))
+    shot = neutralize_ios_status_chrome(shot)
+    shot = strip_ios_status_bar(shot)
+    shot = remove_dynamic_island(shot)
+    return shot
 
 
 SLIDES = [
@@ -135,7 +169,7 @@ SLIDES = [
     },
     {
         "file": "02-connector-radar-iphone-{locale}.png",
-        "de": ("DEIN VERBINDUNGS-RADAR", "The Connector zeigt Stärken in Empathie, Präsenz, Neugier und mehr."),
+        "de": ("IHR VERBINDUNGS-RADAR", "The Connector zeigt Stärken in Empathie, Präsenz, Neugier und mehr."),
         "en": ("YOUR CONNECTION RADAR", "The Connector reveals empathy, presence, curiosity, and more."),
         "src_de": "IMG_1649.PNG",
         "src_en": "connector-radar-en-light.png",

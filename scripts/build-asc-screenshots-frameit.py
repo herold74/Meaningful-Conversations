@@ -65,7 +65,7 @@ SLIDES = [
         "bg": "panorama_right",
         "radar_card": True,
         "copy": {
-            "de": ("DEIN VERBINDUNGS-RADAR", "Empathie, Präsenz, Neugier — fünf Dimensionen auf einen Blick."),
+            "de": ("IHR VERBINDUNGS-RADAR", "Empathie, Präsenz, Neugier — fünf Dimensionen auf einen Blick."),
             "en": ("YOUR CONNECTION RADAR", "Empathy, presence, curiosity — five dimensions at a glance."),
         },
     },

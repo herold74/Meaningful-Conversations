@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Capture About view tabs for ASC (always LIGHT mode).
+ * Capture About view tabs via Playwright (browser chrome — NOT for framed ASC slides 01/04).
+ * Store listing device shots: iPhone screenshots → `_source/IMG_*.PNG` + frame-asc-marketing-device.py.
  *
  * Usage: node scripts/capture-about-asc.mjs [--base URL] [--lang de|en|all]
  *
