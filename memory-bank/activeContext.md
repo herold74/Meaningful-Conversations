@@ -7,7 +7,7 @@
 **Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b54** until next production deploy)
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Connector / docs:** `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md`, `CONNECTOR` routes under `/api/gemini/connector/*`; QA lab + admin analytics per Sept 2026 handoffs below.
-**Handbuch (2026-10-28):** Stilguide im Skill `user-guide-handbook` (Nutzen zuerst, einladend, nur sagen was ist, keine internen Begriffe). Kapitel 1, §2.2 und Connector-Kapitel (kurz, Titel „Gespräche mit Wirkung“ / „Elevate Conversations“) im Zuge von 2.6.0 neu erzählt; übrige Kapitel bei Bedarf in 2.6.1 nach Stilguide.
+**Handbuch (2026-10-28):** Stilguide im Skill `user-guide-handbook` (Nutzen zuerst, einladend, nur sagen was ist, keine internen Begriffe). Kapitel 1, §2.2 und Connector-Kapitel (kurz, Titel „Gespräche mit Wirkung“ / „Elevate Conversations“) im Zuge von 2.6.0 neu erzählt; übrige Kapitel bei Bedarf in 2.6.1 nach Stilguide. Zusätzlich Coach-Empfehlung, Chat, Session Review und Practice-Intro neu geschrieben; iOS-Fassung neutralisiert (kein PayPal/Web-Kaufweg, nur Kontakt `providerContact`; Hinweis „funktioniert auch im Browser“ nur im Web). Staging: Build 60 (Commit `36422326`), Version 2.6.0. 2.5.7 wurde von Apple bei diesen Punkten nicht beanstandet.
 
 **Deploy note (2026-09-24):** Multiple incremental staging builds **b28–b36** during that week; superseded by **b39** on staging + production (see above).
 
