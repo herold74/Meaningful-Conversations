@@ -106,7 +106,9 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Staging v2.6.0 (2026-10-12):** Build **45** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b45; DE phonetic Team plurals/compounds `f5e49d46`)
+- [x] **Staging v2.6.0 (2026-10-28):** Build **52** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b52; Connector invisible server handoff + lightweight coach prep)
+- [x] **Staging v2.6.0 (2026-10-28):** Build **51** — superseded by b52 (Connector coach bridge, handbook)
+- [x] **Staging v2.6.0 (2026-10-12):** Build **45** — superseded by b51 (`sw.js` v2.6.0-b45; DE phonetic Team plurals/compounds `f5e49d46`)
 - [x] **Production v2.6.0:** Build **41** — https://mc-app.manualmode.at (`sw.js` v2.6.0-b41; verified 2026-09-29)
 - [x] **Staging v2.6.0 (2026-09-29):** Build **43** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b43; utility-tile avatar fix + Podman prune hook)
 - [x] **Staging + Production v2.6.0 (2026-09-26):** Build **39** — superseded (production now b41, staging b43)

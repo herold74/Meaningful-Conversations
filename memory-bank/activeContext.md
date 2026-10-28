@@ -1,10 +1,10 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 45** (repo `BUILD_NUMBER` + `public/sw.js`)
-**Branch:** `main` @ `6e65257e` (phonetic Team compounds `f5e49d46`; build sync `6e65257e`)
-**Staging:** v**2.6.0** Build **45** — https://mc-beta.manualmode.at (deploy **2026-10-12**: DE TTS `germanCompound` for Team/Teams/Komposita; frontend+backend health OK)
-**Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b45** until next production deploy)
+**Version:** 2.6.0 **Build 52** (repo `BUILD_NUMBER` + `public/sw.js`)
+**Branch:** `main` @ `9f16527c` (Connector invisible handoff `cd6ccfe5`; build sync `9f16527c`)
+**Staging:** v**2.6.0** Build **52** — https://mc-beta.manualmode.at (deploy **2026-10-28**: Connector coach handoff `connectorChatHandoff`, lightweight Gloria/Sam/Nobody prep; frontend+backend health OK)
+**Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b52** until next production deploy)
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Connector / docs:** `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md`, `CONNECTOR` routes under `/api/gemini/connector/*`; QA lab + admin analytics per Sept 2026 handoffs below.
 
