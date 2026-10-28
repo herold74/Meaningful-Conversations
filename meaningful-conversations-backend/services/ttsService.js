@@ -259,6 +259,18 @@ function buildPhoneticTermRegex(escapedTerm, matchMode) {
     return `\\b${escapedTerm}\\b`;
 }
 
+function applyTtsPacingMarkers(text) {
+    let t = (text || '').replace(/\r\n/g, '\n');
+    t = t.replace(/\n\s*\n+/g, ', ');
+    t = t.replace(/\n+/g, ' ');
+    return t
+        .replace(/[\u2013\u2014]/g, ', ')
+        .replace(/\s--\s/g, ', ')
+        .replace(/\s+/g, ' ')
+        .replace(/,\s*(,\s*)+/g, ', ')
+        .trim();
+}
+
 function applyPausePatterns(text, language) {
     const patterns = getPhoneticReplacements(language).filter((p) => p.ttsBehavior === 'pause');
     let out = text;
@@ -294,6 +306,7 @@ function cleanTextForSpeech(text, language = 'de') {
     
     cleanedText = applyPausePatterns(cleanedText, language);
     
+    cleanedText = applyTtsPacingMarkers(cleanedText);
     // Apply phonetic replacements for better pronunciation
     // Use word boundaries to avoid partial replacements
     let replacementsApplied = 0;
@@ -326,10 +339,11 @@ function cleanTextForSpeech(text, language = 'de') {
         .normalize('NFKC')
         .replace(/[\u2018\u2019]/g, "'")
         .replace(/[\u201C\u201D]/g, '"')
-        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/[\u2013\u2014]/g, ', ')
         .replace(/\u2026/g, ', ')
         .replace(/\u00AD/g, '')
         .replace(/\s+/g, ' ')
+        .replace(/,\s*(,\s*)+/g, ', ')
         .trim();
 }
 
