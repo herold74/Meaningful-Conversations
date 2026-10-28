@@ -4,6 +4,7 @@ import { Bot, Message, Language, User } from '../types';
 import {
   synthesizeSpeech,
   splitIntoSentences,
+  normalizeTextForTts,
   getBotVoiceSettings,
   saveBotVoiceSettings,
   warmupServerVoice,
@@ -40,15 +41,16 @@ export interface UseTtsParams {
 export type TtsStatus = 'idle' | 'speaking' | 'paused';
 
 function cleanTextForTts(text: string): string {
-  return text
-    .replace(/#{1,6}\s/g, '')
-    .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
-    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-    .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
-    .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
-    .replace(/^>\s?/gm, '')
-    .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
-    .trim();
+  return normalizeTextForTts(
+    text
+      .replace(/#{1,6}\s/g, '')
+      .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+      .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
+      .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
+      .replace(/^>\s?/gm, '')
+      .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, ''),
+  );
 }
 
 export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, isNewSession, t, genderOverride, skipAutoFirstMessage }: UseTtsParams) {
@@ -740,7 +742,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     const normalizedFinal = normalize(cleanFinal);
 
     const enqueueMissing = (text: string) => {
-      for (const sentence of splitIntoSentences(text)) {
+      for (const sentence of splitIntoSentences(normalizeTextForTts(text))) {
         const norm = normalize(sentence);
         if (!norm) continue;
         const already = s.synthQueue.some((q) => {
@@ -812,14 +814,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       setIsLoadingAudio(true);
     });
 
-    const cleanText = text
-      .replace(/#{1,6}\s/g, '')
-      .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-      .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
-      .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
-      .replace(/^>\s?/gm, '')
-      .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '');
+    const cleanText = cleanTextForTts(text);
 
     lastSpokenTextRef.current = cleanText;
 
@@ -1537,10 +1532,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
   const handleRepeatTTS = useCallback(() => {
     if (lastSpokenTextRef.current) {
-      invalidateCachedAudio();
-      speak(lastSpokenTextRef.current, false, false, false, true);
+      speak(lastSpokenTextRef.current, false, false, false, false);
     }
-  }, [speak, invalidateCachedAudio]);
+  }, [speak]);
 
   const setIsTtsEnabledFromParent = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
     setIsTtsEnabled(value);
