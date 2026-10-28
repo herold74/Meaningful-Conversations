@@ -720,6 +720,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setLifeContextEditorReturnView('personalityProfile');
             setMenuView('lifeContextEditor');
           }}
+          onStartCoachSession={handleStartSessionFromEval}
         />
       );
     case 'lifeContextEditor':

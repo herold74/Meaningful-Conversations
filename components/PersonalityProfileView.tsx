@@ -358,6 +358,7 @@ interface PersonalityProfileViewProps {
   onUserUpdate: (user: User) => void;
   lifeContext?: string; // For PII detection when activating DPC/DPFL
   onEditLifeContext?: () => void; // Navigate to Life Context editor for PII cleanup
+  onStartCoachSession?: (botId: string, starterPrompt: string) => void;
 }
 
 interface ProfileMetadata {
@@ -369,7 +370,15 @@ interface ProfileMetadata {
   adaptationMode: 'adaptive' | 'stable';
 }
 
-const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encryptionKey, onStartNewTest, currentUser, onUserUpdate, lifeContext, onEditLifeContext }) => {
+const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({
+  encryptionKey,
+  onStartNewTest,
+  currentUser,
+  onUserUpdate,
+  lifeContext,
+  onEditLifeContext,
+  onStartCoachSession,
+}) => {
   const { t, language } = useLocalization();
   const isPremiumOrHigher = !!(currentUser?.isPremium || currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
   const [isLoading, setIsLoading] = useState(true);
@@ -394,7 +403,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
   const [isAutoTranslatingExternalPerspective, setIsAutoTranslatingExternalPerspective] = useState(false);
   const externalPerspectiveTranslationKeyRef = useRef<string | null>(null);
   const [isAutoTranslatingConnector, setIsAutoTranslatingConnector] = useState(false);
-  const connectorTranslationKeyRef = useRef<string | null>(null);
+  const connectorTranslateRunRef = useRef<symbol | null>(null);
   useModalOpen(showDpcWarning || showDeleteWarning || showExternalPerspectivePreview);
 
   const contentLanguage = useMemo(
@@ -709,16 +718,17 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
 
     const connector = normalizeConnectorLocales(decryptedData.connector as ConnectorEvaluationResult);
     const uiLang = language === 'en' ? 'en' : 'de';
-    if (!needsConnectorLocaleTranslation(connector, uiLang)) return;
-
-    const attemptKey = `${connector.completedAt || ''}:${connector.primaryLocale}:${uiLang}`;
-    if (connectorTranslationKeyRef.current === attemptKey) return;
-    connectorTranslationKeyRef.current = attemptKey;
+    if (!needsConnectorLocaleTranslation(connector, uiLang)) {
+      setIsAutoTranslatingConnector(false);
+      return;
+    }
 
     let cancelled = false;
+    const runId = Symbol('connectorTranslate');
+    connectorTranslateRunRef.current = runId;
+    setIsAutoTranslatingConnector(true);
 
     (async () => {
-      setIsAutoTranslatingConnector(true);
       try {
         const sourceLang = resolveConnectorSourceLanguage(connector, uiLang);
         const response = await api.translateConnectorSignature({
@@ -733,17 +743,24 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
         const updatedConnector = mergeDerivedLocale(connector, uiLang, translated);
         const updatedData = { ...decryptedData, connector: updatedConnector };
         setDecryptedData(updatedData);
+        if (!cancelled && connectorTranslateRunRef.current === runId) {
+          setIsAutoTranslatingConnector(false);
+        }
         await persistProfileBlob(updatedData);
       } catch (err) {
         console.error('Auto-translate connector signature failed:', err);
-        connectorTranslationKeyRef.current = null;
       } finally {
-        if (!cancelled) setIsAutoTranslatingConnector(false);
+        if (!cancelled && connectorTranslateRunRef.current === runId) {
+          setIsAutoTranslatingConnector(false);
+        }
       }
     })();
 
     return () => {
       cancelled = true;
+      if (connectorTranslateRunRef.current === runId) {
+        connectorTranslateRunRef.current = null;
+      }
     };
   }, [decryptedData, encryptionKey, profileMetadata, language]);
 
@@ -1362,6 +1379,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
                 connector={decryptedData.connector as ConnectorEvaluationResult}
                 nested
                 isTranslating={isAutoTranslatingConnector}
+                currentUser={currentUser}
+                onStartCoachSession={onStartCoachSession}
               />
             )}
           </section>
@@ -1381,6 +1400,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({ encrypt
             <ConnectorProfileSection
               connector={decryptedData.connector as ConnectorEvaluationResult}
               isTranslating={isAutoTranslatingConnector}
+              currentUser={currentUser}
+              onStartCoachSession={onStartCoachSession}
             />
           </section>
         )}

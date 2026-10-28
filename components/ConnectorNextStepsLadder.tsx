@@ -15,6 +15,8 @@ import {
 interface ConnectorNextStepsLadderProps {
   evaluation: ConnectorEvaluationResult;
   currentUser?: User | null;
+  /** full = micro + connector retry + coach; coachOnly = coach handoff (e.g. strong overall but weak dimension). */
+  variant?: 'full' | 'coachOnly';
   onRestartWithFocus: (focus: ConnectorDimensionKey) => void;
   onStartCoachSession: (botId: string, starterPrompt: string) => void;
 }
@@ -22,6 +24,7 @@ interface ConnectorNextStepsLadderProps {
 const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
   evaluation,
   currentUser,
+  variant = 'full',
   onRestartWithFocus,
   onStartCoachSession,
 }) => {
@@ -36,6 +39,10 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
   const [stage3Open, setStage3Open] = useState(false);
   const [selectedDimension, setSelectedDimension] = useState<ConnectorDimensionKey>(weakest);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (variant === 'coachOnly') setStage3Open(true);
+  }, [variant]);
 
   useEffect(() => {
     const preferred =
@@ -70,6 +77,7 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
   };
 
   const showCoachStep = availableDimensions.length > 0;
+  const showMicroSteps = variant === 'full';
 
   return (
     <div className="mb-6 space-y-4">
@@ -77,8 +85,12 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
         <p className="text-xs font-semibold uppercase tracking-wide text-accent-primary mb-1">
           {t('connector_ladder_heading')}
         </p>
-        <p className="text-sm text-content-secondary mb-4">{t('connector_ladder_intro')}</p>
+        <p className="text-sm text-content-secondary mb-4">
+          {t(variant === 'coachOnly' ? 'profile_connector_coach_bridge_intro' : 'connector_ladder_intro')}
+        </p>
 
+        {showMicroSteps && (
+          <>
         {/* Stufe 1 — Micro-Übung */}
         <div className="rounded-lg border border-border-secondary dark:border-border-primary bg-background-secondary/80 p-4 mb-3">
           <p className="text-sm font-semibold text-content-primary mb-1">
@@ -108,12 +120,14 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
             {t('connector_ladder_step2_cta', { focus: dimensionLabels[weakest] })} →
           </button>
         </div>
+          </>
+        )}
 
         {/* Stufe 3 — Opt-in Coach-Brücke (nur verfügbare Coaches) */}
         {showCoachStep && (
           <div className="rounded-lg border border-border-secondary dark:border-border-primary bg-background-secondary/80 p-4">
             <p className="text-sm font-semibold text-content-primary mb-1">
-              3 · {t('connector_ladder_step3_title')}
+              {showMicroSteps ? `3 · ${t('connector_ladder_step3_title')}` : t('connector_ladder_step3_title')}
             </p>
             {!stage3Open ? (
               <>

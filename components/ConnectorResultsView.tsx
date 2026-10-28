@@ -2,8 +2,9 @@ import React from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import ConnectorRadarChart, { CONNECTOR_DIMENSIONS } from './ConnectorRadarChart';
 import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
+import ConnectorEvaluationMarkdown from './ConnectorEvaluationMarkdown';
 import type { ConnectorDimensionKey, ConnectorEvaluationResult, ConnectorVignettePublic, User } from '../types';
-import { showConnectorPracticeLadder } from '../utils/connectorNextSteps';
+import { showConnectorPracticeLadder, connectorHighScoreNeedsCoachBridge } from '../utils/connectorNextSteps';
 
 const DIMENSION_EMOJI: Record<ConnectorDimensionKey, string> = {
   empathy: '🤝',
@@ -92,7 +93,7 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
         {/* Summary */}
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-content-primary mb-2">{t('connector_results_summary_title')}</h2>
-          <p className="text-content-secondary text-sm leading-relaxed">{evaluation.summary}</p>
+          <ConnectorEvaluationMarkdown text={evaluation.summary} />
         </div>
 
         {/* Dimension details */}
@@ -106,7 +107,10 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
               {evaluation[dim]?.evidence?.length > 0 && (
                 <ul className="mt-2 space-y-1 text-sm text-content-secondary">
                   {evaluation[dim].evidence.map((e, i) => (
-                    <li key={i} className="flex gap-2"><span>•</span><span>{e}</span></li>
+                    <li key={i} className="flex gap-2">
+                      <span className="shrink-0">•</span>
+                      <ConnectorEvaluationMarkdown text={e} className="text-sm text-content-secondary flex-1 min-w-0" />
+                    </li>
                   ))}
                 </ul>
               )}
@@ -120,7 +124,10 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
             <h2 className="text-lg font-semibold text-content-primary mb-2">💪 {t('connector_results_strengths_title')}</h2>
             <ul className="space-y-1 text-sm text-content-secondary">
               {evaluation.strengths.map((s, i) => (
-                <li key={i} className="flex gap-2"><span>✓</span><span>{s}</span></li>
+                <li key={i} className="flex gap-2">
+                  <span className="shrink-0">✓</span>
+                  <ConnectorEvaluationMarkdown text={s} className="text-sm text-content-secondary flex-1 min-w-0" />
+                </li>
               ))}
             </ul>
           </div>
@@ -132,7 +139,10 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
             <h2 className="text-lg font-semibold text-content-primary mb-2">🌱 {t('connector_results_growth_title')}</h2>
             <ul className="space-y-1 text-sm text-content-secondary">
               {evaluation.growthAreas.map((g, i) => (
-                <li key={i} className="flex gap-2"><span>→</span><span>{g}</span></li>
+                <li key={i} className="flex gap-2">
+                  <span className="shrink-0">→</span>
+                  <ConnectorEvaluationMarkdown text={g} className="text-sm text-content-secondary flex-1 min-w-0" />
+                </li>
               ))}
             </ul>
           </div>
@@ -146,9 +156,15 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
               {evaluation.perVignette.map((pv) => (
                 <div key={pv.vignetteId} className="rounded-lg border border-border-secondary dark:border-border-primary bg-background-tertiary p-3 text-sm">
                   <p className="font-medium text-content-primary mb-1">{personaName(pv.vignetteId)}</p>
-                  <p className="text-content-secondary">⭐ {pv.highlight}</p>
+                  <p className="text-content-secondary text-sm flex gap-1 items-start">
+                    <span className="shrink-0">⭐</span>
+                    <ConnectorEvaluationMarkdown text={pv.highlight} className="text-sm text-content-secondary flex-1 min-w-0" />
+                  </p>
                   {pv.missedCue && (
-                    <p className="text-content-tertiary mt-1">👂 {t('connector_results_missed_cue_label')}: {pv.missedCue}</p>
+                    <p className="text-content-tertiary mt-1 text-sm flex gap-1 items-start flex-wrap">
+                      <span className="shrink-0">👂 {t('connector_results_missed_cue_label')}:</span>
+                      <ConnectorEvaluationMarkdown text={pv.missedCue} className="text-sm text-content-tertiary flex-1 min-w-0" />
+                    </p>
                   )}
                 </div>
               ))}
@@ -161,6 +177,17 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
           <ConnectorNextStepsLadder
             evaluation={evaluation}
             currentUser={currentUser}
+            variant="full"
+            onRestartWithFocus={onRestartWithFocus}
+            onStartCoachSession={onStartCoachSession}
+          />
+        )}
+
+        {connectorHighScoreNeedsCoachBridge(evaluation) && (
+          <ConnectorNextStepsLadder
+            evaluation={evaluation}
+            currentUser={currentUser}
+            variant="coachOnly"
             onRestartWithFocus={onRestartWithFocus}
             onStartCoachSession={onStartCoachSession}
           />
