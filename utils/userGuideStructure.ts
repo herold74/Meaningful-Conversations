@@ -83,15 +83,81 @@ export function computeSessionReviewSubsections(ctx: {
   return { analysis, reviewScreen, dpfl };
 }
 
-/** Stable handbook section titles for deep-link copy (DE) — not numbered. */
+export interface ProfileSubsections {
+  chapter: number;
+  overview: string;
+  tests: string;
+  signature: string;
+  coachingModes: string;
+}
+
+export function computeProfileSubsections(isNative: boolean): ProfileSubsections {
+  const chapter = profileChapterNum(isNative);
+  let index = 0;
+  const next = () => `${chapter}.${++index}`;
+  return {
+    chapter,
+    overview: next(),
+    tests: next(),
+    signature: next(),
+    coachingModes: next(),
+  };
+}
+
+export interface GamificationSubsections {
+  chapter: number;
+  intro: string;
+  earnXp: string;
+  storage: string;
+  appearance: string;
+}
+
+export function computeGamificationSubsections(
+  isNative: boolean,
+  isRegistered: boolean,
+): GamificationSubsections {
+  const chapter = gamificationChapterNum(isNative, isRegistered);
+  let index = 0;
+  const next = () => `${chapter}.${++index}`;
+  return {
+    chapter,
+    intro: next(),
+    earnXp: next(),
+    storage: next(),
+    appearance: next(),
+  };
+}
+
+/** Stable handbook section titles for deep-link copy — prefer these over section numbers in cross-refs. */
 export const USER_GUIDE_SECTION_TITLES_DE = {
   chatInterface: 'Die Chat-Oberfläche',
   sessionReview: 'Nach der Sitzung — Der Analyseprozess',
   connector: 'The Connector',
+  transcriptTools: 'Transkript-Tools',
+  coachPracticeTab: 'Coaching üben',
+  contextChoice: 'Kontextauswahl',
 } as const;
 
 export const USER_GUIDE_SECTION_TITLES_EN = {
   chatInterface: 'The Chat Interface',
   sessionReview: 'After the Session — The Review Process',
   connector: 'The Connector',
+  transcriptTools: 'Transcript Tools',
+  coachPracticeTab: 'Coach Practice',
+  contextChoice: 'Context Choice',
 } as const;
+
+/** Cross-reference helper: «Title» with optional dynamic section number when the block is in the reader's handbook. */
+export function handbookSectionRef(
+  language: 'de' | 'en',
+  titleKey: keyof typeof USER_GUIDE_SECTION_TITLES_DE,
+  sectionNum: string | null,
+): string {
+  const title =
+    language === 'de'
+      ? USER_GUIDE_SECTION_TITLES_DE[titleKey]
+      : USER_GUIDE_SECTION_TITLES_EN[titleKey];
+  if (!sectionNum) return `«${title}»`;
+  const label = language === 'de' ? 'Abschnitt' : 'Section';
+  return `«${title}» (${label} ${sectionNum})`;
+}
