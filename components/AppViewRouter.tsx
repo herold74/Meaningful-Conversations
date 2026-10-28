@@ -900,6 +900,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onSaveToProfile={handleConnectorSaveToProfile}
           saveState={connectorSaveState}
           canSave={!!currentUser && !!encryptionKey}
+          currentUser={currentUser}
           onRestart={handleConnectorRestart}
           onDone={handleConnectorDone}
           showPracticeCrossSell={(connectorEvaluation.overallScore ?? 0) >= 8}

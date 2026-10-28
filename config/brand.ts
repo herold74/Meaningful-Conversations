@@ -26,6 +26,9 @@ export const brand = {
   domainStaging:    import.meta.env.VITE_BRAND_DOMAIN_STAGING     || 'mc-beta.manualmode.at',
   domainProduction: import.meta.env.VITE_BRAND_DOMAIN_PRODUCTION  || 'mc-app.manualmode.at',
   appUrlProduction: import.meta.env.VITE_BRAND_APP_URL_PRODUCTION || 'https://mc-app.manualmode.at',
+  /** App Store listing name (ASC); search keyword for iOS install help. */
+  iosAppStoreName:  import.meta.env.VITE_BRAND_IOS_STORE_NAME     || 'ManualMode',
+  appStoreUrl:      import.meta.env.VITE_BRAND_APP_STORE_URL        || 'https://apps.apple.com/at/app/id6759491083',
   serverIp:         import.meta.env.VITE_BRAND_SERVER_IP           || '',
 
   /** 4-shade brand palette (lightest to darkest) */

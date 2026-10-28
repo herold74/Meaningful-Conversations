@@ -33,7 +33,7 @@ Für die beste Erfahrung empfehlen wir einen modernen Chromium-basierten Browser
 ## Onboarding & Plattform
 
 ### Was ist der Intent Picker?
-Der Intent Picker erscheint nach dem Login als Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“: **Kommunikation**, **Coaching** (hervorgehoben) oder **Begleitendes Coaching**. Ihre Wahl bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben wird. Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
+Der Intent Picker erscheint nach dem Login als Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“: **Kommunikation & Management**, **Coaching zu meinem Anliegen** (hervorgehoben) oder **Als Coach üben**. Ihre Wahl wird gespeichert und steuert auf der Coach-Auswahl Fokus und geöffnete Bereiche (z. B. Anliegen-Suche bei registriertem Coaching-Intent — nicht immer durch Ausklappen eines Bereichs). Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
 
 ### Die App zeigt eine leere Seite — was tun?
 Nach einem Update kann eine zwischengespeicherte Version kurz Probleme machen. Öffnen Sie das Menü (☰) und wählen Sie **App aktualisieren** (↻). Alternativ: Hard-Reload im Browser (Strg+F5 / Cmd+Shift+R) oder den Website-Cache in den Browser-Einstellungen leeren.
@@ -140,7 +140,7 @@ For the best experience, we recommend a modern Chromium-based browser (Chrome or
 ## Onboarding & Platform
 
 ### What is the Intent Picker?
-After login, the Intent Picker appears as a screen with **three cards** asking “What would you like to achieve today?”: **Communication**, **Coaching** (featured), or **Augmented Coaching**. Your choice determines which section is highlighted in coach selection. Registered users can disable the Intent Picker under **My Account**.
+After login, the Intent Picker appears as a screen with **three cards** asking “What would you like to achieve today?”: **Communication & management**, **Coaching for my concern** (featured), or **Practice as a coach**. Your choice is stored and adjusts focus and open sections on coach selection (e.g. topic search for registered coaching intent — not always by expanding a section). Registered users can disable the Intent Picker under **My Account**.
 
 ### The app shows a blank page — what should I do?
 After an update, a cached version can briefly cause loading issues. Open the menu (☰) and select **Refresh App** (↻). Alternatively, hard-reload in your browser (Ctrl+F5 / Cmd+Shift+R) or clear the site cache in browser settings.

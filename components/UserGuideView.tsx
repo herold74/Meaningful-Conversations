@@ -102,15 +102,9 @@ In the **Coaching** section, switch to the **Coach Practice** tab (next to "Coac
 `;
 };
 
-const deConnectorChapter = (
-    isNative: boolean,
-    isRegistered: boolean,
-    showPracticeChapter: boolean,
-) => {
+const deConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
     const ch = connectorChapterNum(isNative, isRegistered);
-    const practiceLink = showPracticeChapter
-        ? ` Wer tiefer einsteigen möchte, findet in **Coach Practice** (${deChapterLabel(coachPracticeChapterNum(isNative))}) den passenden Übungsraum.`
-        : '';
+    const teChapter = deChapterLabel(transcriptEvalChapterNum(isNative));
     return `<details id="${USER_GUIDE_ANCHORS.connector}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${deChapterLabel(ch)}: The Connector — Verbindung herstellen (Registriert)</summary>
 <div style="padding: 16px;">
@@ -126,7 +120,9 @@ Im Bereich **Management & Kommunikation** finden Sie die Karte **The Connector**
 - Pro Gespräch schreiben bzw. sprechen Sie **3–5 Antworten**. Die Gespräche enden natürlich — entweder fühlt sich Ihr Gegenüber verstanden, oder der Alltag ruft (z. B. das nächste Meeting).
 - Sie können ein Gespräch jederzeit über **Sitzung beenden** abbrechen; ausgewertet wird dann, was bereits stattgefunden hat.
 
-**Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — **Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität** — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist **mehr Fähigkeit als Talent**: Das Profil zeigt, worauf Sie aufbauen können.${practiceLink}
+**Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — **Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität** — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist **mehr Fähigkeit als Talent**: Das Profil zeigt, worauf Sie aufbauen können.
+
+**Ihr nächster Schritt (optional, in der App):** Liegt Ihr Gesamtergebnis unter 8/10, können Sie unter **„Dein nächster Schritt“** freiwillig weitergehen — ohne Bewertungsdruck: ein **kleiner Impuls** fürs nächste echte Gespräch, optional **The Connector** mit Schwerpunkt auf einer Dimension, optional ein **Coaching-Gespräch** mit einem **für Ihr Konto verfügbaren** Coach aus Management & Kommunikation (Vorschlag zum Einstieg und Direkt-Start — ähnlich wie **Empfohlene Coaching-Profile** in der Transkript-Auswertung, ${teChapter}).
 
 **Übungskatalog (Premium):** Nach einem abgeschlossenen Hauptlauf können Sie **einzelne kuratierte Szenarien** erneut üben — mit Auswertung für diese Einheit (ohne Ihre gespeicherte Signatur zu überschreiben).
 
@@ -144,15 +140,9 @@ ${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächsp
 </details>`;
 };
 
-const enConnectorChapter = (
-    isNative: boolean,
-    isRegistered: boolean,
-    showPracticeChapter: boolean,
-) => {
+const enConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
     const ch = connectorChapterNum(isNative, isRegistered);
-    const practiceLink = showPracticeChapter
-        ? ` If you want to go deeper, **Coach Practice** (${enChapterLabel(coachPracticeChapterNum(isNative))}) is the matching training space.`
-        : '';
+    const teChapter = enChapterLabel(transcriptEvalChapterNum(isNative));
     return `<details id="${USER_GUIDE_ANCHORS.connector}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${enChapterLabel(ch)}: The Connector — Connecting, not just communicating (Registered)</summary>
 <div style="padding: 16px;">
@@ -168,7 +158,9 @@ In the **Management & Communication** section, you'll find **The Connector** car
 - Per conversation, you write or speak **3–5 replies**. Conversations end naturally — either the other person feels heard, or everyday life calls (e.g. the next meeting).
 - You can abort a conversation at any time via **End Session**; whatever has already taken place will be evaluated.
 
-**Your result:** A **Connection Signature** with five dimensions — **empathy, presence, curiosity, non-judgment, and steadiness** — shown as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is **more skill than talent**: the profile shows what to build on.${practiceLink}
+**Your result:** A **Connection Signature** with five dimensions — **empathy, presence, curiosity, non-judgment, and steadiness** — shown as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is **more skill than talent**: the profile shows what to build on.
+
+**Your next step (optional, in the app):** If your overall score is below 8/10, you may see **“Your next step”** — entirely optional, at your pace: a **small nudge** for your next real conversation, optionally **The Connector** again with focus on one dimension, optionally a **coaching conversation** with a coach **available on your account** from Management & Communication (suggested opener and direct start — similar to **Recommended Coaching Profiles** in transcript evaluation, ${teChapter}).
 
 **Practice catalog (Premium):** After a completed main run, you can replay **individual curated vignettes** with evaluation for that unit (without overwriting your saved signature).
 
@@ -232,10 +224,15 @@ Nach dem Login erscheint kurz der **Willkommensbildschirm**: Logo, Coach-Avatare
 
 Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“:
 - **Kommunikation & Management** — Öffnet den Bereich Management & Kommunikation (Nobody, Sam, Gloria, Transkript-Tools)
-- **Coaching zu meinem Anliegen** (hervorgehoben) — Fokus auf die Anliegen-Suche; Coach-Bereiche bleiben eingeklappt
+- **Coaching zu meinem Anliegen** (hervorgehoben) — **Registrierte:** Fokus auf die **Anliegen-Suche**; Coach-Bereiche bleiben eingeklappt, bis ein Vorschlag passt. **Gäste:** Keine Anliegen-Suche — der **Coaching-Bereich** wird hervorgehoben; Sie wählen den Coach direkt (jede Coach-Karte nutzt eine etablierte Methode).
 - **Als Coach üben** — Direkt zum Übungsbereich (Silber-Bereich, Practice-Tab); **überspringt Lebenskontext-Schirme**
 
-Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben und ausgeklappt wird.
+Der gewählte Intent wird in der App **gespeichert** und wirkt **erst auf der Coach-Auswahl** — oft erst nach Name, Lebenskontext, OCEAN oder Kontextauswahl. Dann gilt je nach Karte:
+- **Kommunikation & Management:** Bereich **Management & Kommunikation** wird **geöffnet** und kurz hervorgehoben.
+- **Coaching zu meinem Anliegen:** **Registrierte** — **Anliegen-Suche** wird hervorgehoben; Coach-Bereiche bleiben **eingeklappt**. **Gäste** — **Coaching-Bereich** wird **geöffnet** und hervorgehoben (keine Anliegen-Suche).
+- **Als Coach üben:** Mit **Premium+/Trial/Klient** oft **direkt** zum Übungs-Setup; sonst Coach-Auswahl mit Tab **Coaching üben** und passendem Fokus.
+
+**Ohne gespeicherten Intent** (Picker dauerhaft aus oder noch nicht gewählt): Management & Coaching sind auf der Coach-Auswahl **standardmäßig geöffnet**.
 
 **Name (Gäste):** Haben Sie in **${isNative ? 'dieser App-Sitzung' : 'dieser Browser-Tab-Sitzung'}** noch keinen Namen angegeben, folgt nach dem Intent die Abfrage Ihres Vornamens (oder Pseudonyms). Daraus entsteht eine minimale Lebenskontext-Vorlage; Sie können den Schritt auch **überspringen**. Anschließend gelangen Sie zum **Startbildschirm** zur Lebenskontext-Einrichtung. Haben Sie in derselben Sitzung bereits einen Namen **und** einen Lebenskontext, springt die App nach dem Intent direkt zur **Coach-Auswahl**.
 
@@ -351,6 +348,12 @@ ${isNative ? `- Direkt in der App über **Apple In-App Purchase** (Menü → **U
 - **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium- und Premium+-Pässe sowie Einzelcoach-Freischaltungen via PayPal.
 - **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben.`}
 
+${isNative ? '' : `### Sprachausgabe & Browser (Web)
+
+**Vorlesen (TTS)** — inkl. Server-Stimmen und Wiedergabe im Sprachmodus — haben wir in unseren Tests **ausschließlich mit Google Chrome und Apple Safari** geprüft. In anderen Browsern (z. B. Firefox oder Edge) kann die Sprachausgabe abweichen oder ausfallen.
+
+`}
+
 ### 2.3 KI-Transparenz (EU AI Act)
 
 ${guideWarningBox(`<p class="m-0 mb-2"><strong>KI-Transparenz:</strong> Alle „Coaches“ in dieser App sind <strong>KI-Systeme</strong> — keine menschlichen Berater:innen oder Therapeut:innen. Avatare und Namen dienen der Orientierung; Antworten werden von Sprachmodellen (Google Gemini und/oder Mistral AI) generiert.</p>
@@ -381,11 +384,11 @@ ${isNative ? '' : `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
 <div style="padding: 16px;">
 
-Die ${brand.appName} App ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
+Die **${brand.appNameDe}**-App ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für Desktop und Android unter [${brand.domainProduction}](${brand.appUrlProduction}).
 
 ### 3.1 Native iOS App (empfohlen für iPhone/iPad)
 
-Die App ist als native iOS-App im **Apple App Store** verfügbar. Suchen Sie nach "${brand.appName}" oder nutzen Sie den direkten Link auf unserer Website.
+Die App ist als native iOS-App im **Apple App Store** verfügbar. Suchen Sie nach **${brand.iosAppStoreName}** oder öffnen Sie [${brand.iosAppStoreName} im App Store](${brand.appStoreUrl}).
 
 **Vorteile der nativen App:**
 - Optimiert für iOS mit nativer Performance
@@ -396,14 +399,14 @@ Die App ist als native iOS-App im **Apple App Store** verfügbar. Suchen Sie nac
 ### 3.2 Installation als PWA auf iOS (Alternative)
 
 Falls Sie die Web-Version bevorzugen:
-1. Öffnen Sie die App in **Safari** (wichtig: muss Safari sein, Chrome funktioniert nicht).
+1. Öffnen Sie [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Safari** (wichtig: muss Safari sein, Chrome funktioniert nicht).
 2. Tippen Sie auf das **Teilen-Symbol** (das Quadrat mit dem Pfeil nach oben) in der unteren Leiste.
 3. Scrollen Sie nach unten und tippen Sie auf **"Zum Home-Bildschirm"**.
 4. Geben Sie der App einen Namen und tippen Sie auf **"Hinzufügen"**.
 
 ### 3.3 Installation auf Android
 
-1. Öffnen Sie die App in **Chrome** oder einem anderen Browser.
+1. Öffnen Sie [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Chrome** oder einem anderen Browser.
 2. Tippen Sie auf das **Menü-Symbol** (drei Punkte) oben rechts.
 3. Wählen Sie **"Zum Startbildschirm hinzufügen"** oder **"App installieren"**.
 4. Bestätigen Sie mit **"Hinzufügen"** oder **"Installieren"**.
@@ -411,16 +414,15 @@ Falls Sie die Web-Version bevorzugen:
 
 ### 3.4 Installation auf Desktop (Windows/Mac/Linux)
 
-1. Öffnen Sie die App in **Chrome**, **Edge** oder einem anderen unterstützten Browser.
+1. Öffnen Sie [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Chrome**, **Edge** oder einem anderen unterstützten Browser.
 2. Klicken Sie auf das **Install-Symbol** ⊕ in der Adressleiste oder das **Menü** (drei Punkte).
 3. Wählen Sie **"Installieren"** oder **"App installieren"**.
 4. Die App wird wie eine Desktop-Anwendung installiert und kann über Ihr Startmenü/Dock geöffnet werden.
 
-**Vorteile der Installation:**
-- Schnellerer Zugriff über Ihr App-Icon
-- Vollbildansicht ohne Browser-Chrome
-- Push-Benachrichtigungen (falls aktiviert)
-- Funktioniert teilweise auch offline
+**Vorteile der Installation (PWA / Homescreen):**
+- Schnellerer Start über Ihr App-Icon
+- Vollbildansicht ohne Browser-Leiste
+- **Coaching-Sitzungen bleiben online** — KI-Antworten und Cloud-Funktionen benötigen eine Internetverbindung
 
 ### 3.5 App aktualisieren (Web & PWA)
 
@@ -659,7 +661,7 @@ ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines n
 ### ${coachingSub.coachSelect} Einen Coach auswählen
 Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
 
-Der gewählte **Intent** klappt den passenden Bereich auf (Management & Kommunikation, Coaching oder Coach Practice). **Gäste** sehen die **Anliegen-Suche** nicht — bei Intent „Coaching zu meinem Anliegen" wird stattdessen der **Coaching-Bereich** hervorgehoben.
+Haben Sie zuvor einen **Intent** gewählt, passt die Coach-Auswahl daran an (siehe Kapitel 1.1) — **Kommunikation** öffnet Management & Kommunikation; **Coaching** hebt bei Registrierten die **Anliegen-Suche** hervor (Bereiche eingeklappt), bei **Gästen** den **Coaching-Bereich**; **Coach üben** führt berechtigte Nutzer oft direkt zum Übungs-Setup.
 
 **Ihre Interviewerin:**
 - **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
@@ -968,7 +970,8 @@ ${dePracticeTabSection(isNative, coachingSub.practiceTab)}
     - **Signaturstimme des Coaches:** Beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches — wird automatisch gewählt.
     - **Gerätestimmen:** Stimmen auf Ihrem Gerät. **Vorteil:** Sofortige Reaktion, auch offline.
 ${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium) — exzellente Qualität bei sofortiger Reaktionszeit.` : `    - **Server-Stimmen:** *(Nur im Web-Browser)* Professionelle Stimmen auf unserem Server.
-  - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich Apple-Gerätestimmen (Enhanced/Premium) — Server-Stimmen entfallen.`}
+  - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich Apple-Gerätestimmen (Enhanced/Premium) — Server-Stimmen entfallen.
+  - **Browser (Web):** Sprachausgabe (TTS) wurde **nur mit Google Chrome und Apple Safari** getestet.`}
 - **Sprachmodus:**
   - **Schallwellen-Symbol** wechselt in den reinen Sprachmodus.
   - **Großes Mikrofon-Symbol** startet die Aufnahme — sprechen Sie Ihre Nachricht.
@@ -980,12 +983,12 @@ ${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Ger
 
 ---
 
-${deConnectorChapter(isNative, isRegistered, showChapter10)}
+${deConnectorChapter(isNative, isRegistered)}
 
 ---
 
 <details id="${USER_GUIDE_ANCHORS.sessionReview}">
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${deChapterLabel(sessionReviewChapterNum(isNative, isRegistered))}: Nach der Sitzung - Der Analyseprozess</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${deChapterLabel(sessionReviewChapterNum(isNative, isRegistered))}: Nach der Sitzung — Der Analyseprozess</summary>
 <div style="padding: 16px;">
 
 ### ${sessionReviewSub.analysis} Die Analyse
@@ -1434,10 +1437,15 @@ After login, the **Welcome Screen** appears briefly: logo, orbiting coach avatar
 
 On launch, the **Intent Picker** appears — a screen with **three cards** asking “What would you like to achieve today?”:
 - **Communication & management** — Opens the Management & Communication section (Nobody, Sam, Gloria, transcript tools)
-- **Coaching for my concern** (featured) — Focuses the topic search; coach sections stay collapsed
+- **Coaching for my concern** (featured) — **Registered:** Focuses **topic search**; coach sections stay collapsed until you pick a suggestion. **Guests:** No topic search — the **Coaching section** is highlighted; you choose your coach directly (each coach uses an established method).
 - **Practice as a coach** — Goes straight to the practice area (Silver section, Practice tab); **skips Life Context screens**
 
-Your chosen intent determines which section is highlighted and expanded on the coach selection screen.
+Your chosen intent is **stored** in the app and applies **when you reach coach selection** — often only after name, Life Context, OCEAN, or context choice. Then, by card:
+- **Communication & management:** **Management & Communication** is **expanded** and briefly highlighted.
+- **Coaching for my concern:** **Registered** — **topic search** is highlighted; coach sections stay **collapsed**. **Guests** — **Coaching section** is **expanded** and highlighted (no topic search).
+- **Practice as a coach:** With **Premium+/trial/client** access, often **straight to practice setup**; otherwise coach selection on the **Coach Practice** tab with matching focus.
+
+**With no stored intent** (picker permanently off or not chosen yet): Management & Coaching are **open by default** on coach selection.
 
 **Name (guests):** If you have not entered a name in **this ${isNative ? 'app session' : 'browser tab session'}** yet, the app asks for your first name (or pseudonym) after the intent. This creates a minimal Life Context template; you can also **skip** this step. You then reach the **start screen** to set up your Life Context. If you already have a name **and** a Life Context in the same session, the app goes straight to **coach selection** after the intent.
 
@@ -1553,6 +1561,12 @@ ${isNative ? `- Directly in the app via **Apple In-App Purchase** (Menu → **Up
 - **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium and Premium+ passes and individual coach unlocks via PayPal.
 - **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code.`}
 
+${isNative ? '' : `### Voice output & browsers (Web)
+
+We have tested **read-aloud (TTS)** — including server voices and playback in voice mode — **only in Google Chrome and Apple Safari**. In other browsers (e.g. Firefox or Edge), voice output may behave differently or fail.
+
+`}
+
 ### 2.3 AI Transparency (EU AI Act)
 
 ${guideWarningBox(`<p class="m-0 mb-2"><strong>AI transparency:</strong> All "coaches" in this app are <strong>AI systems</strong> — not human advisors or therapists. Avatars and names help you navigate; responses are generated by language models (Google Gemini and/or Mistral AI).</p>
@@ -1583,11 +1597,11 @@ ${isNative ? '' : `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
 <div style="padding: 16px;">
 
-The ${brand.appName} app is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
+The **${brand.appName}** app is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for desktop and Android at [${brand.domainProduction}](${brand.appUrlProduction}).
 
 ### 3.1 Native iOS App (recommended for iPhone/iPad)
 
-The app is available as a native iOS app on the **Apple App Store**. Search for "${brand.appName}" or use the direct link on our website.
+The app is available as a native iOS app on the **Apple App Store**. Search for **${brand.iosAppStoreName}** or open [${brand.iosAppStoreName} on the App Store](${brand.appStoreUrl}).
 
 **Benefits of the native app:**
 - Optimized for iOS with native performance
@@ -1598,14 +1612,14 @@ The app is available as a native iOS app on the **Apple App Store**. Search for 
 ### 3.2 PWA Installation on iOS (Alternative)
 
 If you prefer the web version:
-1. Open the app in **Safari** (important: must be Safari, Chrome won't work).
+1. Open [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Safari** (important: must be Safari, Chrome won't work).
 2. Tap the **Share icon** (the square with an arrow pointing up) in the bottom bar.
 3. Scroll down and tap **"Add to Home Screen"**.
 4. Give the app a name and tap **"Add"**.
 
 ### 3.3 Installation on Android
 
-1. Open the app in **Chrome** or another browser.
+1. Open [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Chrome** or another browser.
 2. Tap the **Menu icon** (three dots) in the top right.
 3. Select **"Add to Home Screen"** or **"Install App"**.
 4. Confirm with **"Add"** or **"Install"**.
@@ -1613,16 +1627,15 @@ If you prefer the web version:
 
 ### 3.4 Installation on Desktop (Windows/Mac/Linux)
 
-1. Open the app in **Chrome**, **Edge**, or another supported browser.
+1. Open [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Chrome**, **Edge**, or another supported browser.
 2. Click the **Install icon** ⊕ in the address bar or the **Menu** (three dots).
 3. Select **"Install"** or **"Install App"**.
 4. The app will be installed like a desktop application and can be opened from your Start menu/Dock.
 
-**Benefits of Installation:**
-- Faster access via your app icon
-- Full-screen view without browser chrome
-- Push notifications (if enabled)
-- Works partially offline
+**Benefits of installation (PWA / home screen):**
+- Faster launch via your app icon
+- Full-screen view without the browser toolbar
+- **Coaching sessions stay online** — AI replies and cloud features require an internet connection
 
 ### 3.5 Refresh App (Web & PWA)
 
@@ -1835,7 +1848,7 @@ ${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personal
 ### ${coachingSub.coachSelect} Choosing Your Coach
 On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
 
-Your chosen **intent** expands the matching section (Management & Communication, Coaching, or Coach Practice). **Guests** do not see **topic search** — with intent “Coaching for my concern”, the **Coaching section** is highlighted instead.
+If you chose an **intent** earlier, coach selection adapts (see Chapter 1.1) — **communication** opens Management & Communication; **coaching** highlights **topic search** for registered users (sections collapsed) or the **Coaching section** for **guests**; **practice as coach** often sends entitled users straight to practice setup.
 
 **Your Interviewer:**
 - **Gloria** -- Professional interviewer for structured conversations about ideas, projects, and workflows (Registered)
@@ -2144,7 +2157,8 @@ Above the coach list, you'll find a search field that lets the AI recommend a su
     - **Coach Signature Voice:** Best match for the coach's language and personality — selected automatically.
     - **Device Voices:** Generated on your device. **Advantage:** Instant response, works offline.
 ${isNative ? `  - **Note:** The iOS app uses high-quality Apple device voices only (Enhanced/Premium) — excellent quality with instant response.` : `    - **Server Voices:** *(Web browser only)* Professional voices on our server.
-  - **Note for iOS app:** Uses Apple device voices only — no server voices.`}
+  - **Note for iOS app:** Uses Apple device voices only — no server voices.
+  - **Browsers (Web):** Voice output (TTS) has been tested **only in Google Chrome and Apple Safari**.`}
 - **Voice Mode:**
   - **Sound wave icon** switches to pure voice mode.
   - **Large microphone icon** starts recording — speak your message.
@@ -2156,12 +2170,12 @@ ${isNative ? `  - **Note:** The iOS app uses high-quality Apple device voices on
 
 ---
 
-${enConnectorChapter(isNative, isRegistered, showChapter10)}
+${enConnectorChapter(isNative, isRegistered)}
 
 ---
 
 <details id="${USER_GUIDE_ANCHORS.sessionReview}">
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${enChapterLabel(sessionReviewChapterNum(isNative, isRegistered))}: After the Session - The Review Process</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${enChapterLabel(sessionReviewChapterNum(isNative, isRegistered))}: After the Session — The Review Process</summary>
 <div style="padding: 16px;">
 
 ### ${sessionReviewSub.analysis} The Analysis
