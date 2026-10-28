@@ -1,5 +1,6 @@
 const MAX_HIGHLIGHT = 80;
 const MAX_MISSED = 80;
+const { getNoConcreteConversationPhaseBlock } = require('./connectorPrepExamples.js');
 
 const FOCUS_EN = {
   empathy: 'recognizing feelings before solutions',
@@ -43,20 +44,23 @@ function buildConnectorHandoffContext(payload, lang) {
   const missed = truncate(payload.missedCue, MAX_MISSED);
   const feedback = highlight || '—';
   const missedPart = missed ? (lang === 'de' ? `; Entwicklung: ${missed}` : `; growth edge: ${missed}`) : '';
+  const phase2 = getNoConcreteConversationPhaseBlock(lang, focusKey, { questionsOnly: true });
 
   if (lang === 'de') {
     return `
 
 ## Connector-Hintergrund (nur für Sie — nicht vorlesen)
 Practice-Rückmeldung (Verhalten, nicht Rollenspiel): ${feedback}${missedPart}. Prep-Fokus: ${focus}.
-Erste Antwort: kurz bestätigen (z. B. „Alles klar. Konzentrieren wir uns auf dein echtes Gespräch."), dann **eine** Frage — mit wem es geht und was auf dem Spiel steht. Keine Übungspersonas oder Rollen nennen, es sei denn, der Nutzer bringt sie ein.`;
+**Phase 1:** Kurz bestätigen (z. B. „Alles klar. Konzentrieren wir uns auf dein echtes Gespräch."), dann **eine** Frage — mit wem es geht und was auf dem Spiel steht. Keine Übungspersonas nennen, es sei denn, der Nutzer bringt sie ein.
+${phase2}`;
   }
 
   return `
 
 ## Connector background (interviewer-only — do not read aloud)
 Practice feedback (behavior, not role-play): ${feedback}${missedPart}. Prep focus: ${focus}.
-First reply: briefly acknowledge (e.g. “Got it. Let's focus on the real conversation.”), then **one** question — who it is with and what's at stake. Do not name practice personas or roles unless the user does.`;
+**Phase 1:** Brief acknowledgment (e.g. “Got it. Let's focus on the real conversation.”), then **one** question — who it is with and what's at stake. Do not name practice personas unless the user does.
+${phase2}`;
 }
 
 function getConnectorHandoffContinuationReminder(lang, mode) {
