@@ -218,6 +218,7 @@
 - **Staging:** v**2.6.0** Build **45** (mc-beta) · **Production:** Build **41** (mc-app) — staging verified **2026-10-12** via `sw.js` v2.6.0-b45
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
+- [x] **Stack watchdog (2026-10-14):** `mc-stack-watchdog.timer` (~3 min) recreates wedged backends + refreshes nginx IPs; ops-report surfaces 502/unhealthy with HANDLUNG
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
 - [x] **Admin UI:** Fully responsive design for mobile management
 - [x] **Maintenance windows (local, not deployed):** public banner for registered users and guests; admin section above tabs; migration `20260927130000_add_maintenance_windows` applies on next backend deploy

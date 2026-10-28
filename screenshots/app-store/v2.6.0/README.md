@@ -12,13 +12,16 @@ Store-Karussell braucht **eine Zeile Claim + großes Motiv**. Lange Feedback-Tex
 
 **ASC-Upload:** nur **`iphone/*-{de|en}.png`** · **1284×2778** · PNG.
 
+**Quellen:** Slides 01–05 + 07 = **iPhone `IMG_*.PNG`** (kein Browser). Slide 06 = Theme-Captures (Ausnahme). Statusleiste (Uhrzeit/Empfang/Batterie) wird beim Framing **neutralisiert** — siehe `_source/README.md`.
+
 ## Ordner
 
 | Pfad | Inhalt |
 |------|--------|
 | `_source/` | Vollauflösung aus Fotos / iPhone (unbearbeitet) — siehe `_source/README.md` |
 | `iphone/` | Fertige Store-Slides nach Compositing |
-| `ipad/` | Optional (2048×2732), falls iPad-Listing gepflegt |
+| `moodboard-{de\|en}.png` | Alle 7 Slides im Raster (Optik-Review Chrome hell vs. saisonal) — `python3 scripts/build-asc-moodboard.py` |
+| `ipad/` | **2048×2732** — gleiche Story wie iPhone; Slide **00** aus `IMG_1556.JPG` (Café + iPad) |
 
 ## 5-Slides-Set (iPhone 6,7″)
 
@@ -26,11 +29,32 @@ Pro Lokalisierung **Deutsch** und **English (Canada)** — gleiches Layout, Text
 
 | Slot | Dateiname (Ziel) | Inhalt | Headline DE | Headline EN (Canada) |
 |------|------------------|--------|-------------|----------------------|
-| 1 | `01-brand-iphone-{de\|en}.png` | Brand / Vertrauen (Lifestyle iPhone **oder** Welcome aus v2.5.4) | KI-Coaching mit Tiefe | AI coaching that goes deeper |
-| 2 | `02-connector-radar-iphone-{de\|en}.png` | **Radar + Score** (Crop aus Verbindungs-Signatur) | Dein Radar für Verbindung | Your connection radar |
-| 3 | `03-connector-persona-iphone-{de\|en}.png` | **David-Modal** + Chat | Kurze Alltagsgespräche | Short everyday conversations |
-| 4 | `04-practice-iphone-{de\|en}.png` | Coach Practice (Lifestyle-Mock **iPhone** oder Setup-UI) | Coaching üben | Practice coaching |
-| 5 | `05-ecosystem-iphone-{de\|en}.png` | Connector-Tile groß **oder** Coach-Grid-Crop | Coaches, Connector & Üben | Coaches, Connector & practice |
+| **0 (Aufmacher)** | `00-lifestyle-iphone-{de\|en}.png` | Café + Chat | COACHING, WO SIE SIND | COACHING WHERE YOU ARE |
+| 1 | `01-brand-iphone-{de\|en}.png` | Brand / Vertrauen (Welcome) | EIN COACH, DER SIE KENNT | A COACH WHO KNOWS YOU |
+| 2 | `02-connector-persona-iphone-{de\|en}.png` | **Connector-Intro** (David-Modal + Chat) | THE CONNECTOR | THE CONNECTOR |
+| 3 | `03-connector-radar-iphone-{de\|en}.png` | **Radar + Score** (Verbindungs-Signatur) | Ihr Verbindungs-Radar | Your connection radar |
+| 4 | `04-coach-grid-iphone-{de\|en}.png` | Coach-Auswahl (Coaching-Tab) | IHR COACH-TEAM | YOUR COACH TEAM |
+| 5 | `05-voice-coaching-iphone-{de\|en}.png` | Sprachmodus Gabrielle | COACHING PER SPRACHE | COACHING BY VOICE |
+| 6 | `06-coaching-chat-iphone-{de\|en}.png` | **Coaching-Sitzung** Gabrielle (Text) | TIEFGEHENDE GESPRÄCHE | CONVERSATIONS WITH DEPTH |
+| 7 | `07-practice-iphone-{de\|en}.png` | Coach Practice (Setup-UI) | Coaching üben | Practice coaching |
+| 8 | `08-themes-iphone-{de\|en}.png` | Drei Farbwelten | PASST ZU IHREM TAG | FITS YOUR DAY |
+
+### iPad (12.9″/13″, 2048×2732)
+
+**Abweichungen zu iPhone:** Device-UI **Dark Mode** (absicht). **Keine Voice-Slide.** Rohmaterial: `_source/ipad/` + `IMG_1556.JPG`.
+
+| Slot | Ziel | Inhalt |
+|------|------|--------|
+| **00** | `00-lifestyle-ipad-*` | `IMG_1556.JPG` — Café + iPad |
+| **01–06** | Brand … Practice | `IMG_0299`–`0312` — siehe `_source/ipad/README.md` |
+| **07** | Themes | Hell `0317/0316/0318` + Dunkel `0320/0321/0319` (Gerätepaare, diagonal) |
+
+```bash
+python3 scripts/frame-asc-marketing-device.py v260-ipad
+python3 scripts/build-asc-moodboard.py --device ipad   # moodboard-ipad-{de,en}.png
+```
+
+iPhone **05 Voice** entfällt; Chat/Practice/Themes rücken auf **05–07**.
 
 **Nicht als eigene Slide:** Auswertung mit Fließtext + „Deine Stärken“ (`IMG_1650`) — In-App-Tiefe, im Store unlesbar.
 
@@ -42,7 +66,7 @@ Pro Lokalisierung **Deutsch** und **English (Canada)** — gleiches Layout, Text
 | `IMG_1648.PNG` | 1179×2556 | **Slide 3** — Persona-Modal |
 | `IMG_1647.PNG` | 1179×2556 | **Slide 5** — Coach-Grid (nur Connector-Karte / Icon) |
 | `IMG_1650.PNG` | 1179×2556 | Nur Referenz — **nicht** Vollbild-ASC |
-| `IMG_1556.JPG` | 1152×864 | **Slide 4** — Practice-Lifestyle (iPad; für 6,7″ neu: iPhone-Hochformat-Mock) |
+| `IMG_1556.JPG` | 1152×864 | **iPad Slide 00** — Café + iPad (Aufmacher); iPhone 00 = `lifestyle/cafe-iphone.jpg` |
 
 Chat-Komprimierung liefert ~472×1024 — **immer aus Fotos nach `_source/` exportieren** (Original / volle Größe).
 

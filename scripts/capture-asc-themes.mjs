@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
  * Capture 6 theme previews per locale for ASC slide 6 (3 schemes × light/dark).
- * Output: screenshots/app-store/v2.6.0/_source/themes/{de|en}/{theme}-{light|dark}.png  (1290×2796)
+ * Output:
+ *   iphone: _source/themes/{de|en}/{theme}-{light|dark}.png  (~1290×2796)
+ *   ipad:   _source/themes/ipad/{de|en}/{theme}-{light|dark}.png  (~2048×2732)
  *
  *   npm run build && npx vite preview --port 5173
- *   node scripts/capture-asc-themes.mjs --base "http://127.0.0.1:5173/?backend=staging" [--lang de|en|all]
+ *   node scripts/capture-asc-themes.mjs --base "http://127.0.0.1:5173/?backend=staging" [--lang de|en|all] [--device iphone|ipad|all]
  */
 import fs from 'fs';
 import path from 'path';
@@ -21,7 +23,26 @@ const LANG_ARG = process.argv.includes('--lang')
   ? process.argv[process.argv.indexOf('--lang') + 1]
   : 'all';
 
+const DEVICE_ARG = process.argv.includes('--device')
+  ? process.argv[process.argv.indexOf('--device') + 1]
+  : 'iphone';
+
 const THEMES = ['summer', 'autumn', 'brand'];
+
+const DEVICE_PROFILES = {
+  iphone: {
+    label: 'iPhone 14 Pro Max',
+    playwrightDevice: 'iPhone 14 Pro Max',
+    outSubdir: (locale) => locale,
+  },
+  ipad: {
+    label: 'iPad Pro 13"',
+    playwrightDevice: null,
+    viewport: { width: 1024, height: 1366 },
+    deviceScaleFactor: 2,
+    outSubdir: (locale) => path.join('ipad', locale),
+  },
+};
 
 const LOCALES = {
   de: {
@@ -62,25 +83,44 @@ async function guestToLanding(page, loc) {
 
 async function main() {
   const { chromium, devices } = await import('playwright');
-  const iphone = devices['iPhone 14 Pro Max'];
+  const deviceKeys =
+    DEVICE_ARG === 'all' ? ['iphone', 'ipad'] : [DEVICE_ARG];
   const langs = LANG_ARG === 'all' ? ['de', 'en'] : [LANG_ARG];
   const browser = await chromium.launch({ headless: true });
   const season = currentSeason();
 
-  for (const key of langs) {
-    const loc = LOCALES[key];
-    if (!loc) continue;
-    const OUT = path.join(THEMES_ROOT, key);
-    fs.mkdirSync(OUT, { recursive: true });
+  for (const deviceKey of deviceKeys) {
+    const profile = DEVICE_PROFILES[deviceKey];
+    if (!profile) {
+      console.error(`Unknown --device ${deviceKey}`);
+      process.exit(1);
+    }
+    const iphone = profile.playwrightDevice ? devices[profile.playwrightDevice] : null;
 
-    for (const theme of THEMES) {
-      for (const mode of ['light', 'dark']) {
-        const context = await browser.newContext({
-          ...iphone,
-          viewport: iphone.screen,
-          locale: loc.playwrightLocale,
-          colorScheme: mode,
-        });
+    for (const key of langs) {
+      const loc = LOCALES[key];
+      if (!loc) continue;
+      const OUT = path.join(THEMES_ROOT, profile.outSubdir(key));
+      fs.mkdirSync(OUT, { recursive: true });
+
+      for (const theme of THEMES) {
+        for (const mode of ['light', 'dark']) {
+          const contextOptions = iphone
+            ? {
+                ...iphone,
+                viewport: iphone.screen,
+                locale: loc.playwrightLocale,
+                colorScheme: mode,
+              }
+            : {
+                viewport: profile.viewport,
+                deviceScaleFactor: profile.deviceScaleFactor,
+                isMobile: true,
+                hasTouch: true,
+                locale: loc.playwrightLocale,
+                colorScheme: mode,
+              };
+          const context = await browser.newContext(contextOptions);
         const page = await context.newPage();
         await page.addInitScript(({ theme, mode, season, lang }) => {
           localStorage.setItem('language', lang);
@@ -99,10 +139,11 @@ async function main() {
         await page.evaluate(() => {
           localStorage.setItem('isDarkMode', document.documentElement.classList.contains('dark') ? 'dark' : 'false');
         });
-        const outPath = path.join(OUT, `${theme}-${mode}.png`);
-        await page.screenshot({ path: outPath, fullPage: false, animations: 'disabled', scale: 'device' });
-        console.log(`✓ ${outPath}`);
-        await context.close();
+          const outPath = path.join(OUT, `${theme}-${mode}.png`);
+          await page.screenshot({ path: outPath, fullPage: false, animations: 'disabled', scale: 'device' });
+          console.log(`✓ [${deviceKey}] ${outPath}`);
+          await context.close();
+        }
       }
     }
   }

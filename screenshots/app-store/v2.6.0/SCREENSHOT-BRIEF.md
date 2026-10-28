@@ -36,10 +36,10 @@ Subline: Regular/Medium, ~28–36 pt, max. **2 Zeilen**.
 | # | ASC-Datei | Screen (clean) | Headline DE | Headline EN |
 |---|-----------|----------------|-------------|-------------|
 | 1 | `01-brand-iphone-{de\|en}.png` | `clean/{locale}/01-about-coach-knows-you.png` | EIN COACH, DER SIE KENNT | A COACH WHO KNOWS YOU |
-| 2 | `02-connector-radar-iphone-{de\|en}.png` | `clean/{locale}/02-radar.png` + **Zoom-Radar** als Extra-Layer | DEIN VERBINDUNGS-RADAR | YOUR CONNECTION RADAR |
-| 3 | `03-connector-persona-iphone-{de\|en}.png` | `clean/{locale}/03-connector-scenario.png` | ECHTE ALLTAGSSZENEN | THE CONNECTOR |
+| 2 | `02-connector-persona-iphone-{de\|en}.png` | `connector-intro-{de\|en}.png` (Device) | THE CONNECTOR | THE CONNECTOR |
+| 3 | `03-connector-radar-iphone-{de\|en}.png` | `IMG_1677` / `IMG_1674` (Device) | IHR VERBINDUNGS-RADAR | YOUR CONNECTION RADAR |
 | 4 | `04-practice-iphone-{de\|en}.png` | `clean/{locale}/04-practice-about.png` | COACHING ÜBEN | PRACTICE COACHING |
-| 5 | `05-ecosystem-iphone-{de\|en}.png` | `clean/{locale}/05-coach-grid.png` | THE CONNECTOR | MEET THE CONNECTOR |
+| 5 | `05-coaching-chat-iphone-{de\|en}.png` | Journey `06-coaching-deep-tts-active` (DE) / `coaching-chat-en.png` (EN) | TIEFGEHENDE GESPRÄCHE | CONVERSATIONS WITH DEPTH |
 | 6 | `06-themes-iphone-{de\|en}.png` | `themes-grid-{locale}.png` (6er-Grid) | DREI FARBWELTEN | THREE COLOR WORLDS |
 
 ### Subline (DE / EN)

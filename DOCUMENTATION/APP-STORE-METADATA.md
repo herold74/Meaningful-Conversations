@@ -285,50 +285,42 @@ LANGUAGE: Primary store metadata German; full English in-app via Welcome screen 
 
 ## Was ist neu — App Store Connect (v2.6.0) — **aktuelle Einreichung**
 
-**In ASC:** Version **2.6.0** anlegen → Build aus Xcode wählen (z. B. **2.6.0 (21)** nach Upload/Processing). Pro Lokalisierung **Deutsch** und **Englisch (Kanada)** unter „Was ist neu in dieser Version“ einfügen.
+**In ASC:** Version **2.6.0** anlegen → Build aus Xcode wählen (z. B. **2.6.0 (48)** nach Upload/Processing; `CURRENT_PROJECT_VERSION` = Repo-`BUILD_NUMBER`). Pro Lokalisierung **Deutsch** und **Englisch (Kanada)** unter „Was ist neu in dieser Version“ einfügen.
 
-**Screenshots:** Plan und Dateinamen → `screenshots/app-store/v2.6.0/README.md` (min. 3× 1284×2778 pro Lokalisierung; **The Connector** sichtbar machen).
+**Screenshots (Stand 2026-10-25):** `screenshots/app-store/v2.6.0/iphone/` — **9×** `1284×2778` je **Deutsch** und **Englisch (Kanada)** (`01`–`09`). Übersicht: `moodboard-de.png` / `moodboard-en.png`. Apple verlangt min. **3** — Set ist upload-fertig.
 
 **Store-Beschreibung (optional, nicht zwingend pro Release):** Wenn ihr die lange Beschreibung aktualisiert, Abschnitt **„Beschreibung — Ergänzung 2.6.0“** unten in DE + EN einfügen.
 
-### Deutsch
+### Deutsch — „Was ist neu in dieser Version“ (copy-paste)
 
 ```
-The Connector (neu): Kurze Alltags-Szenen mit KI-Personas — du übst zuhörende Gespräche in Text oder Sprache und erhältst eine Auswertung mit Radar-Profil (Empathie, Präsenz, Neugier, Wertschätzung, Gelassenheit). Ergebnis optional verschlüsselt im Profil speichern.
+The Connector: Üben Sie zuhörende Kurzgespräche mit KI-Personas — per Text oder Sprache. Ihre Verbindungs-Signatur macht Empathie, Präsenz, Neugier und mehr sichtbar (optional verschlüsselt im Profil).
 
-Profil & Reflexion: Connector-Ergebnisse unter „Wie du interagierst“, optional eine kurze Fremdsicht zu deinem Lebenskontext (opt-in, Ende-zu-Ende-verschlüsselt).
+Profil & Reflexion: Ergebnisse im Persönlichkeitsprofil, optional eine kurze Fremdsicht zu Ihrem Lebenskontext (opt-in, Ende-zu-Ende-verschlüsselt).
 
-Verbindungsvorbereitung: Gloria hilft beim Vorbereiten wichtiger Gespräche — strukturiert und im Lebenskontext verankert.
-
-Coaching üben: Klarere Sprache und Methoden-Bezeichnungen in Katalog und Sitzung; verbesserte Oberfläche beim Üben.
-
-Weitere Verbesserungen: Überarbeitetes Persönlichkeits-PDF, Feinschliff an Coach-Auswahl und Connector-Oberfläche, Stabilität und Korrekturen.
+Verbindungsvorbereitung mit Gloria, verfeinertes Coaching üben, drei Farbwelten für Tag und Stimmung sowie Stabilität und Feinschliff in Profil, PDF-Export und Oberfläche.
 ```
 
-### English (Canada)
+### English (Canada) — What’s New (copy-paste)
 
 ```
-The Connector (new): Short everyday scenarios with AI personas — practice listening conversations by text or voice and get feedback with a radar profile (empathy, presence, curiosity, non-judgment, steadiness). Optionally save your result encrypted in your profile.
+The Connector: Practice short, listening-focused conversations with AI personas — by text or voice. Your connection signature highlights empathy, presence, curiosity, and more (optionally saved encrypted in your profile).
 
-Profile & reflection: Connector results under “How you interact,” plus an optional short external perspective on your Life Context (opt-in, end-to-end encrypted).
+Profile & reflection: Results in your personality profile, plus an optional short external perspective on your Life Context (opt-in, end-to-end encrypted).
 
-Connection prep: Gloria helps you prepare for important conversations — structured and grounded in your Life Context.
-
-Coach Practice: Clearer language and method labels in the catalog and session; improved practice setup experience.
-
-Other improvements: Redesigned personality PDF export, polish on coach selection and Connector UI, stability and fixes.
+Connection prep with Gloria, refined Coach Practice, three color themes for your day, and stability and polish across profile, PDF export, and UI.
 ```
 
 ### Beschreibung — Ergänzung 2.6.0 (optional in ASC einfügen)
 
-**Deutsch** — nach „COACHING ÜBEN“ oder als eigener Absatz:
+**Deutsch** — nach „COACHING ÜBEN (PREMIUM+)“ oder als eigener Absatz:
 
 ```
 THE CONNECTOR
-Kurze Alltags-Szenen mit KI-Personas: Übe zuhörende Gespräche per Text oder Sprache, erhalte ein Radar-Profil zu fünf Dimensionen und speichere dein Ergebnis optional verschlüsselt im Profil. Optional: kurze Fremdsicht zu deinem Lebenskontext (opt-in).
+Kurze Alltags-Szenen mit KI-Personas: Üben Sie zuhörende Gespräche per Text oder Sprache, erhalten Sie ein Radar-Profil zu fünf Dimensionen und speichern Ihr Ergebnis optional verschlüsselt im Profil. Optional: kurze Fremdsicht zu Ihrem Lebenskontext (opt-in).
 ```
 
-**English (Canada)** — after “COACH PRACTICE” or as its own paragraph:
+**English (Canada)** — after “COACH PRACTICE (PREMIUM+)” or as its own paragraph:
 
 ```
 THE CONNECTOR
