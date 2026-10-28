@@ -1277,7 +1277,7 @@ Am Ende einer Coaching-Sitzung im **Sitzungs-Review**, Abschnitt **„Mögliche 
 </details>
 `;
 
-const de_chapter10 = (isNative: boolean) => `
+const de_chapter10 = (isNative: boolean, practiceTab: string | null) => `
 ---
 
 <details id="${USER_GUIDE_ANCHORS.coachPractice}">
@@ -1292,7 +1292,7 @@ Sie wählen Einstieg, Methode, Szenario und Schwierigkeit. Am Ende erhalten Sie 
 
 ### Wer kann es nutzen?
 
-Zugang und Tab: siehe ${coachingSub.practiceTab ? `Abschnitt **${coachingSub.practiceTab}**` : deChapterLabel(coachPracticeChapterNum(isNative))}.
+Zugang und Tab: siehe ${practiceTab ? `Abschnitt **${practiceTab}**` : deChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Methodenumfang:** Premium+ und Trial: **8 Übungsmethoden**. Klienten: **12 Methoden** (zusätzlich Methoden der Klienten-Coaches Rob, Victor, Bekky und Dan).
 
@@ -2453,7 +2453,7 @@ At the end of a coaching session in **Session Review**, section **"Potential Sol
 </details>
 `;
 
-const en_chapter10 = (isNative: boolean) => `
+const en_chapter10 = (isNative: boolean, practiceTab: string | null) => `
 ---
 
 <details id="${USER_GUIDE_ANCHORS.coachPractice}">
@@ -2468,7 +2468,7 @@ Choose entry path, method, scenario, and difficulty. At the end you receive a **
 
 ### Who Can Use It?
 
-Access and tab: see ${coachingSub.practiceTab ? `section **${coachingSub.practiceTab}**` : enChapterLabel(coachPracticeChapterNum(isNative))}.
+Access and tab: see ${practiceTab ? `section **${practiceTab}**` : enChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Method scope:** Premium+ and trial: **8 practice methods**. Clients: **12 methods** (additionally methods from client coaches Rob, Victor, Bekky, and Dan).
 
@@ -2583,7 +2583,15 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser, focusAnchor, onFo
         const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
         const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
         const ch9pep = language === 'de' ? de_chapter9_pep(native) : en_chapter9_pep(native);
-        const ch10 = language === 'de' ? de_chapter10(native) : en_chapter10(native);
+        const coachingSub = computeCoachingSessionSubsections({
+            isNative: native,
+            isRegistered,
+            showTranscriptTools: showChapter8,
+            showPracticeTab: showChapter10,
+        });
+        const ch10 = language === 'de'
+            ? de_chapter10(native, coachingSub.practiceTab)
+            : en_chapter10(native, coachingSub.practiceTab);
         return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 + ch9pep : '') + (showChapter10 ? ch10 : '');
     }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9, showChapter10]);
 
