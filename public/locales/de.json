@@ -1211,6 +1211,7 @@
   "intent_communication_desc": "Wirkungsvoll kommunizieren, Gespräche vorbereiten und nachbereiten — mit Coaches für Management- und Kommunikationsthemen.",
   "intent_coaching_title": "Coaching zu meinem Anliegen",
   "intent_coaching_desc": "Beschreibe dein Anliegen — der passende Coach wird vorgeschlagen. Ohne manuelle Methodenwahl, ohne Umwege.",
+  "intent_coaching_desc_guest": "Wähle einen Coach der zu deinem Anliegen passt. Jeder Coach arbeitet nach einer eigenständigen, gängigen Methode.",
   "intent_coach_practice_title": "Als Coach üben",
   "intent_coach_practice_desc": "Trainiere Coaching-Methoden anhand typischer Übungsszenarien incl. strukturiertem Feedback.",
   "intent_skip_permanently": "Nicht mehr anzeigen",
