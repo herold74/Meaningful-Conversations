@@ -31,6 +31,8 @@ interface ImportMetaEnv {
   readonly VITE_BRAND_DOMAIN_STAGING?: string;
   readonly VITE_BRAND_DOMAIN_PRODUCTION?: string;
   readonly VITE_BRAND_APP_URL_PRODUCTION?: string;
+  readonly VITE_BRAND_IOS_STORE_NAME?: string;
+  readonly VITE_BRAND_APP_STORE_URL?: string;
   readonly VITE_BRAND_COLOR_1?: string;
   readonly VITE_BRAND_COLOR_2?: string;
   readonly VITE_BRAND_COLOR_3?: string;
