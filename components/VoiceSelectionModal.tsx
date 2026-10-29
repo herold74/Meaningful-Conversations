@@ -251,6 +251,13 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         );
     }, [nativeVoices, botLanguage]);
 
+    const nativeSelectionListId = useMemo(() => {
+        if (selection.type !== 'native') return null;
+        const id = (selection as { type: 'native'; voiceIdentifier: string }).voiceIdentifier;
+        if (filteredNativeVoices.length === 0) return id;
+        return matchNativeVoiceIdentifierToList(id, filteredNativeVoices, nativeVoicesForLanguage);
+    }, [selection, filteredNativeVoices, nativeVoicesForLanguage]);
+
     // Sync modal selection when reopened (manual choice before auto; map native id to list row)
     useEffect(() => {
         if (!isOpen) return;
@@ -416,12 +423,12 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 </p>
                             </div>
                             {filteredNativeVoices.map(voice => (
-                                <div key={voice.identifier} className="p-3 border border-border-primary bg-background-tertiary">
+                                <div key={voice.identifier} className={`p-3 border ${nativeSelectionListId === voice.identifier ? 'border-accent-primary border-2 bg-accent-primary/10' : 'border-border-primary bg-background-tertiary'}`}>
                                     <label className="flex items-center cursor-pointer">
                                         <input
                                             type="radio"
                                             name="voice-selection"
-                                            checked={selection.type === 'native' && (selection as {type: 'native', voiceIdentifier: string}).voiceIdentifier === voice.identifier}
+                                            checked={selection.type === 'native' && nativeSelectionListId === voice.identifier}
                                             onChange={() => setSelection({ type: 'native', voiceIdentifier: voice.identifier })}
                                             className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
                                         />

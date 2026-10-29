@@ -172,10 +172,90 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, []);
 
   useEffect(() => {
+    const applyNativeIosVoicePick = async (isAuto: boolean): Promise<boolean> => {
+      const bestVoice = await pickNativeIosSignatureVoice(language, botGender);
+      if (!bestVoice) return false;
+      console.log('[TTS Init] Native iOS signature voice:', bestVoice.name, bestVoice.quality, 'auto:', isAuto);
+      setSelectedVoiceURI(bestVoice.identifier);
+      setTtsMode('local');
+      setIsAutoMode(isAuto);
+      saveLanguageVoiceSettings('local', bestVoice.identifier, isAuto);
+      return true;
+    };
+
+    const restoreNativeIosManualVoice = async (savedVoiceId: string, isAuto: boolean): Promise<boolean> => {
+      if (!savedVoiceId.startsWith('com.apple.voice')) return false;
+      const canonicalId = await resolveCanonicalNativeVoiceIdentifier(savedVoiceId, language);
+      const voiceId = canonicalId ?? savedVoiceId;
+      const languageMatches = await savedNativeIosVoiceMatchesLanguage(voiceId, language);
+      if (!languageMatches) return false;
+      console.log('[TTS Init] Native iOS manual voice restored:', voiceId, 'auto:', isAuto);
+      setSelectedVoiceURI(voiceId);
+      setTtsMode('local');
+      setIsAutoMode(isAuto);
+      if (canonicalId && canonicalId !== savedVoiceId) {
+        saveLanguageVoiceSettings('local', canonicalId, isAuto);
+      }
+      return true;
+    };
+
+    const initNativeIosVoiceSettings = async (): Promise<void> => {
+      const settings = getBotVoiceSettings(ttsBotId);
+      const langSettings = settings[language];
+      const savedMode = langSettings.mode;
+      const savedVoiceId = langSettings.voiceId;
+      const savedIsAuto = langSettings.isAuto;
+
+      console.log('[TTS Init] Native iOS voice restore:', { savedMode, savedVoiceId, savedIsAuto });
+
+      if (savedMode === 'server') {
+        console.log('[TTS Init] Native iOS — migrating server preference to device voices');
+        if (!(await applyNativeIosVoicePick(savedIsAuto))) {
+          setSelectedVoiceURI(null);
+          setTtsMode('local');
+          setIsAutoMode(true);
+          saveLanguageVoiceSettings('local', null, true);
+        }
+        return;
+      }
+
+      // Manual device voice — restore without server health check (staging CORS/timeouts must not wipe this)
+      if (savedMode === 'local' && savedVoiceId && savedIsAuto === false) {
+        if (await restoreNativeIosManualVoice(savedVoiceId, false)) {
+          return;
+        }
+        console.warn('[TTS Init] Saved manual native voice invalid — falling back to signature pick');
+        if (await applyNativeIosVoicePick(false)) {
+          return;
+        }
+      }
+
+      if (savedMode === 'local' && savedVoiceId && savedIsAuto) {
+        if (await restoreNativeIosManualVoice(savedVoiceId, true)) {
+          return;
+        }
+      }
+
+      if (savedIsAuto || !savedVoiceId || savedMode === 'local') {
+        if (await applyNativeIosVoicePick(true)) {
+          return;
+        }
+        setSelectedVoiceURI(null);
+        setTtsMode('local');
+        setIsAutoMode(true);
+        saveLanguageVoiceSettings('local', null, true);
+      }
+    };
+
     const checkVoiceAvailability = async () => {
       if (!currentUser) {
         console.log('[TTS Init] Guest user - forcing local TTS only');
         setTtsMode('local');
+        return;
+      }
+
+      if (isNativeiOS) {
+        await initNativeIosVoiceSettings();
         return;
       }
 
@@ -195,27 +275,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         const healthData = await healthResponse.json();
         const serverAvailable = healthData.status === 'ok' && healthData.piperAvailable;
 
-        const applyNativeIosVoicePick = async (isAuto: boolean): Promise<boolean> => {
-          const bestVoice = await pickNativeIosSignatureVoice(language, botGender);
-          if (!bestVoice) return false;
-          console.log('[TTS Init] Native iOS signature voice:', bestVoice.name, bestVoice.quality, 'auto:', isAuto);
-          setSelectedVoiceURI(bestVoice.identifier);
-          setTtsMode('local');
-          setIsAutoMode(isAuto);
-          saveLanguageVoiceSettings('local', bestVoice.identifier, isAuto);
-          return true;
-        };
-
         const runServerOrLocalAuto = async () => {
-          if (isNativeiOS) {
-            if (!(await applyNativeIosVoicePick(true))) {
-              setSelectedVoiceURI(null);
-              setTtsMode('local');
-              setIsAutoMode(true);
-              saveLanguageVoiceSettings('local', null, true);
-            }
-            return;
-          }
           if (serverAvailable) {
             console.log('[TTS Init] Auto mode - server signature voice for bot:', ttsBotId);
             setSelectedVoiceURI(null);
@@ -231,12 +291,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           }
         };
 
-        if (isNativeiOS && savedMode === 'server') {
-          console.log('[TTS Init] Native iOS — migrating server voice preference to device voices');
-          if (!(await applyNativeIosVoicePick(savedIsAuto))) {
-            await runServerOrLocalAuto();
-          }
-        } else if (savedMode === 'server' && savedVoiceId) {
+        if (savedMode === 'server' && savedVoiceId) {
           if (!serverAvailable) {
             console.warn('[TTS Init] Server unavailable, temporarily using local (keeping saved preference)');
             setTtsMode('local');
@@ -247,28 +302,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         } else if (savedMode === 'local' && savedVoiceId) {
           const isNativeVoiceId = savedVoiceId.startsWith('com.apple.voice');
 
-          if (isNativeVoiceId && isNativeiOS) {
-            const languageMatches = await savedNativeIosVoiceMatchesLanguage(savedVoiceId, language);
-            if (languageMatches) {
-              const canonicalId = await resolveCanonicalNativeVoiceIdentifier(savedVoiceId, language);
-              const voiceId = canonicalId ?? savedVoiceId;
-              console.log('[TTS Init] Native iOS voice valid, keeping:', voiceId);
-              setSelectedVoiceURI(voiceId);
-              setTtsMode('local');
-              setIsAutoMode(savedIsAuto);
-              if (canonicalId && canonicalId !== savedVoiceId) {
-                saveLanguageVoiceSettings('local', canonicalId, savedIsAuto);
-              }
-            } else {
-              console.warn('[TTS Init] Native iOS saved voice does not match app language — re-picking:', {
-                savedVoiceId,
-                language,
-              });
-              if (!(await applyNativeIosVoicePick(savedIsAuto))) {
-                await runServerOrLocalAuto();
-              }
-            }
-          } else if (isNativeVoiceId && !isNativeiOS) {
+          if (isNativeVoiceId) {
             console.warn('[TTS Init] Native voice saved but not on native iOS, resetting to auto mode');
             setIsAutoMode(true);
             setSelectedVoiceURI(null);
@@ -282,15 +316,13 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
               saveLanguageVoiceSettings('local', null, true);
             } else {
               console.log('[TTS Init] Local voice valid, keeping:', savedVoiceId);
+              setSelectedVoiceURI(savedVoiceId);
+              setTtsMode('local');
+              setIsAutoMode(savedIsAuto);
             }
           }
         } else if (savedIsAuto || (!savedVoiceId && savedMode === 'local')) {
           console.log('[TTS Init] Auto mode - selecting best voice for bot gender:', botGender);
-
-          if (isNativeiOS && (await applyNativeIosVoicePick(true))) {
-            return;
-          }
-
           await runServerOrLocalAuto();
         }
       } catch (error) {
@@ -1437,11 +1469,19 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     } else if (selection.type === 'native') {
       console.log('[TTS Select] Native voice selected:', selection.voiceIdentifier);
       setIsAutoMode(false);
-      const canonicalId = await resolveCanonicalNativeVoiceIdentifier(selection.voiceIdentifier, language);
-      const voiceId = canonicalId ?? selection.voiceIdentifier;
-      setSelectedVoiceURI(voiceId);
       setTtsMode('local');
-      saveLanguageVoiceSettings('local', voiceId, false);
+      setSelectedVoiceURI(selection.voiceIdentifier);
+      saveLanguageVoiceSettings('local', selection.voiceIdentifier, false);
+      try {
+        const canonicalId = await resolveCanonicalNativeVoiceIdentifier(selection.voiceIdentifier, language);
+        const voiceId = canonicalId ?? selection.voiceIdentifier;
+        if (voiceId !== selection.voiceIdentifier) {
+          setSelectedVoiceURI(voiceId);
+          saveLanguageVoiceSettings('local', voiceId, false);
+        }
+      } catch (err) {
+        console.warn('[TTS Select] Could not resolve canonical native voice id:', err);
+      }
     }
     setIsVoiceModalOpen(false);
   }, [ttsBotId, language, botGender, saveLanguageVoiceSettings]);
