@@ -1,5 +1,6 @@
 import {
   dedupeNativeVoicesByName,
+  isAppleAvSpeechVoiceId,
   matchNativeVoiceIdentifierToList,
   nativeVoiceMatchesAppLanguage,
   pickBestNativeIosVoiceFromList,
@@ -21,6 +22,20 @@ const enSamantha: NativeVoice = {
   language: 'en-US',
   quality: 'enhanced',
 };
+
+describe('isAppleAvSpeechVoiceId', () => {
+  it('accepts classic com.apple.voice ids', () => {
+    expect(isAppleAvSpeechVoiceId('com.apple.voice.compact.en-US.Daniel')).toBe(true);
+  });
+
+  it('accepts newer com.apple.eloquence / non-voice bundle ids', () => {
+    expect(isAppleAvSpeechVoiceId('com.apple.eloquence.en-US.Arthur')).toBe(true);
+  });
+
+  it('rejects Web Speech URIs', () => {
+    expect(isAppleAvSpeechVoiceId('Daniel')).toBe(false);
+  });
+});
 
 describe('nativeVoiceMatchesAppLanguage', () => {
   it('matches de-DE to de app language', () => {

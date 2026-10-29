@@ -9,6 +9,7 @@ import { getVoiceGender, cleanVoiceName, voiceNameIncludesToken, dedupeSpeechSyn
 import {
   dedupeNativeVoicesByName,
   matchNativeVoiceIdentifierToList,
+  isAppleAvSpeechVoiceId,
 } from '../utils/nativeIosTtsVoice';
 import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
@@ -280,7 +281,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             if (currentTtsMode === 'server') {
                 console.log('[VoiceModal SYNC] -> Server voice:', currentVoiceURI);
                 setSelection({ type: 'server', voiceId: currentVoiceURI });
-            } else if (currentVoiceURI.startsWith('com.apple.voice') && isNativeiOS) {
+            } else if (isNativeiOS && isAppleAvSpeechVoiceId(currentVoiceURI)) {
                 const listId = matchNativeVoiceIdentifierToList(
                     currentVoiceURI,
                     filteredNativeVoices,
