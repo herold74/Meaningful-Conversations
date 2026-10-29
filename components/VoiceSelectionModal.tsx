@@ -5,7 +5,8 @@ import { XIcon } from './icons/XIcon';
 import { PlayIcon } from './icons/PlayIcon';
 import { Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
-import { getVoiceGender, cleanVoiceName, voiceNameIncludesToken } from '../utils/voiceUtils';
+import { getVoiceGender, cleanVoiceName, voiceNameIncludesToken, dedupeSpeechSynthesisVoices } from '../utils/voiceUtils';
+import { dedupeNativeVoicesByName } from '../utils/nativeIosTtsVoice';
 import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
@@ -182,7 +183,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             whitelistedVoices.map(v => v.name));
 
         if (whitelistedVoices.length > 0) {
-            return whitelistedVoices.sort((a, b) => cleanVoiceName(a.name).localeCompare(cleanVoiceName(b.name)));
+            return dedupeSpeechSynthesisVoices(whitelistedVoices);
         }
         
         // Debug: If no whitelisted voices, show all voices for the language
@@ -231,18 +232,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             console.log('[VoiceModal] iOS fallback - all local voices:', genderFilteredVoices.length);
         }
 
-        // De-duplicate and sort the broader list
-        const uniqueVoicesMap = new Map<string, SpeechSynthesisVoice>();
-        genderFilteredVoices.forEach(voice => {
-            const baseName = voice.name.replace(/\s*\([^)]*\)$/, '').trim();
-            const existing = uniqueVoicesMap.get(baseName);
-            if (!existing || (!/enhanced|premium|erweitert/i.test(existing.name) && /enhanced|premium|erweitert/i.test(voice.name))) {
-                uniqueVoicesMap.set(baseName, voice);
-            }
-        });
-
-        const result = Array.from(uniqueVoicesMap.values())
-            .sort((a, b) => cleanVoiceName(a.name).localeCompare(cleanVoiceName(b.name)));
+        const result = dedupeSpeechSynthesisVoices(genderFilteredVoices);
         
         console.log('[VoiceModal] FINAL localVoices result:', result.length, result.map(v => v.name));
         return result;
@@ -286,13 +276,8 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             genderFiltered = filtered;
         }
 
-        // Sort by quality (premium > enhanced > default), then by name
-        return genderFiltered.sort((a, b) => {
-            const qualityOrder = { premium: 0, enhanced: 1, default: 2 };
-            const qualityDiff = (qualityOrder[a.quality] || 2) - (qualityOrder[b.quality] || 2);
-            if (qualityDiff !== 0) return qualityDiff;
-            return a.name.localeCompare(b.name);
-        });
+        // Sort by quality (premium > enhanced > default), then by name; one row per speaker name
+        return dedupeNativeVoicesByName(genderFiltered);
     }, [nativeVoices, botLanguage, botGender]);
 
     // Helper function to check if a server voice is enabled
@@ -416,11 +401,6 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                         <span className="ml-3 flex-1">
                                             <span className="font-semibold text-content-primary">
                                                 {voice.name}
-                                                {voice.quality !== 'default' && (
-                                                    <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-content-tertiary/20 text-content-secondary">
-                                                        {voice.quality}
-                                                    </span>
-                                                )}
                                             </span>
                                             <span className="block text-sm text-content-secondary">
                                                 {voice.language.startsWith('de') ? 'Deutsch' : voice.language.startsWith('en') ? 'English' : voice.language}
