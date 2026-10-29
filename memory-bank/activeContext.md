@@ -9,7 +9,11 @@
 **Connector / docs:** `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md`, `CONNECTOR` routes under `/api/gemini/connector/*`; QA lab + admin analytics per Sept 2026 handoffs below.
 **Handbuch (2026-10-28):** Stilguide im Skill `user-guide-handbook` (Nutzen zuerst, einladend, nur sagen was ist, keine internen Begriffe). Kapitel 1, §2.2 und Connector-Kapitel (kurz, Titel „Gespräche mit Wirkung“ / „Elevate Conversations“) im Zuge von 2.6.0 neu erzählt; übrige Kapitel bei Bedarf in 2.6.1 nach Stilguide. Zusätzlich Coach-Empfehlung, Chat, Session Review und Practice-Intro neu geschrieben; iOS-Fassung neutralisiert (kein PayPal/Web-Kaufweg, nur Kontakt `providerContact`; Hinweis „funktioniert auch im Browser“ nur im Web). Staging: Build 60 (Commit `36422326`), Version 2.6.0. 2.5.7 wurde von Apple bei diesen Punkten nicht beanstandet.
 
-**Deploy note (2026-09-24):** Multiple incremental staging builds **b28–b36** during that week; superseded by **b39** on staging + production (see above).
+## Session handoff (2026-10-29) — iOS Profil-Connector + Xcode workflow
+
+- **Profil (iOS):** `PersonalityProfileView` reloads when `encryptionKey` arrives; `loadPersonalityProfile` uses `cache: 'no-store'` + dynamic `getApiBaseUrl()` (no frozen module URL). Fixes stale/missed `connector` in UI when blob on server is current.
+- **Xcode sync:** `npm run sync:ios-production` added (mirror of `sync:ios-staging`). **Maintainer:** agent runs sync on request — **no** manual deploy instructions or npm Merksätze in chat (`systemPatterns.md` #31).
+- **Local iOS bundle:** BUILD **61** synced to Xcode via `sync:ios-production` (uncommitted frontend changes unless user commits).
 
 ## Session handoff (2026-10-14) — Prod API 502 + watchdog heal
 

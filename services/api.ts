@@ -226,7 +226,8 @@ export const getAuthHeaders = (): HeadersInit => {
 // Personality Profile API
 // ============================================================================
 
-const API_BASE_URL = getApiBaseUrl();
+/** Resolve API host per call (Capacitor must not freeze URL at module import). */
+const personalityApiUrl = (path: string) => `${getApiBaseUrl()}/api/personality${path}`;
 
 export const savePersonalityProfile = async (data: {
   testType?: string; // Legacy - optional
@@ -236,10 +237,11 @@ export const savePersonalityProfile = async (data: {
   encryptedData: string;
   adaptationMode?: 'adaptive' | 'stable';
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/save`, {
+  const response = await fetch(personalityApiUrl('/save'), {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    cache: 'no-store',
   });
   if (!response.ok) {
     throw new Error('Failed to save personality profile');
@@ -248,8 +250,14 @@ export const savePersonalityProfile = async (data: {
 };
 
 export const loadPersonalityProfile = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/profile`, {
-    headers: getAuthHeaders()
+  const url = `${personalityApiUrl('/profile')}?_=${Date.now()}`;
+  const response = await fetch(url, {
+    headers: {
+      ...getAuthHeaders(),
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+    },
+    cache: 'no-store',
   });
   
   if (!response.ok) {
@@ -261,9 +269,10 @@ export const loadPersonalityProfile = async () => {
 };
 
 export const deletePersonalityProfile = async (): Promise<{ success: boolean; message: string }> => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/profile`, {
+  const response = await fetch(personalityApiUrl('/profile'), {
     method: 'DELETE',
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
+    cache: 'no-store',
   });
   
   if (!response.ok) {
@@ -292,7 +301,7 @@ export const submitSessionLog = async (data: {
   // Note: Transcript is NOT stored (GDPR compliance)
   // User can download transcript immediately after session
   
-  const response = await fetch(`${API_BASE_URL}/api/personality/session-log`, {
+  const response = await fetch(personalityApiUrl('/session-log'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
@@ -307,7 +316,7 @@ export const submitSessionLog = async (data: {
   
   // Submit comfort check
   if (!data.optedOut) {
-    const comfortResponse = await fetch(`${API_BASE_URL}/api/personality/comfort-check`, {
+    const comfortResponse = await fetch(personalityApiUrl('/comfort-check'), {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
@@ -326,8 +335,9 @@ export const submitSessionLog = async (data: {
 };
 
 export const getProfileRefinementSuggestions = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/adaptation-suggestions`, {
-    headers: getAuthHeaders()
+  const response = await fetch(personalityApiUrl('/adaptation-suggestions'), {
+    headers: getAuthHeaders(),
+    cache: 'no-store',
   });
   
   if (!response.ok) {
@@ -359,7 +369,7 @@ export const generateNarrativeProfile = async (data: {
   language: string;
   connector?: ConnectorEvaluationResult | null;
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/generate-narrative`, {
+  const response = await fetch(personalityApiUrl('/generate-narrative'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -380,7 +390,7 @@ export const generateExternalPerspectiveNote = async (data: {
   connector: ConnectorEvaluationResult;
   language: string;
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/generate-external-perspective`, {
+  const response = await fetch(personalityApiUrl('/generate-external-perspective'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -397,7 +407,7 @@ export const translateConnectorSignature = async (data: {
   sourceLang: 'de' | 'en';
   targetLang: 'de' | 'en';
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/translate-connector-signature`, {
+  const response = await fetch(personalityApiUrl('/translate-connector-signature'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -414,7 +424,7 @@ export const translateExternalPerspectiveNote = async (data: {
   sourceLang: 'de' | 'en';
   targetLang: 'de' | 'en';
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/translate-external-perspective`, {
+  const response = await fetch(personalityApiUrl('/translate-external-perspective'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
@@ -431,7 +441,7 @@ export const logSessionBehavior = async (data: {
   encryptedTranscript: string;
   frequencies: Record<string, number>;
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/session-log`, {
+  const response = await fetch(personalityApiUrl('/session-log'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -443,7 +453,7 @@ export const logSessionBehavior = async (data: {
 };
 
 export const submitComfortCheck = async (sessionId: string, score: number, optOut?: boolean) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/comfort-check`, {
+  const response = await fetch(personalityApiUrl('/comfort-check'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ sessionId, score, optOut })
@@ -455,7 +465,7 @@ export const submitComfortCheck = async (sessionId: string, score: number, optOu
 };
 
 export const getAdaptationSuggestions = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/adaptation-suggestions`, {
+  const response = await fetch(personalityApiUrl('/adaptation-suggestions'), {
     headers: getAuthHeaders()
   });
   if (!response.ok) {
@@ -528,7 +538,7 @@ export const previewProfileRefinement = async (data: {
   profileType: 'RIEMANN' | 'BIG5';
   language: string;
 }): Promise<RefinementPreviewResult> => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/preview-refinement`, {
+  const response = await fetch(personalityApiUrl('/preview-refinement'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -562,7 +572,7 @@ export const testRefinementWithMockSessions = async (data: {
     comfortScore: number;
   }>;
 }): Promise<RefinementPreviewResult> => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/test-refinement-mock`, {
+  const response = await fetch(personalityApiUrl('/test-refinement-mock'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)

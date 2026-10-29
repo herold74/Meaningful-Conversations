@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import ConnectorRadarChart, { CONNECTOR_DIMENSIONS } from './ConnectorRadarChart';
 import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
@@ -18,12 +18,11 @@ interface ConnectorResultsViewProps {
   evaluation: ConnectorEvaluationResult;
   vignettes: ConnectorVignettePublic[];
   runMode: 'assessment' | 'practice';
-  onSaveToProfile: () => void;
+  onDone: (skipProfileSave: boolean) => Promise<void>;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
   canSave: boolean;
   currentUser?: User | null;
   onRestart: () => void;
-  onDone: () => void;
   /** Show Coach Practice cross-sell for strong results */
   showPracticeCrossSell: boolean;
   onPracticeCrossSell: () => void;
@@ -39,18 +38,19 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
   evaluation,
   vignettes,
   runMode,
-  onSaveToProfile,
+  onDone,
   saveState,
   canSave,
   currentUser,
   onRestart,
-  onDone,
   showPracticeCrossSell,
   onPracticeCrossSell,
   onRestartWithFocus,
   onStartCoachSession,
 }) => {
   const { t } = useLocalization();
+  const [skipProfileSave, setSkipProfileSave] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
 
   const labels: Record<ConnectorDimensionKey, string> = {
     empathy: t('connector_dim_empathy'),
@@ -64,6 +64,18 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
     vignettes.find((v) => v.id === vignetteId)?.personaName || vignetteId;
 
   const isPracticeRun = runMode === 'practice';
+  const isSaving = saveState === 'saving' || isFinishing;
+  const showSaveOptOut = !isPracticeRun && canSave && !!currentUser;
+
+  const handleDoneClick = async () => {
+    if (isSaving) return;
+    setIsFinishing(true);
+    try {
+      await onDone(isPracticeRun ? true : skipProfileSave);
+    } finally {
+      setIsFinishing(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto py-8 px-4 sm:px-6">
@@ -165,10 +177,18 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
                     <ConnectorEvaluationMarkdown text={pv.highlight} className="text-sm text-content-secondary flex-1 min-w-0" />
                   </p>
                   {pv.missedCue && (
-                    <p className="text-content-tertiary mt-1 text-sm flex gap-1 items-start flex-wrap">
-                      <span className="shrink-0">👂 {t('connector_results_missed_cue_label')}:</span>
-                      <ConnectorEvaluationMarkdown text={pv.missedCue} className="text-sm text-content-tertiary flex-1 min-w-0" />
-                    </p>
+                    <div className="text-content-tertiary mt-1 text-sm flex gap-2 items-start">
+                      <span className="shrink-0" aria-hidden>
+                        👂
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span>{t('connector_results_missed_cue_label')}:</span>{' '}
+                        <ConnectorEvaluationMarkdown
+                          text={pv.missedCue}
+                          className="inline text-sm text-content-tertiary"
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
@@ -203,6 +223,7 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
             <p className="text-sm text-content-primary font-medium mb-2">🎓 {t('connector_results_practice_title')}</p>
             <p className="text-sm text-content-secondary mb-3">{t('connector_results_practice_text')}</p>
             <button
+              type="button"
               onClick={onPracticeCrossSell}
               className="text-sm font-semibold text-accent-primary hover:underline"
             >
@@ -216,27 +237,33 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
           {t(isPracticeRun ? 'connector_results_practice_disclaimer' : 'connector_results_disclaimer')}
         </p>
 
+        {showSaveOptOut && (
+          <div className="mb-4 p-4 bg-status-warning-background dark:bg-status-warning-background border border-status-warning-border dark:border-status-warning-border/30 rounded-md">
+            <label className="flex items-start cursor-pointer gap-3">
+              <input
+                type="checkbox"
+                checked={skipProfileSave}
+                onChange={(e) => setSkipProfileSave(e.target.checked)}
+                disabled={isSaving}
+                className="mt-0.5 h-5 w-5 shrink-0 rounded bg-background-secondary dark:bg-background-tertiary border-border-secondary dark:border-border-secondary text-accent-secondary focus:ring-accent-secondary [color-scheme:light] dark:[color-scheme:dark]"
+              />
+              <div>
+                <span className="font-semibold text-content-primary">{t('connector_results_prevent_save_label')}</span>
+                <p className="text-sm text-status-warning-foreground dark:text-status-warning-foreground mt-1">
+                  {t('connector_results_prevent_save_desc')}
+                </p>
+              </div>
+            </label>
+          </div>
+        )}
+
         {/* Actions — match PracticeEvaluationReview / PracticeResumePrompt button tokens */}
         <div className="flex flex-col sm:flex-row gap-3 mt-2">
-          {!isPracticeRun && canSave && saveState !== 'saved' && (
-            <button
-              type="button"
-              onClick={onSaveToProfile}
-              disabled={saveState === 'saving'}
-              className="flex-1 py-3 rounded-lg btn-accent-solid font-semibold disabled:opacity-50"
-            >
-              {saveState === 'saving' ? t('connector_results_saving') : t('connector_results_save')}
-            </button>
-          )}
-          {!isPracticeRun && saveState === 'saved' && (
-            <div className="flex-1 py-3 px-6 text-center text-sm font-semibold text-accent-primary border border-accent-primary/40 rounded-lg bg-accent-primary/5">
-              ✓ {t('connector_results_saved')}
-            </div>
-          )}
           <button
             type="button"
             onClick={onRestart}
-            className={`flex-1 py-3 rounded-lg font-semibold ${
+            disabled={isSaving}
+            className={`flex-1 py-3 rounded-lg font-semibold disabled:opacity-50 ${
               isPracticeRun ? 'btn-accent-solid' : 'btn-surface-outline'
             }`}
           >
@@ -244,12 +271,15 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
           </button>
           <button
             type="button"
-            onClick={onDone}
-            className={`flex-1 py-3 rounded-lg font-semibold ${
+            onClick={handleDoneClick}
+            disabled={isSaving}
+            className={`flex-1 py-3 rounded-lg font-semibold disabled:opacity-50 ${
               isPracticeRun ? 'btn-surface-outline' : 'btn-accent-solid'
             }`}
           >
-            {t(isPracticeRun ? 'connector_results_practice_done' : 'connector_results_done')}
+            {isSaving
+              ? t('connector_results_saving')
+              : t(isPracticeRun ? 'connector_results_practice_done' : 'connector_results_done')}
           </button>
         </div>
         {saveState === 'error' && (

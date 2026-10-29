@@ -115,7 +115,7 @@ const deConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
 
 **So läuft es ab:** Sie führen drei kurze Gespräche mit KI-Personas, zum Beispiel mit einem Kollegen nach einem frustrierenden Meeting oder einer Freundin nach einer Trennung. Dabei zählt Ihre natürliche Art, so zu sprechen, wie Sie es im echten Leben tun. Zu Beginn wählen Sie **Text** oder **Stimme**. Pro Gespräch antworten Sie drei- bis fünfmal; die Gespräche enden von selbst, und mit **Sitzung beenden** schließen Sie jederzeit ab — ausgewertet wird dann, was bereits besprochen wurde.
 
-**Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist mehr Fähigkeit als Talent: Das Profil zeigt, worauf Sie aufbauen können. Wenn Sie es speichern, finden Sie es verschlüsselt in Ihrem Persönlichkeitsprofil unter **„Wie du interagierst“** und im PDF-Export.
+**Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist mehr Fähigkeit als Talent: Das Profil zeigt, worauf Sie aufbauen können. Mit **Fertig** speichern Sie die Signatur standardmäßig verschlüsselt in Ihrem Persönlichkeitsprofil unter **„Wie du interagierst“** (optional können Sie das Speichern abwählen) — außerdem im PDF-Export.
 
 **Und danach?** Unter **„Dein nächster Schritt“** lädt Sie die App ein, weiterzugehen — ganz in Ihrem Tempo: mit einem kleinen Impuls für Ihr nächstes echtes Gespräch, mit The Connector zu einer Dimension Ihrer Wahl oder mit einem kurzen Coaching-Gespräch zur Vorbereitung. Welche Möglichkeiten Sie sehen, hängt von Ihrem Ergebnis und Ihrem Zugang ab.
 
@@ -124,7 +124,7 @@ ${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächsp
 <details>
 <summary style="cursor: pointer; font-weight: 600;">Gut zu wissen</summary>
 
-- **Üben mit Premium:** Im **Übungskatalog** wiederholen Sie einzelne ausgewählte Szenarien; Ihre gespeicherte Signatur bleibt dabei unverändert. Mit **Eigene Situation** beschreiben Sie Beziehung und Kontext mit fiktiven Namen und erhalten nach einem Übungsgespräch qualitatives Feedback.
+- **Üben mit Premium+:** Im **Übungskatalog** wiederholen Sie einzelne ausgewählte Szenarien; Ihre gespeicherte Signatur bleibt dabei unverändert. Mit **Eigene Situation** beschreiben Sie Beziehung und Kontext mit fiktiven Namen und erhalten nach einem Übungsgespräch qualitatives Feedback.
 - **Datenschutz:** Die Gespräche dienen nur der Auswertung und werden nicht als Chat-Verlauf gespeichert. Optional ergänzen Sie Ihre Signatur über **„Signatur mit Fremdsicht anreichern“** um einen kurzen 360°-Brückentext (mit Vorschau vor dem Speichern).
 - **Im Chat:** Mit einem Tipp auf den Avatar öffnen Sie das vollständige Szenario.
 - **Für Gäste:** Die Karte ist sichtbar; ein Klick führt zur Registrierung.
@@ -145,7 +145,7 @@ const enConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
 
 **How it works:** You have three short conversations with AI personas, for example with a colleague after a frustrating meeting or a friend after a breakup. What counts is your natural way of speaking, just as in real life. At the start, you choose **Text** or **Voice**. In each conversation, you reply three to five times; the conversations end on their own, and with **End Session** you can wrap up at any time — what has already been discussed is then evaluated.
 
-**Your result:** A **Connection Signature** with five dimensions — empathy, presence, curiosity, non-judgment, and steadiness — as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is more skill than talent: the profile shows what to build on. If you save it, you find it encrypted in your personality profile under **“How you interact”** and in the PDF export.
+**Your result:** A **Connection Signature** with five dimensions — empathy, presence, curiosity, non-judgment, and steadiness — as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is more skill than talent: the profile shows what to build on. **Done** saves the signature to your personality profile under **“How you interact”** by default, encrypted (you can opt out before finishing) — and in the PDF export.
 
 **And then?** Under **“Your next step”**, the app invites you to go further — entirely at your own pace: with a small nudge for your next real conversation, with The Connector on a dimension of your choice, or with a short coaching conversation to prepare. Which options you see depends on your result and your access.
 
@@ -154,7 +154,7 @@ ${guideInfoBox('<p class="m-0"><strong>AI transparency:</strong> Your conversati
 <details>
 <summary style="cursor: pointer; font-weight: 600;">Good to know</summary>
 
-- **Practicing with Premium:** In the **practice catalog**, you replay individual selected scenarios; your saved signature stays unchanged. With **Your own situation**, you describe relationship and context using fictional names and receive qualitative feedback after one practice conversation.
+- **Practicing with Premium+:** In the **practice catalog**, you replay individual selected scenarios; your saved signature stays unchanged. With **Your own situation**, you describe relationship and context using fictional names and receive qualitative feedback after one practice conversation.
 - **Privacy:** The conversations serve only the evaluation and are not stored as chat history. Optionally, add a short 360° bridge text to your signature via **“Enrich signature with external view”** (with a preview before saving).
 - **In chat:** Tap the avatar to open the full scenario.
 - **For guests:** The card is visible; a click leads to registration.
@@ -2603,7 +2603,12 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser, focusAnchor, onFo
                             }
                             return <div style={style} {...props} />;
                         },
-                        details: ({node, ...props}) => <details className="my-3 border border-border-secondary rounded-lg overflow-hidden scroll-mt-24" {...props} />,
+                        details: ({node, ...props}) => (
+                            <details
+                                className="my-3 border border-border-secondary rounded-lg overflow-hidden scroll-mt-24 [&>ul]:mx-4 [&>ul]:mb-4 [&>ul]:mt-2 [&>ol]:mx-4 [&>ol]:mb-4 [&>ol]:mt-2 [&>p]:mx-4"
+                                {...props}
+                            />
+                        ),
                         summary: ({node, ...props}) => <summary className="cursor-pointer px-4 py-3 bg-background-tertiary hover:bg-background-tertiary/80 font-medium text-content-primary select-none !my-0" {...props} />,
                     }}
                 >

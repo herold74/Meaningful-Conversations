@@ -243,3 +243,9 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Product owner explicitly rejects neighboring tiles where text or links sit on different vertical levels.
 - **Implementation:** Pattern in `IntentPickerView` (`min-h` on `h3`, `flex-1` description, `mt-auto` CTA, grid `items-stretch` + tile `height: 100%` from `md` up). Apply the same rule to future card grids (catalog pickers, hub rows).
 
+### 31. Xcode web sync — agent runs npm scripts (2026-10-29)
+- **Decision:** The maintainer does **not** deploy to Xcode manually (no “run `npx cap sync ios`” handoffs, no Merksatz checklists of npm commands in chat). When they ask to **deploy / sync to Xcode**, the **agent** runs the repo script and reports done + “Run in Xcode (scheme App)”.
+- **Scripts:** `npm run sync:ios-staging` (mc-beta API) · `npm run sync:ios-production` (mc-app API, default `npm run build`). Never suggest raw `npx cap sync ios` alone to the user.
+- **Default mapping:** “Deploy nach Xcode” + production device testing → `sync:ios-production`; staging iPhone → `sync:ios-staging`. Ask once if ambiguous.
+- **Reasoning:** Owner tests via Xcode builds on device; repeating CLI recipes in prose feels like ignored instructions and wastes attention.
+
