@@ -1749,8 +1749,7 @@ const App: React.FC = () => {
         setIsConnectorStarting(true);
         try {
             const hasPrior = await userHasSavedConnector(encryptionKey);
-            const premium = resolveConnectorPremiumAccess(currentUser);
-            if (hasPrior && premium.canAccessConnectorPractice) {
+            if (hasPrior) {
                 setView('connectorCatalog');
             } else {
                 setView('connectorIntro');
@@ -1939,9 +1938,9 @@ const App: React.FC = () => {
         if (endType) advanceConnector(endType);
     };
 
-    /** Persist the result E2EE inside the personality profile payload (no transcript). */
-    const handleConnectorSaveToProfile = async () => {
-        if (!currentUser || !encryptionKey || !connectorEvaluation) return;
+    /** Persist assessment result E2EE in the personality profile. Returns false on failure. */
+    const persistConnectorEvaluationToProfile = async (): Promise<boolean> => {
+        if (!currentUser || !encryptionKey || !connectorEvaluation) return false;
         setConnectorSaveState('saving');
         try {
             const existing = await api.loadPersonalityProfile();
@@ -1954,7 +1953,7 @@ const App: React.FC = () => {
                 } catch (decryptError) {
                     console.error('Connector save: could not decrypt existing profile, aborting to avoid data loss.', decryptError);
                     setConnectorSaveState('error');
-                    return;
+                    return false;
                 }
                 testType = existing.testType || testType;
                 try {
@@ -1992,10 +1991,21 @@ const App: React.FC = () => {
             });
             setHasPersonalityProfile(true);
             setConnectorSaveState('saved');
+            return true;
         } catch (error) {
             console.error('Connector save failed:', error);
             setConnectorSaveState('error');
+            return false;
         }
+    };
+
+    const handleConnectorResultsDone = async (skipProfileSave: boolean) => {
+        const isAssessment = connectorRun?.mode === 'assessment';
+        if (isAssessment && !skipProfileSave && currentUser && encryptionKey && connectorEvaluation) {
+            const ok = await persistConnectorEvaluationToProfile();
+            if (!ok) return;
+        }
+        handleConnectorDone();
     };
 
     const handleConnectorRestart = async () => {
@@ -2407,7 +2417,7 @@ const App: React.FC = () => {
         handleConnectorOpenToCatalog,
         handleConnectorNewAssessment,
         handleConnectorEnded,
-        handleConnectorSaveToProfile,
+        handleConnectorResultsDone,
         handleConnectorRestart,
         handleConnectorRestartWithFocus,
         handleConnectorStartCoachSession,

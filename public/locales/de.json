@@ -2513,6 +2513,8 @@
   "connector_results_saving": "Wird gespeichert …",
   "connector_results_saved": "Im Profil gespeichert ✓",
   "connector_results_save_error": "Speichern fehlgeschlagen — bitte versuche es erneut.",
+  "connector_results_prevent_save_label": "Ergebnis nicht in meinem Profil speichern",
+  "connector_results_prevent_save_desc": "Standardmäßig speichert „Fertig“ deine Verbindungs-Signatur verschlüsselt unter „Wie du interagierst“ in deinem Persönlichkeitsprofil (ersetzt eine frühere Signatur). Aktiviere das Kästchen nur, wenn dein gespeichertes Profil unverändert bleiben soll.",
   "connector_results_restart": "Noch einmal mit neuen Gesprächen",
   "connector_results_done": "Fertig",
   "connector_results_practice_title": "Da steckt was in dir.",

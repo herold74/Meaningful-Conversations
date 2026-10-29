@@ -209,7 +209,7 @@ export interface AppViewRouterProps {
   handleConnectorOpenToCatalog: () => void;
   handleConnectorNewAssessment: () => void;
   handleConnectorEnded: (endType: 'heard' | 'timeout') => void;
-  handleConnectorSaveToProfile: () => void;
+  handleConnectorResultsDone: (skipProfileSave: boolean) => Promise<void>;
   handleConnectorRestart: () => void;
   handleConnectorRestartWithFocus: (focus: ConnectorDimensionKey) => void;
   handleConnectorStartCoachSession: (
@@ -376,7 +376,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handleConnectorOpenToCatalog,
     handleConnectorNewAssessment,
     handleConnectorEnded,
-    handleConnectorSaveToProfile,
+    handleConnectorResultsDone,
     handleConnectorRestart,
     handleConnectorRestartWithFocus,
     handleConnectorStartCoachSession,
@@ -915,12 +915,11 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           evaluation={connectorEvaluation}
           vignettes={connectorRun.vignettes}
           runMode={connectorRun.mode === 'open' ? 'practice' : connectorRun.mode}
-          onSaveToProfile={handleConnectorSaveToProfile}
+          onDone={handleConnectorResultsDone}
           saveState={connectorSaveState}
           canSave={!!currentUser && !!encryptionKey}
           currentUser={currentUser}
           onRestart={handleConnectorRestart}
-          onDone={handleConnectorDone}
           showPracticeCrossSell={(connectorEvaluation.overallScore ?? 0) >= 8}
           onPracticeCrossSell={handleConnectorPracticeCrossSell}
           onRestartWithFocus={handleConnectorRestartWithFocus}

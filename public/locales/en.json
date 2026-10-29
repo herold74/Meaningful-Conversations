@@ -2513,6 +2513,8 @@
   "connector_results_saving": "Saving …",
   "connector_results_saved": "Saved to profile ✓",
   "connector_results_save_error": "Saving failed — please try again.",
+  "connector_results_prevent_save_label": "Don't save this result to my profile",
+  "connector_results_prevent_save_desc": "By default, Done stores your connection signature encrypted under “How you interact” in your personality profile (replacing any previous signature). Check this box only if you want to leave your saved profile unchanged.",
   "connector_results_restart": "Try again with new conversations",
   "connector_results_done": "Done",
   "connector_results_practice_title": "There's something in you.",

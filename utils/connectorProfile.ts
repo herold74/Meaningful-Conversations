@@ -31,7 +31,8 @@ export async function userHasSavedConnector(encryptionKey: CryptoKey | null): Pr
     if (!existing?.encryptedData) return false;
     const decrypted = await decryptPersonalityProfile(existing.encryptedData, encryptionKey);
     return !!(decrypted as { connector?: ConnectorEvaluationResult }).connector;
-  } catch {
+  } catch (err) {
+    console.warn('[connector] userHasSavedConnector failed:', err);
     return false;
   }
 }

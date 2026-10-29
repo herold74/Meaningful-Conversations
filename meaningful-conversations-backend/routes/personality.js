@@ -120,7 +120,9 @@ router.get('/profile', authMiddleware, async (req, res) => {
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
     }
-    
+
+    res.set('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+    res.set('Pragma', 'no-cache');
     res.json(profile);
   } catch (error) {
     console.error('Error fetching profile:', error);

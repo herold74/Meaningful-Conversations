@@ -500,7 +500,18 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({
 
   useEffect(() => {
     loadProfile();
-  }, []);
+  }, [encryptionKey]);
+
+  useEffect(() => {
+    if (!encryptionKey) return;
+    const refreshIfVisible = () => {
+      if (document.visibilityState === 'visible') {
+        loadProfile();
+      }
+    };
+    document.addEventListener('visibilitychange', refreshIfVisible);
+    return () => document.removeEventListener('visibilitychange', refreshIfVisible);
+  }, [encryptionKey]);
 
   const loadProfile = async () => {
     setIsLoading(true);
@@ -520,6 +531,8 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({
       if (encryptionKey && encryptedProfile.encryptedData) {
         decrypted = await decryptPersonalityProfile(encryptedProfile.encryptedData, encryptionKey);
         setDecryptedData(decrypted);
+      } else {
+        setDecryptedData(null);
       }
 
       // Determine completedLenses from decrypted data
