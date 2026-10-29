@@ -2,7 +2,7 @@
 
 ## Current Status
 **Version:** 2.6.0 **Build 64** (repo `BUILD_NUMBER` + `public/sw.js`)
-**Branch:** `main` @ `3cf711e4` (iOS native voice save + dedupe)
+**Branch:** `main` @ `965c536e` (iOS profile load: apiFetch, session backend pin, load race)
 **Staging:** v**2.6.0** Build **64** — https://mc-beta.manualmode.at
 **Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b54** until next production deploy)
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
