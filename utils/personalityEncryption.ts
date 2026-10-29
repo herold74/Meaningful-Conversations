@@ -59,7 +59,8 @@ export const decryptPersonalityProfile = async (
   encryptedData: string,
   key: CryptoKey
 ): Promise<EncryptedPersonalityData> => {
-  const decrypted = await decryptData(key, encryptedData);
+  const normalized = encryptedData.trim();
+  const decrypted = await decryptData(key, normalized);
   return JSON.parse(decrypted);
 };
 

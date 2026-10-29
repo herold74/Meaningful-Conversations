@@ -101,25 +101,93 @@ export const getApiBaseUrl = (): string => {
     return '';
 };
 
+/** Which server environment the app talks to (for error copy / debugging). */
+export type ApiBackendTarget = 'staging' | 'production' | 'local' | 'custom';
+
+export const getApiBackendTarget = (): ApiBackendTarget => {
+    const base = getApiBaseUrl();
+    if (!base || base === '') {
+        const host = typeof window !== 'undefined' ? window.location.hostname : '';
+        if (host.includes(brand.domainStaging)) return 'staging';
+        if (host.includes(brand.domainProduction)) return 'production';
+        return 'custom';
+    }
+    if (base.includes(brand.domainStaging)) return 'staging';
+    if (base.includes(brand.domainProduction)) return 'production';
+    if (base.includes('localhost') || base.includes('127.0.0.1')) return 'local';
+    return 'custom';
+};
+
+/** Human-readable API host for support messages (no secrets). */
+export const getApiBackendLabel = (): string => {
+    const target = getApiBackendTarget();
+    if (target === 'staging') return brand.domainStaging;
+    if (target === 'production') return brand.domainProduction;
+    if (target === 'local') return 'localhost';
+    const base = getApiBaseUrl();
+    return base.replace(/^https?:\/\//, '') || 'api';
+};
+
 
 const SESSION_KEY = 'user_session';
+const SESSION_BACKEND_PIN_KEY = 'session_api_backend_target';
 
 interface Session {
     token: string;
     user: User;
 }
 
+function clearSessionBackendPin(): void {
+    try {
+        localStorage.removeItem(SESSION_BACKEND_PIN_KEY);
+    } catch {
+        /* ignore */
+    }
+}
+
+/** Drop session when the embedded API target changed (e.g. after Xcode sync prod ↔ staging). */
+function assertSessionBackendAlignment(): void {
+    try {
+        const sessionRaw = localStorage.getItem(SESSION_KEY);
+        if (!sessionRaw) return;
+
+        const pinned = localStorage.getItem(SESSION_BACKEND_PIN_KEY);
+        const current = getApiBackendTarget();
+        if (!pinned) {
+            localStorage.setItem(SESSION_BACKEND_PIN_KEY, current);
+            return;
+        }
+        if (pinned !== current) {
+            console.warn('[API] Session backend pin mismatch; clearing session.');
+            localStorage.removeItem(SESSION_KEY);
+            clearSessionBackendPin();
+        }
+    } catch {
+        /* ignore */
+    }
+}
+
+export const pinSessionBackendTarget = (): void => {
+    try {
+        localStorage.setItem(SESSION_BACKEND_PIN_KEY, getApiBackendTarget());
+    } catch {
+        /* ignore */
+    }
+};
+
 // --- Session Management ---
 
 export const setSession = (session: Session): void => {
     try {
         localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        pinSessionBackendTarget();
     } catch (error) {
         console.error("Could not save session:", error);
     }
 };
 
 export const getSession = (): Session | null => {
+    assertSessionBackendAlignment();
     try {
         const sessionStr = localStorage.getItem(SESSION_KEY);
         if (!sessionStr) {
@@ -136,6 +204,7 @@ export const getSession = (): Session | null => {
 export const clearSession = (): void => {
     try {
         localStorage.removeItem(SESSION_KEY);
+        clearSessionBackendPin();
     } catch (error) {
         console.error("Could not clear session:", error);
     }
@@ -250,22 +319,20 @@ export const savePersonalityProfile = async (data: {
 };
 
 export const loadPersonalityProfile = async () => {
-  const url = `${personalityApiUrl('/profile')}?_=${Date.now()}`;
-  const response = await fetch(url, {
-    headers: {
-      ...getAuthHeaders(),
-      'Cache-Control': 'no-cache',
-      Pragma: 'no-cache',
-    },
-    cache: 'no-store',
-  });
-  
-  if (!response.ok) {
-    if (response.status === 404) return null;
-    throw new Error('Failed to load personality profile');
+  try {
+    return await apiFetch(`/personality/profile?_=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    });
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      return null;
+    }
+    throw err;
   }
-  
-  return response.json();
 };
 
 export const deletePersonalityProfile = async (): Promise<{ success: boolean; message: string }> => {
