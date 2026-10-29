@@ -71,7 +71,50 @@ export async function pickNativeIosSignatureVoice(
   botGender: 'male' | 'female',
 ): Promise<NativeVoice | null> {
   const nativeVoices = await nativeTtsService.getVoicesForLanguage(language);
-  return pickBestNativeIosVoiceFromList(nativeVoices, botGender);
+  const picked = pickBestNativeIosVoiceFromList(nativeVoices, botGender);
+  if (!picked) return null;
+  return canonicalNativeVoiceInList(picked.identifier, nativeVoices) ?? picked;
+}
+
+export function canonicalNativeVoiceInList(
+  voiceIdentifier: string,
+  languageVoices: NativeVoice[],
+): NativeVoice | null {
+  const deduped = dedupeNativeVoicesByName(languageVoices);
+  const exactInDeduped = deduped.find(v => v.identifier === voiceIdentifier);
+  if (exactInDeduped) return exactInDeduped;
+
+  const full = languageVoices.find(v => v.identifier === voiceIdentifier);
+  if (!full) return null;
+
+  const nameKey = full.name.trim().toLowerCase();
+  return deduped.find(v => v.name.trim().toLowerCase() === nameKey) ?? full;
+}
+
+/** Map saved Apple voice id to the id shown in the settings list (deduped tier). */
+export async function resolveCanonicalNativeVoiceIdentifier(
+  voiceIdentifier: string,
+  language: Language,
+): Promise<string | null> {
+  const languageVoices = await nativeTtsService.getVoicesForLanguage(language);
+  const canonical = canonicalNativeVoiceInList(voiceIdentifier, languageVoices);
+  return canonical?.identifier ?? null;
+}
+
+/** Match persisted id to a row in the modal list (same speaker name, best tier). */
+export function matchNativeVoiceIdentifierToList(
+  voiceIdentifier: string,
+  listVoices: NativeVoice[],
+  allLanguageVoices: NativeVoice[],
+): string {
+  if (listVoices.some(v => v.identifier === voiceIdentifier)) {
+    return voiceIdentifier;
+  }
+  const canonical = canonicalNativeVoiceInList(voiceIdentifier, allLanguageVoices);
+  if (canonical && listVoices.some(v => v.identifier === canonical.identifier)) {
+    return canonical.identifier;
+  }
+  return voiceIdentifier;
 }
 
 export async function findNativeVoiceByIdentifier(identifier: string): Promise<NativeVoice | undefined> {

@@ -1,5 +1,6 @@
 import {
   dedupeNativeVoicesByName,
+  matchNativeVoiceIdentifierToList,
   nativeVoiceMatchesAppLanguage,
   pickBestNativeIosVoiceFromList,
 } from '../nativeIosTtsVoice';
@@ -28,6 +29,20 @@ describe('nativeVoiceMatchesAppLanguage', () => {
 
   it('does not match de-DE to en app language', () => {
     expect(nativeVoiceMatchesAppLanguage('de-DE', 'en')).toBe(false);
+  });
+});
+
+describe('matchNativeVoiceIdentifierToList', () => {
+  it('maps enhanced id to premium row id for the same speaker name', () => {
+    const enhanced: NativeVoice = { ...enSamantha, quality: 'enhanced' };
+    const premium: NativeVoice = {
+      ...enSamantha,
+      identifier: 'com.apple.voice.premium.en-US.Samantha',
+      quality: 'premium',
+    };
+    const list = dedupeNativeVoicesByName([enhanced, premium]);
+    const matched = matchNativeVoiceIdentifierToList(enhanced.identifier, list, [enhanced, premium]);
+    expect(matched).toBe(premium.identifier);
   });
 });
 
