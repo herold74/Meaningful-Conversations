@@ -126,7 +126,10 @@ export async function savedNativeIosVoiceMatchesLanguage(
   voiceIdentifier: string,
   appLanguage: Language,
 ): Promise<boolean> {
-  const voice = await findNativeVoiceByIdentifier(voiceIdentifier);
+  const voices = await nativeTtsService.getVoices();
+  const languageVoices = voices.filter(v => nativeVoiceMatchesAppLanguage(v.language, appLanguage));
+  const canonical = canonicalNativeVoiceInList(voiceIdentifier, languageVoices);
+  const voice = canonical ?? voices.find(v => v.identifier === voiceIdentifier);
   if (!voice) return false;
   return nativeVoiceMatchesAppLanguage(voice.language, appLanguage);
 }
