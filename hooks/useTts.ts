@@ -12,8 +12,12 @@ import {
   type TtsMode,
 } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
-import { selectVoice, voiceNameIncludesToken } from '../utils/voiceUtils';
+import { selectVoice } from '../utils/voiceUtils';
 import { getBotGender, resolveTtsBotId } from '../utils/botGender';
+import {
+  pickNativeIosSignatureVoice,
+  savedNativeIosVoiceMatchesLanguage,
+} from '../utils/nativeIosTtsVoice';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 import { brand } from '../config/brand';
 
@@ -189,6 +193,34 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         });
         const healthData = await healthResponse.json();
         const serverAvailable = healthData.status === 'ok' && healthData.piperAvailable;
+
+        const applyNativeIosVoicePick = async (isAuto: boolean): Promise<boolean> => {
+          const bestVoice = await pickNativeIosSignatureVoice(language, botGender);
+          if (!bestVoice) return false;
+          console.log('[TTS Init] Native iOS signature voice:', bestVoice.name, bestVoice.quality, 'auto:', isAuto);
+          setSelectedVoiceURI(bestVoice.identifier);
+          setTtsMode('local');
+          setIsAutoMode(isAuto);
+          saveLanguageVoiceSettings('local', bestVoice.identifier, isAuto);
+          return true;
+        };
+
+        const runServerOrLocalAuto = async () => {
+          if (serverAvailable) {
+            console.log('[TTS Init] Auto mode - server signature voice for bot:', ttsBotId);
+            setSelectedVoiceURI(null);
+            setTtsMode('server');
+            setIsAutoMode(true);
+            saveLanguageVoiceSettings('server', null, true);
+            warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
+          } else {
+            setSelectedVoiceURI(null);
+            setTtsMode('local');
+            setIsAutoMode(true);
+            saveLanguageVoiceSettings('local', null, true);
+          }
+        };
+
         if (savedMode === 'server' && savedVoiceId) {
           if (!serverAvailable) {
             console.warn('[TTS Init] Server unavailable, temporarily using local (keeping saved preference)');
@@ -201,7 +233,18 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           const isNativeVoiceId = savedVoiceId.startsWith('com.apple.voice');
 
           if (isNativeVoiceId && isNativeiOS) {
-            console.log('[TTS Init] Native iOS voice valid, keeping:', savedVoiceId);
+            const languageMatches = await savedNativeIosVoiceMatchesLanguage(savedVoiceId, language);
+            if (languageMatches) {
+              console.log('[TTS Init] Native iOS voice valid, keeping:', savedVoiceId);
+            } else {
+              console.warn('[TTS Init] Native iOS saved voice does not match app language — re-picking:', {
+                savedVoiceId,
+                language,
+              });
+              if (!(await applyNativeIosVoicePick(savedIsAuto))) {
+                await runServerOrLocalAuto();
+              }
+            }
           } else if (isNativeVoiceId && !isNativeiOS) {
             console.warn('[TTS Init] Native voice saved but not on native iOS, resetting to auto mode');
             setIsAutoMode(true);
@@ -221,49 +264,11 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         } else if (savedIsAuto || (!savedVoiceId && savedMode === 'local')) {
           console.log('[TTS Init] Auto mode - selecting best voice for bot gender:', botGender);
 
-          if (isNativeiOS) {
-            try {
-              const nativeVoices = await nativeTtsService.getVoicesForLanguage(language);
-              if (nativeVoices.length > 0) {
-                const qualityVoices = nativeVoices.filter(v => v.quality === 'premium' || v.quality === 'enhanced');
-                const pool = qualityVoices.length > 0 ? qualityVoices : nativeVoices;
-
-                const femaleNames = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie',
-                  'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
-                const maleNames = ['markus', 'viktor', 'yannick', 'martin', 'hans', 'daniel', 'tom', 'alex', 'aaron', 'fred'];
-                const targetNames = botGender === 'female' ? femaleNames : maleNames;
-                const oppositeNames = botGender === 'female' ? maleNames : femaleNames;
-
-                const genderMatched = pool.filter(v => targetNames.some(n => voiceNameIncludesToken(v.name, n)));
-                const notOpposite = genderMatched.length > 0 ? genderMatched
-                  : pool.filter(v => !oppositeNames.some(n => voiceNameIncludesToken(v.name, n)));
-                const candidateVoices = notOpposite.length > 0 ? notOpposite : pool;
-
-                const bestVoice = candidateVoices.find(v => v.quality === 'premium')
-                  || candidateVoices.find(v => v.quality === 'enhanced')
-                  || candidateVoices[0];
-                console.log('[TTS Init] Auto mode on native iOS - selected:', bestVoice.name, bestVoice.quality);
-                setSelectedVoiceURI(bestVoice.identifier);
-                setTtsMode('local');
-                saveLanguageVoiceSettings('local', bestVoice.identifier, true);
-                return;
-              }
-            } catch (error) {
-              console.warn('[TTS Init] Could not get native voices:', error);
-            }
+          if (isNativeiOS && (await applyNativeIosVoicePick(true))) {
+            return;
           }
 
-          if (serverAvailable) {
-            console.log('[TTS Init] Auto mode - server signature voice for bot:', ttsBotId);
-            setSelectedVoiceURI(null);
-            setTtsMode('server');
-            saveLanguageVoiceSettings('server', null, true);
-            warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
-          } else {
-            setSelectedVoiceURI(null);
-            setTtsMode('local');
-            saveLanguageVoiceSettings('local', null, true);
-          }
+          await runServerOrLocalAuto();
         }
       } catch (error) {
         console.warn('[TTS Init] Could not check voice availability:', error);
@@ -1355,30 +1360,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
       if (isNativeiOS) {
         console.log('[TTS Select] Auto mode - fetching native voices for language:', language, 'botGender:', botGender);
-        const nativeVoices = await nativeTtsService.getVoicesForLanguage(language);
+        const bestVoice = await pickNativeIosSignatureVoice(language, botGender);
 
-        if (nativeVoices.length > 0) {
-          const femaleNames = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie',
-            'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
-          const maleNames = ['markus', 'viktor', 'yannick', 'martin', 'hans', 'daniel', 'tom', 'alex', 'aaron', 'fred'];
-
-          const genderFilteredVoices = nativeVoices.filter(v => {
-            const nameLower = v.name.toLowerCase();
-            const matchesMale = maleNames.some(n => voiceNameIncludesToken(nameLower, n));
-            const matchesFemale = femaleNames.some(n => voiceNameIncludesToken(nameLower, n));
-            if (botGender === 'male') {
-              return matchesMale || !matchesFemale;
-            }
-            return matchesFemale || !matchesMale;
-          });
-
-          const candidateVoices = genderFilteredVoices.length > 0 ? genderFilteredVoices : nativeVoices;
-
-          const bestVoice = candidateVoices.find(v => v.quality === 'premium')
-            || candidateVoices.find(v => v.quality === 'enhanced')
-            || candidateVoices[0];
-
-          console.log('[TTS Select] Auto mode - selected:', bestVoice.name, bestVoice.quality, 'from', candidateVoices.length, 'candidates');
+        if (bestVoice) {
+          console.log('[TTS Select] Auto mode - selected:', bestVoice.name, bestVoice.quality);
           setSelectedVoiceURI(bestVoice.identifier);
           setTtsMode('local');
           saveLanguageVoiceSettings('local', bestVoice.identifier, true);
