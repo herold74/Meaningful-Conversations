@@ -319,19 +319,52 @@ export const savePersonalityProfile = async (data: {
 };
 
 export const loadPersonalityProfile = async () => {
+  const apiBaseUrl = getApiBaseUrl();
+  const url = `${personalityApiUrl('/profile')}?_=${Date.now()}`;
+  let response: Response;
   try {
-    return await apiFetch(`/personality/profile?_=${Date.now()}`, {
+    // Do not send Cache-Control/Pragma request headers: Capacitor cross-origin preflight
+    // only allows headers listed in Access-Control-Allow-Headers (see server.js CORS).
+    response = await fetch(url, {
+      headers: getAuthHeaders(),
       cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-      },
     });
-  } catch (err) {
-    if (err instanceof ApiError && err.status === 404) {
-      return null;
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : '';
+    if (error instanceof TypeError && (msg.includes('Failed to fetch') || msg.includes('Load failed'))) {
+      throw new ApiError(
+        `Could not connect to the server at ${apiBaseUrl}.`,
+        0,
+        { error: 'Network Error' },
+        true,
+        apiBaseUrl,
+      );
     }
-    throw err;
+    throw error;
+  }
+
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    const errorData = await response.json().catch(() => ({}));
+    throw new ApiError(
+      errorData.error || 'Failed to load personality profile',
+      response.status,
+      errorData,
+      false,
+      apiBaseUrl,
+    );
+  }
+
+  try {
+    return await response.json();
+  } catch (parseError) {
+    throw new ApiError(
+      'Invalid personality profile response',
+      response.status,
+      { parseError: String(parseError) },
+      false,
+      apiBaseUrl,
+    );
   }
 };
 
