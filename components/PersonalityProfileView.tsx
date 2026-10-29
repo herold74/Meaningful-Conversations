@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useModalOpen } from '../utils/modalUtils';
 import { useLocalization } from '../context/LocalizationContext';
 import * as api from '../services/api';
+import { ApiError, getApiBackendLabel } from '../services/api';
 import { updateCoachingMode } from '../services/userService';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { SurveyResult, NarrativeProfile, SpiralDynamicsResult, LensType } from './PersonalitySurvey';
@@ -406,6 +407,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({
   const [externalPerspectiveTranslatedNotice, setExternalPerspectiveTranslatedNotice] = useState(false);
   const [isAutoTranslatingExternalPerspective, setIsAutoTranslatingExternalPerspective] = useState(false);
   const externalPerspectiveTranslationKeyRef = useRef<string | null>(null);
+  const profileLoadGenerationRef = useRef(0);
   const [isAutoTranslatingConnector, setIsAutoTranslatingConnector] = useState(false);
   const connectorTranslateRunRef = useRef<symbol | null>(null);
   useModalOpen(showDpcWarning || showDeleteWarning || showExternalPerspectivePreview);
@@ -498,9 +500,109 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({
     }
   };
 
+  const resolveProfileLoadErrorMessage = useCallback(
+    (err: unknown): string => {
+      const backend = getApiBackendLabel();
+      if (err instanceof ApiError) {
+        if (err.isNetworkError) {
+          return t('profile_view_error_network', { backend })
+            || `Keine Verbindung zum Server (${backend}).`;
+        }
+        if (err.status === 401) {
+          return t('profile_view_error_auth') || 'Sitzung abgelaufen. Bitte melde dich erneut an.';
+        }
+        return t('profile_view_error_load_with_backend', { backend })
+          || `Profil konnte nicht geladen werden (${backend}, HTTP ${err.status}).`;
+      }
+      const isDecryptFailure =
+        (err instanceof DOMException && err.name === 'OperationError')
+        || (err instanceof Error && /decrypt|atob|JSON\.parse/i.test(err.message));
+      if (isDecryptFailure) {
+        return t('profile_view_error_decrypt', { backend })
+          || `Profil konnte nicht entschlüsselt werden (${backend}). Bitte Support, falls es im Browser funktioniert.`;
+      }
+      return t('profile_view_error_load') || 'Fehler beim Laden des Profils';
+    },
+    [t],
+  );
+
+  const loadProfile = useCallback(async () => {
+    if (!encryptionKey) {
+      return;
+    }
+
+    const generation = ++profileLoadGenerationRef.current;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const encryptedProfile = await api.loadPersonalityProfile();
+
+      if (generation !== profileLoadGenerationRef.current) return;
+
+      if (!encryptedProfile) {
+        setDecryptedData(null);
+        setProfileMetadata(null);
+        return;
+      }
+
+      let decrypted: Awaited<ReturnType<typeof decryptPersonalityProfile>> | null = null;
+      const encryptedPayload =
+        typeof encryptedProfile.encryptedData === 'string'
+          ? encryptedProfile.encryptedData.trim()
+          : String(encryptedProfile.encryptedData ?? '').trim();
+      if (!encryptedPayload) {
+        console.error('Profile row missing encryptedData');
+        setError(t('profile_view_error_load') || 'Fehler beim Laden des Profils');
+        setDecryptedData(null);
+        setProfileMetadata(null);
+        return;
+      }
+      try {
+        decrypted = await decryptPersonalityProfile(encryptedPayload, encryptionKey);
+      } catch (decryptErr) {
+        if (generation !== profileLoadGenerationRef.current) return;
+        console.error('Failed to decrypt personality profile:', decryptErr);
+        setDecryptedData(null);
+        setProfileMetadata(null);
+        setError(resolveProfileLoadErrorMessage(decryptErr));
+        return;
+      }
+
+      if (generation !== profileLoadGenerationRef.current) return;
+
+      setDecryptedData(decrypted);
+
+      const completedLenses: LensType[] = [];
+      if (decrypted?.spiralDynamics) completedLenses.push('sd');
+      if (decrypted?.riemann) completedLenses.push('riemann');
+      if (decrypted?.big5) completedLenses.push('ocean');
+
+      const metadata: ProfileMetadata = {
+        testType: encryptedProfile.testType,
+        completedLenses,
+        createdAt: encryptedProfile.createdAt,
+        updatedAt: encryptedProfile.updatedAt,
+        sessionCount: encryptedProfile.sessionCount || 0,
+        adaptationMode: encryptedProfile.adaptationMode || 'stable',
+      };
+      setProfileMetadata(metadata);
+    } catch (err) {
+      if (generation !== profileLoadGenerationRef.current) return;
+      console.error('Failed to load profile:', err);
+      setError(resolveProfileLoadErrorMessage(err));
+      setDecryptedData(null);
+      setProfileMetadata(null);
+    } finally {
+      if (generation === profileLoadGenerationRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [encryptionKey, resolveProfileLoadErrorMessage, t]);
+
   useEffect(() => {
     loadProfile();
-  }, [encryptionKey]);
+  }, [loadProfile]);
 
   useEffect(() => {
     if (!encryptionKey) return;
@@ -511,53 +613,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({
     };
     document.addEventListener('visibilitychange', refreshIfVisible);
     return () => document.removeEventListener('visibilitychange', refreshIfVisible);
-  }, [encryptionKey]);
-
-  const loadProfile = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const encryptedProfile = await api.loadPersonalityProfile();
-      
-      if (!encryptedProfile) {
-        setDecryptedData(null);
-        setProfileMetadata(null);
-        return;
-      }
-
-      // Decrypt profile data first to determine completed lenses
-      let decrypted = null;
-      if (encryptionKey && encryptedProfile.encryptedData) {
-        decrypted = await decryptPersonalityProfile(encryptedProfile.encryptedData, encryptionKey);
-        setDecryptedData(decrypted);
-      } else {
-        setDecryptedData(null);
-      }
-
-      // Determine completedLenses from decrypted data
-      const completedLenses: LensType[] = [];
-      if (decrypted?.spiralDynamics) completedLenses.push('sd');
-      if (decrypted?.riemann) completedLenses.push('riemann');
-      if (decrypted?.big5) completedLenses.push('ocean');
-
-      // Store metadata
-      const metadata: ProfileMetadata = {
-        testType: encryptedProfile.testType, // Legacy
-        completedLenses,
-        createdAt: encryptedProfile.createdAt,
-        updatedAt: encryptedProfile.updatedAt,
-        sessionCount: encryptedProfile.sessionCount || 0,
-        adaptationMode: encryptedProfile.adaptationMode || 'stable'
-      };
-      setProfileMetadata(metadata);
-    } catch (err) {
-      console.error('Failed to load profile:', err);
-      setError(t('profile_view_error_load') || 'Fehler beim Laden des Profils');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [encryptionKey, loadProfile]);
 
   const handleDownloadPdf = async () => {
     if (!decryptedData || !profileMetadata) return;
