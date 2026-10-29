@@ -6,7 +6,10 @@ import { PlayIcon } from './icons/PlayIcon';
 import { Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getVoiceGender, cleanVoiceName, voiceNameIncludesToken, dedupeSpeechSynthesisVoices } from '../utils/voiceUtils';
-import { dedupeNativeVoicesByName } from '../utils/nativeIosTtsVoice';
+import {
+  dedupeNativeVoicesByName,
+  matchNativeVoiceIdentifierToList,
+} from '../utils/nativeIosTtsVoice';
 import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
@@ -104,45 +107,6 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                 });
         }
     }, [isOpen]);
-
-    // Sync state if the modal is reopened with a different external state
-    useEffect(() => {
-        if (isOpen) {
-            console.log('[VoiceModal SYNC] Props:', { currentVoiceURI, currentTtsMode, isAutoMode, isIOSBrowser });
-            
-            // On iOS, server voices are not available - switch to auto if server voice was selected
-            if (isIOSBrowser && currentTtsMode === 'server') {
-                console.log('[VoiceModal SYNC] -> iOS browser, forcing auto');
-                setSelection({ type: 'auto' });
-                return;
-            }
-            
-            // Sync modal state with parent props
-            if (isAutoMode) {
-                // Auto mode is enabled - always show the Auto radio button as selected
-                console.log('[VoiceModal SYNC] -> Auto mode (showing auto selected)');
-                setSelection({ type: 'auto' });
-            } else if (currentTtsMode === 'server' && currentVoiceURI) {
-                console.log('[VoiceModal SYNC] -> Server voice:', currentVoiceURI);
-                setSelection({ type: 'server', voiceId: currentVoiceURI });
-            } else if (currentVoiceURI) {
-                // Check if it's a native iOS voice (com.apple.voice identifier)
-                // IMPORTANT: Only treat as 'native' on actual iOS Native app!
-                // Safari Desktop also uses com.apple.voice.* URIs but should be 'local'
-                if (currentVoiceURI.startsWith('com.apple.voice') && isNativeiOS) {
-                    console.log('[VoiceModal SYNC] -> Native iOS voice:', currentVoiceURI);
-                    setSelection({ type: 'native', voiceIdentifier: currentVoiceURI });
-                } else {
-                    console.log('[VoiceModal SYNC] -> Local voice:', currentVoiceURI);
-                    setSelection({ type: 'local', voiceURI: currentVoiceURI });
-                }
-            } else {
-                console.log('[VoiceModal SYNC] -> Default auto (no voiceURI)');
-                setSelection({ type: 'auto' });
-            }
-        }
-    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode, isIOSBrowser]);
-
 
     const localVoices = useMemo(() => {
         if (!voices || voices.length === 0) {
@@ -279,6 +243,69 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         // Sort by quality (premium > enhanced > default), then by name; one row per speaker name
         return dedupeNativeVoicesByName(genderFiltered);
     }, [nativeVoices, botLanguage, botGender]);
+
+    const nativeVoicesForLanguage = useMemo(() => {
+        if (!isNativeiOS || nativeVoices.length === 0) return [];
+        return nativeVoices.filter(v =>
+            v.language.toLowerCase().startsWith(botLanguage.toLowerCase()),
+        );
+    }, [nativeVoices, botLanguage]);
+
+    // Sync modal selection when reopened (manual choice before auto; map native id to list row)
+    useEffect(() => {
+        if (!isOpen) return;
+
+        console.log('[VoiceModal SYNC] Props:', { currentVoiceURI, currentTtsMode, isAutoMode, isIOSBrowser });
+
+        if (isIOSBrowser && currentTtsMode === 'server') {
+            console.log('[VoiceModal SYNC] -> iOS browser, forcing auto');
+            setSelection({ type: 'auto' });
+            return;
+        }
+
+        if (isNativeiOS && currentTtsMode === 'server') {
+            console.log('[VoiceModal SYNC] -> Native iOS, server mode ignored — auto');
+            setSelection({ type: 'auto' });
+            return;
+        }
+
+        if (!isAutoMode && currentVoiceURI) {
+            if (currentTtsMode === 'server') {
+                console.log('[VoiceModal SYNC] -> Server voice:', currentVoiceURI);
+                setSelection({ type: 'server', voiceId: currentVoiceURI });
+            } else if (currentVoiceURI.startsWith('com.apple.voice') && isNativeiOS) {
+                const listId = matchNativeVoiceIdentifierToList(
+                    currentVoiceURI,
+                    filteredNativeVoices,
+                    nativeVoicesForLanguage,
+                );
+                console.log('[VoiceModal SYNC] -> Native iOS voice:', listId);
+                setSelection({ type: 'native', voiceIdentifier: listId });
+            } else {
+                console.log('[VoiceModal SYNC] -> Local voice:', currentVoiceURI);
+                setSelection({ type: 'local', voiceURI: currentVoiceURI });
+            }
+            return;
+        }
+
+        if (isAutoMode) {
+            console.log('[VoiceModal SYNC] -> Auto mode (showing auto selected)');
+            setSelection({ type: 'auto' });
+            return;
+        }
+
+        console.log('[VoiceModal SYNC] -> Default auto (no voiceURI)');
+        setSelection({ type: 'auto' });
+    }, [
+        isOpen,
+        currentVoiceURI,
+        currentTtsMode,
+        isAutoMode,
+        isIOSBrowser,
+        isNativeiOS,
+        filteredNativeVoices,
+        nativeVoicesForLanguage,
+    ]);
 
     // Helper function to check if a server voice is enabled
     // Server voices are disabled on iOS browser due to autoplay restrictions

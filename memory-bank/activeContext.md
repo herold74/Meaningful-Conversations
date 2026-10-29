@@ -1,9 +1,9 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0 **Build 62** (repo; staging deploy pending after TTS voice fixes)
-**Branch:** `main` — Connector `45d013b3`; TTS iOS signature + voice list dedupe (local, deploy next)
-**Staging:** v**2.6.0** Build **62** — https://mc-beta.manualmode.at (pending redeploy: voice settings dedupe, iOS signature language match)
+**Version:** 2.6.0 **Build 63** (repo `BUILD_NUMBER` + `public/sw.js`)
+**Branch:** `main` @ `e32473c5` (TTS dedupe + iOS signature voice language match)
+**Staging:** v**2.6.0** Build **63** — https://mc-beta.manualmode.at (voice list dedupe web + native; iOS manual voice save fix still open)
 **Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`; **behind staging b54** until next production deploy)
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`, `screenshots/app-store/v2.6.0/README.md`.
 **Connector / docs:** `DOCUMENTATION/CONNECTOR-OPTIMAL-CONVERSATIONS.md`, `CONNECTOR` routes under `/api/gemini/connector/*`; QA lab + admin analytics per Sept 2026 handoffs below.
