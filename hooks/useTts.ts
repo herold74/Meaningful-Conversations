@@ -18,6 +18,7 @@ import {
   pickNativeIosSignatureVoice,
   resolveCanonicalNativeVoiceIdentifier,
   savedNativeIosVoiceMatchesLanguage,
+  isAppleAvSpeechVoiceId,
 } from '../utils/nativeIosTtsVoice';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 import { brand } from '../config/brand';
@@ -184,7 +185,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     };
 
     const restoreNativeIosManualVoice = async (savedVoiceId: string, isAuto: boolean): Promise<boolean> => {
-      if (!savedVoiceId.startsWith('com.apple.voice')) return false;
+      if (!isAppleAvSpeechVoiceId(savedVoiceId)) return false;
       const canonicalId = await resolveCanonicalNativeVoiceIdentifier(savedVoiceId, language);
       const voiceId = canonicalId ?? savedVoiceId;
       const languageMatches = await savedNativeIosVoiceMatchesLanguage(voiceId, language);
@@ -300,7 +301,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
           }
         } else if (savedMode === 'local' && savedVoiceId) {
-          const isNativeVoiceId = savedVoiceId.startsWith('com.apple.voice');
+          const isNativeVoiceId = isAppleAvSpeechVoiceId(savedVoiceId);
 
           if (isNativeVoiceId) {
             console.warn('[TTS Init] Native voice saved but not on native iOS, resetting to auto mode');
@@ -879,7 +880,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     lastSpokenTextRef.current = cleanText;
 
     const isValidServerVoice = selectedVoiceURI && ['de-thorsten', 'de-eva', 'en-amy', 'en-ryan'].includes(selectedVoiceURI);
-    const isNativeVoice = selectedVoiceURI?.startsWith('com.apple.voice');
+    const isNativeVoice = isNativeiOS && isAppleAvSpeechVoiceId(selectedVoiceURI);
 
     const iosSafariForcesLocal = isIOS && !isNativeiOS;
     const nativeiOSForcesLocal = isNativeiOS && ttsMode === 'server';
@@ -1526,7 +1527,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
   const handleToggleTts = useCallback(() => {
     if (isTtsEnabled) {
-      const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+      const isNativeVoiceSelected = isNativeiOS && isAppleAvSpeechVoiceId(selectedVoiceURI);
 
       if (isNativeVoiceSelected) {
         nativeTtsService.stop();
@@ -1552,7 +1553,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [isTtsEnabled, selectedVoiceURI, ttsMode]);
 
   const handlePauseTTS = useCallback(() => {
-    const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+    const isNativeVoiceSelected = isNativeiOS && isAppleAvSpeechVoiceId(selectedVoiceURI);
 
     if (isNativeVoiceSelected) {
       nativeTtsService.pause();
@@ -1565,7 +1566,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [selectedVoiceURI, ttsMode]);
 
   const handleResumeTTS = useCallback(() => {
-    const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+    const isNativeVoiceSelected = isNativeiOS && isAppleAvSpeechVoiceId(selectedVoiceURI);
 
     if (isNativeVoiceSelected) {
       nativeTtsService.resume();

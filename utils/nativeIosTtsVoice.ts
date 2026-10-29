@@ -2,6 +2,11 @@ import type { Language } from '../types';
 import { voiceNameIncludesToken } from './voiceUtils';
 import { nativeTtsService, type NativeVoice } from '../services/nativeTtsService';
 
+/** AVSpeechSynthesisVoice.identifier values (Daniel, Arthur, Fred, …) — not only com.apple.voice.* */
+export function isAppleAvSpeechVoiceId(voiceId: string | null | undefined): boolean {
+  return !!voiceId && voiceId.startsWith('com.apple.');
+}
+
 const FEMALE_NAME_TOKENS = [
   'anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie',
   'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky',
