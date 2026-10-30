@@ -51,19 +51,14 @@ const PAGE_BOTTOM = 44;
 const styles = StyleSheet.create({
   page: {
     paddingHorizontal: PAGE_H,
+    paddingTop: PAGE_H,
     paddingBottom: PAGE_BOTTOM,
     fontFamily: 'Helvetica',
     fontSize: 10,
     color: colors.gray700,
     backgroundColor: colors.white,
   },
-  pageFirst: {
-    paddingTop: 0,
-  },
-  pageContinued: {
-    paddingTop: PAGE_H,
-  },
-  // Mockup B hero band (full bleed on page 1)
+  // Mockup B hero band (full bleed at top of first sheet)
   heroBand: {
     backgroundColor: colors.primaryDark,
     paddingHorizontal: PAGE_H,
@@ -71,6 +66,7 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     marginBottom: 16,
     marginHorizontal: -PAGE_H,
+    marginTop: -PAGE_H,
   },
   heroTop: {
     flexDirection: 'row',
@@ -155,12 +151,6 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderLeftColor: colors.gray200,
   },
-  // Three-column insights
-  threeCol: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 12,
-  },
   miniCard: {
     border: `1 solid ${colors.gray200}`,
     borderRadius: 10,
@@ -193,21 +183,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 6,
     marginBottom: 7,
-  },
-  numCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  numCircleTeal: { backgroundColor: colors.teal100 },
-  numCircleAmber: { backgroundColor: colors.amber100 },
-  numCircleGray: { backgroundColor: colors.gray200 },
-  numCircleText: {
-    fontSize: 7.5,
-    fontWeight: 'bold',
   },
   listTitle: {
     fontSize: 8.5,
@@ -516,7 +491,7 @@ const translations = {
     spiralNotCompleted: 'Spiral Dynamics Test noch nicht abgeschlossen',
     riemannNotCompleted: 'Riemann-Thomann Test noch nicht abgeschlossen',
     oceanNotCompleted: 'OCEAN/Big Five Test noch nicht abgeschlossen',
-    axesExplanation: 'Horizontale Achse: Beständigkeit ↔ Spontanität. Vertikale Achse: Distanz ↔ Nähe.',
+    axesExplanation: 'Horizontale Achse: Beständigkeit – Spontanität. Vertikale Achse: Distanz – Nähe.',
     differencesExplanation: 'Die Punkte zeigen deine Position in drei Kontexten. Große Abstände deuten auf Flexibilität oder innere Spannung hin.',
     openness: 'Offenheit',
     conscientiousness: 'Gewissenhaftigkeit',
@@ -585,7 +560,7 @@ const translations = {
     spiralNotCompleted: 'Spiral Dynamics test not yet completed',
     riemannNotCompleted: 'Riemann-Thomann test not yet completed',
     oceanNotCompleted: 'OCEAN/Big Five test not yet completed',
-    axesExplanation: 'Horizontal axis: Stability ↔ Spontaneity. Vertical axis: Distance ↔ Proximity.',
+    axesExplanation: 'Horizontal axis: Stability – Spontaneity. Vertical axis: Distance – Proximity.',
     differencesExplanation: 'The dots show your position in three contexts. Large distances may indicate flexibility or inner tension.',
     openness: 'Openness',
     conscientiousness: 'Conscientiousness',
@@ -695,20 +670,58 @@ const ThinBar = ({ value, color, maxValue = 5 }: { value: number; color: string;
   );
 };
 
+/** Minimal inline Markdown (**bold**, *italic*) for Connector copy in PDF (Helvetica / WinAnsi). */
+function renderPdfInline(text: string, baseStyle: object | object[] = styles.listDesc): React.ReactNode {
+  const styleArr = Array.isArray(baseStyle) ? baseStyle : [baseStyle];
+  const segments: React.ReactNode[] = [];
+  const re = /(\*\*([^*]+)\*\*|\*([^*]+)\*)/g;
+  let last = 0;
+  let key = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) {
+      segments.push(text.slice(last, m.index));
+    }
+    if (m[2]) {
+      segments.push(
+        <Text key={key++} style={{ fontWeight: 'bold' }}>
+          {m[2]}
+        </Text>,
+      );
+    } else if (m[3]) {
+      segments.push(
+        <Text key={key++} style={{ fontStyle: 'italic' }}>
+          {m[3]}
+        </Text>,
+      );
+    }
+    last = re.lastIndex;
+  }
+  if (last < text.length) {
+    segments.push(text.slice(last));
+  }
+  if (segments.length === 0) {
+    return <Text style={styleArr}>{text}</Text>;
+  }
+  return <Text style={styleArr}>{segments}</Text>;
+}
+
+const PdfInsightEntry = ({ title, desc }: { title?: string; desc: string }) => (
+  <View style={styles.listEntry}>
+    <View style={{ flex: 1 }}>
+      {title ? <Text style={styles.listTitle}>{title}</Text> : null}
+      {renderPdfInline(desc)}
+    </View>
+  </View>
+);
+
 const NumEntry = ({
   title,
   desc,
 }: {
   title: string;
   desc: string;
-}) => (
-  <View style={styles.listEntry}>
-    <View style={{ flex: 1 }}>
-      <Text style={styles.listTitle}>{title}</Text>
-      <Text style={styles.listDesc}>{desc}</Text>
-    </View>
-  </View>
-);
+}) => <PdfInsightEntry title={title} desc={desc} />;
 
 const PdfInsightGroup = ({
   title,
@@ -732,9 +745,9 @@ const PdfInsightGroup = ({
 const PdfBulletInsights = ({ items }: { items: string[] }) => (
   <>
     {items.map((line, i) => (
-      <Text key={i} style={{ fontSize: 8, color: colors.gray600, marginBottom: 3, lineHeight: 1.35 }}>
-        • {line}
-      </Text>
+      <View key={i} style={{ marginBottom: 3 }}>
+        {renderPdfInline(line)}
+      </View>
     ))}
   </>
 );
@@ -872,7 +885,7 @@ export function resolvePdfLanguage(uiLanguage: 'de' | 'en', result: SurveyResult
   return resolveProfileContentLanguage(uiLanguage, result.narrativeProfile);
 }
 
-const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result, language, userEmail }) => {
+export const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result, language, userEmail }) => {
   const t = translations[language];
   const date = new Date().toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
     year: 'numeric',
@@ -943,8 +956,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
 
   return (
     <Document>
-      {/* Page 1: Hero + narrative + SD */}
-      <Page size="A4" style={[styles.page, styles.pageFirst, { paddingBottom: PAGE_BOTTOM }]}>
+      <Page size="A4" style={styles.page}>
         <HeroHeader />
 
         {hasNarrative && result.narrativeProfile && (
@@ -1036,11 +1048,6 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
           </SectionBlock>
         )}
 
-        <Footer />
-      </Page>
-
-      {/* Page 2: Riemann + Connector + OCEAN + usage */}
-      <Page size="A4" style={[styles.page, styles.pageContinued, { paddingBottom: PAGE_BOTTOM }]}>
         {hasRiemann && result.riemann && (
           <SectionBlock>
             <View style={styles.card}>
@@ -1113,7 +1120,7 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                 {connectorForPdf.overallScore != null && (
                   <Text style={styles.connectorScore}>{t.connectorOverall}: {connectorForPdf.overallScore}/10</Text>
                 )}
-                {connectorForPdf.summary ? <Text style={styles.connectorSummary}>{connectorForPdf.summary}</Text> : null}
+                {connectorForPdf.summary ? renderPdfInline(connectorForPdf.summary, styles.connectorSummary) : null}
                 {(
                   [
                     { key: 'empathy', label: t.connectorDimEmpathy },
@@ -1134,28 +1141,21 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
                     </View>
                   );
                 })}
-                {!(connectorForPdf.strengths?.length || connectorForPdf.growthAreas?.length) && (
-                  <Text style={styles.disclaimerText}>{t.connectorDisclaimer}</Text>
-                )}
+                <Text style={[styles.disclaimerText, { marginTop: 8 }]}>{t.connectorDisclaimer}</Text>
               </View>
             </SectionBlock>
-            {((connectorForPdf.strengths?.length ?? 0) > 0 || (connectorForPdf.growthAreas?.length ?? 0) > 0) && (
+            {connectorForPdf.strengths && connectorForPdf.strengths.length > 0 && (
               <SectionBlock>
-                <View style={styles.card}>
-                  {connectorForPdf.strengths && connectorForPdf.strengths.length > 0 && (
-                    <View style={{ marginBottom: connectorForPdf.growthAreas?.length ? 10 : 0 }}>
-                      <PdfInsightGroup title={t.connectorStrengths} tone="warning">
-                        <PdfBulletInsights items={connectorForPdf.strengths} />
-                      </PdfInsightGroup>
-                    </View>
-                  )}
-                  {connectorForPdf.growthAreas && connectorForPdf.growthAreas.length > 0 && (
-                    <PdfInsightGroup title={t.connectorGrowth} tone="success">
-                      <PdfBulletInsights items={connectorForPdf.growthAreas} />
-                    </PdfInsightGroup>
-                  )}
-                  <Text style={styles.disclaimerText}>{t.connectorDisclaimer}</Text>
-                </View>
+                <PdfInsightGroup title={t.connectorStrengths} tone="warning">
+                  <PdfBulletInsights items={connectorForPdf.strengths} />
+                </PdfInsightGroup>
+              </SectionBlock>
+            )}
+            {connectorForPdf.growthAreas && connectorForPdf.growthAreas.length > 0 && (
+              <SectionBlock>
+                <PdfInsightGroup title={t.connectorGrowth} tone="success">
+                  <PdfBulletInsights items={connectorForPdf.growthAreas} />
+                </PdfInsightGroup>
               </SectionBlock>
             )}
           </>
