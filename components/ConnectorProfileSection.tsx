@@ -30,7 +30,7 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
   const { t, language } = useLocalization();
   const uiLang = language === 'en' ? 'en' : 'de';
   const display = resolveConnectorForDisplay(connector, uiLang);
-  const [isSectionOpen, setIsSectionOpen] = useState(false);
+  const [isSectionOpen, setIsSectionOpen] = useState(true);
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
 
   const showCoachBridge = useMemo(
