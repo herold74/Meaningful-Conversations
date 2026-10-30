@@ -2609,6 +2609,7 @@
   "connector_eval_error": "Die Auswertung ist fehlgeschlagen. Deine Gespräche konnten nicht bewertet werden — bitte versuche es später erneut.",
   "profile_connector_section_title": "Verbindungs-Signatur (The Connector)",
   "profile_connector_subtitle": "Beobachtete Fremdsicht in Gesprächen — Ergänzung zu deinem Selbstbild unter „Wie du interagierst“",
+  "profile_connector_subtitle_nested": "Beobachtete Fremdsicht in Gesprächen",
   "profile_connector_completed_at": "Erstellt am {{date}}",
   "profile_connector_disclaimer": "KI-Beobachtung aus drei simulierten Gesprächen (The Connector), kein psychologisches Gutachten.",
   "profile_connector_coach_bridge_intro": "Optional: Vertiefen Sie einen Aspekt in einem Coaching-Gespräch — nur mit Coaches, die für Ihr Konto freigeschaltet sind.",
