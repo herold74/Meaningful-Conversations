@@ -80,7 +80,7 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
     <div
       className={
         nested
-          ? 'mt-5 pt-5 border-t border-border-secondary/60 dark:border-border-primary/60 space-y-4'
+          ? 'pb-1 space-y-4'
           : 'px-3 pb-3 border-t border-border-secondary/60 pt-3 space-y-4'
       }
     >
@@ -156,29 +156,33 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
       )}
 
       {hasInsights && (
-        nested ? (
-          insightsContent
-        ) : (
-          <div className="mt-4 rounded-lg border border-border-secondary/70 overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setIsInsightsOpen((open) => !open)}
-              className="w-full px-3 py-3 flex items-center justify-between gap-2 text-left hover:bg-background-tertiary dark:hover:bg-background-tertiary transition-colors"
-              aria-expanded={isInsightsOpen}
+        <div
+          className={
+            nested
+              ? 'mt-4 border-t border-border-secondary/60 dark:border-border-primary/60'
+              : 'mt-4 rounded-lg border border-border-secondary/70 overflow-hidden'
+          }
+        >
+          <button
+            type="button"
+            onClick={() => setIsInsightsOpen((open) => !open)}
+            className={`w-full flex items-center justify-between gap-2 text-left hover:bg-background-tertiary dark:hover:bg-background-tertiary transition-colors ${
+              nested ? 'py-3' : 'px-3 py-3'
+            }`}
+            aria-expanded={isInsightsOpen}
+          >
+            <span className="text-sm font-medium text-content-primary">
+              {t('profile_connector_insights_title')}
+            </span>
+            <span
+              className={`text-base text-content-tertiary transition-transform ${isInsightsOpen ? 'rotate-180' : ''}`}
+              aria-hidden
             >
-              <span className="text-sm font-medium text-content-primary">
-                {t('profile_connector_insights_title')}
-              </span>
-              <span
-                className={`text-base text-content-tertiary transition-transform ${isInsightsOpen ? 'rotate-180' : ''}`}
-                aria-hidden
-              >
-                ▼
-              </span>
-            </button>
-            {isInsightsOpen && insightsContent}
-          </div>
-        )
+              ▼
+            </span>
+          </button>
+          {isInsightsOpen && insightsContent}
+        </div>
       )}
 
       <p className="mt-4 text-xs text-content-tertiary italic text-center">
@@ -190,7 +194,12 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
   if (nested) {
     return (
       <div className="mt-6 pt-6 border-t border-border-secondary/80 dark:border-border-primary/80">
-        <div className="flex items-start gap-3 mb-1">
+        <button
+          type="button"
+          onClick={() => setIsSectionOpen((open) => !open)}
+          className="w-full flex items-start gap-3 text-left rounded-md hover:bg-background-secondary/80 dark:hover:bg-background-secondary/50 transition-colors -mx-1 px-1 py-1"
+          aria-expanded={isSectionOpen}
+        >
           <div className="flex-1 min-w-0">
             <h4 className="text-base font-semibold text-content-primary">
               {t('profile_connector_section_title')}
@@ -201,8 +210,14 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
             </p>
           </div>
           {scoreBadge}
-        </div>
-        {mainBody}
+          <span
+            className={`shrink-0 text-lg text-content-tertiary transition-transform mt-1 ${isSectionOpen ? 'rotate-180' : ''}`}
+            aria-hidden
+          >
+            ▼
+          </span>
+        </button>
+        {isSectionOpen && <div className="mt-2">{mainBody}</div>}
       </div>
     );
   }
