@@ -175,7 +175,7 @@ const ConnectorNextStepsLadder: React.FC<ConnectorNextStepsLadderProps> = ({
                 </fieldset>
 
                 {coachAvailable && coachBot && (
-                  <div className="rounded-lg border border-status-success-border bg-status-success-background/40 p-4">
+                  <div className="rounded-lg border border-accent-primary/40 bg-accent-primary/5 p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm font-bold text-content-primary">{coachBot.name}</span>
                       <span className="text-xs text-content-tertiary">

@@ -5,6 +5,7 @@ import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
 import ConnectorEvaluationMarkdown from './ConnectorEvaluationMarkdown';
 import type { ConnectorDimensionKey, ConnectorEvaluationResult, ConnectorVignettePublic, User, ConnectorCoachSessionStartOptions } from '../types';
 import { showConnectorPracticeLadder, connectorHighScoreNeedsCoachBridge } from '../utils/connectorNextSteps';
+import ProfileInsightGroup from './ProfileInsightGroup';
 
 const DIMENSION_EMOJI: Record<ConnectorDimensionKey, string> = {
   empathy: '🤝',
@@ -138,14 +139,14 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
         {evaluation.strengths?.length > 0 && (
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-content-primary mb-2">💪 {t('connector_results_strengths_title')}</h2>
-            <ul className="space-y-1 text-sm text-content-secondary">
-              {evaluation.strengths.map((s, i) => (
-                <li key={i} className="flex gap-2">
-                  <span className="shrink-0">✓</span>
-                  <ConnectorEvaluationMarkdown text={s} className="text-sm text-content-secondary flex-1 min-w-0" />
-                </li>
-              ))}
-            </ul>
+            <ProfileInsightGroup
+              tone="warning"
+              items={evaluation.strengths.map((s) => ({
+                body: (
+                  <ConnectorEvaluationMarkdown text={s} className="text-sm text-content-secondary leading-relaxed" />
+                ),
+              }))}
+            />
           </div>
         )}
 
@@ -153,14 +154,14 @@ const ConnectorResultsView: React.FC<ConnectorResultsViewProps> = ({
         {evaluation.growthAreas?.length > 0 && (
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-content-primary mb-2">🌱 {t('connector_results_growth_title')}</h2>
-            <ul className="space-y-1 text-sm text-content-secondary">
-              {evaluation.growthAreas.map((g, i) => (
-                <li key={i} className="flex gap-2">
-                  <span className="shrink-0">→</span>
-                  <ConnectorEvaluationMarkdown text={g} className="text-sm text-content-secondary flex-1 min-w-0" />
-                </li>
-              ))}
-            </ul>
+            <ProfileInsightGroup
+              tone="success"
+              items={evaluation.growthAreas.map((g) => ({
+                body: (
+                  <ConnectorEvaluationMarkdown text={g} className="text-sm text-content-secondary leading-relaxed" />
+                ),
+              }))}
+            />
           </div>
         )}
 
