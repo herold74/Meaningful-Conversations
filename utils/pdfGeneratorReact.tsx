@@ -35,7 +35,9 @@ const colors = {
   amber100: '#fef3c7',
   amber500: '#f59e0b',
   amber700: '#b45309',
+  green50: '#f0fdf4',
   green600: '#16a34a',
+  red50: '#fef2f2',
   blue500: '#3b82f6',
   orange500: '#f97316',
   yellow500: '#eab308',
@@ -160,11 +162,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   miniCard: {
-    flex: 1,
     border: `1 solid ${colors.gray200}`,
     borderRadius: 10,
     padding: '10 10',
     backgroundColor: colors.gray50,
+    marginBottom: 10,
+  },
+  miniCardWarning: {
+    borderLeftWidth: 3,
+    borderLeftColor: colors.amber500,
+    backgroundColor: colors.amber50,
+  },
+  miniCardDanger: {
+    borderLeftWidth: 3,
+    borderLeftColor: colors.red500,
+    backgroundColor: colors.red50,
+  },
+  miniCardSuccess: {
+    borderLeftWidth: 3,
+    borderLeftColor: colors.green600,
+    backgroundColor: colors.green50,
   },
   miniCardTitle: {
     fontSize: 9,
@@ -526,7 +543,8 @@ const translations = {
     connectorDimCuriosity: 'Neugier',
     connectorDimNonjudgment: 'Urteilsfreiheit',
     connectorDimSteadiness: 'Stabilität',
-    connectorStrengths: 'Stärken in Gesprächen',
+    connectorStrengths: 'Deine Stärken',
+    connectorGrowth: 'Woran du wachsen kannst',
     riemannDimDistanz: 'Distanz',
     riemannDimNaehe: 'Nähe',
     riemannDimWechsel: 'Spontanität',
@@ -594,7 +612,8 @@ const translations = {
     connectorDimCuriosity: 'Curiosity',
     connectorDimNonjudgment: 'Non-judgment',
     connectorDimSteadiness: 'Steadiness',
-    connectorStrengths: 'Strengths in conversation',
+    connectorStrengths: 'Your strengths',
+    connectorGrowth: 'Where you can grow',
     riemannDimDistanz: 'Distance',
     riemannDimNaehe: 'Proximity',
     riemannDimWechsel: 'Spontaneity',
@@ -677,30 +696,48 @@ const ThinBar = ({ value, color, maxValue = 5 }: { value: number; color: string;
 };
 
 const NumEntry = ({
-  index,
   title,
   desc,
-  variant,
 }: {
-  index: number;
   title: string;
   desc: string;
-  variant: 'teal' | 'amber' | 'gray';
+}) => (
+  <View style={styles.listEntry}>
+    <View style={{ flex: 1 }}>
+      <Text style={styles.listTitle}>{title}</Text>
+      <Text style={styles.listDesc}>{desc}</Text>
+    </View>
+  </View>
+);
+
+const PdfInsightGroup = ({
+  title,
+  tone,
+  children,
+}: {
+  title: string;
+  tone: 'warning' | 'danger' | 'success';
+  children: React.ReactNode;
 }) => {
-  const circleStyle = variant === 'teal' ? styles.numCircleTeal : variant === 'amber' ? styles.numCircleAmber : styles.numCircleGray;
-  const textColor = variant === 'teal' ? colors.primaryDark : variant === 'amber' ? colors.amber700 : colors.gray600;
+  const toneStyle =
+    tone === 'warning' ? styles.miniCardWarning : tone === 'danger' ? styles.miniCardDanger : styles.miniCardSuccess;
   return (
-    <View style={styles.listEntry}>
-      <View style={[styles.numCircle, circleStyle]}>
-        <Text style={[styles.numCircleText, { color: textColor }]}>{index + 1}</Text>
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.listTitle}>{title}</Text>
-        <Text style={styles.listDesc}>{desc}</Text>
-      </View>
+    <View style={[styles.miniCard, toneStyle]}>
+      <Text style={styles.miniCardTitle}>{title}</Text>
+      {children}
     </View>
   );
 };
+
+const PdfBulletInsights = ({ items }: { items: string[] }) => (
+  <>
+    {items.map((line, i) => (
+      <Text key={i} style={{ fontSize: 8, color: colors.gray600, marginBottom: 3, lineHeight: 1.35 }}>
+        • {line}
+      </Text>
+    ))}
+  </>
+);
 
 /**
  * Riemann-Thomann cross with all four axis end-labels inside SVG (matches app chart).
@@ -930,28 +967,29 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         )}
 
         {hasNarrative && result.narrativeProfile && (
-          <SectionBlock>
-            <View style={styles.threeCol}>
-              <View style={styles.miniCard}>
-                <Text style={styles.miniCardTitle}>{t.narrativeSuperpowers}</Text>
+          <>
+            <SectionBlock>
+              <PdfInsightGroup title={t.narrativeSuperpowers} tone="warning">
                 {result.narrativeProfile.superpowers.map((p: { name: string; description: string }, i: number) => (
-                  <NumEntry key={i} index={i} title={p.name} desc={p.description} variant="teal" />
+                  <NumEntry key={i} title={p.name} desc={p.description} />
                 ))}
-              </View>
-              <View style={styles.miniCard}>
-                <Text style={styles.miniCardTitle}>{t.narrativeBlindspots}</Text>
+              </PdfInsightGroup>
+            </SectionBlock>
+            <SectionBlock>
+              <PdfInsightGroup title={t.narrativeBlindspots} tone="danger">
                 {result.narrativeProfile.blindspots.map((s: { name: string; description: string }, i: number) => (
-                  <NumEntry key={i} index={i} title={s.name} desc={s.description} variant="amber" />
+                  <NumEntry key={i} title={s.name} desc={s.description} />
                 ))}
-              </View>
-              <View style={styles.miniCard}>
-                <Text style={styles.miniCardTitle}>{t.narrativeGrowth}</Text>
+              </PdfInsightGroup>
+            </SectionBlock>
+            <SectionBlock>
+              <PdfInsightGroup title={t.narrativeGrowth} tone="success">
                 {result.narrativeProfile.growthOpportunities.map((g: { title: string; recommendation: string }, i: number) => (
-                  <NumEntry key={i} index={i} title={g.title} desc={g.recommendation} variant="gray" />
+                  <NumEntry key={i} title={g.title} desc={g.recommendation} />
                 ))}
-              </View>
-            </View>
-          </SectionBlock>
+              </PdfInsightGroup>
+            </SectionBlock>
+          </>
         )}
 
         {hasSD && result.spiralDynamics && (
@@ -1067,45 +1105,60 @@ const PersonalityPdfDocument: React.FC<PersonalityPdfDocumentProps> = ({ result,
         )}
 
         {hasConnector && connectorForPdf && (
-          <SectionBlock>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>{t.connectorTitle}</Text>
-              <Text style={styles.cardSubtitle}>{t.connectorSubtitle}</Text>
-              {connectorForPdf.overallScore != null && (
-                <Text style={styles.connectorScore}>{t.connectorOverall}: {connectorForPdf.overallScore}/10</Text>
-              )}
-              {connectorForPdf.summary ? <Text style={styles.connectorSummary}>{connectorForPdf.summary}</Text> : null}
-              {(
-                [
-                  { key: 'empathy', label: t.connectorDimEmpathy },
-                  { key: 'presence', label: t.connectorDimPresence },
-                  { key: 'curiosity', label: t.connectorDimCuriosity },
-                  { key: 'nonJudgment', label: t.connectorDimNonjudgment },
-                  { key: 'steadiness', label: t.connectorDimSteadiness },
-                ] as const
-              ).map(({ key, label }) => {
-                const score = connectorForPdf![key]?.score;
-                if (typeof score !== 'number') return null;
-                return (
-                  <View key={key} style={styles.barRow}>
-                    <View style={[styles.barLabel, { width: 88 }]}>
-                      <Text style={styles.barName}>{label}</Text>
+          <>
+            <SectionBlock>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>{t.connectorTitle}</Text>
+                <Text style={styles.cardSubtitle}>{t.connectorSubtitle}</Text>
+                {connectorForPdf.overallScore != null && (
+                  <Text style={styles.connectorScore}>{t.connectorOverall}: {connectorForPdf.overallScore}/10</Text>
+                )}
+                {connectorForPdf.summary ? <Text style={styles.connectorSummary}>{connectorForPdf.summary}</Text> : null}
+                {(
+                  [
+                    { key: 'empathy', label: t.connectorDimEmpathy },
+                    { key: 'presence', label: t.connectorDimPresence },
+                    { key: 'curiosity', label: t.connectorDimCuriosity },
+                    { key: 'nonJudgment', label: t.connectorDimNonjudgment },
+                    { key: 'steadiness', label: t.connectorDimSteadiness },
+                  ] as const
+                ).map(({ key, label }) => {
+                  const score = connectorForPdf![key]?.score;
+                  if (typeof score !== 'number') return null;
+                  return (
+                    <View key={key} style={styles.barRow}>
+                      <View style={[styles.barLabel, { width: 88 }]}>
+                        <Text style={styles.barName}>{label}</Text>
+                      </View>
+                      <ThinBar value={score} color={colors.primary} maxValue={10} />
                     </View>
-                    <ThinBar value={score} color={colors.primary} maxValue={10} />
-                  </View>
-                );
-              })}
-              {connectorForPdf.strengths && connectorForPdf.strengths.length > 0 && (
-                <View style={{ marginTop: 6 }}>
-                  <Text style={{ fontSize: 8.5, fontWeight: 'bold', color: colors.gray700, marginBottom: 3 }}>{t.connectorStrengths}</Text>
-                  {connectorForPdf.strengths.slice(0, 3).map((s: string, i: number) => (
-                    <Text key={i} style={{ fontSize: 8, color: colors.gray600, marginBottom: 2 }}>• {s}</Text>
-                  ))}
+                  );
+                })}
+                {!(connectorForPdf.strengths?.length || connectorForPdf.growthAreas?.length) && (
+                  <Text style={styles.disclaimerText}>{t.connectorDisclaimer}</Text>
+                )}
+              </View>
+            </SectionBlock>
+            {((connectorForPdf.strengths?.length ?? 0) > 0 || (connectorForPdf.growthAreas?.length ?? 0) > 0) && (
+              <SectionBlock>
+                <View style={styles.card}>
+                  {connectorForPdf.strengths && connectorForPdf.strengths.length > 0 && (
+                    <View style={{ marginBottom: connectorForPdf.growthAreas?.length ? 10 : 0 }}>
+                      <PdfInsightGroup title={t.connectorStrengths} tone="warning">
+                        <PdfBulletInsights items={connectorForPdf.strengths} />
+                      </PdfInsightGroup>
+                    </View>
+                  )}
+                  {connectorForPdf.growthAreas && connectorForPdf.growthAreas.length > 0 && (
+                    <PdfInsightGroup title={t.connectorGrowth} tone="success">
+                      <PdfBulletInsights items={connectorForPdf.growthAreas} />
+                    </PdfInsightGroup>
+                  )}
+                  <Text style={styles.disclaimerText}>{t.connectorDisclaimer}</Text>
                 </View>
-              )}
-              <Text style={styles.disclaimerText}>{t.connectorDisclaimer}</Text>
-            </View>
-          </SectionBlock>
+              </SectionBlock>
+            )}
+          </>
         )}
 
         {hasOcean && (
