@@ -119,7 +119,7 @@ const deConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
 
 **Und danach?** Unter **„Dein nächster Schritt“** lädt Sie die App ein, weiterzugehen — ganz in Ihrem Tempo: mit einem kleinen Impuls für Ihr nächstes echtes Gespräch, mit The Connector zu einer Dimension Ihrer Wahl oder mit einem kurzen Coaching-Gespräch zur Vorbereitung. Welche Möglichkeiten Sie sehen, hängt von Ihrem Ergebnis und Ihrem Zugang ab.
 
-${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächspartner sind KI-Personas, die Auswertung erstellt eine KI. Das Ergebnis ist ein Impuls zur Selbstreflexion — kein psychologisches Gutachten und kein Coaching-Zertifikat.</p>')}
+${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächspartner sind KI-Personas; die Auswertung wird von einer KI erstellt. Das Ergebnis ist ein Impuls zur Selbstreflexion — kein psychologisches Gutachten und kein Coaching-Zertifikat.</p>')}
 
 <details>
 <summary style="cursor: pointer; font-weight: 600;">Gut zu wissen</summary>
@@ -141,7 +141,7 @@ const enConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${enChapterLabel(ch)}: The Connector — Elevate Conversations (Registered)</summary>
 <div style="padding: 16px;">
 
-**Your benefit:** The Connector shows you in a friendly way how you come across in conversation — as a prompt for your self-awareness. It is especially helpful when you do not yet have a concrete coaching topic: you start with short everyday dialogues and can get going right away. You find the **The Connector** card in the **Management & Communication** section.
+**Your benefit:** The Connector shows you in a friendly way how you come across in conversation — as a prompt for your self-awareness. It is especially helpful when you do not yet have a concrete coaching topic: you start with short everyday dialogues and can get going right away. You find **The Connector** card in the **Management & Communication** section.
 
 **How it works:** You have three short conversations with AI personas, for example with a colleague after a frustrating meeting or a friend after a breakup. What counts is your natural way of speaking, just as in real life. At the start, you choose **Text** or **Voice**. In each conversation, you reply three to five times; the conversations end on their own, and with **End Session** you can wrap up at any time — what has already been discussed is then evaluated.
 
@@ -209,7 +209,7 @@ Ein guter Start dauert nur wenige Minuten. Hier erfahren Sie, wie Sie in die App
 
 ### 1.1 Ihre Startfrage: „Was möchten Sie heute erreichen?“
 
-Nach einem kurzen Willkommen stellt die App eine einzige Frage. Ihre Antwort führt Sie in wenigen Sekunden zu dem Coach oder Coachee, der heute am besten zu Ihnen passt. Drei Karten stehen zur Auswahl:
+Nach einem kurzen Willkommen stellt die App eine einzige Frage. Ihre Antwort führt Sie in wenigen Sekunden zu dem passenden Einstieg — Coach, Coaching-Thema oder Übungsmodus. Drei Karten stehen zur Auswahl:
 
 - **Kommunikation & Management** — für ein Gespräch, das Sie vorbereiten oder besser verstehen möchten. Dort warten Nobody und Sam, mit Konto außerdem Gloria und mit Premium die Transkript-Tools.
 - **Coaching zu meinem Anliegen** (hervorgehoben) — für das Thema, das Sie gerade beschäftigt. Mit Konto beschreiben Sie es in eigenen Worten und erhalten eine Coach-Empfehlung; als Gast wählen Sie direkt aus Nobody, Max und Ava.
@@ -246,7 +246,7 @@ Den Startbildschirm erreichen Gäste nach der Namenseingabe und jederzeit über 
 
 ### 1.4 Lebenskontext ansehen und bearbeiten
 
-Hier behalten Sie die Kontrolle darüber, was Ihr Coach über Sie weiß. Wählen Sie eine Karte oder laden Sie eine Datei hoch, öffnet sich die **Vorschau** mit Dateiname und formatiertem Text. Von dort geht es weiter mit:
+Hier behalten Sie die Kontrolle darüber, was Ihr Coach über Sie weiß. Wenn Sie eine Karte wählen oder eine Datei hochladen, öffnet sich die **Vorschau** mit Dateiname und formatiertem Text. Von dort geht es weiter mit:
 
 - **Sitzung starten** — zur Coach-Auswahl, mit dem geladenen Kontext.
 - **Lebenskontext-Datei erweitern** — wenn Ihr Kontext noch eine Vorlage ist (z. B. nur Ihr Name); der Fragebogen hilft beim Füllen.
@@ -619,7 +619,7 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 
 **DPFL (Dynamic Personality-Focused Learning):**
 <span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Verfügbar ab Premium*</span>
-- Alles was DPC bietet, plus: Ihr Profil wird **adaptiv** und kann ab der **zweiten Sitzung** verfeinert werden
+- Alles, was DPC bietet, plus: Ihr Profil wird **adaptiv** und kann ab der **zweiten Sitzung** verfeinert werden
 - Der Coach schlägt nach dem Gespräch Profilanpassungen vor -- eine Art "Fremdbild"-Feedback, das Ihr "Selbstbild" ergänzt
 - Nach jeder Sitzung findet ein **Comfort Check** statt: Sie bewerten, wie authentisch Sie waren. Profilanpassungen werden erst nach mindestens zwei authentischen Sitzungen vorgeschlagen.
 - Wenn Sie zurück zu DPC oder Aus wechseln, bleiben gesammelte Verfeinerungen erhalten
@@ -641,7 +641,7 @@ ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines n
 
 ### ${coachingSub.coachSelect} Einen Coach auswählen
 
-Hier finden Sie den Coach, der zu Ihrem heutigen Vorhaben passt. Die Coach-Auswahl orientiert sich an Ihrer Antwort auf die Startfrage (siehe Abschnitt 1.1): Wer **Kommunikation** gewählt hat, sieht Management & Kommunikation bereits geöffnet. Bei **Coaching** hilft Registrierten die **Anliegen-Suche**, den passenden Coach zu finden, und Gäste starten im **Coaching-Bereich**. Wer **Als Coach üben** gewählt hat, gelangt mit entsprechender Berechtigung direkt zum Übungs-Setup.
+Hier finden Sie den Coach, der zu Ihrem heutigen Vorhaben passt. Die Coach-Auswahl orientiert sich an Ihrer Antwort auf die Startfrage (siehe Abschnitt 1.1): Wer **Kommunikation** gewählt hat, sieht Management & Kommunikation bereits geöffnet. Bei **Coaching** hilft registrierten Nutzern die **Anliegen-Suche**, den passenden Coach zu finden; Gäste starten im **Coaching-Bereich**. Wer **Als Coach üben** gewählt hat, gelangt mit entsprechender Berechtigung direkt zum Übungs-Setup.
 
 **Ihre Interviewerin:**
 - **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
@@ -690,7 +690,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 <summary>Sam -- Zukunftsorientiert, Effizient, Vorwärtsgerichtet (Registriert)</summary>
 <div style="padding: 12px 16px;">
 
-**Kernidee:** Sam nutzt kurzes zukunftsorientiertes Coaching — gewünschte Zukunft, Ausnahmen und Skalierung — für berufliche und alltägliche Herausforderungen, wenn Problemgespräch feststeckt.
+**Kernidee:** Sam nutzt kurzes zukunftsorientiertes Coaching — gewünschte Zukunft, Ausnahmen und Skalierung — für berufliche und alltägliche Herausforderungen, wenn das Problemgespräch feststeckt.
 
 **Ideal für:**
 - Berufliche und alltägliche Themen mit Fokus auf die gewünschte Zukunft
@@ -925,7 +925,7 @@ ${deTranscriptToolsSection(isNative, coachingSub.transcriptTools)}
 ${dePracticeTabSection(isNative, coachingSub.practiceTab)}
 ### ${coachingSub.coachRecommendation} Coach-Empfehlung (KI-gestützte Suche)
 
-Sie wissen noch nicht, welcher Coach heute zu Ihnen passt? Beschreiben Sie in ein oder zwei Sätzen, worum es Ihnen geht — die KI schlägt Ihnen einen passenden Coach vor und erklärt, warum.
+Sie wissen noch nicht, welchen Coach heute zu Ihnen passt? Beschreiben Sie in ein oder zwei Sätzen, worum es Ihnen geht — die KI schlägt Ihnen einen passenden Coach vor und erklärt, warum.
 
 Das Suchfeld finden Sie über der Coach-Liste:
 
@@ -1216,7 +1216,7 @@ const de_chapter9_pep = (isNative: boolean) => `
 
 ### Was sind PEP-Lösungsblockaden?
 
-**PEP** (**P**rozess- und **E**mbodiment fokussierte **P**sychologie) nach **Dr. Michael Bohne** ist ein therapeutisches und coachingspezifisches Verfahren, das körperbezogene (embodimentfokussierte) Interventionen mit prozessorientierter Arbeit verbindet.
+**PEP** (**P**rozess- und **E**mbodiment fokussierte **P**sychologie) nach **Dr. Michael Bohne** ist ein therapeutisches und coaching-spezifisches Verfahren, das körperbezogene (embodimentfokussierte) Interventionen mit prozessorientierter Arbeit verbindet.
 
 **Lösungsblockaden** sind in PEP keine „Ergebnisse“ eines Durchlaufs, sondern **entwicklungshemmende Beziehungsmuster** (die sogenannten **Big Five**), die Lösungs- und Veränderungsprozesse blockieren können — auch wenn Sie sich bereits anstrengen. In der klassischen PEP-Arbeit werden sie **typischerweise erst in den Blick genommen, wenn embodimentfokussierte Schritte allein nicht ausreichen**, um spürbare Entlastung oder Bewegung zu erreichen; die Blockaden stehen der wirksamen Anwendung von Veränderungsarbeit eher **im Weg** als dass sie deren Abschlussprodukt wären.
 
@@ -1348,7 +1348,7 @@ Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Ent
 
 ### Hinweise & Disclaimer
 
-${guideWarningBox(`<p class="m-0 mb-2"><strong>Methodenbezeichnungen:</strong> Die Coaching-Methoden in der App sind generische, beschreibende Bezeichnungen für didaktische Übungszwecke. Sie stehen in keiner Verbindung zu und werden nicht unterstützt oder zertifiziert durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.</p>
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Methodenbezeichnungen:</strong> Die Coaching-Methoden in der App sind generische, beschreibende Bezeichnungen für didaktische Übungszwecke. Sie stehen in keiner Verbindung mit Inhabern von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter und werden von diesen weder unterstützt noch zertifiziert.</p>
 <ul class="list-disc list-outside pl-5 space-y-1 my-0">
 <li><strong>Keine Therapie / keine klinische Anwendung:</strong> Coach-Übung dient der Reflexion und Skills-Übung — nicht der Behandlung psychischer Erkrankungen oder Krisenintervention.</li>
 <li><strong>Keine Supervision:</strong> Die App ersetzt keine professionelle Supervision oder Peer-Review durch qualifizierte Kolleg:innen.</li>
@@ -1405,7 +1405,7 @@ A good start takes just a few minutes. Here you will find out how to get into th
 
 ### 1.1 Your Opening Question: “What would you like to achieve today?”
 
-After a short welcome, the app asks a single question. Your answer takes you within seconds to the coach or coachee who fits you best today. Three cards are available:
+After a short welcome, the app asks a single question. Your answer takes you within seconds to the right entry point — coach, coaching topic, or practice mode. Three cards are available:
 
 - **Communication & Management** — for a conversation you want to prepare or understand better. Nobody and Sam are waiting there; with an account also Gloria, and with Premium the Transcript Tools.
 - **Coaching on my concern** (highlighted) — for the topic that is on your mind right now. With an account, you describe it in your own words and receive a coach recommendation; as a guest, you choose directly from Nobody, Max, and Ava.
@@ -1791,7 +1791,7 @@ Having a personality profile alone does not change coaching. Only when you activ
 <span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Available from Premium*</span>
 - Everything DPC offers, plus: your profile becomes **adaptive** and can be refined from the **second session** onwards
 - The coach suggests profile adjustments after the conversation -- a form of "external perspective" feedback that complements your "self-image"
-- After each session, a **Comfort Check** takes place: you rate how authentic you were. Profile adjustments are only suggested after at least two authentic sessions.
+- After each session, a **Comfort Check** takes place: you rate how authentically you behaved during the session. Profile adjustments are only suggested after at least two authentic sessions.
 - If you switch back to DPC or Off, collected refinements are preserved
 - Ideal for: Self-discovery & continuous growth
 - **Exception:** **Nobody** and **Sam** (Management & Communication) still use **DPC only** when your account is on DPFL — no Comfort Check or profile refinement after their sessions.
@@ -1860,7 +1860,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 <summary>Sam -- Forward-Focused, Efficient, Future-Oriented (Registered)</summary>
 <div style="padding: 12px 16px;">
 
-**Core Idea:** Sam uses brief forward-focused coaching — preferred future, exceptions, and scaling — for work and everyday challenges when problem-talk is stuck.
+**Core Idea:** Sam uses brief forward-focused coaching — preferred future, exceptions, and scaling — for work and everyday challenges when the problem talk is stuck.
 
 **Ideal for:**
 - Work and everyday topics with a focus on the preferred future
@@ -2146,7 +2146,7 @@ ${guideInfoBox('<p class="m-0"><strong>Gloria Life Context interview:</strong> A
 
 - **New Findings:** The AI summarizes your key takeaways from the session.
 - **Your rating:** Use the stars to give feedback and help improve coach quality.
-- **Accomplished Goals:** ⭐ The AI recognizes when you have achieved a goal from your Life Context and marks it with ✅. When you accept the updates, it leaves your Life Context — so your goal list stays current and focused.
+- **Accomplished Goals:** ⭐ The AI recognizes when you have achieved a goal from your Life Context and marks it with ✅. When you accept the updates, the goal is removed from your Life Context — so your goal list stays current and focused.
 - **Completed Steps:** Next steps from earlier sessions that you have completed are recognized too and taken off the list when you accept the updates.
 - **Next Steps:** Concrete tasks you committed to during the conversation. The **calendar icon** adds a step as an .ics file to Google Calendar, Outlook, Apple Calendar, or another calendar app; **"Export All to Calendar"** does this for all steps at once. Events are created by default at 9:00 AM on the deadline date, with a reminder 24 hours before.
 - **Proposed Context Updates:** The AI suggests how your Life Context can reflect the conversation — and you decide. Use the checkboxes to choose the changes you want to apply. You set whether a suggestion **appends** to a section or **replaces** it, and you can adjust the target headline or create a new section.
@@ -2167,7 +2167,7 @@ ${isPremium ? `### ${sessionReviewSub.dpfl} Authenticity Check & Profile Refinem
 
 If you have the **DPFL coaching mode** activated (see ${enChapterLabel(profileChapterNum(isNative))}), two additional steps appear after the session:
 
-- **Authenticity Check (Comfort Check):** You'll be asked how authentic you felt during the session (scale 1-5). Only sessions rated 3 or higher are used for profile refinement. This ensures your profile is only adjusted based on authentic interactions.
+- **Authenticity Check (Comfort Check):** You'll be asked how authentically you behaved during the session (scale 1-5). Only sessions rated 3 or higher are used for profile refinement. This ensures your profile is only adjusted based on authentic interactions.
 - **Profile Refinement:** Starting from the **second authentic session**, you'll see a suggestion to adjust your personality profile. You'll see:
   - An analysis of the keywords that led to the suggestions
   - Current vs. suggested values for your personality dimensions

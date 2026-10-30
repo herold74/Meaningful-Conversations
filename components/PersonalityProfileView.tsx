@@ -15,6 +15,7 @@ import { InfoIcon } from './icons/InfoIcon';
 import NarrativeStoriesModal from './NarrativeStoriesModal';
 import SpiralDynamicsVisualization from './SpiralDynamicsVisualization';
 import ConnectorProfileSection from './ConnectorProfileSection';
+import ProfileInsightGroup from './ProfileInsightGroup';
 import ExternalPerspectivePreviewModal from './ExternalPerspectivePreviewModal';
 import { User, CoachingMode } from '../types';
 import type { ConnectorEvaluationResult } from '../types';
@@ -55,21 +56,13 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({
         <h4 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
           {t('narrative_profile_superpowers_title') || '⚡ Deine geheimen Superkräfte'}
         </h4>
-        <div className="space-y-3">
-          {narrativeProfile.superpowers.map((power, index) => (
-            <div 
-              key={index}
-              className="p-4 bg-status-warning-background rounded-card border border-status-warning-border"
-            >
-              <div className="font-semibold text-status-warning-foreground mb-1.5 text-sm">
-                {index + 1}. {power.name}
-              </div>
-              <p className="text-content-secondary text-sm leading-relaxed">
-                {power.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        <ProfileInsightGroup
+          tone="warning"
+          items={narrativeProfile.superpowers.map((power) => ({
+            title: power.name,
+            body: power.description,
+          }))}
+        />
       </div>
 
       {/* Blindspots */}
@@ -77,21 +70,13 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({
         <h4 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
           {t('narrative_profile_blindspots_title') || '🌑 Potenzielle Blindspots'}
         </h4>
-        <div className="space-y-3">
-          {narrativeProfile.blindspots.map((spot, index) => (
-            <div 
-              key={index}
-              className="p-4 bg-status-danger-background rounded-card border border-status-danger-border"
-            >
-              <div className="font-semibold text-status-danger-foreground mb-1.5 text-sm">
-                {index + 1}. {spot.name}
-              </div>
-              <p className="text-content-secondary text-sm leading-relaxed">
-                {spot.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        <ProfileInsightGroup
+          tone="danger"
+          items={narrativeProfile.blindspots.map((spot) => ({
+            title: spot.name,
+            body: spot.description,
+          }))}
+        />
       </div>
 
       {/* Growth Opportunities */}
@@ -99,21 +84,13 @@ const NarrativeProfileSection: React.FC<NarrativeProfileSectionProps> = ({
         <h4 className="text-lg font-semibold mb-3 text-content-primary flex items-center gap-2">
           {t('narrative_profile_growth_title') || '🌱 Wachstumsmöglichkeiten'}
         </h4>
-        <div className="space-y-3">
-          {narrativeProfile.growthOpportunities.map((opp, index) => (
-            <div 
-              key={index}
-              className="p-4 bg-status-success-background rounded-card border border-status-success-border"
-            >
-              <div className="font-semibold text-status-success-foreground mb-1.5 text-sm">
-                {index + 1}. {opp.title}
-              </div>
-              <p className="text-content-secondary text-sm leading-relaxed">
-                {opp.recommendation}
-              </p>
-            </div>
-          ))}
-        </div>
+        <ProfileInsightGroup
+          tone="success"
+          items={narrativeProfile.growthOpportunities.map((opp) => ({
+            title: opp.title,
+            body: opp.recommendation,
+          }))}
+        />
       </div>
 
       {/* Generation timestamp */}
@@ -1152,7 +1129,7 @@ const PersonalityProfileView: React.FC<PersonalityProfileViewProps> = ({
 
             {/* Language mismatch warning */}
             {contentLanguage !== language && (
-              <div className="mx-4 sm:mx-5 mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg flex items-center justify-between gap-3">
+              <div className="mx-4 sm:mx-5 mt-2 mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg flex items-center justify-between gap-3">
                 <p className="text-amber-800 dark:text-amber-300 text-sm flex-1">
                   ⚠️ {t('narrative_language_mismatch') || 'Diese Signatur wurde in einer anderen Sprache generiert. Aktualisiere sie, um sie in deiner aktuellen Sprache zu erhalten.'}
                 </p>

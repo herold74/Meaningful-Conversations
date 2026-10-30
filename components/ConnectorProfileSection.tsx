@@ -6,6 +6,7 @@ import ConnectorNextStepsLadder from './ConnectorNextStepsLadder';
 import type { ConnectorDimensionKey, ConnectorEvaluationResult, User, ConnectorCoachSessionStartOptions } from '../types';
 import { resolveConnectorForDisplay } from '../utils/connectorSignatureTranslation';
 import { shouldOfferConnectorCoachBridge } from '../utils/connectorNextSteps';
+import ProfileInsightGroup from './ProfileInsightGroup';
 
 interface ConnectorProfileSectionProps {
   connector: ConnectorEvaluationResult;
@@ -86,39 +87,39 @@ const ConnectorProfileSection: React.FC<ConnectorProfileSectionProps> = ({
     >
       {display.strengths?.length > 0 && (
         <div>
-          <p className="text-sm font-medium text-content-primary mb-2">
-            {t('connector_results_strengths_title')}
+          <p className="text-base font-semibold text-content-primary mb-2">
+            💪 {t('connector_results_strengths_title')}
           </p>
-          <ul className="space-y-1 text-sm text-content-secondary">
-            {display.strengths.map((s, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="shrink-0">•</span>
+          <ProfileInsightGroup
+            tone="warning"
+            items={display.strengths.map((s) => ({
+              body: (
                 <ConnectorEvaluationMarkdown
                   text={s}
-                  className="text-sm text-content-secondary leading-relaxed flex-1 min-w-0"
+                  className="text-sm text-content-secondary leading-relaxed"
                 />
-              </li>
-            ))}
-          </ul>
+              ),
+            }))}
+          />
         </div>
       )}
 
       {display.growthAreas?.length > 0 && (
         <div>
-          <p className="text-sm font-medium text-content-primary mb-2">
-            {t('connector_results_growth_title')}
+          <p className="text-base font-semibold text-content-primary mb-2">
+            🌱 {t('connector_results_growth_title')}
           </p>
-          <ul className="space-y-1 text-sm text-content-secondary">
-            {display.growthAreas.map((g, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="shrink-0">→</span>
+          <ProfileInsightGroup
+            tone="success"
+            items={display.growthAreas.map((g) => ({
+              body: (
                 <ConnectorEvaluationMarkdown
                   text={g}
-                  className="text-sm text-content-secondary leading-relaxed flex-1 min-w-0"
+                  className="text-sm text-content-secondary leading-relaxed"
                 />
-              </li>
-            ))}
-          </ul>
+              ),
+            }))}
+          />
         </div>
       )}
 
