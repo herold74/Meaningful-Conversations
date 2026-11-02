@@ -140,6 +140,16 @@ describe('POST /api/auth/register', () => {
         expect(res.status).toBe(400);
         expect(res.body.error).toContain('Password is required');
     });
+
+    it('returns 400 when the body has no email', async () => {
+        const res = await request(app)
+            .post('/api/auth/register')
+            .send({});
+
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('Email is required.');
+        expect(prisma.user.create).not.toHaveBeenCalled();
+    });
 });
 
 describe('POST /api/auth/login', () => {
@@ -301,5 +311,15 @@ describe('POST /api/auth/forgot-password', () => {
         expect(res.status).toBe(200);
         expect(res.body.message).toContain('If an account with this email exists');
         expect(mailService.sendPasswordResetEmail).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 when email is missing', async () => {
+        const res = await request(app)
+            .post('/api/auth/forgot-password')
+            .send({});
+
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe('Email is required.');
+        expect(prisma.user.findUnique).not.toHaveBeenCalled();
     });
 });

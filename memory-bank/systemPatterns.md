@@ -243,6 +243,11 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** Product owner explicitly rejects neighboring tiles where text or links sit on different vertical levels.
 - **Implementation:** Pattern in `IntentPickerView` (`min-h` on `h3`, `flex-1` description, `mt-auto` CTA, grid `items-stretch` + tile `height: 100%` from `md` up). Apply the same rule to future card grids (catalog pickers, hub rows).
 
+### 32. Sessions and developer test mode (2026-11-02)
+- **Decision:** A JWT is accepted only for an existing user with `status === 'ACTIVE'`, and only if it was issued after `tokensInvalidatedAt`. Admin password reset, account deletion, and role toggles invalidate that user's tokens. Role and credential mutations require `isAdmin` (developers keep read access and the test runner). `X-Test-Mode` skips the daily cost cap only for `isDeveloper`, and never when `ENVIRONMENT_TYPE=production`.
+- **Reasoning:** A deleted or reset account must not keep a 7-day session. The test header was a client-controlled spend bypass. Express 4 does not catch async rejections; Node 22 exits on them, so route rejections are forwarded to an error middleware and process-level handlers shut the worker down cleanly.
+- **Implementation:** `middleware/auth.js`, `middleware/adminAuth.js`, `middleware/requireAdmin.js`, `services/tokenInvalidation.js`, `utils/testMode.js`, `middleware/asyncHandler.js`, `middleware/errorHandler.js`.
+
 ### 31. Xcode web sync — agent runs npm scripts (2026-10-29)
 - **Decision:** The maintainer does **not** deploy to Xcode manually (no “run `npx cap sync ios`” handoffs, no Merksatz checklists of npm commands in chat). When they ask to **deploy / sync to Xcode**, the **agent** runs the repo script and reports done + “Run in Xcode (scheme App)”.
 - **Scripts:** `npm run sync:ios-staging` (mc-beta API) · `npm run sync:ios-production` (mc-app API, default `npm run build`). Never suggest raw `npx cap sync ios` alone to the user.

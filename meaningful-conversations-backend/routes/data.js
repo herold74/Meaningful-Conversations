@@ -10,6 +10,7 @@ const {
     deleteTicketsForEmail,
     findTicketsForEmail,
 } = require('../services/gdprAccountCleanup.js');
+const { invalidateTokensForUser } = require('../services/tokenInvalidation.js');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -1310,6 +1311,9 @@ router.delete('/user', async (req, res) => {
             where: { usedById: req.userId },
             data: { usedById: null },
         });
+        // Revoke the session before the row disappears. A missing user is also
+        // rejected by auth, including on workers that did not handle this request.
+        await invalidateTokensForUser(req.userId);
         // Cascade deletes: Feedback, PersonalityProfile, SessionBehaviorLog
         await prisma.user.delete({ where: { id: req.userId } });
         res.status(204).send();
