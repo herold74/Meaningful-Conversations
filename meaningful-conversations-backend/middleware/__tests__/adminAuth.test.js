@@ -45,6 +45,7 @@ describe('adminAuth middleware', () => {
         id: 'admin-user-456',
         email: 'admin@test.com',
         isAdmin: true,
+        status: 'ACTIVE',
       };
 
       jwt.verify.mockReturnValue(decoded);
@@ -73,6 +74,8 @@ describe('adminAuth middleware', () => {
         id: 'regular-user-789',
         email: 'user@test.com',
         isAdmin: false,
+        isDeveloper: false,
+        status: 'ACTIVE',
       };
 
       jwt.verify.mockReturnValue(decoded);
@@ -143,7 +146,7 @@ describe('adminAuth middleware', () => {
   });
 
   describe('user not found', () => {
-    it('returns 403 when user does not exist in database', async () => {
+    it('returns 401 when user does not exist in database', async () => {
       const decoded = { userId: 'deleted-user' };
       jwt.verify.mockReturnValue(decoded);
       prisma.user.findUnique.mockResolvedValue(null);
@@ -156,10 +159,27 @@ describe('adminAuth middleware', () => {
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'deleted-user' },
       });
-      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Forbidden: Admin access required.',
+        error: 'Authentication failed: Invalid token.',
       });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('returns 401 when the admin account is not ACTIVE', async () => {
+      jwt.verify.mockReturnValue({ userId: 'admin-user-456', iat: 10 });
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'admin-user-456',
+        isAdmin: true,
+        status: 'SUSPENDED',
+      });
+
+      const req = mockReq({ headers: { authorization: 'Bearer valid-token' } });
+      const res = mockRes();
+
+      await adminAuth(req, res, mockNext);
+
+      expect(res.status).toHaveBeenCalledWith(401);
       expect(mockNext).not.toHaveBeenCalled();
     });
   });

@@ -25,6 +25,7 @@ const {
   getConnectorHandoffContinuationReminder,
   isFirstConnectorHandoffTurn,
 } = require('../../utils/connectorHandoffContext.js');
+const { isDeveloperTestMode } = require('../../utils/testMode.js');
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
@@ -37,7 +38,15 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     } = req.body;
     const lang = normalizeLanguage(language);
     const userId = req.userId; // This will be undefined for guests
-    const isTestMode = req.headers['x-test-mode'] === 'true';
+    let loadedUser = null;
+    if (userId) {
+        loadedUser = await prisma.user.findUnique({ where: { id: userId } });
+    }
+    const isTestMode = isDeveloperTestMode({
+        environmentType: process.env.ENVIRONMENT_TYPE,
+        headerValue: req.headers['x-test-mode'],
+        isDeveloper: loadedUser?.isDeveloper,
+    });
 
     // Telemetry collection for test mode
     const testTelemetry = {
@@ -74,7 +83,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     if (bot.accessTier === 'guest') {
         hasAccess = true;
     } else if (userId) {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const user = loadedUser;
         if (user) {
             // Store user's AI region preference for later use
             userRegionPreference = user.aiRegionPreference || 'optimal';

@@ -52,7 +52,9 @@ async function isTokenInvalidated(userId, tokenIssuedAt) {
         select: { tokensInvalidatedAt: true },
     });
 
-    if (!user?.tokensInvalidatedAt) return false;
+    // Deleted accounts must not keep a live JWT until it expires.
+    if (!user) return true;
+    if (!user.tokensInvalidatedAt) return false;
 
     const invalidatedAtSec = Math.floor(user.tokensInvalidatedAt.getTime() / 1000);
     // Warm up the local cache so subsequent requests on this worker skip the DB

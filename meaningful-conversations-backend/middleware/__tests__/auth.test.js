@@ -11,10 +11,12 @@
 const jwt = require('jsonwebtoken');
 
 jest.mock('jsonwebtoken');
+jest.mock('../../prismaClient.js', () => require('../../__mocks__/prismaClient.js'));
 jest.mock('../../services/tokenInvalidation.js', () => ({
   isTokenInvalidated: jest.fn().mockResolvedValue(false),
 }));
 
+const prisma = require('../../prismaClient.js');
 const auth = require('../auth');
 
 const mockReq = (overrides = {}) => ({
@@ -36,6 +38,7 @@ const mockNext = jest.fn();
 beforeEach(() => {
   jest.clearAllMocks();
   process.env.JWT_SECRET = 'test-secret';
+  prisma.user.findUnique.mockResolvedValue({ status: 'ACTIVE' });
   // Default: token is valid (not invalidated)
   require('../../services/tokenInvalidation.js').isTokenInvalidated.mockResolvedValue(false);
 });
@@ -73,6 +76,37 @@ describe('auth middleware', () => {
       expect(res.json).toHaveBeenCalledWith({
         error: 'Token has been invalidated. Please log in again.',
       });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('account state', () => {
+    it('returns 401 when the user no longer exists', async () => {
+      jwt.verify.mockReturnValue({ userId: 'deleted-user', iat: 1000 });
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      const req = mockReq({ headers: { authorization: 'Bearer orphan-token' } });
+      const res = mockRes();
+
+      await auth(req, res, mockNext);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Authentication failed: Invalid token.',
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('returns 401 when the account is not ACTIVE', async () => {
+      jwt.verify.mockReturnValue({ userId: 'user-123', iat: 1000 });
+      prisma.user.findUnique.mockResolvedValue({ status: 'PENDING' });
+
+      const req = mockReq({ headers: { authorization: 'Bearer pending-token' } });
+      const res = mockRes();
+
+      await auth(req, res, mockNext);
+
+      expect(res.status).toHaveBeenCalledWith(401);
       expect(mockNext).not.toHaveBeenCalled();
     });
   });

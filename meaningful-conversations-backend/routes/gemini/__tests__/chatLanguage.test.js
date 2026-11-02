@@ -23,6 +23,7 @@ const request = require('supertest');
 const chatRouter = require('../chat.js');
 const aiProviderService = require('../../../services/aiProviderService.js');
 const prisma = require('../../../prismaClient.js');
+const { checkDailyCostCap } = require('../../../services/apiUsageTracker.js');
 
 function buildApp() {
   const app = express();
@@ -109,5 +110,71 @@ describe('POST /chat/send-message language routing', () => {
 
     const call = aiProviderService.generateContent.mock.calls[0][0];
     expect(call.language).toBe('de');
+  });
+});
+
+describe('POST /chat/send-message X-Test-Mode', () => {
+  const payload = {
+    botId: 'nexus-goal-path-solution',
+    context: '',
+    history: [],
+    language: 'de',
+    isNewSession: true,
+    coachingMode: 'off',
+  };
+
+  afterEach(() => {
+    delete process.env.ENVIRONMENT_TYPE;
+  });
+
+  test('still applies the daily cost cap for a non-developer', async () => {
+    process.env.ENVIRONMENT_TYPE = 'staging';
+    const app = buildApp();
+    await request(app)
+      .post('/gemini/chat/send-message')
+      .set('X-Test-Mode', 'true')
+      .send(payload);
+
+    expect(checkDailyCostCap).toHaveBeenCalledWith('user-1');
+  });
+
+  test('skips the daily cost cap for a developer outside production', async () => {
+    process.env.ENVIRONMENT_TYPE = 'staging';
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-1',
+      isPremium: true,
+      isClient: false,
+      isAdmin: false,
+      isDeveloper: true,
+      aiRegionPreference: 'optimal',
+      unlockedCoaches: '[]',
+    });
+    const app = buildApp();
+    await request(app)
+      .post('/gemini/chat/send-message')
+      .set('X-Test-Mode', 'true')
+      .send(payload);
+
+    expect(checkDailyCostCap).not.toHaveBeenCalled();
+  });
+
+  test('applies the daily cost cap in production even for a developer', async () => {
+    process.env.ENVIRONMENT_TYPE = 'production';
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-1',
+      isPremium: true,
+      isClient: false,
+      isAdmin: false,
+      isDeveloper: true,
+      aiRegionPreference: 'optimal',
+      unlockedCoaches: '[]',
+    });
+    const app = buildApp();
+    await request(app)
+      .post('/gemini/chat/send-message')
+      .set('X-Test-Mode', 'true')
+      .send(payload);
+
+    expect(checkDailyCostCap).toHaveBeenCalledWith('user-1');
   });
 });

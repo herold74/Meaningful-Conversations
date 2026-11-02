@@ -22,9 +22,63 @@ const prisma = require('./prismaClient.js');
 const { initCleanup: initGuestLimitCleanup } = require('./services/guestLimitTracker');
 const { initDataRetentionCleanup } = require('./services/dataRetention');
 const { ensureDefaultConfig } = require('./services/initService');
+const { installAsyncErrorForwarding } = require('./middleware/asyncHandler.js');
+const { errorHandler } = require('./middleware/errorHandler.js');
+const { corsAllowedHeaders } = require('./utils/testMode.js');
+
+installAsyncErrorForwarding();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+let httpServer = null;
+let shuttingDown = false;
+
+/**
+ * Close HTTP and Prisma, then exit. Used for signals and for unhandled
+ * rejections/exceptions so a bad request cannot leave a wedged worker.
+ */
+function gracefulShutdown(signal, exitCode = 0) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`\n${signal} received. Starting graceful shutdown...`);
+
+    const finish = async () => {
+        try {
+            await prisma.$disconnect();
+            console.log('Database connections closed');
+        } catch (error) {
+            console.error('Error during shutdown:', error);
+            process.exit(1);
+        }
+        console.log('Graceful shutdown completed');
+        process.exit(exitCode);
+    };
+
+    if (!httpServer) {
+        finish();
+        return;
+    }
+
+    httpServer.close(() => {
+        console.log('HTTP server closed');
+        finish();
+    });
+
+    setTimeout(() => {
+        console.error('Forced shutdown after timeout');
+        process.exit(1);
+    }, 25000);
+}
+
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled rejection:', reason);
+    gracefulShutdown('unhandledRejection', 1);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught exception:', error);
+    gracefulShutdown('uncaughtException', 1);
+});
 
 /**
  * Fail fast when required secrets are missing in staging/production.
@@ -297,7 +351,7 @@ async function startServer() {
                 return callback(null, false);
             },
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'X-Test-Mode', 'X-Client-Platform', 'Cache-Control', 'Pragma'],
+            allowedHeaders: corsAllowedHeaders(),
         };
         app.use(cors(corsOptions));
         
@@ -355,41 +409,14 @@ async function startServer() {
         // Initialize GDPR data retention cleanup (runs every 24 hours)
         initDataRetentionCleanup();
 
-        const server = app.listen(PORT, () => {
+        app.use(errorHandler);
+
+        httpServer = app.listen(PORT, () => {
             console.log(`Backend server is running on port ${PORT}`);
         });
 
-        // Graceful shutdown handler
-        const gracefulShutdown = async (signal) => {
-            console.log(`\n${signal} received. Starting graceful shutdown...`);
-            
-            // Stop accepting new connections
-            server.close(async () => {
-                console.log('HTTP server closed');
-                
-                try {
-                    // Disconnect Prisma
-                    await prisma.$disconnect();
-                    console.log('Database connections closed');
-                    
-                    console.log('Graceful shutdown completed');
-                    process.exit(0);
-                } catch (error) {
-                    console.error('Error during shutdown:', error);
-                    process.exit(1);
-                }
-            });
-
-            // Force shutdown after 25 seconds (before podman's 30s timeout)
-            setTimeout(() => {
-                console.error('Forced shutdown after timeout');
-                process.exit(1);
-            }, 25000);
-        };
-
-        // Register shutdown handlers
-        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM', 0));
+        process.on('SIGINT', () => gracefulShutdown('SIGINT', 0));
 
     } catch (error) {
         console.error('Failed to start server:', error);
