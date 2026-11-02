@@ -16,6 +16,7 @@
 - **Repo hygiene:** Password-candidate decrypt/dump scripts and `tmp/` are gitignored. The ICF source PDF stays local.
 - **Docs:** `DOCUMENTATION-STRUCTURE.md` now says 2.6.0, staging b67, production b41, and indexes Connector, safety, access, Mistral DPA, and ICF. `KEYWORD-CRITIQUE.md`, `FEATURE-DEVELOPMENT-TIMELINE.md`, and `TTS-HYBRID-README.md` moved to `DOCUMENTATION/ARCHIVED/`. Older handoffs: `memory-bank/archive/activeContext-2026-10.md`.
 - **Decision:** `systemPatterns.md` #32.
+- **Phase 1 (this release):** Server speech uses only the Piper container. The local shell fallback is gone, so spoken text cannot become a command. `/api/health` sits outside the global 60/min limit, so the watchdog is not crowded out. App split stays for the next release.
 
 ## Active Tasks
 - [ ] **Remove legacy aliases** — when obsolete per `DOCUMENTATION/LEGACY-ALIASES-REMOVAL.md` (not before App Store ≥2.4.x + DB clean)
