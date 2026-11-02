@@ -29,14 +29,14 @@
   },
   "dependencies": {
     "@capacitor-community/speech-recognition": "^7.0.1",
-    "@capacitor/core": "^8.0.1",
+    "@capacitor/core": "^8.6.0",
     "@capacitor/filesystem": "^8.1.0",
-    "@capacitor/ios": "^8.0.1",
+    "@capacitor/ios": "^8.6.0",
     "@capacitor/share": "^8.0.0",
     "@react-pdf/renderer": "^4.3.2",
     "@revenuecat/purchases-capacitor": "^13.2.2",
     "events": "^3.3.0",
-    "express": "^4.19.2",
+    "express": "^4.22.3",
     "framer-motion": "^12.34.3",
     "ics": "^3.8.1",
     "lucide-react": "^1.26.0",
@@ -48,8 +48,8 @@
     "stream-browserify": "^3.0.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.0.1",
-    "@tailwindcss/typography": "^0.5.10",
+    "@capacitor/cli": "^8.6.0",
+    "@tailwindcss/typography": "^0.5.20",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.43",
@@ -68,6 +68,8 @@
   "overrides": {
     "glob": "^10.5.0",
     "inflight": "npm:@aashutoshrathi/inflight@^1.0.2",
+    "minimatch": "^11.0.1",
+    "postcss-selector-parser": "^6.1.5",
     "tar": "^7.4.0"
   }
 }
