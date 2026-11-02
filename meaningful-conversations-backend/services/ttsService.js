@@ -2,9 +2,6 @@
 // Handles communication with the Piper TTS container/process
 
 const axios = require('axios');
-const { exec } = require('child_process');
-const { promisify } = require('util');
-const execAsync = promisify(exec);
 const { getPhoneticReplacements } = require('../utils/phoneticDictionary');
 
 // Configuration
@@ -203,39 +200,10 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
         }
     }
     
-    // Fallback: Local Piper (if available)
-    // Check if Piper is available first
-    try {
-        await execAsync('which piper');
-    } catch {
-        // Piper not available - return null so frontend can use Web Speech API
-        console.log('Piper TTS not available, suggesting fallback to Web Speech API');
-        throw new Error('Piper TTS not available: Local Piper not found on system');
-    }
-    
-    const voiceDir = process.env.PIPER_VOICE_DIR || '/models';
-    const modelPath = `${voiceDir}/${model}.onnx`;
-    const piperCommand = process.env.PIPER_COMMAND || 'piper';
-    
-    // Build Piper command
-    let command = `echo "${cleanText.replace(/"/g, '\\"')}" | ${piperCommand} --model ${modelPath} --length_scale ${lengthScale} --output-file -`;
-    
-    try {
-        const { stdout, stderr } = await execAsync(command, {
-            encoding: 'buffer',
-            maxBuffer: 10 * 1024 * 1024, // 10MB max buffer for audio
-        });
-        
-        if (stderr && stderr.length > 0) {
-            console.warn('Piper stderr:', stderr.toString());
-        }
-        
-        console.log('TTS via local Piper');
-        return { buffer: stdout, contentType: 'audio/wav' };
-    } catch (error) {
-        console.error('Piper TTS error:', error);
-        throw new Error(`Failed to synthesize speech: ${error.message}`);
-    }
+    // No local Piper process. Speech text must never be passed to a shell.
+    // The client falls back to Web Speech when the container is down.
+    console.log('Piper TTS container unavailable, suggesting fallback to Web Speech API');
+    throw new Error('Piper TTS not available: container is not reachable');
 }
 
 /**
@@ -359,20 +327,11 @@ async function isPiperAvailable() {
             return response.data.status === 'ok';
         } catch (error) {
             console.warn('TTS container not available:', error.message);
-            // Fall through to check local Piper
+            return false;
         }
     }
-    
-    // Check local Piper
-    try {
-        const piperCommand = process.env.PIPER_COMMAND || 'piper';
-        // Piper --help returns exit code 0, unlike --version which requires --model
-        await execAsync(`${piperCommand} --help`, { timeout: 5000 });
-        return true;
-    } catch (error) {
-        console.warn('Piper TTS not available:', error.message);
-        return false;
-    }
+
+    return false;
 }
 
 /**

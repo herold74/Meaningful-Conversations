@@ -15,6 +15,8 @@ const {
     maintenanceDbErrorResponse,
 } = require('../services/maintenanceService.js');
 const brand = require('../config/brand');
+const { invalidateTokensForUser } = require('../services/tokenInvalidation.js');
+const { requireAdminActor, auditAdminAction } = require('../middleware/requireAdmin.js');
 
 // Configure marked for email-safe HTML
 marked.setOptions({
@@ -69,6 +71,7 @@ router.get('/users', async (req, res) => {
 
 // PUT /api/admin/users/:id/activate
 router.put('/users/:id/activate', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
     try {
         const user = await prisma.user.findUnique({ where: { id } });
@@ -88,6 +91,7 @@ router.put('/users/:id/activate', async (req, res) => {
                 activationTokenExpires: null,
             },
         });
+        auditAdminAction(req, 'activate-user', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error activating user:", error);
@@ -97,6 +101,7 @@ router.put('/users/:id/activate', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-premium
 router.put('/users/:id/toggle-premium', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
     try {
         const user = await prisma.user.findUnique({ where: { id } });
@@ -106,6 +111,8 @@ router.put('/users/:id/toggle-premium', async (req, res) => {
             where: { id },
             data: { isPremium: !user.isPremium },
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-premium', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling premium:", error);
@@ -115,6 +122,7 @@ router.put('/users/:id/toggle-premium', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-admin
 router.put('/users/:id/toggle-admin', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
 
     if (id === req.userId) {
@@ -129,6 +137,8 @@ router.put('/users/:id/toggle-admin', async (req, res) => {
             where: { id },
             data: { isAdmin: !user.isAdmin },
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-admin', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling admin:", error);
@@ -138,6 +148,7 @@ router.put('/users/:id/toggle-admin', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-client
 router.put('/users/:id/toggle-client', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
 
     try {
@@ -148,6 +159,8 @@ router.put('/users/:id/toggle-client', async (req, res) => {
             where: { id },
             data: { isClient: !user.isClient },
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-client', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling client:", error);
@@ -157,6 +170,7 @@ router.put('/users/:id/toggle-client', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-registered
 router.put('/users/:id/toggle-registered', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
     try {
         const user = await prisma.user.findUnique({ where: { id } });
@@ -168,6 +182,8 @@ router.put('/users/:id/toggle-registered', async (req, res) => {
             where: { id },
             data: { accessExpiresAt: isRegistered ? new Date() : null },
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-registered', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling registered:", error);
@@ -177,7 +193,12 @@ router.put('/users/:id/toggle-registered', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-developer
 router.put('/users/:id/toggle-developer', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
+
+    if (id === req.userId) {
+        return res.status(403).json({ error: 'Cannot change your own developer status.' });
+    }
 
     try {
         const user = await prisma.user.findUnique({ where: { id } });
@@ -194,6 +215,8 @@ router.put('/users/:id/toggle-developer', async (req, res) => {
             where: { id },
             data: updateData,
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-developer', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling developer:", error);
@@ -203,6 +226,7 @@ router.put('/users/:id/toggle-developer', async (req, res) => {
 
 // POST /api/admin/users/:id/reset-password
 router.post('/users/:id/reset-password', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
     try {
         const newPassword = crypto.randomBytes(8).toString('hex');
@@ -219,6 +243,8 @@ router.post('/users/:id/reset-password', async (req, res) => {
         });
         const { clearPersonalityProfileOnPasswordReset } = require('../services/gdprAccountCleanup.js');
         await clearPersonalityProfileOnPasswordReset(id);
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'reset-password', id);
 
         res.json({ newPassword });
     } catch (error) {

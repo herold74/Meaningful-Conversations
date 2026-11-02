@@ -15,7 +15,7 @@ const makeRow = (overrides = {}) => ({
   endTypes: ['heard', 'heard', 'timeout'],
   language: 'de',
   liveMode: false,
-  createdAt: new Date('2026-07-20T10:00:00.000Z'),
+  createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
   ...overrides,
 });
 
@@ -73,7 +73,7 @@ describe('connectorStatsService', () => {
       developmentFieldsTouched: ['empathy', 'presence'],
       language: 'de',
       liveMode: false,
-      createdAt: new Date('2026-07-21T10:00:00.000Z'),
+      createdAt: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
     }));
     const stats = computeConnectorAdminStats(openRows, 10, { days: 90 });
 
