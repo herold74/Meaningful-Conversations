@@ -6,9 +6,10 @@ describe('contractingScenarios', () => {
     expect(CONTRACTING_SCENARIOS).toHaveLength(12);
   });
 
-  test('public catalog hides concern text', () => {
+  test('public catalog includes the concern and omits the hidden agenda', () => {
     const pub = getPublicContractingScenarios('en');
-    expect(pub[0].concern).toBeUndefined();
+    expect(pub[0].concern).toContain('parental leave');
+    expect(pub[0].hiddenAgenda).toBeUndefined();
     expect(pub[0].coacheeName).toBeTruthy();
   });
 
