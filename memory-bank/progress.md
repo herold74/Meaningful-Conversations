@@ -106,6 +106,7 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
+- [x] **Staging v2.6.0 (2026-11-02):** Build **70** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b70; deps/audit + Capacitor 8.6; from `bc497fec` + deploy `68094440`)
 - [x] **Staging v2.6.0 (2026-10-30):** Build **64** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b64; iOS manual voice save + dedupe; `3cf711e4`)
 - [x] **Staging v2.6.0 (2026-10-30):** Build **63** — superseded by b64
 - [x] **Staging v2.6.0 (2026-10-28):** Build **52** — superseded by b62 (Connector invisible server handoff + lightweight coach prep)

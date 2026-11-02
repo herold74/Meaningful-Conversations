@@ -1,8 +1,8 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0. Repo `BUILD_NUMBER` **68**. **Staging** Build **67**. **Production** Build **41**.
-**Staging:** v**2.6.0** Build **67** — https://mc-beta.manualmode.at (deploy 2026-10-30).
+**Version:** 2.6.0. Repo `BUILD_NUMBER` **70**. **Staging** Build **70**. **Production** Build **41**.
+**Staging:** v**2.6.0** Build **70** — https://mc-beta.manualmode.at (deploy 2026-11-02).
 **Production:** v**2.6.0** Build **41** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b41`). Behind staging until the next production deploy.
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with the repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`.
 **Standing rule:** Do not run staging login or E2EE maintenance without an explicit user request. The 2026-10-30 staging database was restored from `staging-20261030-050001.sql.gz` after an unauthorized password/profile rewrap.
