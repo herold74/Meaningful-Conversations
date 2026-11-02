@@ -213,12 +213,16 @@ const resetPasswordLimiter = rateLimit({
  * Global API rate limiter - Catch-all for unprotected endpoints
  * 60 requests per minute per IP (staging / production).
  * Development: skipped. TTS routes use ttsLimiter instead.
+ * /api/health is excluded so a busy client cannot starve the watchdog probe.
  */
 const globalApiLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
     max: 60,
-    skip: (req) =>
-        isDevEnvironment || req.originalUrl.startsWith('/api/tts'),
+    skip: (req) => {
+        if (isDevEnvironment) return true;
+        const path = String(req.originalUrl || '').split('?')[0];
+        return path.startsWith('/api/tts') || path === '/api/health';
+    },
     message: { 
         error: 'Too many requests. Please slow down.',
         errorCode: 'RATE_LIMIT_GLOBAL'

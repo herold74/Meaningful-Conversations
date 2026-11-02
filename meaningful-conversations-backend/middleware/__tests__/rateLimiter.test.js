@@ -159,13 +159,15 @@ describe('rate limiter configuration', () => {
     expect(config.max).toBe(10);
   });
 
-  it('globalApiLimiter has windowMs 1 min, max 60, and skips dev/TTS routes', () => {
+  it('globalApiLimiter has windowMs 1 min, max 60, and skips dev/TTS/health routes', () => {
     const config = capturedConfigs.find((c) => c.message?.errorCode === 'RATE_LIMIT_GLOBAL');
     expect(config).toBeDefined();
     expect(config.windowMs).toBe(60 * 1000);
     expect(config.max).toBe(60);
     expect(typeof config.skip).toBe('function');
     expect(config.skip({ originalUrl: '/api/tts/synthesize' })).toBe(true);
+    expect(config.skip({ originalUrl: '/api/health' })).toBe(true);
+    expect(config.skip({ originalUrl: '/api/health?watchdog=1' })).toBe(true);
     expect(config.skip({ originalUrl: '/api/auth/login' })).toBe(false);
   });
 
