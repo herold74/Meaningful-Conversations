@@ -12,10 +12,12 @@ Detail-Anleitung (ASC-Klicks ↔ Dateipfade): Project store `docs/asc-2.6.0-uplo
 |----------------|-------------|-----------|------|
 | **Kopfzeile** | `product-page-header/de/` | `manualmode-product-page-header-de.png` | **3840×1646** |
 | **Kopfzeile** | `product-page-header/en/` | `manualmode-product-page-header-en.png` | **3840×1646** |
-| **Suchergebnisse** | `universal/de/` | `manualmode-universal-de.png` | **5244×2950** |
-| **Suchergebnisse** | `universal/en/` | `manualmode-universal-en.png` | **5244×2950** |
+| **Suchergebnisse** | `search-results/de/` | `manualmode-search-de.png` | **3840×2560** (3:2) |
+| **Suchergebnisse** | `search-results/en/` | `manualmode-search-en.png` | **3840×2560** (3:2) |
 
-Generierung: `python3 scripts/compose-asc-product-page-header.py` → danach `python3 scripts/compose-asc-universal-asset.py`
+Nicht `universal/` (5244×2950) ins Suchfeld — der Streifen schneidet die Textbox ab.
+
+Generierung: `python3 scripts/compose-asc-product-page-header.py` (Kopfzeile) · `python3 scripts/compose-asc-universal-asset.py` (Suche)
 
 ---
 
