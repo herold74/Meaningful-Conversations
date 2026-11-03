@@ -209,6 +209,8 @@ def paint_card(
     sub_ratio: float = 0.42,
     pad: int = 48,
     anchor: str = "center",
+    shift_x: float = 0,
+    shift_y: float = 0,
 ) -> Image.Image:
     """Draw the headline card so the whole rounded box stays inside `bounds`."""
     meta = COPY[locale]
@@ -235,11 +237,12 @@ def paint_card(
     block_h = title_h * len(lines) + 28 + body_h
     box_w = min(inner_w, int(_text_width(longest, title_font)) + 8) + pad * 2
     box_h = block_h + pad * 2
-    left = x0 + ((x1 - x0) - box_w) // 2
+    left = x0 + ((x1 - x0) - box_w) // 2 + int(box_w * shift_x)
     if anchor == "top":
         top = y0 + 8
     else:
         top = y0 + ((y1 - y0) - box_h) // 2
+    top += int(box_h * shift_y)
     box = (left, top, left + box_w, top + box_h)
 
     scrim = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
