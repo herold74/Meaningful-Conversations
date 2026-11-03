@@ -1,59 +1,46 @@
 # App Store Connect — Upload-Assets (v2.6.0)
 
-**Quelle der Wahrheit für ASC-Upload** (iPhone). Masters zum Bearbeiten: `../iphone/` (1284×2778).
+Masters (Bearbeitung): `../iphone/` (**1284×2778** — **nicht** in ASC hochladen).
 
-## iPhone — Dynamic Island (Mitteldisplay, 6,1″ / 6,3″)
+Detail-Anleitung (ASC-Klicks ↔ Dateipfade): Project store `docs/asc-2.6.0-upload-anleitung.md`.
 
-| Ordner | Maße | ASC-Tab |
-|--------|------|---------|
-| `iphone-dynamic-island-medium/de/` | **1179 × 2556** | Deutsch → Screenshots hochladen |
-| `iphone-dynamic-island-medium/en/` | **1179 × 2556** | English (Canada) |
+---
 
-**Nicht** die Dateien aus `../iphone/` (1284×2778) in diesen Tab ziehen — ASC meldet „Dateiabmessungen ungültig“.
+## Tab „Kopfzeile und Suchergebnisse“ (zwei getrennte Felder)
 
-Optional größerer iPhone-Tab: `iphone-dynamic-island-large/{de|en}/` (**1320 × 2868**) — nur wenn ASC den Slot verlangt (`export-asc-iphone-upload.py --also-large`).
+| ASC-Unterpunkt | Repo-Ordner | Dateiname | Maße |
+|----------------|-------------|-----------|------|
+| **Kopfzeile** | `product-page-header/de/` | `manualmode-product-page-header-de.png` | **3840×1646** |
+| **Kopfzeile** | `product-page-header/en/` | `manualmode-product-page-header-en.png` | **3840×1646** |
+| **Suchergebnisse** | `universal/de/` | `manualmode-universal-de.png` | **5244×2950** |
+| **Suchergebnisse** | `universal/en/` | `manualmode-universal-en.png` | **5244×2950** |
 
-## Product page header (optional, 21:9)
+Generierung: `python3 scripts/compose-asc-product-page-header.py` → danach `python3 scripts/compose-asc-universal-asset.py`
 
-Breites Hero-Bild **über** Icon & Name auf der Produktseite.
+---
 
-| Ordner | Maße | ASC |
-|--------|------|-----|
-| `product-page-header/de/` | **3840 × 1646** (21:9) | Deutsch → Placement **nur Kopfzeile** |
-| `product-page-header/en/` | **3840 × 1646** | English (Canada) |
+## Tab „App-Vorschauen und Bildschirmfotos“
 
-**Inhalt:** Café-Szene (Lifestyle). Headline „Coaching, wo Sie sind.“ / „Coaching where you are.“ · Untertitel „Jederzeit. Persönlich. Privat.“ / „Anytime. Personal. Private.“  
-Generierung: `python3 scripts/compose-asc-product-page-header.py`
+### iPhone Dynamic Island (6,1″ / 6,3″)
 
-## Universal (Kopfzeile + Suche, ein Bild)
+| Ordner | Maße | Anzahl |
+|--------|------|--------|
+| `iphone-dynamic-island-medium/de/` | **1179×2556** | 9 (`00`–`08`) |
+| `iphone-dynamic-island-medium/en/` | **1179×2556** | 9 |
 
-| Ordner | Maße | ASC |
-|--------|------|-----|
-| `universal/de/` | **5244 × 2950** PNG, 16:9, ohne Alpha | Deutsch → Tab **Kopfzeile und Suchergebnisse** (Header + Suche) |
-| `universal/en/` | **5244 × 2950** | English (Canada) |
+Optional: `iphone-dynamic-island-large/{de|en}/` (**1320×2868**) — nur wenn ASC den Tab verlangt.
 
-Safe Area **1402 × 962** bei (1921, 660). Generierung: `python3 scripts/compose-asc-universal-asset.py`
+Export: `python3 scripts/frame-asc-marketing-device.py v260` → `python3 scripts/export-asc-iphone-upload.py` (`--also-large` optional)
 
-## iPad 13″
+### iPad 13″
 
-`../ipad/*-{de|en}.png` (**2048 × 2732**) im Tab **iPad 13″ Display** (8 Slides je Sprache, ohne Voice).
+| Ordner | Maße | Anzahl |
+|--------|------|--------|
+| `../ipad/DE/` | **2048×2732** | 8 |
+| `../ipad/EN/` | **2048×2732** | 8 |
 
-## Neu generieren
+Karussell-Reihenfolge: `../README.md` (Lifestyle → … → Themes).
 
-```bash
-python3 scripts/frame-asc-marketing-device.py v260
-python3 scripts/export-asc-iphone-upload.py
-python3 scripts/export-asc-iphone-upload.py --also-large   # optional
-python3 scripts/compose-asc-product-page-header.py
-python3 scripts/compose-asc-universal-asset.py
-```
+---
 
-## Apple — Asset Best Practices (Kurz)
-
-[Richtlinie](https://developer.apple.com/app-store/asset-best-practices/) · PNG RGB ohne Alpha · DE + EN (Canada) getrennt · keine Preise/URLs in Screenshots.
-
-## Karussell-Reihenfolge (00–08)
-
-Siehe [`../README.md`](../README.md) — Lifestyle → Brand → Connector → Radar → Coaches → Voice → Chat → Practice → Themes.
-
-Metadaten: `DOCUMENTATION/APP-STORE-METADATA.md`, Project store `docs/asc-2.6.0-einreichung-texte.md`.
+Metadaten: `DOCUMENTATION/APP-STORE-METADATA.md`
