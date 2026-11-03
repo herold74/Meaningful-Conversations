@@ -200,36 +200,46 @@ def scene(locale: str) -> Image.Image:
     return rescreen(canvas, locale).convert("RGBA")
 
 
-def paint_card(canvas: Image.Image, bounds: tuple[int, int, int, int], locale: str) -> Image.Image:
+def paint_card(
+    canvas: Image.Image,
+    bounds: tuple[int, int, int, int],
+    locale: str,
+    *,
+    max_title: int = 360,
+    sub_ratio: float = 0.42,
+    pad: int = 48,
+    anchor: str = "center",
+) -> Image.Image:
     """Draw the headline card so the whole rounded box stays inside `bounds`."""
     meta = COPY[locale]
     x0, y0, x1, y1 = bounds
-    pad = 48
     inner_w = max(80, (x1 - x0) - pad * 2)
     inner_h = max(80, (y1 - y0) - pad * 2)
     lines = [ln.strip() for ln in meta["headline"].split("\n") if ln.strip()]
     longest = max(lines, key=len)
     title_font = body_font = None
     title_h = body_h = 0
-    for size in range(360, 48, -2):
+    for size in range(max_title, 48, -2):
         title_font = load_font(TITLE_FONT, size)
-        body_font = load_font(BODY_FONT, max(40, int(size * 0.42)))
+        body_font = load_font(BODY_FONT, max(32, int(size * sub_ratio)))
         if _text_width(longest, title_font) > inner_w:
             continue
         if _text_width(meta["sub"], body_font) > inner_w:
             continue
-        title_h = int(size * 1.08)
-        body_h = int(body_font.size * 1.25)
-        block_h = title_h * len(lines) + 36 + body_h
+        title_h = int(size * 1.05)
+        body_h = int(body_font.size * 1.2)
+        block_h = title_h * len(lines) + 28 + body_h
         if block_h <= inner_h:
             break
     assert title_font and body_font
-    block_h = title_h * len(lines) + 36 + body_h
-    box_w = inner_w + pad * 2
+    block_h = title_h * len(lines) + 28 + body_h
+    box_w = min(inner_w, int(_text_width(longest, title_font)) + 8) + pad * 2
     box_h = block_h + pad * 2
-    # Center the card in the safe area so nothing clips.
     left = x0 + ((x1 - x0) - box_w) // 2
-    top = y0 + ((y1 - y0) - box_h) // 2
+    if anchor == "top":
+        top = y0 + 8
+    else:
+        top = y0 + ((y1 - y0) - box_h) // 2
     box = (left, top, left + box_w, top + box_h)
 
     scrim = Image.new("RGBA", canvas.size, (0, 0, 0, 0))

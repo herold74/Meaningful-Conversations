@@ -61,11 +61,16 @@ def place(locale: str, guides: bool) -> Image.Image:
     hdr = _header()
     canvas = cover(hdr.scene(locale).convert("RGB"), W, H).convert("RGBA")
     sx, sy, sw, sh = SAFE
-    margin = 72
+    # iPhone search shows a shorter strip than the template box. Keep the
+    # card in the upper part so the subtitle is not cut off.
     canvas = hdr.paint_card(
         canvas,
-        (sx + margin, sy + margin, sx + sw - margin, sy + sh - margin),
+        (sx + 80, sy + 12, sx + sw - 80, sy + int(sh * 0.72)),
         locale,
+        max_title=210,
+        sub_ratio=0.36,
+        pad=32,
+        anchor="top",
     )
     if guides:
         ImageDraw.Draw(canvas).rectangle(
