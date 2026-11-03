@@ -6,11 +6,13 @@ Store-Karussell braucht **eine Zeile Claim + großes Motiv**. Lange Feedback-Tex
 
 | Ansatz | Verwenden für ASC `iphone/` |
 |--------|------------------------------|
-| **Marketing-Slide** (Teal/Orange, Headline, optional Lifestyle) | Ja — Hauptformat |
+| **Marketing-Slide** (Teal/Orange, Headline, optional Lifestyle) | Ja — Master in `iphone/` |
 | **Echter UI-Crop** im Phone-Rahmen | Ja — Radar, David-Modal, Practice-Setup |
 | **Roher Vollbild-Screenshot** (nur Text/Chips) | Nein — nur als `_source/` für Crops |
 
-**ASC-Upload:** nur **`iphone/*-{de|en}.png`** · **1284×2778** · PNG.
+**ASC-Upload (iPhone):** `asc-upload/iphone-dynamic-island-medium/{de|en}/` · **1179×2556** · PNG RGB ohne Alpha.  
+**Masters (Compositing):** `iphone/*-{de|en}.png` · **1284×2778**.  
+Regenerieren: `python3 scripts/frame-asc-marketing-device.py v260` → `python3 scripts/export-asc-iphone-upload.py` — Details [`asc-upload/README.md`](asc-upload/README.md).
 
 **Quellen:** Slides 01–05 + 07 = **iPhone `IMG_*.PNG`** (kein Browser). Slide 06 = Theme-Captures (Ausnahme). Statusleiste (Uhrzeit/Empfang/Batterie) wird beim Framing **neutralisiert** — siehe `_source/README.md`.
 
@@ -19,8 +21,9 @@ Store-Karussell braucht **eine Zeile Claim + großes Motiv**. Lange Feedback-Tex
 | Pfad | Inhalt |
 |------|--------|
 | `_source/` | Vollauflösung aus Fotos / iPhone (unbearbeitet) — siehe `_source/README.md` |
-| `iphone/` | Fertige Store-Slides nach Compositing |
-| `moodboard-{de\|en}.png` | Alle 7 Slides im Raster (Optik-Review Chrome hell vs. saisonal) — `python3 scripts/build-asc-moodboard.py` |
+| `iphone/` | **Masters** nach Compositing (**1284×2778**) — nicht direkt in ASC 6,3″-Tab |
+| `asc-upload/` | **Upload-fertig** für ASC — siehe [`asc-upload/README.md`](asc-upload/README.md) |
+| `moodboard-{de\|en}.png` | Alle Slides im Raster (Optik-Review) — `python3 scripts/build-asc-moodboard.py` |
 | `ipad/` | **2048×2732** — gleiche Story wie iPhone; Slide **00** aus `IMG_1556.JPG` (Café + iPad) |
 
 ## 5-Slides-Set (iPhone 6,7″)
@@ -139,9 +142,8 @@ Production-Archive-Screens: `npm run build && npx cap sync ios` → Simulator **
 
 ## Check vor Upload
 
-- [ ] Alle `iphone/*.png` exakt **1284×2778**
-- [ ] DE- und EN-Satz **gleiche Anzahl** Slides
-- [ ] Connector **Radar** auf mindestens einer Slide klar erkennbar (Slide 2: Zoom-Karte + Device)
-- [ ] **Panorama 1↔2:** im ASC-Karussell wischen — Verlauf und iPhone-Kante ohne Sprung
-- [ ] Keine 1179×2556-Rohdateien direkt in ASC hochladen
-- [ ] Disclaimer-Kleintext in Crops nicht als Hauptbotschaft
+- [ ] ASC-Tab **Dynamic Island (Mitteldisplay)** — Dateien aus `asc-upload/iphone-dynamic-island-medium/{de|en}/` (**1179×2556**)
+- [ ] DE- und EN-Satz **gleiche Anzahl** Slides (00–08)
+- [ ] Connector **Radar** auf mindestens einer Slide klar erkennbar
+- [ ] Keine Preise/URLs in Headlines (Apple Best Practices)
+- [ ] **Nicht** `moodboard-*.png` oder `iphone/` 1284×2778 in den 6,3″-Tab ziehen

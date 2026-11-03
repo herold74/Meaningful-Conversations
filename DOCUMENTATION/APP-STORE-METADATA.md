@@ -287,7 +287,7 @@ LANGUAGE: Primary store metadata German; full English in-app via Welcome screen 
 
 **In ASC:** Version **2.6.0** anlegen → Build aus Xcode wählen (z. B. **2.6.0 (48)** nach Upload/Processing; `CURRENT_PROJECT_VERSION` = Repo-`BUILD_NUMBER`). Pro Lokalisierung **Deutsch** und **Englisch (Kanada)** unter „Was ist neu in dieser Version“ einfügen.
 
-**Screenshots (Stand 2026-10-25):** `screenshots/app-store/v2.6.0/iphone/` — **9×** `1284×2778` je **Deutsch** und **Englisch (Kanada)** (`01`–`09`). Übersicht: `moodboard-de.png` / `moodboard-en.png`. Apple verlangt min. **3** — Set ist upload-fertig.
+**Screenshots (Stand 2026-11):** ASC-Upload **`screenshots/app-store/v2.6.0/asc-upload/iphone-dynamic-island-medium/{de|en}/`** — **9×** **1179×2556** je **Deutsch** und **Englisch (Kanada)** (`00`–`08`). Masters: `iphone/` (1284×2778). Generierung: `frame-asc-marketing-device.py v260` + `export-asc-iphone-upload.py`. Apple verlangt min. **3** — Set ist upload-fertig.
 
 **Store-Beschreibung (optional, nicht zwingend pro Release):** Wenn ihr die lange Beschreibung aktualisiert, Abschnitt **„Beschreibung — Ergänzung 2.6.0“** unten in DE + EN einfügen.
 
