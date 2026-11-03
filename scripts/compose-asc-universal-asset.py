@@ -47,19 +47,28 @@ def _header():
     return mod
 
 
-def cover(src: Image.Image, tw: int, th: int) -> Image.Image:
-    scale = max(tw / src.width, th / src.height)
-    plate = src.resize((round(src.width * scale), round(src.height * scale)), Image.Resampling.LANCZOS)
-    left = (plate.width - tw) // 2
-    top = max(0, (plate.height - th) // 3)
-    top = min(top, plate.height - th)
-    return plate.crop((left, top, left + tw, top + th))
+# Window into the portrait café slide (1320×2868): hands and phone, no face.
+# x, y, width — height follows the 3:2 frame.
+# Full phone including the top bezel, both hands, cup. No face or hair.
+PHOTO_WINDOW = (200, 1380, 1120)
+
+
+def photo(locale: str) -> Image.Image:
+    """Hands and phone, higher in the frame, cheek cropped out."""
+    hdr = _header()
+    slide = hdr.CAFE / locale / hdr.COPY[locale]["slide"]
+    if not slide.is_file():
+        raise SystemExit(f"Missing café slide: {slide}")
+    im = Image.open(slide).convert("RGB")
+    x, y, w = PHOTO_WINDOW
+    h = round(w * H / W)
+    return im.crop((x, y, x + w, y + h)).resize((W, H), Image.Resampling.LANCZOS)
 
 
 def place(locale: str, guides: bool) -> Image.Image:
     """Café full-bleed; headline card entirely inside the search safe area."""
     hdr = _header()
-    canvas = cover(hdr.scene(locale).convert("RGB"), W, H).convert("RGBA")
+    canvas = photo(locale).convert("RGBA")
     sx, sy, sw, sh = SAFE
     # iPhone search shows a shorter strip than the template box. Keep the
     # card in the upper part so the subtitle is not cut off.
