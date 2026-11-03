@@ -11,62 +11,49 @@
 
 **Nicht** die Dateien aus `../iphone/` (1284×2778) in diesen Tab ziehen — ASC meldet „Dateiabmessungen ungültig“.
 
-## Product page header (iOS 27+, optional)
+Optional größerer iPhone-Tab: `iphone-dynamic-island-large/{de|en}/` (**1320 × 2868**) — nur wenn ASC den Slot verlangt (`export-asc-iphone-upload.py --also-large`).
+
+## Product page header (optional, 21:9)
 
 Breites Hero-Bild **über** Icon & Name auf der Produktseite.
 
 | Ordner | Maße | ASC |
 |--------|------|-----|
-| `product-page-header/de/` | **3840 × 1646** (21:9) | Deutsch → **Product page header** |
+| `product-page-header/de/` | **3840 × 1646** (21:9) | Deutsch → Placement **nur Kopfzeile** |
 | `product-page-header/en/` | **3840 × 1646** | English (Canada) |
 
-**Inhalt:** Café-Szene (Lifestyle-Slide, Ausschnitt mit Blick und Coaching-Chat). Headline „Coaching, wo Sie sind.“ / „Coaching where you are.“ Untertitel: „Jederzeit. Persönlich. Privat.“ / „Anytime. Personal. Private.“  
-Generierung: `python3 scripts/compose-asc-product-page-header.py` (optional `--guides`).  
-Upload unter **Produktseiten-Informationen → Header und Suchergebnisse** — Placement **nur Header**, nicht Search Results (3:2).
+**Inhalt:** Café-Szene (Lifestyle). Headline „Coaching, wo Sie sind.“ / „Coaching where you are.“ · Untertitel „Jederzeit. Persönlich. Privat.“ / „Anytime. Personal. Private.“  
+Generierung: `python3 scripts/compose-asc-product-page-header.py`
 
-## Universal (Header + Suche, ein Bild)
+## Universal (Kopfzeile + Suche, ein Bild)
 
 | Ordner | Maße | ASC |
 |--------|------|-----|
-| `universal/de/` | **5244 × 2950** PNG, 16:9, ohne Alpha | Deutsch → **universelles Creative Asset** |
+| `universal/de/` | **5244 × 2950** PNG, 16:9, ohne Alpha | Deutsch → Tab **Kopfzeile und Suchergebnisse** (Header + Suche) |
 | `universal/en/` | **5244 × 2950** | English (Canada) |
 
-Ein Bild für Produktseiten-Header und Suchergebnisse. Safe Area **1402 × 962** bei (1921, 660) — Textkarte oben, Café-Telefon darunter.  
-Generierung: `python3 scripts/compose-asc-universal-asset.py`
+Safe Area **1402 × 962** bei (1921, 660). Generierung: `python3 scripts/compose-asc-universal-asset.py`
 
 ## iPad 13″
 
-Unverändert: `../ipad/*-{de|en}.png` (**2048 × 2732**) im Tab **iPad 13″ Display**.
+`../ipad/*-{de|en}.png` (**2048 × 2732**) im Tab **iPad 13″ Display** (8 Slides je Sprache, ohne Voice).
 
 ## Neu generieren
 
 ```bash
-# 1) Marketing-Masters (1284×2778)
 python3 scripts/frame-asc-marketing-device.py v260
-
-# 2) ASC-Upload-Sets (1179×2556, RGB ohne Alpha)
 python3 scripts/export-asc-iphone-upload.py
-
-# Optional: großer Dynamic-Island-Tab (1320×2868)
-python3 scripts/export-asc-iphone-upload.py --also-large
-
-# Product page header (3840×1646, DE + EN)
+python3 scripts/export-asc-iphone-upload.py --also-large   # optional
 python3 scripts/compose-asc-product-page-header.py
+python3 scripts/compose-asc-universal-asset.py
 ```
 
 ## Apple — Asset Best Practices (Kurz)
 
-Richtlinie: [App Store asset best practices](https://developer.apple.com/app-store/asset-best-practices/)
-
-| Do | Don't (in Screenshots) |
-|----|-------------------------|
-| Echte App-UI / euer Marketing-Layout | Konkrete Preise, Rabatte |
-| Kurze Headlines, gut lesbar (Safe Area oben) | Website-URLs, Copyright-Zeichen |
-| DE + EN (Canada) getrennt hochladen | Falsche App-Store-Auszeichnungen |
-| PNG RGB, **ohne** Transparenz | 1284×2778 in den 6,3″-Tab |
-
-**App-Vorschauen (Video):** separate Slots (886×1920 / 1920×886) — optional, nicht in diesem Ordner.
+[Richtlinie](https://developer.apple.com/app-store/asset-best-practices/) · PNG RGB ohne Alpha · DE + EN (Canada) getrennt · keine Preise/URLs in Screenshots.
 
 ## Karussell-Reihenfolge (00–08)
 
 Siehe [`../README.md`](../README.md) — Lifestyle → Brand → Connector → Radar → Coaches → Voice → Chat → Practice → Themes.
+
+Metadaten: `DOCUMENTATION/APP-STORE-METADATA.md`, Project store `docs/asc-2.6.0-einreichung-texte.md`.
