@@ -15,8 +15,6 @@ Detail-Anleitung (ASC-Klicks ↔ Dateipfade): Project store `docs/asc-2.6.0-uplo
 | **Suchergebnisse** | `search-results/de/` | `manualmode-search-de.png` | **3840×2560** (3:2) |
 | **Suchergebnisse** | `search-results/en/` | `manualmode-search-en.png` | **3840×2560** (3:2) |
 
-Nicht `universal/` (5244×2950) ins Suchfeld — der Streifen schneidet die Textbox ab.
-
 Generierung: `python3 scripts/compose-asc-product-page-header.py` (Kopfzeile) · `python3 scripts/compose-asc-universal-asset.py` (Suche)
 
 ---
