@@ -9,7 +9,8 @@ bezel's transparent display opening, so nothing shows outside the device silhoue
 Usage:
   python3 scripts/frame-asc-marketing-device.py v254        # 8× DE → v2.5.4/iphone-framed/
   python3 scripts/frame-asc-marketing-device.py v254 --all  # + 09–10 practice
-  python3 scripts/frame-asc-marketing-device.py v260        # 01–07 DE + EN → v2.6.0/iphone/
+  python3 scripts/frame-asc-marketing-device.py v260        # 00–08 DE + EN → v2.6.0/iphone/ (1284×2778 masters)
+  python3 scripts/export-asc-iphone-upload.py             # ASC upload 1179×2556 → asc-upload/.../de|en/
   python3 scripts/frame-asc-marketing-device.py v260-ipad   # 00–07 DE + EN → v2.6.0/ipad/ (2048×2732)
 
 Requires the frameit frames once: `brew install fastlane && fastlane frameit download_frames`.
