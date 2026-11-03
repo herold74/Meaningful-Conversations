@@ -62,8 +62,21 @@ COPY = {
     },
 }
 
-TITLE_FONT = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
-BODY_FONT = Path("/System/Library/Fonts/Supplemental/Arial.ttf")
+def _first_font(*candidates: Path) -> Path:
+    for path in candidates:
+        if path.is_file():
+            return path
+    return candidates[-1]
+
+
+TITLE_FONT = _first_font(
+    Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
+    Path("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
+)
+BODY_FONT = _first_font(
+    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+    Path("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"),
+)
 
 
 def load_font(path: Path, size: int) -> ImageFont.FreeTypeFont:
@@ -177,46 +190,82 @@ def _fit_font(text: str, path: Path, max_w: int, max_size: int = 240) -> ImageFo
     return load_font(path, best)
 
 
-def compose(locale: str, guides: bool = False) -> Image.Image:
+def scene(locale: str) -> Image.Image:
+    """Café + phone, no headline card."""
     meta = COPY[locale]
     slide = CAFE / locale / meta["slide"]
     if not slide.is_file():
         raise SystemExit(f"Missing café slide: {slide}")
     canvas = cafe_frame(slide).convert("RGB")
-    canvas = rescreen(canvas, locale).convert("RGBA")
-    sx, sy, sw, sh = SAFE_X, SAFE_Y, SAFE_W, SAFE_H
+    return rescreen(canvas, locale).convert("RGBA")
 
-    # Box stays in the safe area, left of the phone.
-    pad = 36
-    box = (sx + 4, sy + 28, sx + int(sw * 0.78), sy + sh - 36)
-    inner_w = box[2] - box[0] - pad * 2
+
+def paint_card(canvas: Image.Image, bounds: tuple[int, int, int, int], locale: str) -> Image.Image:
+    """Draw the headline card so the whole rounded box stays inside `bounds`."""
+    meta = COPY[locale]
+    x0, y0, x1, y1 = bounds
+    pad = 48
+    inner_w = max(80, (x1 - x0) - pad * 2)
+    inner_h = max(80, (y1 - y0) - pad * 2)
     lines = [ln.strip() for ln in meta["headline"].split("\n") if ln.strip()]
-    title_font = _fit_font(max(lines, key=len), TITLE_FONT, inner_w)
-    body_font = _fit_font(meta["sub"], BODY_FONT, inner_w)
-    title_h = int(title_font.size * 1.02)
-    body_h = int(body_font.size * 1.15)
+    longest = max(lines, key=len)
+    title_font = body_font = None
+    title_h = body_h = 0
+    for size in range(360, 48, -2):
+        title_font = load_font(TITLE_FONT, size)
+        body_font = load_font(BODY_FONT, max(40, int(size * 0.42)))
+        if _text_width(longest, title_font) > inner_w:
+            continue
+        if _text_width(meta["sub"], body_font) > inner_w:
+            continue
+        title_h = int(size * 1.08)
+        body_h = int(body_font.size * 1.25)
+        block_h = title_h * len(lines) + 36 + body_h
+        if block_h <= inner_h:
+            break
+    assert title_font and body_font
     block_h = title_h * len(lines) + 36 + body_h
-    box = (box[0], box[1], box[2], box[1] + block_h + pad * 2 + 8)
+    box_w = inner_w + pad * 2
+    box_h = block_h + pad * 2
+    # Center the card in the safe area so nothing clips.
+    left = x0 + ((x1 - x0) - box_w) // 2
+    top = y0 + ((y1 - y0) - box_h) // 2
+    box = (left, top, left + box_w, top + box_h)
 
     scrim = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    ImageDraw.Draw(scrim).rounded_rectangle(box, radius=32, fill=(255, 248, 240, 188))
-    scrim = scrim.filter(ImageFilter.GaussianBlur(10))
+    ImageDraw.Draw(scrim).rounded_rectangle(box, radius=36, fill=(255, 248, 240, 210))
+    scrim = scrim.filter(ImageFilter.GaussianBlur(8))
     canvas = Image.alpha_composite(canvas, scrim)
 
     draw = ImageDraw.Draw(canvas)
     x = box[0] + pad
-    y = box[1] + pad - 4
+    y = box[1] + pad
     for line in lines:
         draw.text((x, y), line, fill=INK, font=title_font)
         y += title_h
-    y += 6
-    draw.rounded_rectangle((x, y, x + min(220, inner_w // 3), y + 8), radius=4, fill=ACCENT)
-    y += 22
+    y += 8
+    draw.rounded_rectangle((x, y, x + min(320, inner_w // 3), y + 12), radius=6, fill=ACCENT)
+    y += 28
     draw.text((x, y), meta["sub"], fill=MUTED, font=body_font)
+    return canvas
 
+
+def compose(locale: str, guides: bool = False) -> Image.Image:
+    canvas = scene(locale)
+    inset = 12
+    bounds = (
+        SAFE_X + inset,
+        SAFE_Y + inset,
+        SAFE_X + SAFE_W - inset,
+        SAFE_Y + SAFE_H - inset,
+    )
+    canvas = paint_card(canvas, bounds, locale)
     if guides:
-        draw.rectangle((sx, sy, sx + sw, sy + sh), outline=(255, 0, 128), width=4)
-
+        ImageDraw.Draw(canvas).rectangle(
+            (SAFE_X, SAFE_Y, SAFE_X + SAFE_W, SAFE_Y + SAFE_H),
+            outline=(255, 0, 128),
+            width=4,
+        )
     return canvas.convert("RGB")
 
 
