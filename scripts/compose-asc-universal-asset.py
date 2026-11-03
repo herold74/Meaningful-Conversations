@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-Search-results creative (5244×2950).
+Search-results creative (3:2).
 
-The café scene fills the frame. The headline card is drawn so the whole box
-sits inside Apple's safe area (the search-result spacer).
+Apple's search card is 3:2, not the 16:9 universal image. A 5244×2950 file
+gets cropped to a short strip and the headline is cut off.
+
+Canvas: 3840 × 2560. Safe area (Apple template): 2168 × 1030 at (836, 765).
+The whole headline card stays inside that box.
 
 Usage:
   python3 scripts/compose-asc-universal-asset.py
@@ -22,15 +25,15 @@ import importlib.util
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "screenshots" / "app-store" / "v2.6.0"
-OUT_ROOT = BASE / "asc-upload" / "universal"
+OUT_ROOT = BASE / "asc-upload" / "search-results"
 
-W, H = 5244, 2950
-# Apple search-result safe area — the whole headline card must stay inside this.
-SAFE = (1921, 660, 1402, 962)
+W, H = 3840, 2560
+# Apple search-results safe area on the 3840×2560 template.
+SAFE = (836, 765, 2168, 1030)
 
 FILES = {
-    "de": "manualmode-universal-de.png",
-    "en": "manualmode-universal-en.png",
+    "de": "manualmode-search-de.png",
+    "en": "manualmode-search-en.png",
 }
 
 
@@ -58,7 +61,7 @@ def place(locale: str, guides: bool) -> Image.Image:
     hdr = _header()
     canvas = cover(hdr.scene(locale).convert("RGB"), W, H).convert("RGBA")
     sx, sy, sw, sh = SAFE
-    margin = 16
+    margin = 72
     canvas = hdr.paint_card(
         canvas,
         (sx + margin, sy + margin, sx + sw - margin, sy + sh - margin),
@@ -102,7 +105,7 @@ def main() -> None:
         img.save(dest, "PNG", optimize=True)
         validate(dest)
         print(f"  ✓ {dest.relative_to(ROOT)}  ({W}×{H})")
-    print("\nSearch slot: headline card is fully inside the safe area.")
+    print("\nSearch slot is 3:2 (3840×2560), not the 16:9 universal file.")
     print("Upload: Kopfzeile und Suchergebnisse → Suchergebnisse")
 
 
