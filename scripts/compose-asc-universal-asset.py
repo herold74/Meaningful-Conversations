@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Universal creative asset from the approved 21:9 product-page header.
+Search-results creative (5244×2950).
 
-The approved 21:9 header is scaled up and cropped to 5244×2950. One sharp picture —
-no second blurred layer above or below.
+The café scene fills the frame. The headline card is drawn so the whole box
+sits inside Apple's safe area (the search-result spacer).
 
 Usage:
   python3 scripts/compose-asc-universal-asset.py
@@ -18,47 +18,57 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
+import importlib.util
+
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "screenshots" / "app-store" / "v2.6.0"
-HEADER = BASE / "asc-upload" / "product-page-header"
 OUT_ROOT = BASE / "asc-upload" / "universal"
 
 W, H = 5244, 2950
+# Apple search-result safe area — the whole headline card must stay inside this.
 SAFE = (1921, 660, 1402, 962)
 
-# Headline ink on the approved header (measured on the DE master).
-TEXT_BOX = (1139, 590, 2323, 956)
-
 FILES = {
-    "de": ("manualmode-product-page-header-de.png", "manualmode-universal-de.png"),
-    "en": ("manualmode-product-page-header-en.png", "manualmode-universal-en.png"),
+    "de": "manualmode-universal-de.png",
+    "en": "manualmode-universal-en.png",
 }
 
 
-def place_header(src: Image.Image, locale: str) -> Image.Image:
-    """Cover-crop the approved header. Sharp edge to edge; headline pulled into the safe area."""
-    del locale  # DE and EN share the same crop; the artwork already differs.
-    sx, sy, sw, sh = SAFE
-    x0, y0, x1, y1 = TEXT_BOX
-    safe_bottom = sy + sh - 20
-    # Scale past a plain cover so the subline can move up into the safe area
-    # without leaving a gap. Everything stays the sharp header — no blur pass.
-    scale = max(
-        W / src.width,
-        H / src.height,
-        (H - safe_bottom) / (src.height - y1),
+def _header():
+    spec = importlib.util.spec_from_file_location(
+        "asc_header", ROOT / "scripts" / "compose-asc-product-page-header.py"
     )
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def cover(src: Image.Image, tw: int, th: int) -> Image.Image:
+    scale = max(tw / src.width, th / src.height)
     plate = src.resize((round(src.width * scale), round(src.height * scale)), Image.Resampling.LANCZOS)
+    left = (plate.width - tw) // 2
+    top = max(0, (plate.height - th) // 3)
+    top = min(top, plate.height - th)
+    return plate.crop((left, top, left + tw, top + th))
 
-    text_cx = (x0 + x1) / 2 * scale
-    crop_x = round(text_cx - (sx + sw / 2))
-    crop_x = max(0, min(crop_x, plate.width - W))
 
-    text_bottom = y1 * scale
-    crop_y = round(text_bottom - (sy + sh - 20))
-    crop_y = max(0, min(crop_y, plate.height - H))
-
-    return plate.crop((crop_x, crop_y, crop_x + W, crop_y + H))
+def place(locale: str, guides: bool) -> Image.Image:
+    """Café full-bleed; headline card entirely inside the search safe area."""
+    hdr = _header()
+    canvas = cover(hdr.scene(locale).convert("RGB"), W, H).convert("RGBA")
+    sx, sy, sw, sh = SAFE
+    margin = 16
+    canvas = hdr.paint_card(
+        canvas,
+        (sx + margin, sy + margin, sx + sw - margin, sy + sh - margin),
+        locale,
+    )
+    if guides:
+        ImageDraw.Draw(canvas).rectangle(
+            (sx, sy, sx + sw - 1, sy + sh - 1), outline=(255, 0, 128), width=6
+        )
+    return canvas.convert("RGB")
 
 
 def validate(path: Path) -> None:
@@ -85,21 +95,15 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--guides", action="store_true")
     args = parser.parse_args()
-    for locale, (src_name, out_name) in FILES.items():
-        src_path = HEADER / locale / src_name
-        if not src_path.is_file():
-            raise SystemExit(f"Missing approved header: {src_path}")
-        img = place_header(Image.open(src_path).convert("RGB"), locale)
-        if args.guides:
-            sx, sy, sw, sh = SAFE
-            ImageDraw.Draw(img).rectangle((sx, sy, sx + sw - 1, sy + sh - 1), outline=(255, 0, 128), width=6)
+    for locale, out_name in FILES.items():
+        img = place(locale, guides=args.guides)
         dest = OUT_ROOT / locale / out_name
         dest.parent.mkdir(parents=True, exist_ok=True)
         img.save(dest, "PNG", optimize=True)
         validate(dest)
         print(f"  ✓ {dest.relative_to(ROOT)}  ({W}×{H})")
-    print("\nSame artwork as the product-page header, framed for the universal slot.")
-    print("Upload: Header and Search Results → universal asset")
+    print("\nSearch slot: headline card is fully inside the safe area.")
+    print("Upload: Kopfzeile und Suchergebnisse → Suchergebnisse")
 
 
 if __name__ == "__main__":
