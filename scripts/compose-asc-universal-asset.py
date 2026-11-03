@@ -80,6 +80,8 @@ def place(locale: str, guides: bool) -> Image.Image:
         sub_ratio=0.36,
         pad=32,
         anchor="top",
+        shift_x=-0.5,
+        shift_y=-0.5,
     )
     if guides:
         ImageDraw.Draw(canvas).rectangle(
