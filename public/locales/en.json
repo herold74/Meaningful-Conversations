@@ -758,7 +758,7 @@
   "upgrade_premium_description": "Unlock all premium bots and advanced features.",
   "upgrade_premium_without_practice_description": "Premium — incl. Kenji, Chloe, dynamic profile, and more.",
   "upgrade_premium_plus_section": "Premium+",
-  "upgrade_premium_plus_description": "Premium including Coach Practice — one subscription, one renewal date (€14.90/month). Included in the 9-day trial.",
+  "upgrade_premium_plus_description": "Premium including Coach Practice — one subscription, one renewal date. Included in the 9-day trial.",
   "upgrade_premium_plus_upgrade_hint": "Upgrade from Premium: unused Premium time is credited on the price. Premium+ runs for 30 days from today.",
   "upgrade_premium_upgrade_badge": "Premium credit",
   "upgrade_premium_upgrade_detail": "{{credit}} Premium credit applied · Premium+ until {{date}} (30 days from today).",
