@@ -138,7 +138,8 @@ Production-Archive-Screens: `npm run build && npx cap sync ios` → Simulator **
 
 - Lokalisierung **English (Canada)** — nicht U.S. (`app-store-connect` Skill).
 - Copy „Was ist neu“: `DOCUMENTATION/APP-STORE-METADATA.md` (Block v2.6.0).
-- Mindestens **3** Screenshots pro Lokalisierung; empfohlen **5** wie oben.
+- **ASC-Upload:** `asc-upload/README.md` — Kopfzeile vs. Universal vs. iPad.
+- Mindestens **3** Screenshots pro Lokalisierung; empfohlen **9** Universal + **8** iPad wie oben.
 
 ## Check vor Upload
 
