@@ -72,7 +72,8 @@ log_line() {
 OVERALL=0
 DETAILS=""
 ACTIONS=()
-SUMMARY_BACKUP="OK"
+SUMMARY_BACKUP_PROD="OK"
+SUMMARY_BACKUP_STAGING="OK"
 SUMMARY_PROD="OK"
 SUMMARY_STAGING="—"
 SUMMARY_DISK="OK"
@@ -101,10 +102,60 @@ add_action() {
   ACTIONS+=("[$level] $what — $todo")
 }
 
+# Newest dump for one environment across BACKUP_DIRS. Echoes the path, or nothing.
+latest_backup_for_env() {
+  local env_name="$1" dir candidate latest="" latest_mtime=0 mtime
+  for dir in "${BACKUP_DIRS[@]}"; do
+    [[ -d "$dir" ]] || continue
+    while IFS= read -r -d '' candidate; do
+      mtime=$(stat -c %Y "$candidate" 2>/dev/null || stat -f %m "$candidate")
+      if [[ "$mtime" -gt "$latest_mtime" ]]; then
+        latest=$candidate
+        latest_mtime=$mtime
+      fi
+    done < <(find "$dir" -maxdepth 1 -type f \( -name "${env_name}-*.sql.gz" -o -name "${env_name}-*.sql" \) -print0 2>/dev/null)
+  done
+  printf '%s' "$latest"
+}
+
+# Sets ASSESS_SUMMARY. Age, size, and gzip are checked for this file only.
+assess_backup_file() {
+  local env_name="$1" latest="$2"
+  local age_hours size base problems=() reason
+  age_hours=$(( ( $(date +%s) - $(stat -c %Y "$latest" 2>/dev/null || stat -f %m "$latest") ) / 3600 ))
+  size=$(stat -c %s "$latest" 2>/dev/null || stat -f %z "$latest")
+  base=$(basename "$latest")
+
+  if [[ "$age_hours" -gt "$BACKUP_MAX_AGE_HOURS" ]]; then
+    problems+=("älter als ${BACKUP_MAX_AGE_HOURS}h")
+    add_action "FAIL" "DB-Backup ${env_name} zu alt (${age_hours}h)" "SSH: /usr/local/bin/backup-databases.sh; $latest prüfen"
+  fi
+  if [[ "$size" -lt "$BACKUP_MIN_BYTES" ]]; then
+    problems+=("Datei zu klein")
+    add_action "FAIL" "Backup ${env_name} zu klein (${size}B)" "Dump/DB prüfen; backup-databases.sh Log lesen"
+  fi
+  if [[ "$latest" == *.gz ]] && command -v gzip >/dev/null; then
+    if ! gzip -t "$latest" 2>/dev/null; then
+      problems+=("gzip defekt")
+      add_action "FAIL" "Backup ${env_name} gzip-Integrität" "SSH: gzip -t $latest; neues Backup erzeugen"
+    fi
+  fi
+
+  if [[ ${#problems[@]} -eq 0 ]]; then
+    append "OK ${env_name}: ${base} age=${age_hours}h size=${size}B"
+    ASSESS_SUMMARY="OK (${age_hours}h, ${base})"
+    return 0
+  fi
+
+  bump_status FAIL
+  reason=$(IFS=', '; echo "${problems[*]}")
+  append "FAIL ${env_name}: ${base} age=${age_hours}h size=${size}B (${reason})"
+  ASSESS_SUMMARY="FAIL (${reason}, ${base})"
+}
+
 check_backups() {
   section "Database backups"
-  local found_any=false
-  local backup_status="OK"
+  local found_any=false dir env_name latest
 
   if [[ -f "$BACKUP_LOG" ]]; then
     append "Backup log (last 3 lines):"
@@ -112,56 +163,42 @@ check_backups() {
   else
     append "Backup log missing: $BACKUP_LOG"
     bump_status WARN
-    backup_status="WARN"
     add_action "WARN" "Backup-Log fehlt" "SSH: ls -la $BACKUP_LOG; Cron backup-databases.sh (06:00 Vienna) prüfen"
   fi
 
   for dir in "${BACKUP_DIRS[@]}"; do
-    [[ -d "$dir" ]] || continue
-    found_any=true
-    local latest
-    latest=$(find "$dir" -maxdepth 1 -type f \( -name '*.sql.gz' -o -name '*.sql' -o -name '*.gz' \) -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-)
-    if [[ -z "$latest" ]]; then
-      append "FAIL $dir: no backup files"
-      bump_status FAIL
-      backup_status="FAIL"
-      add_action "FAIL" "Keine Backup-Dateien in $dir" "SSH: /usr/local/bin/backup-databases.sh manuell; Log $BACKUP_LOG"
-      continue
-    fi
-    local age_hours size
-    age_hours=$(( ( $(date +%s) - $(stat -c %Y "$latest" 2>/dev/null || stat -f %m "$latest") ) / 3600 ))
-    size=$(stat -c %s "$latest" 2>/dev/null || stat -f %z "$latest")
-    append "OK $dir: $(basename "$latest") age=${age_hours}h size=${size}B"
-    SUMMARY_BACKUP="OK (neuestes Dump ${age_hours}h, $(basename "$latest"))"
-    if [[ "$age_hours" -gt "$BACKUP_MAX_AGE_HOURS" ]]; then
-      append "  backup older than ${BACKUP_MAX_AGE_HOURS}h"
-      bump_status FAIL
-      backup_status="FAIL"
-      SUMMARY_BACKUP="FAIL (älter als ${BACKUP_MAX_AGE_HOURS}h)"
-      add_action "FAIL" "DB-Backup zu alt (${age_hours}h)" "SSH: /usr/local/bin/backup-databases.sh; Verzeichnis $dir prüfen"
-    fi
-    if [[ "$size" -lt "$BACKUP_MIN_BYTES" ]]; then
-      bump_status FAIL
-      backup_status="FAIL"
-      SUMMARY_BACKUP="FAIL (Datei zu klein)"
-      add_action "FAIL" "Backup-Datei zu klein (${size}B)" "Dump/DB prüfen; backup-databases.sh Log lesen"
-    fi
-    if [[ "$latest" == *.gz ]] && command -v gzip >/dev/null; then
-      if ! gzip -t "$latest" 2>/dev/null; then
-        bump_status FAIL
-        backup_status="FAIL"
-        SUMMARY_BACKUP="FAIL (gzip defekt)"
-        add_action "FAIL" "Backup gzip-Integrität" "SSH: gzip -t $latest; neues Backup erzeugen"
-      fi
-    fi
+    [[ -d "$dir" ]] && found_any=true
   done
 
   if [[ "$found_any" == false ]]; then
     append "FAIL: no backup directory found (checked: ${BACKUP_DIRS[*]})"
     bump_status FAIL
-    SUMMARY_BACKUP="FAIL (kein Verzeichnis)"
-    add_action "FAIL" "Backup-Verzeichnis fehlt" "SSH: mkdir/Permissions $BACKUP_DIRS; backup-databases.sh"
+    SUMMARY_BACKUP_PROD="FAIL (kein Verzeichnis)"
+    SUMMARY_BACKUP_STAGING="FAIL (kein Verzeichnis)"
+    add_action "FAIL" "Backup-Verzeichnis fehlt" "SSH: mkdir/Permissions ${BACKUP_DIRS[*]}; backup-databases.sh"
+    return 0
   fi
+
+  for env_name in production staging; do
+    latest=$(latest_backup_for_env "$env_name")
+    if [[ -z "$latest" ]]; then
+      append "FAIL ${env_name}: no backup file in ${BACKUP_DIRS[*]}"
+      bump_status FAIL
+      add_action "FAIL" "Kein ${env_name}-Backup" "SSH: ls ${BACKUP_DIRS[*]}/${env_name}-*.sql.gz; /usr/local/bin/backup-databases.sh"
+      if [[ "$env_name" == production ]]; then
+        SUMMARY_BACKUP_PROD="FAIL (fehlt)"
+      else
+        SUMMARY_BACKUP_STAGING="FAIL (fehlt)"
+      fi
+      continue
+    fi
+    assess_backup_file "$env_name" "$latest"
+    if [[ "$env_name" == production ]]; then
+      SUMMARY_BACKUP_PROD="$ASSESS_SUMMARY"
+    else
+      SUMMARY_BACKUP_STAGING="$ASSESS_SUMMARY"
+    fi
+  done
 }
 
 _ops_http_code() {
@@ -411,7 +448,8 @@ build_report() {
   fi
 
   body+="KURZÜBERSICHT"$'\n'
-  body+="• Backup:   ${SUMMARY_BACKUP}"$'\n'
+  body+="• Backup Prod:    ${SUMMARY_BACKUP_PROD}"$'\n'
+  body+="• Backup Staging: ${SUMMARY_BACKUP_STAGING}"$'\n'
   body+="• Prod:     ${SUMMARY_PROD}"$'\n'
   body+="• Staging:  ${SUMMARY_STAGING}"$'\n'
   body+="• Disk:     ${SUMMARY_DISK}"$'\n'
@@ -459,6 +497,11 @@ if [[ "$TEST_MAIL" == true ]]; then
     exit 0
   fi
   exit 2
+fi
+
+# Tests source this file with MC_OPS_REPORT_SOURCE_ONLY=1 and call the functions directly.
+if [[ "${MC_OPS_REPORT_SOURCE_ONLY:-}" == "1" ]]; then
+  return 0 2>/dev/null || exit 0
 fi
 
 HOSTNAME=$(hostname -f 2>/dev/null || hostname)
