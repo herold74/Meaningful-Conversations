@@ -136,6 +136,8 @@ ssh root@<YOUR_SERVER_IP> '/usr/local/bin/podman-image-cleanup.sh'
 
 Automatischer Check (Backups, Health, Container, Disk, Security-Patches) — Mail **nur bei WARN/FAIL**, plus **Montag 07:45** kurze OK-Zusammenfassung (Europe/Vienna, vor Production-Deploy).
 
+Die Kurzübersicht nennt **Backup Prod** und **Backup Staging** getrennt (jeweils neueste Datei `production-*.sql.gz` / `staging-*.sql.gz`, Alter, Größe, `gzip`-Test). Ein frisches Staging-Dump macht ein fehlendes Produktions-Dump nicht unsichtbar.
+
 ```bash
 # Auf dem Server (manuell)
 /usr/local/bin/server-ops-report.sh --dry-run
