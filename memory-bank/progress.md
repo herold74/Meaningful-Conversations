@@ -201,7 +201,7 @@
 - [x] **DB-backed token invalidation:** `tokensInvalidatedAt` column — cross-worker revocation in PM2 cluster
 - [x] **npm audit:** Frontend 0 vulns, Backend 0 vulns (pm2@7.0.3 fixes CVE-2025-5891 + CVE-2026-27699)
 - [x] **Docker base images:** node:22-bookworm (Debian 12) — Bullseye EOL Nov 2026 avoided
-- [x] **Server OS:** AlmaLinux 9.8, kernel 5.14.0-687, OpenSSL 3.5.5, Podman 5.8.2 (dnf upgrade 2026-07-15)
+- [x] **Server OS:** AlmaLinux 9.8, kernel 5.14.0-687.65.1, Podman 5.8.2-8 (`dnf update --security` + reboot 2026-11-04; previous note 2026-07-15)
 - [x] **Backup script:** Duplicate log line bug fixed; daily backups healthy (2.8 MB / 16 files, 7-day retention)
 
 ## Code Quality (v2.5.6)

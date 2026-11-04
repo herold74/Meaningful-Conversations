@@ -3,6 +3,7 @@
 ## Current Status
 **Version:** 2.6.0. Repo `BUILD_NUMBER` **72**. **Staging** Build **72**. **Production** Build **72**.
 **Ops-Report (2026-11-04):** `scripts/server-ops-report.sh` prüft Produktions- und Staging-Dumps getrennt (`production-*.sql.gz` / `staging-*.sql.gz`: Alter, Größe, gzip). Kurzübersicht: `Backup Prod` und `Backup Staging`. Cron bleibt `/usr/local/bin/server-ops-report.sh` (Kopie, nicht Teil des App-Deploys).
+**Patches (2026-11-04):** `dnf update --security` (27 Pakete, Kernel `5.14.0-687.65.1`, OpenSSH, Podman 5.8.2-8) plus `krb5-libs`. Reboot ~07:35 UTC. Danach keine Updates mehr offen, kein weiterer Reboot. Prod und Staging `/api/health` HTTP 200, MC-Container healthy.
 **Staging:** v**2.6.0** Build **72** — https://mc-beta.manualmode.at.
 **Production:** v**2.6.0** Build **72** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b72`; deploy 2026-11-03).
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with the repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`.
