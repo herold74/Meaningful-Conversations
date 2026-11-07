@@ -248,6 +248,12 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** A deleted or reset account must not keep a 7-day session. The test header was a client-controlled spend bypass. Express 4 does not catch async rejections; Node 22 exits on them, so route rejections are forwarded to an error middleware and process-level handlers shut the worker down cleanly.
 - **Implementation:** `middleware/auth.js`, `middleware/adminAuth.js`, `middleware/requireAdmin.js`, `services/tokenInvalidation.js`, `utils/testMode.js`, `middleware/asyncHandler.js`, `middleware/errorHandler.js`.
 
+### 33. Software-stack dependency waves (2026-11-07)
+- **Decision:** Dependency updates follow **layers and waves** (W1 host security → W2 npm patch/minor + image rebuild → W3 LLM SDK minors with regression → later majors Prisma/React/Express). **One wave per deploy focus** — do not mix kernel reboot, Prisma major, and LLM SDK in one rollout.
+- **Staging first;** production pulls the same registry tags. **Rollback:** `deploy-manualmode.sh` + `.previous-version` on the server (see `techContext.md`).
+- **Build numbering:** Functional stack bumps can soak on staging at the current `BUILD_NUMBER`; increment **BUILD_NUMBER** (e.g. 75 → 76) on the production deploy that marks the wave complete.
+- **Reference:** `PLANS/software-stack-update-plan.md`.
+
 ### 31. Xcode web sync — agent runs npm scripts (2026-10-29)
 - **Decision:** The maintainer does **not** deploy to Xcode manually (no “run `npx cap sync ios`” handoffs, no Merksatz checklists of npm commands in chat). When they ask to **deploy / sync to Xcode**, the **agent** runs the repo script and reports done + “Run in Xcode (scheme App)”.
 - **Scripts:** `npm run sync:ios-staging` (mc-beta API) · `npm run sync:ios-production` (mc-app API, default `npm run build`). Never suggest raw `npx cap sync ios` alone to the user.
