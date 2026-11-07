@@ -215,7 +215,7 @@ February 2026 drift audits are historical. Open product docs for 2.6.0 are index
 
 ## Current Setup
 
-- **Version:** 2.6.0. Repo `BUILD_NUMBER` **68**. **Staging** Build **67** (mc-beta.manualmode.at, deploy 2026-10-30). **Production** Build **41** (mc-app.manualmode.at) — behind staging until the next production deploy.
+- **Version:** 2.6.0. Repo `BUILD_NUMBER` **75**. **Staging + Production** Build **75** (mc-beta / mc-app). Stack-Update-Plan: `PLANS/software-stack-update-plan.md`.
 - **Server:** Hetzner VPS (`<YOUR_SERVER_IP>` — never commit the real address)
 - **Environments:** Staging + Production. They are not on the same build.
 - **Container Engine:** Podman + podman-compose

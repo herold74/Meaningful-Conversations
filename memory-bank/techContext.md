@@ -51,7 +51,7 @@
 - **Platform:** iOS (Native App)
 - **IDE:** Xcode 16+
 - **Configuration:** `capacitor.config.ts`
-- **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH); staging/production web **v2.5.6-b26** (2026-08-09). **2.5.6 (23) submitted for review** 2026-08-09.
+- **App Store:** iOS **2.5.7 live** (AT/DE/CH); web **v2.6.0-b75** (Staging + Production). **2.6.0** ASC archive next — align `CURRENT_PROJECT_VERSION` with repo `BUILD_NUMBER`.
 - **Backend Target:** Production by default (`services/api.ts`), staging override via `?backend=staging`
 - **Native Plugins:**
   - `SplashScreen`: Launch screen control
@@ -137,10 +137,11 @@
 
 #### Versionierung
 - **VERSION:** Semantische Version aus `package.json` (z.B. `2.0.1`)
-- **BUILD_NUMBER:** Fortlaufende Nummer in `BUILD_NUMBER` Datei (**aktuell: 35**, Staging 2026-07-24)
-- **Anzeige:** `Version 2.0.1 (Build 35)` im Burger-Menü via `VITE_BUILD_NUMBER`
-- **Service Worker:** Cache-Name enthält Version + Build (`meaningful-conversations-cache-v2.0.1-b35`)
-- **iOS:** `ios/App/CapApp-SPM/Package.swift` — Capacitor Swift PM **8.4.2** (synced 2026-07-24)
+- **BUILD_NUMBER:** Fortlaufende Nummer in `BUILD_NUMBER` Datei (**aktuell: 75**, Staging + Production 2026-11)
+- **Anzeige:** `Version 2.6.0 (Build 75)` im Burger-Menü via `VITE_BUILD_NUMBER`
+- **Service Worker:** Cache-Name enthält Version + Build (`meaningful-conversations-cache-v2.6.0-b75`)
+- **iOS:** `ios/App/CapApp-SPM/Package.swift` — Capacitor Swift PM **8.6.0** (exact in Package.swift)
+- **Stack-Updates:** Wellen und Tests — `PLANS/software-stack-update-plan.md`
 - **iOS plugin Swift warnings:** Vendor fixes in `patches/` via **`patch-package`** (`postinstall`). Patches: `@capacitor/filesystem` (unused `responseType`), `@revenuecat/purchases-capacitor` (optional→`Any`). Re-apply after `npm ci`; re-create patch if package version bumps.
 
 **⚠️ KRITISCH: BUILD_NUMBER bei Versionswechsel zurücksetzen!**
