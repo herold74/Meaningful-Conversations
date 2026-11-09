@@ -1,13 +1,22 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0. Repo `BUILD_NUMBER` **75**. **Staging** Build **75**. **Production** Build **75**.
+**Version:** 2.6.0. Repo `BUILD_NUMBER` **76**. **Staging** Build **76** (W2 deploy 2026-11-09). **Production** Build **75**.
 **Ops-Report (2026-11-04):** `scripts/server-ops-report.sh` prüft Produktions- und Staging-Dumps getrennt (`production-*.sql.gz` / `staging-*.sql.gz`: Alter, Größe, gzip). Kurzübersicht: `Backup Prod` und `Backup Staging`. Cron bleibt `/usr/local/bin/server-ops-report.sh` (Kopie, nicht Teil des App-Deploys).
 **Patches (2026-11-04):** `dnf update --security` (27 Pakete, Kernel `5.14.0-687.65.1`, OpenSSH, Podman 5.8.2-8) plus `krb5-libs`. Reboot ~07:35 UTC. Danach keine Updates mehr offen, kein weiterer Reboot. Prod und Staging `/api/health` HTTP 200, MC-Container healthy.
-**Staging:** v**2.6.0** Build **75** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b75`).
-**Production:** v**2.6.0** Build **75** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b75`).
+**Staging:** v**2.6.0** Build **76** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b76`; W2 npm + container deploy).
+**Production:** v**2.6.0** Build **75** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b75` until W2 prod).
 **App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with the repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`.
 **Standing rule:** Do not run staging login or E2EE maintenance without an explicit user request. The 2026-10-30 staging database was restored from `staging-20261030-050001.sql.gz` after an unauthorized password/profile rewrap.
+
+## Session handoff (2026-11-09) — W2 umgesetzt (Staging b76)
+
+- **Branch:** `cursor/w2-pr2-pr3-482a` (enthält PR-1 Backend lockfile + PR-2/3 Frontend).
+- **Backend (PR-1):** `express-rate-limit` 8.7.3, `marked` 18.1.3, `pm2` 7.1.2, `supertest` 7.3.1.
+- **Frontend (PR-2/3):** `@capacitor/filesystem` 8.1.5, `@capacitor/share` 8.0.3, `@revenuecat/purchases-capacitor` **13.8.0**, `@react-pdf/renderer` 4.9.0, `lucide-react` 1.70.0, `framer-motion` 12.43.0, `ics`/`postcss`/`autoprefixer`/`playwright` Patches.
+- **Patches:** `patches/` geleert — Fixes sind in Upstream 8.1.5 / 13.8.0 (`verify:ios-iap` + `verify-ios-plugin-packages` OK).
+- **CI:** `npm run ci` grün. **Staging:** `./deploy-manualmode.sh -e staging -c app` OK, Health 200.
+- **Nächster Schritt:** ~24h Soak mc-beta, dann Merge + `./deploy-manualmode.sh -e production` (Prod → b76). **W3** = LLM-Minors separat.
 
 ## Session handoff (2026-11-07) — Software-Stack-Updates (Plan + W2-Scan)
 

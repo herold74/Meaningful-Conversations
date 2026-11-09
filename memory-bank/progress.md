@@ -222,7 +222,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Repo `BUILD_NUMBER`:** **75**. **Staging + Production:** v**2.6.0** Build **75** (mc-beta / mc-app, `sw.js` b75). Nächster erwarteter Sprung nach **W2**-Prod-Deploy: Build **76**.
+- **Repo `BUILD_NUMBER`:** **76**. **Staging:** v**2.6.0** Build **76** (W2 deploy 2026-11-09, `sw.js` b76). **Production:** Build **75** bis W2-Prod.
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **Stack watchdog (2026-10-14):** `mc-stack-watchdog.timer` (~3 min) recreates wedged backends + refreshes nginx IPs; ops-report surfaces 502/unhealthy with HANDLUNG
