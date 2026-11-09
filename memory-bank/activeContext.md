@@ -28,7 +28,7 @@
 - **Phase 1 (this release):** Server speech uses only the Piper container. The local shell fallback is gone, so spoken text cannot become a command. `/api/health` sits outside the global 60/min limit, so the watchdog is not crowded out. App split stays for the next release.
 
 ## Active Tasks
-- [ ] **W2 Stack — Patch/Minor** (siehe `PLANS/software-stack-update-plan.md`): PR-1 Backend → PR-2 Frontend → PR-3 Capacitor/RevenueCat 13.8.x; Staging-Soak; Prod als Build **76**
+- [ ] **W2 Stack — Soak + Prod** (siehe `PLANS/software-stack-update-plan.md`): PR-1–3 umgesetzt auf Branch `cursor/w2-pr2-pr3-482a`; Staging-Deploy + 24h Soak; Prod-Freigabe
 - [ ] **Remove legacy aliases** — when obsolete per `DOCUMENTATION/LEGACY-ALIASES-REMOVAL.md` (not before App Store ≥2.4.x + DB clean)
 - [ ] **Console.log Cleanup:** frontend `console.log` calls. TTS debug logs (`[TTS-DBG]`) stay for stability monitoring.
 - [ ] W4F: Update DNS for `w4f-beta.manualmode.at`, then run `certbot`

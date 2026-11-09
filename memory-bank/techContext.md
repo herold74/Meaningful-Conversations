@@ -142,7 +142,7 @@
 - **Service Worker:** Cache-Name enthält Version + Build (`meaningful-conversations-cache-v2.6.0-b75`)
 - **iOS:** `ios/App/CapApp-SPM/Package.swift` — Capacitor Swift PM **8.6.0** (exact in Package.swift)
 - **Stack-Updates:** Wellen und Tests — `PLANS/software-stack-update-plan.md`
-- **iOS plugin Swift warnings:** Vendor fixes in `patches/` via **`patch-package`** (`postinstall`). Patches: `@capacitor/filesystem` (unused `responseType`), `@revenuecat/purchases-capacitor` (optional→`Any`). Re-apply after `npm ci`; re-create patch if package version bumps.
+- **iOS plugin patches (2026-11-09 W2):** Vendor patches **removed** — `@capacitor/filesystem` 8.1.5 and `@revenuecat/purchases-capacitor` 13.8.0 ship the fixes upstream. `postinstall` still runs `patch-package` when present; `patches/` may be empty.
 
 **⚠️ KRITISCH: BUILD_NUMBER bei Versionswechsel zurücksetzen!**
 ```
