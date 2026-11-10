@@ -2,10 +2,8 @@
 
 **Staging:** https://mc-beta.manualmode.at  
 **Backend-SDK:** `@google/genai` **2.32.0**, `@mistralai/mistralai` **2.7.0**  
-**Deploy:** `./deploy-manualmode.sh -e staging -c backend` erfolgreich  
-**PR:** [#28](https://github.com/herold74/Meaningful-Conversations/pull/28) (rebased auf `main` nach W2 #27)
-
-**Hinweis Referenz:** `local-gemini` / `local-mistral` (Juli 2026). Offline-Compare nur überlappende Snapshots.
+**Deploy:** `./deploy-manualmode.sh -e staging -c backend` (post-#28) — `/api/health` OK  
+**Merge:** [#28](https://github.com/herold74/Meaningful-Conversations/pull/28) → `main` `05c7dd1d`
 
 ---
 
@@ -19,33 +17,37 @@
 
 ---
 
-## Classic — Mistral
+## Classic — Mistral (`suite: regression`, 12)
 
-| Versuch | Suite | Ergebnis |
-|---------|-------|----------|
-| diverse | full / regression | Abbruch nach 5–8 Szenarien — Frontend: „Failed to get response from AI model.“ |
-| `w3-mistral-27-regression-retry` | regression | **5/12** bis `dpc_strategy_diversity` Turn 2 |
-| `w3-mistral-27-regression-paced` | regression + 45s Pacing | *siehe Abschluss unten* |
+| Versuch | Ergebnis |
+|---------|----------|
+| ohne Pacing | 429 → „Failed to get response“ |
+| `w3-mistral-27-regression-paced` + `w3-mistral-tail` | **12/12** Szenarien erfasst (2 Runs) |
+| `w3-mistral-session-full-retest` | **3/3** Auto-Checks (Next-Steps-Flake im paced Lauf behoben) |
 
-### Root Cause (Staging `podman logs`)
+**Root cause 429:** Mistral `Rate limit exceeded` (code 1300) — **`CLASSIC_REGRESSION_DELAY_MS=45000`** zwischen Szenarien.
 
-**HTTP 429** Mistral `Rate limit exceeded` (code `1300`). Backend retried 2×, EU-Region ohne Fallback → 500 an Client. **Kein SDK-2.7-Defekt.**
+---
 
-Mitigation: `CLASSIC_REGRESSION_DELAY_MS=45000` zwischen Szenarien (`scripts/run-classic-regression.mjs`, `PLANS/w3-regression-run.sh`).
+## Practice — Mistral
+
+| Feld | Wert |
+|------|------|
+| **Run ID** | `2026-11-10T18-16-25-mistral-w3-practice-mistral-27` |
+| **Scores** | motivation-dip **9**, relationship-boundary **9**, overwhelm **9** (`PRACTICE_REGRESSION_TURN_DELAY_MS=4000`) |
+| **compare-offline** vs. `local-mistral` | Scores höher als Juli-Reference (Modell/Prompt-Drift); kein Abbruch, kein leerer Text |
 
 ---
 
 ## Go / No-Go W3
 
-| Provider | Regression | Merge |
-|----------|------------|-------|
-| **Google** 2.32 | Go (classic + practice) | **Go** |
-| **Mistral** 2.7 | 429 unter Harness-Last; paced Re-run | **Go** (Provider OK, Quota-Management beim Test) |
+| Provider | Verdict |
+|----------|---------|
+| **Google** 2.32 | **Go** |
+| **Mistral** 2.7 | **Go** (Classic 12/12 mit Pacing; Practice 9/9/9) |
 
 ---
 
-## Nächste Schritte
+## Ops
 
-1. Merge #28  
-2. Prod: W2 b76, dann W3 Backend  
-3. Optional: paced Mistral `compare-offline` vs. `local-mistral`
+- Prod **Build 75** → W2 **b76** (`-c app`), dann W3 Backend mit Prod-Pull.
