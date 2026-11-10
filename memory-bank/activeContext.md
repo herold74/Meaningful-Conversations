@@ -16,8 +16,9 @@
 - **Frontend (PR-2/3):** `@capacitor/filesystem` 8.1.5, `@capacitor/share` 8.0.3, `@revenuecat/purchases-capacitor` **13.8.0**, `@react-pdf/renderer` 4.9.0, `lucide-react` 1.70.0, `framer-motion` 12.43.0, `ics`/`postcss`/`autoprefixer`/`playwright` Patches.
 - **Patches:** `patches/` geleert — Fixes sind in Upstream 8.1.5 / 13.8.0 (`verify:ios-iap` + `verify-ios-plugin-packages` OK).
 - **CI:** `npm run ci` grün. **Staging:** `./deploy-manualmode.sh -e staging -c app` OK, Health 200.
-- **W3 (2026-11-10):** SDK `@google/genai` 2.32 + `@mistralai` 2.7 auf Staging-Backend deployed; Classic **full** Gemini 21/24 + Practice 9–10/10; Mistral Harness **abgebrochen** (API „Failed to get response“). Details: `PLANS/w3-regression-results.md`.
-- **Nächster Schritt:** W2 #27 mergen/Prod b76; W3 lockfile PR + Mistral-Regression nachholen.
+- **W2 #27:** gemerged `3509e81b` (2026-11-10). **Prod** noch b75 → Deploy für b76.
+- **W3 #28:** SDK 2.32/2.7 + Regression-Doku; Mistral-Abbrüche = **API 429**, Harness-Pacing `CLASSIC_REGRESSION_DELAY_MS`.
+- **Nächster Schritt:** #28 mergen; Prod b76 (W2); paced Mistral-Harness optional.
 
 ## Session handoff (2026-11-07) — Software-Stack-Updates (Plan + W2-Scan)
 
