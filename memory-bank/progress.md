@@ -273,7 +273,8 @@
 - [x] **Content-based template detection** — line-by-line analysis instead of questionnaireAnswers state
 
 ## Pending / Roadmap
-- [ ] **Software-Stack W2 (Patch/Minor):** Umsetzung nach Scan 2026-11-07 — `PLANS/software-stack-update-plan.md`; LLM-Minors → W3
+- [x] **Software-Stack W2:** #27 merged; Staging b76.
+- [x] **Software-Stack W3:** #28 merged — `@google/genai` 2.32, `@mistralai` 2.7; Regression `PLANS/w3-regression-results.md`.
 - [x] **Krisen-Hilfsangebote region-aware** *(2026-08-23)*: Kuratierter Katalog AT/DE/CH/CA in `crisisResources.js` (keine LLM-Nummern). `crisisText.js` injiziert die Liste; AT nicht mehr als Default für alle Länder. Doku: `DOCUMENTATION/CRISIS-HELPLINES.md`. 3-Schritt-Protokoll (Verify → Region → Activate) unverändert.
 - [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
 - [ ] **Android:** Capacitor project setup (Android Studio)

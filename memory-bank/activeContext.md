@@ -17,8 +17,8 @@
 - **Patches:** `patches/` geleert — Fixes sind in Upstream 8.1.5 / 13.8.0 (`verify:ios-iap` + `verify-ios-plugin-packages` OK).
 - **CI:** `npm run ci` grün. **Staging:** `./deploy-manualmode.sh -e staging -c app` OK, Health 200.
 - **W2 #27:** gemerged `3509e81b` (2026-11-10). **Prod** noch b75 → Deploy für b76.
-- **W3 #28:** SDK 2.32/2.7 + Regression-Doku; Mistral-Abbrüche = **API 429**, Harness-Pacing `CLASSIC_REGRESSION_DELAY_MS`.
-- **Nächster Schritt:** #28 mergen; Prod b76 (W2); paced Mistral-Harness optional.
+- **W3 #28:** gemerged `05c7dd1d`; Staging **Backend** redeploy OK. Mistral Classic **12/12** (Pacing) + Practice **9/9/9** — `PLANS/w3-regression-results.md`.
+- **Nächster Schritt:** Prod **b76** (W2 `-c app`); Prod Backend nach Soak.
 
 ## Session handoff (2026-11-07) — Software-Stack-Updates (Plan + W2-Scan)
 
