@@ -106,7 +106,8 @@
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Production v2.6.0 (2026-11-03):** Build **72** — https://mc-app.manualmode.at (`sw.js` v2.6.0-b72; promote staging images)
+- [x] **Staging + Production v2.6.0 (2026-11):** Build **75** — Repo `BUILD_NUMBER` 75, `sw.js` v2.6.0-b75; Staging & Production parity (laut Projektstand)
+- [x] **Production v2.6.0 (2026-11-03):** Build **72** — superseded by b75
 - [x] **Staging v2.6.0 (2026-11-02):** Build **70** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b70; deps/audit + Capacitor 8.6; from `bc497fec` + deploy `68094440`)
 - [x] **Staging v2.6.0 (2026-10-30):** Build **64** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b64; iOS manual voice save + dedupe; `3cf711e4`)
 - [x] **Staging v2.6.0 (2026-10-30):** Build **63** — superseded by b64
@@ -199,7 +200,7 @@
 - [x] **IP Externalization:** Server IP never hardcoded, git history scrubbed
 - [x] **Sensitive data sanitization:** `sanitizeUserForClient()` allowlist — no token leakage in API responses
 - [x] **DB-backed token invalidation:** `tokensInvalidatedAt` column — cross-worker revocation in PM2 cluster
-- [x] **npm audit:** Frontend 0 vulns, Backend 0 vulns (pm2@7.0.3 fixes CVE-2025-5891 + CVE-2026-27699)
+- [x] **npm audit (committed lockfiles):** Keine high/critical in Produktionsabhängigkeiten (pm2@7.0.3: CVE-2025-5891 + CVE-2026-27699 behoben). W2-Scan 2026-11-07: moderate nur Jest/glob-Kette (dev/test); kein `audit fix --force` für W2.
 - [x] **Docker base images:** node:22-bookworm (Debian 12) — Bullseye EOL Nov 2026 avoided
 - [x] **Server OS:** AlmaLinux 9.8, kernel 5.14.0-687.65.1, Podman 5.8.2-8 (`dnf update --security` + reboot 2026-11-04; previous note 2026-07-15)
 - [x] **Backup script:** Duplicate log line bug fixed; daily backups healthy (2.8 MB / 16 files, 7-day retention)
@@ -221,7 +222,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Repo `BUILD_NUMBER`:** **68**. **Staging:** v**2.6.0** Build **67** (mc-beta, deploy 2026-10-30) · **Production:** Build **41** (mc-app) — production is behind staging until the next production deploy. Build 45 (2026-10-12) is superseded.
+- **Repo `BUILD_NUMBER`:** **76**. **Staging:** v**2.6.0** Build **76** (W2 deploy 2026-11-09, `sw.js` b76). **Production:** Build **75** bis W2-Prod.
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **Stack watchdog (2026-10-14):** `mc-stack-watchdog.timer` (~3 min) recreates wedged backends + refreshes nginx IPs; ops-report surfaces 502/unhealthy with HANDLUNG
@@ -238,7 +239,7 @@
     - [x] Backend receipt verification (`/api/apple-iap/verify-receipt`)
     - [x] NativePaywall with Restore, active products, legal links (Privacy/Terms)
     - [x] App Store Launch (v2.0.0, 2026-03-07) — AT/DE/CH
-    - [x] Capacitor SPM **8.4.2** synced (2026-07-24, build 35)
+    - [x] Capacitor **8.6.0** (npm + `CapApp-SPM/Package.swift` exact 8.6.0)
     - [x] Apple Review compliance (Guideline 3.1.2c — EULA/Terms links)
     - [x] Static compliance pages (`privacy.html`, `support.html`, `terms.html`)
     - [x] Test account for Apple Review (`premium@manualmode.at` on production)
@@ -272,6 +273,7 @@
 - [x] **Content-based template detection** — line-by-line analysis instead of questionnaireAnswers state
 
 ## Pending / Roadmap
+- [ ] **Software-Stack W2 (Patch/Minor):** Umsetzung nach Scan 2026-11-07 — `PLANS/software-stack-update-plan.md`; LLM-Minors → W3
 - [x] **Krisen-Hilfsangebote region-aware** *(2026-08-23)*: Kuratierter Katalog AT/DE/CH/CA in `crisisResources.js` (keine LLM-Nummern). `crisisText.js` injiziert die Liste; AT nicht mehr als Default für alle Länder. Doku: `DOCUMENTATION/CRISIS-HELPLINES.md`. 3-Schritt-Protokoll (Verify → Region → Activate) unverändert.
 - [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
 - [ ] **Android:** Capacitor project setup (Android Studio)
