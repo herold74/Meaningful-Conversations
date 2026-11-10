@@ -10,6 +10,7 @@ LOG="$ROOT/PLANS/w3-regression-$(date +%Y%m%d-%H%M%S).log"
 exec > >(tee -a "$LOG") 2>&1
 echo "=== W3 regression started $(date -Iseconds) ==="
 echo "API: $MC_API_BASE"
+export CLASSIC_REGRESSION_DELAY_MS="${CLASSIC_REGRESSION_DELAY_MS:-45000}"
 
 run_classic() {
   local provider=$1
