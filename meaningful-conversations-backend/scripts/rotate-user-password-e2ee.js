@@ -12,9 +12,8 @@
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 
-const prisma = new PrismaClient();
 
 const OLD_PASSWORD = process.env.OLD_PASSWORD;
 const NEW_PASSWORD = process.env.NEW_PASSWORD;

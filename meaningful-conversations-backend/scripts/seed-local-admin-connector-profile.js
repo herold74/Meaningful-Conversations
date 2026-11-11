@@ -10,9 +10,8 @@
 
 require('dotenv').config();
 const crypto = require('crypto');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 
-const prisma = new PrismaClient();
 
 function assertLocalDev() {
   const nodeEnv = process.env.NODE_ENV;
