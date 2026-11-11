@@ -13,9 +13,8 @@
 
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 
-const prisma = new PrismaClient();
 
 const EMAIL = (process.env.REVIEW_ACCOUNT_EMAIL || 'premium@manualmode.at').toLowerCase();
 const NEW_PASSWORD = process.env.NEW_PASSWORD;

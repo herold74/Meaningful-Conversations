@@ -11,9 +11,8 @@
 require('dotenv').config();
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 
-const prisma = new PrismaClient();
 const TEST_PASSWORD = process.env.SEED_TEST_PASSWORD || 'local-dev-seed-password';
 
 const DEFAULT_EMAILS = [
