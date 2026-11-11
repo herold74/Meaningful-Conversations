@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Status
-**Version:** 2.6.0. Repo `BUILD_NUMBER` **76**. **Staging** Build **76** (W2 deploy 2026-11-09). **Production** Build **75**.
+**Version:** 2.6.0. Repo `BUILD_NUMBER` **77**. **Staging + Production** Build **77** (Prod pull deploy 2026-11-12; gleiche Registry-Images wie mc-beta, W2–W5 inkl. Prisma 7 / Apple Lib 3.1.0).
 **Ops-Report (2026-11-04):** `scripts/server-ops-report.sh` prüft Produktions- und Staging-Dumps getrennt (`production-*.sql.gz` / `staging-*.sql.gz`: Alter, Größe, gzip). Kurzübersicht: `Backup Prod` und `Backup Staging`. Cron bleibt `/usr/local/bin/server-ops-report.sh` (Kopie, nicht Teil des App-Deploys).
 **Patches (2026-11-04):** `dnf update --security` (27 Pakete, Kernel `5.14.0-687.65.1`, OpenSSH, Podman 5.8.2-8) plus `krb5-libs`. Reboot ~07:35 UTC. Danach keine Updates mehr offen, kein weiterer Reboot. Prod und Staging `/api/health` HTTP 200, MC-Container healthy.
-**Staging:** v**2.6.0** Build **76** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b76`; W2 npm + container deploy).
-**Production:** v**2.6.0** Build **75** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b75` until W2 prod).
-**App Store:** iOS **2.5.7** live (AT/DE/CH). **Next:** iOS **2.6.0** ASC submit/archive (`MARKETING_VERSION` 2.6.0; align `CURRENT_PROJECT_VERSION` with the repo build before upload). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`.
+**Staging:** v**2.6.0** Build **77** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b77`; `/api/health` includes `version` + `prisma`; App UI shows App + API lines in menu/About).
+**Production:** v**2.6.0** Build **77** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b77`; `/api/health` mit `version` + `prisma`).
+**App Store:** iOS **2.6.0** live (AT/DE/CH) — nutzt Production-API; kein neues iOS-Release für Stack-W2–W5 nötig (API-kompatibel). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`.
 **Standing rule:** Do not run staging login or E2EE maintenance without an explicit user request. The 2026-10-30 staging database was restored from `staging-20261030-050001.sql.gz` after an unauthorized password/profile rewrap.
 
 ## Session handoff (2026-11-09) — W2 umgesetzt (Staging b76)
@@ -18,7 +18,10 @@
 - **CI:** `npm run ci` grün. **Staging:** `./deploy-manualmode.sh -e staging -c app` OK, Health 200.
 - **W2 #27:** gemerged `3509e81b` (2026-11-10). **Prod** noch b75 → Deploy für b76.
 - **W3 #28:** gemerged `05c7dd1d`; Staging **Backend** redeploy OK. Mistral Classic **12/12** (Pacing) + Practice **9/9/9** — `PLANS/w3-regression-results.md`.
-- **Nächster Schritt:** Prod **b76** (W2 `-c app`); Prod Backend nach Soak.
+- **W5 #30:** Prisma 7.10.1 merged; Staging backend verified.
+- **Version UI:** `f429d649` — health + Burger/About; Staging **b77** deploy OK.
+- **Production (2026-11-12):** `./deploy-manualmode.sh -e production` — Parität mit Staging **b77**; Health 200, DB connected.
+- **Nächster Schritt:** Prod-Soak / W6 (React 19) erst nach Ruhe; ggf. kurzer Smoke Login+IAP auf mc-app.
 
 ## Session handoff (2026-11-07) — Software-Stack-Updates (Plan + W2-Scan)
 
