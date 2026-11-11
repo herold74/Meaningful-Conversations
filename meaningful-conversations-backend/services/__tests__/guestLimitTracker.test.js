@@ -9,10 +9,7 @@
  * 5. WEEKLY_MESSAGE_LIMIT constant
  */
 
-jest.mock('@prisma/client', () => {
-  const prisma = require('../../__mocks__/prismaClient.js');
-  return { PrismaClient: jest.fn(() => prisma) };
-});
+jest.mock('../../prismaClient.js', () => require('../../__mocks__/prismaClient.js'));
 
 const prisma = require('../../__mocks__/prismaClient.js');
 const {

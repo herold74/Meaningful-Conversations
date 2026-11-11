@@ -3,14 +3,13 @@
  * One-off migration: legacy frameworkId + unlockedCoaches bot IDs → neutral taxonomy.
  * Run inside backend container: node scripts/migrate-method-ids.js
  */
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 const {
   LEGACY_FRAMEWORK_ALIASES,
   LEGACY_BOT_ALIASES,
   normalizeUnlockedCoaches,
 } = require('../practice/methodTaxonomy.js');
 
-const prisma = new PrismaClient();
 
 async function migratePracticeEvaluations() {
   let updated = 0;
