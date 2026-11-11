@@ -10,7 +10,7 @@
 ## Gates
 
 - [x] `npm run ci` grün (Frontend Jest + Backend Jest + typecheck + locales + build)
-- [ ] Staging deploy `./deploy-manualmode.sh -e staging -c app` (frontend image rebuild)
+- [x] Staging deploy `./deploy-manualmode.sh -e staging -c app` (frontend image `937e141b…`, React 19 bundle)
 - [ ] Staging smoke: Login, Classic kurz, Burger-Menü, About
 - [ ] Soak vor Production
 
