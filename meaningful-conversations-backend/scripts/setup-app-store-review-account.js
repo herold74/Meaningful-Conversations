@@ -13,9 +13,8 @@
  */
 'use strict';
 
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../prismaClient.js');
 
-const prisma = new PrismaClient();
 
 const EMAIL = (process.env.REVIEW_ACCOUNT_EMAIL || 'premium@manualmode.at').toLowerCase();
 const YEARS = Math.max(1, parseInt(process.env.REVIEW_PREMIUM_YEARS || '2', 10) || 2);
