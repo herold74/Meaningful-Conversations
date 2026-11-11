@@ -19,6 +19,7 @@ import { ShoppingBagIcon } from './icons/ShoppingBagIcon';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 import { FileTextIcon } from './icons/FileTextIcon';
 import { useFocusTrap } from '../utils/useFocusTrap';
+import { VersionLabels } from './VersionLabels';
 
 interface BurgerMenuProps {
     isOpen: boolean;
@@ -150,11 +151,8 @@ const BurgerMenu: React.FC<BurgerMenuProps> = ({ isOpen, onClose, currentUser, o
                         <MenuItem icon={LogInIcon} text={t('menu_login')} onClick={() => onNavigate('auth')} />
                     )}
                     
-                    <div className="px-4 pt-2 pb-2 flex items-center justify-between">
-                        <p className="text-xs text-content-subtle">
-                            Version {import.meta.env.VITE_APP_VERSION || 'unknown'}
-                            {import.meta.env.VITE_BUILD_NUMBER && ` (Build ${import.meta.env.VITE_BUILD_NUMBER})`}
-                        </p>
+                    <div className="px-4 pt-2 pb-2 flex items-end justify-between gap-2">
+                        <VersionLabels className="min-w-0 flex-1" />
                         <button
                             onClick={handleRefresh}
                             className="p-1.5 rounded-full hover:bg-background-tertiary transition-colors"
