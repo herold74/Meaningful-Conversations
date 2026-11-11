@@ -169,7 +169,10 @@ make update-version  # Aktualisiert alle Dateien
 ```bash
 cd meaningful-conversations-backend
 npx prisma migrate dev --name beschreibender_name
+npx prisma generate   # Prisma 7: explicit after migrate
 ```
+
+**Prisma 7:** `prisma.config.ts`, `@prisma/adapter-mariadb`, Client in `generated/prisma` (`postinstall` / Docker build). CLI needs `DATABASE_URL` (or placeholder at generate-only).
 
 **Automatische Anwendung:** Backend-Container führt `prisma migrate deploy` beim Start aus.
 
