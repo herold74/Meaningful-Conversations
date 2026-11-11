@@ -6,6 +6,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { HowItWorks } from './HowItWorks';
 import { AboutCoachPractice } from './AboutCoachPractice';
 import { brand } from '../config/brand';
+import { VersionLabels } from './VersionLabels';
 
 interface InfoViewProps {
 }
@@ -65,7 +66,9 @@ const AboutView: React.FC<InfoViewProps> = () => {
             <div className="w-full max-w-3xl mx-auto p-4 sm:p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10 box-border">
                 <div className="text-center">
                     <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('about_title')}</h1>
-                    <p className="mt-1 text-sm text-content-subtle">{t('about_version')} 2.6.0</p>
+                    <div className="mt-2 flex justify-center">
+                        <VersionLabels align="center" className="text-sm" />
+                    </div>
                 </div>
                 <div className="flex items-stretch justify-between gap-1 sm:gap-2 border-b border-border-secondary dark:border-border-primary">
                     <button

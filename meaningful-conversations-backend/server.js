@@ -19,6 +19,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const prisma = require('./prismaClient.js');
+const backendPackageJson = require('./package.json');
 const { initCleanup: initGuestLimitCleanup } = require('./services/guestLimitTracker');
 const { initDataRetentionCleanup } = require('./services/dataRetention');
 const { ensureDefaultConfig } = require('./services/initService');
@@ -396,10 +397,20 @@ async function startServer() {
         app.get('/api/health', async (req, res) => {
             try {
                 await prisma.$queryRaw`SELECT 1`;
-                res.status(200).json({ status: 'ok', database: 'connected' });
+                res.status(200).json({
+                    status: 'ok',
+                    database: 'connected',
+                    version: backendPackageJson.version,
+                    prisma: backendPackageJson.dependencies['@prisma/client'] || null,
+                });
             } catch (error) {
                 console.error('Health check failed:', error);
-                res.status(503).json({ status: 'error', database: 'disconnected' });
+                res.status(503).json({
+                    status: 'error',
+                    database: 'disconnected',
+                    version: backendPackageJson.version,
+                    prisma: backendPackageJson.dependencies['@prisma/client'] || null,
+                });
             }
         });
 
