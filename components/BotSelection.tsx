@@ -4,6 +4,8 @@ import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info 
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
+import { isOnDeviceModelAvailable } from '../services/nativeLlmService';
+import { getLocalModelMode, setLocalModelMode, SAM_BOT_ID, type LocalModelFeature } from '../utils/localModelMode';
 import { recommendBotForTopic } from '../services/geminiService';
 import { LockIcon } from './icons/LockIcon';
 import { MediationIcon } from './icons/MediationIcon';
@@ -37,6 +39,38 @@ import {
 } from '../utils/kommunikationTutorialTilePrefs';
 
 /** Utility tile icons — same footprint as coach avatars on Bot Selection (no 4.75rem inset). */
+const LocalModelSwitch: React.FC<{ feature: LocalModelFeature }> = ({ feature }) => {
+  const { t, language } = useLocalization();
+  const [available, setAvailable] = useState(false);
+  const [mode, setMode] = useState(() => getLocalModelMode(feature));
+
+  useEffect(() => {
+    let cancelled = false;
+    isOnDeviceModelAvailable(language).then((ready) => {
+      if (!cancelled) setAvailable(ready);
+    });
+    return () => { cancelled = true; };
+  }, [language]);
+
+  if (!available) return null;
+
+  const nextMode = mode === 'local' ? 'online' : 'local';
+  return (
+    <button
+      type="button"
+      aria-label={t('local_model_switch')}
+      onClick={(event) => {
+        event.stopPropagation();
+        setLocalModelMode(feature, nextMode);
+        setMode(nextMode);
+      }}
+      className="mt-3 inline-flex items-center justify-center w-full px-2 py-1.5 rounded-lg text-xs font-semibold border border-accent-primary/40 text-accent-primary bg-accent-primary/10"
+    >
+      {mode === 'local' ? t('local_model_local') : t('local_model_online')}
+    </button>
+  );
+};
+
 const UTILITY_TILE_AVATAR_CLASS =
   'w-20 h-20 rounded-full border-2 border-background-secondary object-cover';
 
@@ -577,6 +611,7 @@ const ConnectorTile: React.FC<ConnectorTileProps> = ({ isGuest, onConnector, onA
         </div>
 
         <div className="mt-4 w-full">
+          {!isGuest && <LocalModelSwitch feature="connector" />}
           <span
             className={`inline-flex items-center justify-center gap-1.5 w-full px-2 py-2.5 rounded-lg text-sm font-semibold transition-all border ${
               isGuest
@@ -789,6 +824,7 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
             <p className="mt-1 text-content-secondary leading-relaxed text-sm">
                 {language === 'de' ? bot.description_de : bot.description}
             </p>
+            {bot.id === SAM_BOT_ID && !isLocked && <LocalModelSwitch feature="sam" />}
         </div>
       </motion.div>
     );

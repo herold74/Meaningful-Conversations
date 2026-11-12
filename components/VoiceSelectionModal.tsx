@@ -245,6 +245,15 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         return dedupeNativeVoicesByName(genderFiltered);
     }, [nativeVoices, botLanguage, botGender]);
 
+    const nativeVoiceIsCompact = useMemo(() => {
+        if (!isNativeiOS || nativeVoices.length === 0) return false;
+        const languageVoices = nativeVoices.filter(voice =>
+            voice.language.toLowerCase().startsWith(botLanguage.toLowerCase()),
+        );
+        return languageVoices.length > 0
+            && !languageVoices.some(voice => voice.quality === 'premium' || voice.quality === 'enhanced');
+    }, [nativeVoices, botLanguage]);
+
     const nativeVoicesForLanguage = useMemo(() => {
         if (!isNativeiOS || nativeVoices.length === 0) return [];
         return nativeVoices.filter(v =>
@@ -422,6 +431,9 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 <p className="text-xs text-content-tertiary mt-0.5">
                                     {t('voiceModal_native_voices_desc') || 'Installed on your device • Instantly available'}
                                 </p>
+                                {nativeVoiceIsCompact && (
+                                    <p className="text-xs text-status-warning-foreground mt-1">{t('tts_compact_voice_hint')}</p>
+                                )}
                             </div>
                             {filteredNativeVoices.map(voice => (
                                 <div key={voice.identifier} className={`p-3 border ${nativeSelectionListId === voice.identifier ? 'border-accent-primary border-2 bg-accent-primary/10' : 'border-border-primary bg-background-tertiary'}`}>

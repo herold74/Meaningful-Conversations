@@ -45,6 +45,8 @@ class MyViewController: CAPBridgeViewController {
         // Register native plugins with the bridge
         bridge?.registerPluginInstance(NativeTTSPlugin())
         bridge?.registerPluginInstance(NativeSTTPlugin())
+        bridge?.registerPluginInstance(NativeLLMPlugin())
+        bridge?.registerPluginInstance(NativeSecureStorePlugin())
         bridge?.registerPluginInstance(NativeGamificationBarPlugin())
         NativeGamificationBarManager.shared.bridge = bridge
     }

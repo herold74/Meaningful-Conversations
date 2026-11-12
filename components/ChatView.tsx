@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Bot, Message, User, CoachPracticeConfig, Language, ConnectorEndType, ConnectorChatHandoff, ConnectorHandoffPayload } from '../types';
 import type { ConnectorChatConfig } from '../utils/connectorRun';
 import * as geminiService from '../services/geminiService';
+import { generateLocalConnectorReply, generateLocalSamReply, shouldUseLocalModel } from '../services/localConversation';
+import { SAM_BOT_ID } from '../utils/localModelMode';
 import * as userService from '../services/userService';
 import * as guestService from '../services/guestService';
 import BrandLoader from './shared/BrandLoader';
@@ -305,9 +307,42 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
       };
 
       let connectorEnd: { ended: boolean; endType: ConnectorEndType | null } | null = null;
-      let response: { text: string; provider?: string | null };
+      let response: { text: string; provider?: string | null } | undefined;
 
-      if (connectorConfig) {
+      const useLocalSam = !connectorConfig && !coachPracticeConfig && bot.id === SAM_BOT_ID && shouldUseLocalModel('sam');
+      const useLocalConnector = !!connectorConfig && !connectorConfig.customScenarioId && shouldUseLocalModel('connector');
+      if (useLocalSam || useLocalConnector) {
+        try {
+          if (useLocalConnector && connectorConfig) {
+            const local = await generateLocalConnectorReply({
+              vignetteId: connectorConfig.vignetteId,
+              history: historyWithUserMessage,
+              language,
+              liveMode: showVoiceUi,
+            });
+            if (!local) throw new Error('vignette not bundled');
+            onStreamChunk(local.text);
+            connectorEnd = { ended: local.ended, endType: local.endType };
+            response = { text: local.text, provider: 'apple-on-device' };
+          } else {
+            const text = await generateLocalSamReply({
+              userId: currentUser?.id ?? null,
+              lifeContext,
+              history: historyWithUserMessage,
+              language,
+            });
+            onStreamChunk(text);
+            response = { text, provider: 'apple-on-device' };
+          }
+        } catch (error) {
+          if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            throw new Error(t('local_model_unavailable_reply'));
+          }
+          console.warn('[local-model] falling back to cloud', error);
+        }
+      }
+
+      if (!response && connectorConfig) {
         const connectorResponse = await geminiService.sendConnectorTurnStream(
           connectorConfig.vignetteId,
           historyWithUserMessage,
@@ -321,14 +356,14 @@ const ChatView: React.FC<ChatViewProps> = ({ bot, lifeContext, chatHistory, setC
         );
         connectorEnd = { ended: connectorResponse.ended, endType: connectorResponse.endType };
         response = { text: connectorResponse.text, provider: connectorResponse.provider ?? null };
-      } else if (coachPracticeConfig) {
+      } else if (!response && coachPracticeConfig) {
         response = await geminiService.sendPracticeMessageStream(
           coachPracticeConfig,
           historyWithUserMessage,
           language,
           onStreamChunk,
         );
-      } else {
+      } else if (!response) {
         response = await geminiService.sendMessageStream(
           bot.id,
           lifeContext,

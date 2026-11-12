@@ -6,6 +6,9 @@ import { User } from '../types';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import Button from './shared/Button';
 import { deriveKey, hexToUint8Array } from '../utils/encryption';
+import { buildOfflineUnlockRecord, matchOfflineUnlock, unlockStorageKey } from '../utils/offlineUnlock';
+import { secureGet, secureSet } from '../services/nativeSecureStore';
+import { ApiError } from '../services/api';
 import { InfoIcon } from './icons/InfoIcon';
 interface LoginViewProps {
   onLoginSuccess: (user: User, key: CryptoKey) => void;
@@ -56,6 +59,10 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
         
         const saltBytes = hexToUint8Array(user.encryptionSalt);
         const key = await deriveKey(trimmedPassword, saltBytes);
+        const unlockRecord = await buildOfflineUnlockRecord(user, trimmedPassword);
+        if (unlockRecord) {
+            await secureSet(unlockStorageKey(unlockRecord.email), JSON.stringify(unlockRecord));
+        }
         
         try {
             if (rememberMe) {
@@ -75,8 +82,23 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
 
     } catch (err: any) {
         console.error("Login failed:", err);
-        if (err.isNetworkError) {
-            setError(t('error_network_detailed', { url: err.backendUrl }));
+        if (err.isNetworkError || (err instanceof ApiError && err.isNetworkError)) {
+            const stored = await secureGet(unlockStorageKey(trimmedEmail));
+            if (stored) {
+                try {
+                    const unlocked = await matchOfflineUnlock(JSON.parse(stored), trimmedEmail, trimmedPassword);
+                    if (unlocked) {
+                        if (rememberMe) {
+                            localStorage.setItem(REMEMBER_EMAIL_KEY, trimmedEmail);
+                        }
+                        onLoginSuccess(unlocked.user, unlocked.key);
+                        return;
+                    }
+                } catch (unlockError) {
+                    console.warn('[login] offline unlock failed', unlockError);
+                }
+            }
+            setError(t('error_network_detailed', { url: err.backendUrl || '' }));
         } else if (err.status === 401) {
             setError(t('login_error_credentials'));
         } else if (err.status === 403) {

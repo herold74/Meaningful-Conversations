@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions, ConnectorHandoffPayload } from './types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions, ConnectorHandoffPayload } from './types';
 import { resolveConnectorPremiumAccess } from './utils/connectorAccess';
 import { userHasSavedConnector } from './utils/connectorProfile';
 import { sealConnectorForProfile } from './utils/connectorSignatureTranslation';
@@ -45,6 +45,20 @@ import type { SurveyResult, LensType } from './components/PersonalitySurvey';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
 import { encryptData } from './utils/encryption';
+import { getLocalModelMode, SAM_BOT_ID } from './utils/localModelMode';
+import {
+    hashLifeContext,
+    markOfflineLifeContextClean,
+    readOfflineLifeContext,
+    saveOfflineLifeContext,
+} from './utils/offlineLifeContext';
+import {
+    enqueueSamOfflineResult,
+    listSamOfflineResults,
+    oldestActionableSamResult,
+    setSamOfflineResultStatus,
+} from './utils/samOfflineResults';
+import { saveConnectorOfflineRun } from './utils/connectorOfflineRuns';
 import {
     botFromConnectorVignette,
     openingMessageFromVignette,
@@ -117,6 +131,60 @@ function appendBekkyAuditTasksFromMessages(
     }
 }
 
+function mergeSessionNextSteps(analysis: SessionAnalysis, lifeContext: string): void {
+    const hasNewSteps = analysis.nextSteps && analysis.nextSteps.length > 0;
+    const hasCompletedSteps = analysis.completedSteps && analysis.completedSteps.length > 0;
+    if (!hasNewSteps && !hasCompletedSteps) return;
+
+    const docLang = (lifeContext && lifeContext.match(/^#\s*(Mein\s)?Lebenskontext/im)) ? 'de' : 'en';
+    const nextStepsHeadline = docLang === 'de' ? 'Realisierbare nächste Schritte' : 'Achievable Next Steps';
+    const deadlineWord = docLang === 'de' ? 'bis' : 'Deadline';
+    const existingStepsRegex = /##\s*✅\s*(Achievable Next Steps|Realisierbare nächste Schritte)\s*\n(?:.*?\n)?((?:\* .*(?:\n|$))*)/i;
+    const match = lifeContext?.match(existingStepsRegex);
+    let existingStepsLines: string[] = [];
+    if (match && match[2]) {
+        existingStepsLines = match[2]
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.startsWith('*'));
+    }
+
+    let remainingSteps = existingStepsLines;
+    if (hasCompletedSteps) {
+        const completedStepsNormalized = analysis.completedSteps.map((step: string) =>
+            step.trim().replace(/^\*\s*/, '').toLowerCase()
+        );
+        remainingSteps = existingStepsLines.filter(step => {
+            const stepNormalized = step.replace(/^\*\s*/, '').toLowerCase();
+            return !completedStepsNormalized.some(completed =>
+                stepNormalized.includes(completed) || completed.includes(stepNormalized)
+            );
+        });
+    }
+
+    const newStepsLines = hasNewSteps
+        ? analysis.nextSteps.map((step: { action: string; deadline: string }) =>
+            `* ${step.action} (${deadlineWord}: ${step.deadline})`
+        )
+        : [];
+    const allSteps = [...remainingSteps, ...newStepsLines];
+
+    if (allSteps.length > 0) {
+        const updateType = (hasCompletedSteps || existingStepsLines.length > 0) ? 'replace_section' : 'append';
+        analysis.proposedUpdates.push({
+            type: updateType,
+            headline: nextStepsHeadline,
+            content: allSteps.join('\n'),
+        });
+    } else if (hasCompletedSteps && existingStepsLines.length > 0) {
+        analysis.proposedUpdates.push({
+            type: 'replace_section',
+            headline: nextStepsHeadline,
+            content: '',
+        });
+    }
+}
+
 const App: React.FC = () => {
     const { t, language } = useLocalization();
     const [view, setView] = useState<NavView>('welcome');
@@ -148,6 +216,8 @@ const App: React.FC = () => {
     const [gamificationState, setGamificationState] = useState<GamificationState>(DEFAULT_GAMIFICATION_STATE);
     const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
     const [chatHistory, setChatHistory] = useState<Message[]>([]);
+    const samIncorporationIdRef = useRef<string | null>(null);
+    const samIncorporateCooldownRef = useRef<string | null>(null);
     const [sessionAnalysis, setSessionAnalysis] = useState<SessionAnalysis | null>(null);
     const [newGamificationState, setNewGamificationState] = useState<GamificationState | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -461,17 +531,52 @@ const App: React.FC = () => {
             return;
         }
         if (encryptionKey) {
+            const gamification = serializeGamificationState(gamificationState);
+            const existing = await readOfflineLifeContext(currentUser.id, encryptionKey).catch(() => null);
+            await saveOfflineLifeContext(currentUser.id, encryptionKey, newContext, gamification, {
+                dirty: true,
+                baseHash: existing?.baseHash,
+            });
             try {
-                await userService.saveUserData(
-                    newContext,
-                    serializeGamificationState(gamificationState),
-                    encryptionKey,
-                );
+                await userService.saveUserData(newContext, gamification, encryptionKey);
+                await markOfflineLifeContextClean(currentUser.id, encryptionKey, newContext);
             } catch (error) {
                 console.error('Failed to save edited context:', error);
             }
         }
     }, [currentUser, encryptionKey, gamificationState, questionnaireAnswers.profile_name]);
+
+    useEffect(() => {
+        if (!currentUser || !encryptionKey) return;
+        const syncDirtyLifeContext = async () => {
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+            const local = await readOfflineLifeContext(currentUser.id, encryptionKey);
+            if (!local?.dirty) return;
+            try {
+                const server = await userService.loadUserData(encryptionKey);
+                const serverHash = await hashLifeContext(server.context || '');
+                if (serverHash !== local.baseHash) {
+                    const keepLocal = window.confirm(t('lc_sync_conflict'));
+                    if (!keepLocal) {
+                        setLifeContext(server.context || '');
+                        setGamificationState(deserializeGamificationState(server.gamificationState));
+                        await saveOfflineLifeContext(currentUser.id, encryptionKey, server.context || '', server.gamificationState || '{}', {
+                            dirty: false,
+                            baseHash: serverHash,
+                        });
+                        return;
+                    }
+                }
+                await userService.saveUserData(local.context, local.gamificationState, encryptionKey);
+                await markOfflineLifeContextClean(currentUser.id, encryptionKey, local.context);
+            } catch (error) {
+                console.warn('Life context sync postponed', error);
+            }
+        };
+        void syncDirtyLifeContext();
+        window.addEventListener('online', syncDirtyLifeContext);
+        return () => window.removeEventListener('online', syncDirtyLifeContext);
+    }, [currentUser, encryptionKey, t]);
 
     const handleLcEditorSaveFromContextChoice = useCallback(async (newContext: string) => {
         await persistLifeContextEdits(newContext);
@@ -633,6 +738,66 @@ const App: React.FC = () => {
         return newState;
 
     }, [t]);
+
+    useEffect(() => {
+        if (!currentUser || !encryptionKey) return;
+        if (view !== 'intentPicker' && view !== 'botSelection') return;
+        if (samIncorporationIdRef.current) return;
+        let cancelled = false;
+        const resumeQueuedSam = async () => {
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+            let queued;
+            try {
+                queued = await listSamOfflineResults(currentUser.id, encryptionKey);
+            } catch (error) {
+                console.warn('Offline Sam queue cannot be opened with the current key.', error);
+                return;
+            }
+            const next = oldestActionableSamResult(
+                queued.filter((result) => result.status === 'pending' && result.id !== samIncorporateCooldownRef.current),
+            );
+            if (!next || cancelled || samIncorporationIdRef.current) return;
+            const sam = BOTS.find((bot) => bot.id === SAM_BOT_ID);
+            if (!sam) return;
+            const history: Message[] = next.messages.map((message, index) => ({
+                id: `${next.id}-${index}`,
+                role: message.role,
+                text: message.text,
+                timestamp: next.createdAt,
+            }));
+            samIncorporationIdRef.current = next.id;
+            setSamOfflineResultStatus(next.id, 'in_review');
+            setSelectedBot(sam);
+            setChatHistory(history);
+            setUserMessageCount(history.filter((message) => message.role === 'user').length);
+            setBaselineMessageCount(0);
+            setIsAnalyzing(true);
+            try {
+                const analysis = await geminiService.analyzeSession(history, lifeContext, next.language);
+                appendBekkyAuditTasksFromMessages(history, analysis, lifeContext || '', SAM_BOT_ID);
+                mergeSessionNextSteps(analysis, lifeContext || '');
+                if (cancelled) {
+                    setSamOfflineResultStatus(next.id, 'pending');
+                    samIncorporationIdRef.current = null;
+                    return;
+                }
+                const messageCount = history.filter((message) => message.role === 'user').length;
+                setSessionAnalysis(analysis);
+                setIsSessionQualified(messageCount >= 5);
+                setNewGamificationState(calculateNewGamificationState(gamificationState, analysis, SAM_BOT_ID, messageCount, 0));
+                setView('sessionReview');
+            } catch (error) {
+                samIncorporateCooldownRef.current = next.id;
+                setSamOfflineResultStatus(next.id, 'pending');
+                samIncorporationIdRef.current = null;
+                console.error('Offline Sam incorporation postponed', error);
+            } finally {
+                setIsAnalyzing(false);
+            }
+        };
+        void resumeQueuedSam();
+        return () => { cancelled = true; };
+    }, [view, currentUser, encryptionKey, lifeContext, gamificationState, calculateNewGamificationState]);
 
 
     // --- PWA Service Worker Registration (web/PWA only — breaks local assets on Capacitor) ---
@@ -1346,80 +1511,43 @@ const App: React.FC = () => {
         clearCoachingDraftState();
         setConnectorChatHandoff(null);
         setConnectorHandoffPayload(null);
+        let historyForAnalysis = chatHistory;
+        let analysisLanguage = language;
+        if (selectedBot.id === SAM_BOT_ID && getLocalModelMode('sam') === 'local' && currentUser && encryptionKey && !isTestMode) {
+            await enqueueSamOfflineResult(currentUser.id, encryptionKey, language, chatHistory);
+            const online = typeof navigator === 'undefined' || navigator.onLine !== false;
+            if (!online) {
+                setSelectedBot(null);
+                setChatHistory([]);
+                setUserMessageCount(0);
+                setBaselineMessageCount(0);
+                alert(t('sam_offline_queued'));
+                applyIntentLogic(null);
+                return;
+            }
+            const queued = await listSamOfflineResults(currentUser.id, encryptionKey);
+            const next = oldestActionableSamResult(queued);
+            if (!next) {
+                applyIntentLogic(null);
+                return;
+            }
+            historyForAnalysis = next.messages.map((message, index) => ({
+                id: `${next.id}-${index}`,
+                role: message.role,
+                text: message.text,
+                timestamp: next.createdAt,
+            }));
+            samIncorporationIdRef.current = next.id;
+            samIncorporateCooldownRef.current = null;
+            setSamOfflineResultStatus(next.id, 'in_review');
+            setChatHistory(historyForAnalysis);
+            analysisLanguage = next.language;
+        }
         setIsAnalyzing(true);
         try {
-            const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
-            appendBekkyAuditTasksFromMessages(chatHistory, analysis, lifeContext || '', selectedBot.id);
-
-            // Handle "Next Steps" and "Completed Steps" logic.
-            const hasNewSteps = analysis.nextSteps && analysis.nextSteps.length > 0;
-            const hasCompletedSteps = analysis.completedSteps && analysis.completedSteps.length > 0;
-            
-            if (hasNewSteps || hasCompletedSteps) {
-                // Determine the correct headline based on the document's language.
-                const docLang = (lifeContext && lifeContext.match(/^#\s*(Mein\s)?Lebenskontext/im)) ? 'de' : 'en';
-                const nextStepsHeadline = docLang === 'de' ? 'Realisierbare nächste Schritte' : 'Achievable Next Steps';
-                const deadlineWord = docLang === 'de' ? 'bis' : 'Deadline';
-
-                // Extract existing next steps from the life context.
-                const existingStepsRegex = /##\s*✅\s*(Achievable Next Steps|Realisierbare nächste Schritte)\s*\n(?:.*?\n)?((?:\* .*(?:\n|$))*)/i;
-                const match = lifeContext?.match(existingStepsRegex);
-                let existingStepsLines: string[] = [];
-                
-                if (match && match[2]) {
-                    existingStepsLines = match[2]
-                        .split('\n')
-                        .map(line => line.trim())
-                        .filter(line => line.startsWith('*'));
-                }
-
-                // Filter out completed steps from existing steps.
-                let remainingSteps = existingStepsLines;
-                if (hasCompletedSteps) {
-                    const completedStepsNormalized = analysis.completedSteps.map((s: string) => 
-                        s.trim().replace(/^\*\s*/, '').toLowerCase()
-                    );
-                    remainingSteps = existingStepsLines.filter(step => {
-                        const stepNormalized = step.replace(/^\*\s*/, '').toLowerCase();
-                        return !completedStepsNormalized.some(completed => 
-                            stepNormalized.includes(completed) || completed.includes(stepNormalized)
-                        );
-                    });
-                }
-
-                // Format new next steps.
-                const newStepsLines = hasNewSteps 
-                    ? analysis.nextSteps.map((step: { action: string; deadline: string }) => 
-                        `* ${step.action} (${deadlineWord}: ${step.deadline})`
-                    )
-                    : [];
-
-                // Combine remaining + new steps.
-                const allSteps = [...remainingSteps, ...newStepsLines];
-
-                if (allSteps.length > 0) {
-                    // If there were completed steps OR existing steps, use 'replace_section' to ensure clean update.
-                    // Otherwise, use 'append' for first-time creation.
-                    const updateType = (hasCompletedSteps || existingStepsLines.length > 0) ? 'replace_section' : 'append';
-                    
-                    const nextStepsUpdate: ProposedUpdate = {
-                        type: updateType,
-                        headline: nextStepsHeadline,
-                        content: allSteps.join('\n'),
-                    };
-                    
-                    analysis.proposedUpdates.push(nextStepsUpdate);
-                } else if (hasCompletedSteps && existingStepsLines.length > 0) {
-                    // All steps were completed. Clear the task list but keep the section structure (headline + subtitle).
-                    const nextStepsUpdate: ProposedUpdate = {
-                        type: 'replace_section',
-                        headline: nextStepsHeadline,
-                        content: '', // Empty content = no tasks, but section structure remains
-                    };
-                    
-                    analysis.proposedUpdates.push(nextStepsUpdate);
-                }
-            }
+            const analysis = await geminiService.analyzeSession(historyForAnalysis, lifeContext, analysisLanguage);
+            appendBekkyAuditTasksFromMessages(historyForAnalysis, analysis, lifeContext || '', selectedBot.id);
+            mergeSessionNextSteps(analysis, lifeContext || '');
 
             setSessionAnalysis(analysis);
 
@@ -1472,6 +1600,15 @@ const App: React.FC = () => {
                 }
             }
         } catch (error) {
+            if (samIncorporationIdRef.current) {
+                samIncorporateCooldownRef.current = samIncorporationIdRef.current;
+                setSamOfflineResultStatus(samIncorporationIdRef.current, 'pending');
+                samIncorporationIdRef.current = null;
+                console.error("Failed to analyze session:", error);
+                alert(t('sam_offline_queued'));
+                applyIntentLogic(null);
+                return;
+            }
             console.error("Failed to analyze session:", error);
             const fallbackAnalysis: SessionAnalysis = {
                 newFindings: "There was an error analyzing the session.",
@@ -1528,7 +1665,14 @@ const App: React.FC = () => {
         }
     };
 
+    const settleSamIncorporation = () => {
+        if (!samIncorporationIdRef.current) return;
+        setSamOfflineResultStatus(samIncorporationIdRef.current, 'decided');
+        samIncorporationIdRef.current = null;
+    };
+
     const handleContinueSession = async (newContext: string, options: { preventCloudSave: boolean }) => {
+        settleSamIncorporation();
         // Stop any ongoing voice output
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
@@ -1567,6 +1711,7 @@ const App: React.FC = () => {
     };
 
     const handleSwitchCoach = async (newContext: string, options: { preventCloudSave: boolean }) => {
+        settleSamIncorporation();
         // Stop any ongoing voice output
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
@@ -1601,6 +1746,10 @@ const App: React.FC = () => {
     };
 
     const handleStartOver = useCallback(() => {
+        if (samIncorporationIdRef.current) {
+            setSamOfflineResultStatus(samIncorporationIdRef.current, 'decided');
+            samIncorporationIdRef.current = null;
+        }
         // Reset session-specific state
         setSelectedBot(null);
         setChatHistory([]);
@@ -1748,7 +1897,13 @@ const App: React.FC = () => {
         resetConnectorState();
         setIsConnectorStarting(true);
         try {
-            const hasPrior = await userHasSavedConnector(encryptionKey);
+            let hasPrior = false;
+            try {
+                hasPrior = await userHasSavedConnector(encryptionKey);
+            } catch (error) {
+                console.warn('[connector] profile check skipped offline', error);
+                hasPrior = true;
+            }
             if (hasPrior) {
                 setView('connectorCatalog');
             } else {
@@ -1825,6 +1980,29 @@ const App: React.FC = () => {
         runState?: ConnectorRunState | null,
     ) => {
         const evaluable = entries.filter((e) => e.history.some((m) => m.role === 'user'));
+        if (
+            getLocalModelMode('connector') === 'local'
+            && currentUser
+            && typeof navigator !== 'undefined'
+            && navigator.onLine === false
+            && evaluable.length > 0
+        ) {
+            if (encryptionKey) {
+                for (const entry of evaluable) {
+                    await saveConnectorOfflineRun({
+                        userId: currentUser.id,
+                        language,
+                        liveMode,
+                        vignetteId: entry.vignetteId,
+                        history: entry.history.map((message) => ({ role: message.role, text: message.text })),
+                    }, encryptionKey);
+                }
+            }
+            resetConnectorState();
+            alert(t('connector_offline_saved'));
+            setView(connectorHubView(runMode));
+            return;
+        }
         if (evaluable.length === 0) {
             resetConnectorState();
             setView(connectorHubView(runMode));

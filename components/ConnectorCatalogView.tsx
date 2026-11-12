@@ -10,9 +10,11 @@ import { ApiError } from '../services/api';
 import { CONNECTOR_AVATARS } from '../utils/connectorRun';
 import type { ConnectorVignetteCatalogEntry, User } from '../types';
 import { resolveConnectorPremiumAccess } from '../utils/connectorAccess';
+import { listPendingConnectorRuns, markConnectorRunEvaluated } from '../utils/connectorOfflineRuns';
 
 interface ConnectorCatalogViewProps {
   currentUser: User | null;
+  encryptionKey?: CryptoKey | null;
   onStartPractice: (vignetteId: string, liveMode: boolean) => void;
   onOpenSituation: () => void;
   onBack: () => void;
@@ -23,6 +25,7 @@ interface ConnectorCatalogViewProps {
 
 const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
   currentUser,
+  encryptionKey,
   onStartPractice,
   onOpenSituation,
   onBack,
@@ -38,6 +41,7 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
   const [signatureInfoOpen, setSignatureInfoOpen] = useState(false);
   const [catalogVignetteInfo, setCatalogVignetteInfo] = useState<ConnectorVignetteCatalogEntry | null>(null);
   const [catalog, setCatalog] = useState<ConnectorVignetteCatalogEntry[]>([]);
+  const [pendingRuns, setPendingRuns] = useState<Awaited<ReturnType<typeof listPendingConnectorRuns>>>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -63,6 +67,22 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
       });
     return () => { cancelled = true; };
   }, [language, t]);
+
+  useEffect(() => {
+    if (!currentUser || !encryptionKey) {
+      setPendingRuns([]);
+      return;
+    }
+    let cancelled = false;
+    listPendingConnectorRuns(currentUser.id, encryptionKey)
+      .then((runs) => {
+        if (!cancelled) setPendingRuns(runs);
+      })
+      .catch(() => {
+        if (!cancelled) setPendingRuns([]);
+      });
+    return () => { cancelled = true; };
+  }, [currentUser, encryptionKey]);
 
   if (isLoading || isStarting) {
     return (
@@ -97,6 +117,36 @@ const ConnectorCatalogView: React.FC<ConnectorCatalogViewProps> = ({
           {t('connector_catalog_title')}
         </h1>
         <p className="text-content-secondary text-sm mb-4">{t('connector_catalog_subtitle')}</p>
+
+        {pendingRuns.length > 0 && (
+          <button
+            type="button"
+            className="mb-4 w-full py-2 px-4 rounded-lg border border-accent-primary text-accent-primary text-sm font-semibold"
+            onClick={async () => {
+              const run = pendingRuns[0];
+              if (!run) return;
+              try {
+                await geminiService.evaluateConnectorRun([{
+                  vignetteId: run.vignetteId,
+                  endType: 'heard',
+                  history: run.history.map((message, index) => ({
+                    id: `${run.id}-${index}`,
+                    role: message.role,
+                    text: message.text,
+                    timestamp: run.createdAt,
+                  })),
+                }], run.language, run.liveMode);
+                markConnectorRunEvaluated(run.id);
+                setPendingRuns((current) => current.filter((item) => item.id !== run.id));
+              } catch (error) {
+                console.error('Saved connector review failed', error);
+                alert(t('connector_eval_error'));
+              }
+            }}
+          >
+            {t('connector_pending_evaluate')} ({pendingRuns.length})
+          </button>
+        )}
 
         {practiceLocked && (
           <div className="mb-6 rounded-xl border border-accent-primary/40 bg-accent-primary/5 p-4 text-sm text-content-secondary">

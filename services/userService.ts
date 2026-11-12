@@ -153,7 +153,13 @@ export const submitFeedback = async (feedbackData: {
 };
 
 export const getBots = async (): Promise<Bot[]> => {
-    return await apiFetch('/bots');
+    try {
+        return await apiFetch('/bots');
+    } catch (error) {
+        const { BOTS } = await import('../constants');
+        console.warn('[bots] Using bundled coach list', error);
+        return BOTS;
+    }
 };
 
 

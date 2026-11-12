@@ -56,17 +56,37 @@ export function saveCoachingSessionDraft(
     savedAt: new Date().toISOString(),
     ...draft,
   };
+  const serialized = JSON.stringify(payload);
   try {
-    sessionStorage.setItem(COACHING_DRAFT_STORAGE_KEY, JSON.stringify(payload));
+    sessionStorage.setItem(COACHING_DRAFT_STORAGE_KEY, serialized);
   } catch {
     // Private mode or quota — fail silently; server never receives draft data.
+  }
+  try {
+    localStorage.setItem(COACHING_DRAFT_STORAGE_KEY, serialized);
+  } catch {
+    // Ignore quota failures. sessionStorage still holds the draft for this tab.
+  }
+}
+
+function readDraftRaw(): string | null {
+  try {
+    const sessionRaw = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(COACHING_DRAFT_STORAGE_KEY) : null;
+    if (sessionRaw) return sessionRaw;
+  } catch {
+    // Fall through to the durable copy.
+  }
+  try {
+    return typeof localStorage !== 'undefined' ? localStorage.getItem(COACHING_DRAFT_STORAGE_KEY) : null;
+  } catch {
+    return null;
   }
 }
 
 export function loadCoachingSessionDraft(ownerId: string | undefined): CoachingSessionDraft | null {
-  if (!ownerId || typeof sessionStorage === 'undefined') return null;
+  if (!ownerId) return null;
   try {
-    const raw = sessionStorage.getItem(COACHING_DRAFT_STORAGE_KEY);
+    const raw = readDraftRaw();
     if (!raw) return null;
     const parsed = JSON.parse(raw) as CoachingSessionDraft;
     if (parsed.version !== 1 || parsed.ownerId !== ownerId) return null;
@@ -95,9 +115,13 @@ export function loadCoachingSessionDraft(ownerId: string | undefined): CoachingS
 }
 
 export function clearCoachingSessionDraft(): void {
-  if (typeof sessionStorage === 'undefined') return;
   try {
     sessionStorage.removeItem(COACHING_DRAFT_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+  try {
+    localStorage.removeItem(COACHING_DRAFT_STORAGE_KEY);
   } catch {
     // ignore
   }
