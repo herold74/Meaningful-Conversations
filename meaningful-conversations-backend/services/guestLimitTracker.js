@@ -1,7 +1,6 @@
 // meaningful-conversations-backend/services/guestLimitTracker.js
 
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../prismaClient.js');
 
 const WEEKLY_MESSAGE_LIMIT = 50;
 

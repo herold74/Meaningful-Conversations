@@ -1,6 +1,13 @@
 {
   "runs": [
     {
+      "runId": "2026-11-10T18-16-25-mistral-w3-practice-mistral-27",
+      "provider": "mistral",
+      "createdAt": "2026-11-10T18:16:26.672Z",
+      "path": "runs/2026-11-10T18-16-25-mistral-w3-practice-mistral-27",
+      "packageVersion": "2.6.0"
+    },
+    {
       "runId": "2026-07-28T22-18-08-gemini-staging-dev-relbound-1k",
       "provider": "gemini",
       "createdAt": "2026-07-28T22:18:09.113Z",

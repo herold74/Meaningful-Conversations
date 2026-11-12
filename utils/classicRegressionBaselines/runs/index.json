@@ -1,6 +1,26 @@
 {
   "runs": [
     {
+      "runId": "2026-11-10T18-16-25-mistral-w3-mistral-session-full-retest",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-10T18:16:26.451Z",
+      "path": "runs/2026-11-10T18-16-25-mistral-w3-mistral-session-full-retest",
+      "packageVersion": "2.6.0",
+      "autoCheckPass": "1/1",
+      "models": "mistral-large-latest"
+    },
+    {
+      "runId": "2026-11-10T18-02-41-mistral-w3-mistral-tail",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-10T18:02:42.253Z",
+      "path": "runs/2026-11-10T18-02-41-mistral-w3-mistral-tail",
+      "packageVersion": "2.6.0",
+      "autoCheckPass": "4/4",
+      "models": "mistral-large-latest"
+    },
+    {
       "runId": "2026-07-28T21-09-53-mistral-harness-force-mistral",
       "provider": "mistral",
       "suite": "regression",

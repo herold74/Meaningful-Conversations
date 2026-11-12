@@ -1,0 +1,55 @@
+{
+  "planRef": "PLANS/software-stack-update-plan.md",
+  "updated": "2026-11-12",
+  "waves": [
+    {
+      "id": "W1",
+      "title": "Host Security (P0)",
+      "status": "done",
+      "note": "2026-11-12 dnf security, kernel 687.66.2"
+    },
+    {
+      "id": "W2",
+      "title": "npm Patch/Minor + image digest (P1)",
+      "status": "done",
+      "note": "Prod b77 parity"
+    },
+    {
+      "id": "W3",
+      "title": "@google/genai + @mistralai (P2)",
+      "status": "done",
+      "note": "Regression dokumentiert in PLANS/w3-regression-results.md"
+    },
+    {
+      "id": "W4",
+      "title": "Apple app-store-server-library (P2)",
+      "status": "done",
+      "note": "3.1.0 on production"
+    },
+    {
+      "id": "W5",
+      "title": "Prisma 7 (P3)",
+      "status": "done",
+      "note": "Prisma 7.10.1 prod"
+    },
+    {
+      "id": "W6",
+      "title": "React 19 (P3)",
+      "status": "soak",
+      "note": "Staging b78; Production noch b77 — Prod-Pull nach Soak"
+    },
+    {
+      "id": "Defer",
+      "title": "Express 5",
+      "status": "deferred",
+      "note": "Backlog laut Plan §7"
+    }
+  ],
+  "fridayFocus": [
+    "W6: Staging-Smoke (Login, Classic, UI) — danach Prod-Pull freigeben",
+    "npm: Patch/Minor-Kandidaten prüfen (kein Major ohne neue Welle)",
+    "Dependabot nur nach expliziter Freigabe (Freitag-Workflow)"
+  ],
+  "gitRepo": "https://github.com/herold74/Meaningful-Conversations.git",
+  "scanDir": "/var/lib/mc-sw-stack-scan"
+}

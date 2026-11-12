@@ -1,16 +1,20 @@
-const { PrismaClient } = require('@prisma/client');
-
-// This pattern ensures that a single instance of PrismaClient is used across the application,
-// preventing connection pool exhaustion, especially during development with hot-reloading.
+const { PrismaClient } = require('./generated/prisma/client');
+const { createMariaDbAdapter } = require('./utils/mariadbAdapterFromUrl');
 
 const globalForPrisma = global;
 
-const prisma = globalForPrisma.prisma || new PrismaClient({
+function newPrismaClient() {
+  const adapter = createMariaDbAdapter(process.env.DATABASE_URL);
+  return new PrismaClient({
+    adapter,
     log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
-});
+  });
+}
+
+const prisma = globalForPrisma.prisma || newPrismaClient();
 
 if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma = prisma;
 }
 
 module.exports = prisma;

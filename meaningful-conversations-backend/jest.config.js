@@ -1,5 +1,6 @@
 module.exports = {
   testEnvironment: 'node',
+  setupFiles: ['<rootDir>/jest.prisma-env.js'],
   testMatch: ['**/__tests__/**/*.test.js'],
   collectCoverageFrom: [
     'services/**/*.js',
