@@ -1,0 +1,22 @@
+{
+  "$schema": "https://cursor.com/schemas/environment.schema.json",
+  "name": "meaningful-conversations-dev",
+  "install": "bash templates/cursor-cloud-environment/install.sh",
+  "start": "bash templates/cursor-cloud-environment/start.sh",
+  "ports": [
+    { "name": "frontend", "port": 5173 },
+    { "name": "backend", "port": 3001 }
+  ],
+  "terminals": [
+    {
+      "name": "frontend",
+      "command": "bash -lc 'npm run dev -- --host 0.0.0.0 --port 5173'",
+      "description": "Vite on :5173. That host calls the local API on :3001; add ?backend=staging for mc-beta."
+    },
+    {
+      "name": "backend",
+      "command": "bash -lc 'cd meaningful-conversations-backend && npm run dev'",
+      "description": "Express API on :3001 (needs DATABASE_URL, JWT_SECRET, GOOGLE_API_KEY)"
+    }
+  ]
+}
