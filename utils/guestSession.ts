@@ -70,6 +70,7 @@ export function hasGuestNameProvided(
 ): boolean {
   if (getStoredGuestName()) return true;
   if (profileName?.trim()) return true;
+  if (extractGuestNameFromLifeContext(lifeContext)) return true;
   return false;
 }
 

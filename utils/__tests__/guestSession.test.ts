@@ -11,9 +11,10 @@ describe('guestSession', () => {
     expect(resolveGuestName(template, null)).toBe('Anna');
   });
 
-  it('requires explicit session name for hasGuestNameProvided', () => {
+  it('treats name in life context template as provided for guest routing', () => {
     const template = '# Lebenskontext\n\n**Name**: Anna\n\n**Ziel**: \n';
-    expect(hasGuestNameProvided(template, null)).toBe(false);
+    expect(extractGuestNameFromLifeContext(template)).toBe('Anna');
+    expect(hasGuestNameProvided(template, null)).toBe(true);
     expect(hasGuestNameProvided('', 'Anna')).toBe(true);
   });
 
