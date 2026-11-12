@@ -256,10 +256,7 @@ check_npm_stack() {
     -v "${NPM_OUT_DIR}:/out:Z" \
     -w /repo \
     "$NODE_IMAGE" \
-    bash -c 'set -e
-      npm ci --ignore-scripts --omit=optional --no-audit --no-fund -q 2>/dev/null
-      cd /repo/meaningful-conversations-backend
-      npm ci --ignore-scripts --omit=optional --no-audit --no-fund -q 2>/dev/null
+    bash -c '
       cd /repo
       npm outdated --json > /out/frontend.json 2>/dev/null || echo "{}" > /out/frontend.json
       cd /repo/meaningful-conversations-backend
