@@ -3,7 +3,7 @@
 ## Current Status
 **Version:** 2.6.0. Repo `BUILD_NUMBER` **78**. **Staging** Build **78** (W6 React 19 deploy 2026-11-12). **Production** Build **77** (React 18 Frontend bis Prod-Pull).
 **Ops-Report (2026-11-04):** `scripts/server-ops-report.sh` prüft Produktions- und Staging-Dumps getrennt (`production-*.sql.gz` / `staging-*.sql.gz`: Alter, Größe, gzip). Kurzübersicht: `Backup Prod` und `Backup Staging`. Cron bleibt `/usr/local/bin/server-ops-report.sh` (Kopie, nicht Teil des App-Deploys).
-**Patches (2026-11-04):** `dnf update --security` (27 Pakete, Kernel `5.14.0-687.65.1`, OpenSSH, Podman 5.8.2-8) plus `krb5-libs`. Reboot ~07:35 UTC. Danach keine Updates mehr offen, kein weiterer Reboot. Prod und Staging `/api/health` HTTP 200, MC-Container healthy.
+**Patches (2026-11-12 W1):** `dnf update --security` — Kernel **5.14.0-687.66.2**, glibc, Cockpit, qemu-guest-agent, webkit; Reboot; Prod+Staging Health 200. Details: `PLANS/w1-host-security-2026-11-12.md`. *(Vorher 2026-11-04: 687.65.1, Podman 5.8.2-8.)*
 **Staging:** v**2.6.0** Build **78** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b78`; W6 React 19.3 Frontend).
 **Production:** v**2.6.0** Build **77** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b77`; `/api/health` mit `version` + `prisma`).
 **App Store:** iOS **2.6.0** live (AT/DE/CH) — nutzt Production-API; kein neues iOS-Release für Stack-W2–W5 nötig (API-kompatibel). Metadata: `DOCUMENTATION/APP-STORE-METADATA.md`.
@@ -21,8 +21,8 @@
 - **W5 #30:** Prisma 7.10.1 merged; Staging backend verified.
 - **Version UI:** `f429d649` — health + Burger/About; Staging **b77** deploy OK.
 - **Production (2026-11-12):** `./deploy-manualmode.sh -e production` — Parität mit Staging **b77**; Health 200, DB connected.
-- **W6 (2026-11-12):** React **19.3** lokal + `npm run ci` grün; Staging-Deploy ausstehend/laufend — siehe `PLANS/w6-react-19.md`.
-- **Nächster Schritt:** Staging-Smoke W6; Production erst nach Soak (Prod bleibt React 18 bis Pull).
+- **W6 (2026-11-12):** React **19.3** — `dd6fa9fd`, Staging **b78** deploy OK — `PLANS/w6-react-19.md`.
+- **Nächster Schritt:** Staging-Smoke (Login, Classic, UI); Prod-Pull für W6 erst nach Soak.
 
 ## Session handoff (2026-11-07) — Software-Stack-Updates (Plan + W2-Scan)
 
