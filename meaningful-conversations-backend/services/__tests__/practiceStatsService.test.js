@@ -9,7 +9,7 @@ const makeRow = (overrides = {}) => ({
   scenarioId: 'career-decision',
   difficulty: 'moderate',
   userId: 'user-1',
-  createdAt: new Date('2026-07-20T10:00:00.000Z'),
+  createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
   evaluationData: JSON.stringify({
     overallScore: 7,
     methodCompliance: { score: 7 },
@@ -70,7 +70,7 @@ describe('practiceStatsService', () => {
       }));
       rows.push(makeRow({
         userId: `coach-${i}`,
-        createdAt: new Date('2026-07-22T10:00:00.000Z'),
+        createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
         evaluationData: JSON.stringify({
           overallScore: 9,
           methodCompliance: { score: 9 },

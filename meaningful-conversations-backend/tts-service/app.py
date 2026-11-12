@@ -37,7 +37,7 @@ def sanitize_text_for_piper(text: str) -> str:
     text = unicodedata.normalize('NFKC', text)
     for src, dst in [
         ('\u2018', "'"), ('\u2019', "'"), ('\u201c', '"'), ('\u201d', '"'),
-        ('\u2013', '-'), ('\u2014', '-'), ('\u2026', '...'), ('\u00ad', ''),
+        ('\u2013', ', '), ('\u2014', ', '), ('\u2026', ', '), ('\u00ad', ''),
     ]:
         text = text.replace(src, dst)
     text = re.sub(r"[^\w\s.,!?;:'\"()\-\–—/äöüÄÖÜß]", ' ', text, flags=re.UNICODE)

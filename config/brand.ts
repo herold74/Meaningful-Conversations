@@ -10,12 +10,25 @@ export const brand = {
   providerName:     import.meta.env.VITE_BRAND_PROVIDER_NAME      || 'manualmode.at',
   providerUrl:      import.meta.env.VITE_BRAND_PROVIDER_URL       || 'https://www.manualmode.at',
   contactEmail:     import.meta.env.VITE_BRAND_CONTACT_EMAIL      || 'support@manualmode.at',
+  /** Coaching / client access inquiries (not general app support). */
+  connectEmail:     import.meta.env.VITE_BRAND_CONNECT_EMAIL      || 'connect@manualmode.at',
   ownerName:        import.meta.env.VITE_BRAND_OWNER_NAME         || 'Günter Herold',
+  ownerLegalName:   import.meta.env.VITE_BRAND_OWNER_LEGAL_NAME   || 'Günter Herold, MSc',
+  ownerProfessionDe: import.meta.env.VITE_BRAND_OWNER_PROFESSION_DE || 'Lebens- und Sozialberatung',
+  ownerProfessionEn: import.meta.env.VITE_BRAND_OWNER_PROFESSION_EN || 'Life and Social Counseling',
+  invoiceStreet:    import.meta.env.VITE_BRAND_INVOICE_STREET       || 'Am Gigalberg 7a',
+  invoicePostalCode: import.meta.env.VITE_BRAND_INVOICE_POSTAL_CODE || '2000',
+  invoiceCity:      import.meta.env.VITE_BRAND_INVOICE_CITY         || 'Zissersdorf',
+  invoiceCountryDe: import.meta.env.VITE_BRAND_INVOICE_COUNTRY_DE   || 'Österreich',
+  invoiceCountryEn: import.meta.env.VITE_BRAND_INVOICE_COUNTRY_EN   || 'Austria',
   primaryColor:     import.meta.env.VITE_BRAND_PRIMARY_COLOR      || '#1B7272',
   primaryColorDark: import.meta.env.VITE_BRAND_PRIMARY_COLOR_DARK || '#165a5a',
   domainStaging:    import.meta.env.VITE_BRAND_DOMAIN_STAGING     || 'mc-beta.manualmode.at',
   domainProduction: import.meta.env.VITE_BRAND_DOMAIN_PRODUCTION  || 'mc-app.manualmode.at',
   appUrlProduction: import.meta.env.VITE_BRAND_APP_URL_PRODUCTION || 'https://mc-app.manualmode.at',
+  /** App Store listing name (ASC); search keyword for iOS install help. */
+  iosAppStoreName:  import.meta.env.VITE_BRAND_IOS_STORE_NAME     || 'ManualMode',
+  appStoreUrl:      import.meta.env.VITE_BRAND_APP_STORE_URL        || 'https://apps.apple.com/at/app/id6759491083',
   serverIp:         import.meta.env.VITE_BRAND_SERVER_IP           || '',
 
   /** 4-shade brand palette (lightest to darkest) */
@@ -31,3 +44,15 @@ export const brand = {
 
 export type Brand = typeof brand;
 export type BrandLoaderType = Brand['loader'];
+
+/** Markdown link to contact the provider by e-mail (handbook, about, terms). */
+export function brandProviderMailtoMarkdown(linkLabel?: string): string {
+  const label = linkLabel ?? brand.providerName;
+  return `[${label}](mailto:${brand.contactEmail})`;
+}
+
+export type BrandMailPurpose = 'coaching' | 'support';
+
+export function brandEmailForPurpose(purpose: BrandMailPurpose): string {
+  return purpose === 'coaching' ? brand.connectEmail : brand.contactEmail;
+}

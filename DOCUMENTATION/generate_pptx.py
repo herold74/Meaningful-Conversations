@@ -304,7 +304,7 @@ tiers = [
     {
         'name': 'Registered',
         'price': '3,90 €/Monat',
-        'price2': 'oder 14,90 € einmalig',
+        'price2': 'oder 14,90 €/Jahr',
         'color': TEAL,
         'bg': TEAL_LIGHT,
         'features': [

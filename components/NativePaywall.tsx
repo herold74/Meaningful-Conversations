@@ -2,18 +2,54 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import {
   fetchAvailableProducts,
+  fetchAvailableProductsWithDiagnostics,
   getActiveProductIds,
   purchaseProduct,
   restorePurchases,
   logInRevenueCat,
   localizeIapError,
   sortPaywallProducts,
+  filterActiveProductIdsForServerAccess,
   StoreProduct,
 } from '../services/purchaseService';
 import { User } from '../types';
 import Button from './shared/Button';
 import * as api from '../services/api';
 import { brand } from '../config/brand';
+
+/** App-locale titles/descriptions for IAP products (StoreKit metadata follows App Store locale, not in-app language). */
+const IAP_PRODUCT_TITLE_KEYS: Record<string, string> = {
+  'mc.registered.monthly': 'paywall_product_registered_1m',
+  'mc.registered.yearly.v2': 'paywall_product_registered_1y',
+  'mc.registered.lifetime': 'paywall_product_registered_lifetime',
+  'mc.premium.monthly': 'paywall_product_premium_1m',
+  'mc.premium.yearly': 'paywall_product_premium_1y',
+  'mc.premium_plus.monthly': 'paywall_product_premium_plus_1m',
+  'mc.coach.kenji': 'paywall_product_kenji',
+  'mc.coach.chloe': 'paywall_product_chloe',
+};
+
+const IAP_PRODUCT_DESC_KEYS: Record<string, string> = {
+  'mc.registered.monthly': 'iap_product_desc_registered_monthly',
+  'mc.registered.yearly.v2': 'iap_product_desc_registered_yearly',
+  'mc.registered.lifetime': 'iap_product_desc_registered_lifetime',
+  'mc.premium.monthly': 'iap_product_desc_premium_monthly',
+  'mc.premium.yearly': 'iap_product_desc_premium_yearly',
+  'mc.premium_plus.monthly': 'iap_product_desc_premium_plus_monthly',
+  'mc.coach.kenji': 'iap_product_desc_kenji',
+  'mc.coach.chloe': 'iap_product_desc_chloe',
+};
+
+function iapProductTitle(product: StoreProduct, t: (key: string) => string): string {
+  const key = IAP_PRODUCT_TITLE_KEYS[product.identifier];
+  return key ? t(key) : product.localizedTitle;
+}
+
+function iapProductDescription(product: StoreProduct, t: (key: string) => string): string | null {
+  const key = IAP_PRODUCT_DESC_KEYS[product.identifier];
+  if (key) return t(key);
+  return product.localizedDescription || null;
+}
 
 interface NativePaywallProps {
   onPurchaseSuccess: (user: User) => void;
@@ -78,10 +114,16 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
           }
         }
 
-        const available = await fetchAvailableProducts();
-        const activeIds = await getActiveProductIds();
+        const diag = await fetchAvailableProductsWithDiagnostics();
+        const available = diag.products;
+        if (diag.error) console.warn('[NativePaywall] IAP diagnostics:', diag);
+        let activeIds = await getActiveProductIds();
+        activeIds = filterActiveProductIdsForServerAccess(activeIds, currentUser);
         setProducts(available);
         setActiveProductIds(activeIds);
+        if (available.length === 0 && diag.error) {
+          setError(diag.error);
+        }
       } catch {
         setError(t('iap_load_error'));
       } finally {
@@ -99,7 +141,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
 
     if (result.success) {
       setSuccess(t('paywall_payment_success'));
-      setActiveProductIds(await getActiveProductIds());
+      setActiveProductIds(filterActiveProductIdsForServerAccess(await getActiveProductIds(), currentUser));
       let userToUse: User | null = (result as any).user || null;
       if (!userToUse && currentUser) {
         const patched = { ...currentUser };
@@ -190,7 +232,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
 
     if (result.restored > 0) {
       setSuccess(t('iap_restore_success', { count: result.restored }));
-      setActiveProductIds(await getActiveProductIds());
+      setActiveProductIds(filterActiveProductIdsForServerAccess(await getActiveProductIds(), currentUser));
       const userToUse = (result as any).user || (currentUser ? (() => {
         const p = { ...currentUser };
         const oneYear = new Date(Date.now() + 365 * 86400000).toISOString();
@@ -247,7 +289,7 @@ const NativePaywall: React.FC<NativePaywallProps> = ({ onPurchaseSuccess, curren
     return (
       <div className="space-y-4">
         <p className="text-sm text-content-subtle text-center">
-          {t('iap_not_available')}
+          {error || t('iap_not_available')}
         </p>
         <button
           onClick={handleRestore}
@@ -406,6 +448,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const periodLabel = product.identifier.includes('yearly')
     ? t('iap_period_year')
     : t('iap_period_month');
+  const description = iapProductDescription(product, t);
 
   return (
     <div className={`rounded-lg p-4 border ${isActive ? 'bg-status-success-background/50 border-status-success-border' : 'bg-background-tertiary border-border-primary'}`}>
@@ -413,7 +456,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="font-semibold text-content-primary text-sm sm:text-base">
-              {product.localizedTitle}
+              {iapProductTitle(product, t)}
             </p>
             {isActive && (
               <span className="text-xs font-medium text-status-success-foreground bg-status-success-background px-2 py-0.5 rounded">
@@ -421,9 +464,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
               </span>
             )}
           </div>
-          {product.localizedDescription && (
+          {description && (
             <p className="text-xs text-content-subtle mt-0.5">
-              {product.localizedDescription}
+              {description}
             </p>
           )}
           {showAppleUpgradeNote && (

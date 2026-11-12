@@ -13,8 +13,14 @@ const {
 } = require('../middleware/rateLimiter.js');
 const { syncUserFromRevenueCat } = require('./appleIAP.js');
 const { invalidateTokensForUser } = require('../services/tokenInvalidation.js');
+const { asyncHandler } = require('../middleware/asyncHandler.js');
 
 const router = express.Router();
+
+function requireEmail(email) {
+    if (typeof email !== 'string' || email.trim() === '') return 'Email is required.';
+    return null;
+}
 
 function validatePassword(password) {
     if (!password || typeof password !== 'string') return 'Password is required.';
@@ -49,9 +55,14 @@ const { sanitizeUserForClient } = require('../utils/userHelpers.js');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /api/auth/register
-router.post('/register', registerLimiter, async (req, res) => {
-    const { email, password, firstName, lastName, newsletterConsent, language } = req.body;
-    const lowerCaseEmail = email.toLowerCase();
+router.post('/register', registerLimiter, asyncHandler(async (req, res) => {
+    const body = req.body || {};
+    const { email, password, firstName, lastName, newsletterConsent, language } = body;
+    const emailError = requireEmail(email);
+    if (emailError) {
+        return res.status(400).json({ error: emailError });
+    }
+    const lowerCaseEmail = email.trim().toLowerCase();
 
     const passwordError = validatePassword(password);
     if (passwordError) {
@@ -136,7 +147,7 @@ router.post('/register', registerLimiter, async (req, res) => {
         console.error("Registration error:", error);
         res.status(500).json({ error: 'Internal server error.' });
     }
-});
+}));
 
 // POST /api/auth/login
 router.post('/login', loginLimiter, async (req, res) => {
@@ -274,9 +285,14 @@ router.post('/verify-email', verifyEmailLimiter, async (req, res) => {
 });
 
 // POST /api/auth/forgot-password
-router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
-    const { email, language } = req.body;
-    const lowerCaseEmail = email.toLowerCase();
+router.post('/forgot-password', forgotPasswordLimiter, asyncHandler(async (req, res) => {
+    const body = req.body || {};
+    const { email, language } = body;
+    const emailError = requireEmail(email);
+    if (emailError) {
+        return res.status(400).json({ error: emailError });
+    }
+    const lowerCaseEmail = email.trim().toLowerCase();
     const isStagingOrDev = process.env.ENVIRONMENT_TYPE === 'staging' || process.env.ENVIRONMENT_TYPE === 'development';
 
     try {
@@ -308,7 +324,7 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
         }
         res.status(500).json({ error: 'Internal server error.' });
     }
-});
+}));
 
 // POST /api/auth/reset-password
 router.post('/reset-password', resetPasswordLimiter, async (req, res) => {

@@ -1,0 +1,296 @@
+/* Shared tokens for PDF profile mockups — aligned with MC app */
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../public/fonts/Inter-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../../../public/fonts/Inter-Variable-Italic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --teal: #1B7272;
+  --teal-dark: #165a5a;
+  --teal-light: #5BBFBF;
+  --accent: #F59E0B;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --content-primary: var(--gray-900);
+  --content-secondary: var(--gray-600);
+  --content-tertiary: var(--gray-500);
+  --border: var(--gray-200);
+  --card-radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 10pt;
+  line-height: 1.45;
+  color: var(--content-secondary);
+  background: #e5e7eb;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  margin: 0 auto 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ship wheel logo */
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+/* Thin progress bar (app style) */
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.bar-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 88px;
+  flex-shrink: 0;
+}
+.bar-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.bar-name {
+  font-size: 8.5pt;
+  color: var(--gray-700);
+}
+.bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--gray-200);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+.bar-value {
+  font-size: 8pt;
+  color: var(--gray-500);
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* OCEAN thin scale */
+.ocean-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.ocean-name {
+  width: 100px;
+  font-size: 8.5pt;
+  color: var(--gray-700);
+  flex-shrink: 0;
+}
+.ocean-scale {
+  flex: 1;
+  position: relative;
+  height: 4px;
+  background: var(--gray-200);
+  border-radius: 999px;
+}
+.ocean-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--teal);
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 1px var(--teal);
+}
+.ocean-score {
+  font-size: 8pt;
+  color: var(--gray-500);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Riemann cross */
+.riemann-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.riemann-cross {
+  width: 140px;
+  height: 140px;
+  position: relative;
+}
+.riemann-legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 8pt;
+  color: var(--gray-700);
+}
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Stress ranking */
+.stress-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+}
+.stress-item.first {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+.stress-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8pt;
+  font-weight: 600;
+  flex-shrink: 0;
+  background: var(--gray-300);
+  color: var(--gray-700);
+}
+.stress-item.first .stress-num {
+  background: var(--accent);
+  color: #fff;
+}
+.stress-label {
+  font-size: 8.5pt;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+.stress-desc {
+  font-size: 8pt;
+  color: var(--gray-500);
+}
+
+/* Pill score tag */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--gray-100);
+  font-size: 8pt;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+.pill.accent {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+/* Numbered list item */
+.num-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8pt;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.num-circle.teal { background: #ccfbf1; color: var(--teal-dark); }
+.num-circle.amber { background: #fef3c7; color: #b45309; }
+.num-circle.gray { background: var(--gray-200); color: var(--gray-600); }
+
+.list-entry {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.list-entry-title {
+  font-size: 9pt;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 1px;
+}
+.list-entry-desc {
+  font-size: 8.5pt;
+  color: var(--gray-500);
+  line-height: 1.4;
+}
+
+/* Footnotes */
+.footnotes {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--gray-300);
+}
+.footnote-line {
+  font-size: 6.5pt;
+  color: var(--gray-400);
+  font-style: italic;
+  line-height: 1.5;
+  margin-bottom: 2px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 28px;
+  left: 40px;
+  right: 40px;
+  text-align: center;
+  font-size: 7.5pt;
+  color: var(--gray-400);
+  border-top: 1px solid var(--gray-200);
+  padding-top: 6px;
+}

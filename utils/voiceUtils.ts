@@ -140,3 +140,35 @@ export const cleanVoiceName = (name: string): string => {
     }
     return `${baseName}${qualitySuffix}`;
 };
+
+/** Prefer premium/enhanced when Safari lists the same speaker twice (name + URI heuristics). */
+export function speechSynthesisVoiceRank(voice: SpeechSynthesisVoice): number {
+  const hay = `${voice.name} ${voice.voiceURI}`.toLowerCase();
+  if (/premium/.test(hay)) return 0;
+  if (/enhanced|erweitert/.test(hay)) return 1;
+  if (voice.localService) return 2;
+  return 3;
+}
+
+/** One row per speaker name and language — best tier wins (Web Speech / Safari). */
+export function dedupeSpeechSynthesisVoices(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice[] {
+  const sorted = [...voices].sort((a, b) => {
+    const rankDiff = speechSynthesisVoiceRank(a) - speechSynthesisVoiceRank(b);
+    if (rankDiff !== 0) return rankDiff;
+    return cleanVoiceName(a.name).localeCompare(cleanVoiceName(b.name), undefined, { sensitivity: 'base' });
+  });
+
+  const bySpeaker = new Map<string, SpeechSynthesisVoice>();
+  for (const voice of sorted) {
+    const langKey = voice.lang.toLowerCase().split('-')[0];
+    const nameKey = voice.name.split('(')[0].trim().toLowerCase();
+    const key = `${langKey}:${nameKey}`;
+    if (!bySpeaker.has(key)) {
+      bySpeaker.set(key, voice);
+    }
+  }
+
+  return Array.from(bySpeaker.values()).sort((a, b) =>
+    cleanVoiceName(a.name).localeCompare(cleanVoiceName(b.name), undefined, { sensitivity: 'base' }),
+  );
+}

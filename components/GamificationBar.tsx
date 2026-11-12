@@ -104,7 +104,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                 <div 
                     ref={gbRef}
                     data-gamification-bar
-                    className={`${positionClass} left-0 right-0 z-10 flex justify-between items-center p-2 bg-background-secondary/70 dark:bg-background-secondary/65 backdrop-blur-sm`}
+                    className={`${positionClass} left-0 right-0 z-10 flex justify-between items-center p-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.5rem,env(safe-area-inset-left))] w-full max-w-[100vw] box-border bg-background-secondary/70 dark:bg-background-secondary/65 backdrop-blur-sm`}
                     style={{ top: safeAreaTop }}
                 >
                  <button 
@@ -137,7 +137,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
             <div 
                 ref={gbRef}
                 data-gamification-bar
-                className={`${positionClass} left-0 right-0 z-10 flex items-center p-3 bg-background-secondary/80 backdrop-blur-md border-b border-border-primary shadow-card`}
+                className={`${positionClass} left-0 right-0 z-10 flex items-center p-3 pr-[max(0.75rem,env(safe-area-inset-right))] pl-[max(0.75rem,env(safe-area-inset-left))] w-full max-w-[100vw] box-border bg-background-secondary/80 backdrop-blur-md border-b border-border-primary shadow-card`}
                 style={{ top: safeAreaTop }}
             >
             {/* Left section: burger + level + streak */}
@@ -157,7 +157,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
                             aria-label={t('menu_exit')}
                         >
                             <XIcon className="w-6 h-6" />
-                            <span className="font-bold uppercase text-xs">{t('menu_exit')}</span>
+                            <span className="font-bold uppercase text-xs max-[420px]:hidden">{t('menu_exit')}</span>
                         </button>
                     </>
                 ) : (
@@ -200,7 +200,7 @@ const GamificationBar: React.FC<GamificationBarProps> = ({
             {(isSubMenuOpen || isMenuOpen) && <div className="flex-1" />}
 
             {/* Right section: icons */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-0.5 sm:gap-2 shrink-0 pr-0.5 sm:pr-0">
                 {!isSubMenuOpen && !isMenuOpen && (
                     <button 
                         onClick={onViewAchievements} 

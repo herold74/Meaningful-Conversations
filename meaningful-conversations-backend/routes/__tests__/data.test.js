@@ -26,13 +26,19 @@ app.use('/api/data', require('../data.js'));
 
 beforeEach(() => {
     jest.clearAllMocks();
-    jwt.verify.mockReturnValue({ userId: 'test-user-id' });
+    jwt.verify.mockReturnValue({ userId: 'test-user-id', iat: 1_700_000_000 });
+    prisma.user.findUnique.mockResolvedValue({
+        id: 'test-user-id',
+        status: 'ACTIVE',
+        email: 'coach@example.com',
+    });
 });
 
 describe('GET /api/data/user', () => {
     it('returns user context and gamificationState', async () => {
         prisma.user.findUnique.mockResolvedValue({
             id: 'test-user-id',
+            status: 'ACTIVE',
             lifeContext: 'my context',
             gamificationState: '{"xp":10,"level":1}',
         });
@@ -51,15 +57,15 @@ describe('GET /api/data/user', () => {
         });
     });
 
-    it('returns 404 when user not found', async () => {
+    it('returns 401 when the account no longer exists', async () => {
         prisma.user.findUnique.mockResolvedValue(null);
 
         const res = await request(app)
             .get('/api/data/user')
             .set('Authorization', 'Bearer fake-token');
 
-        expect(res.status).toBe(404);
-        expect(res.body.error).toContain('User not found');
+        expect(res.status).toBe(401);
+        expect(res.body.error).toContain('Invalid token');
     });
 });
 
@@ -159,6 +165,7 @@ describe('PUT /api/data/user/profile', () => {
             newsletterConsentDate: null,
             unsubscribeToken: null,
             passwordHash: 'hash',
+            status: 'ACTIVE',
         };
         prisma.user.findUnique.mockResolvedValue(mockUser);
         prisma.user.update.mockResolvedValue({
@@ -222,6 +229,7 @@ describe('PUT /api/data/user/profile', () => {
             newsletterConsentDate: null,
             unsubscribeToken: null,
             passwordHash: 'hash',
+            status: 'ACTIVE',
         };
         prisma.user.findUnique.mockResolvedValue(mockUser);
         prisma.user.update.mockResolvedValue({
@@ -348,7 +356,7 @@ describe('GET /api/data/export', () => {
 
 describe('DELETE /api/data/user', () => {
     it('anonymizes purchases and deletes tickets before user delete', async () => {
-        prisma.user.findUnique.mockResolvedValue({ email: 'coach@example.com' });
+        prisma.user.findUnique.mockResolvedValue({ email: 'coach@example.com', status: 'ACTIVE' });
         prisma.purchase.updateMany.mockResolvedValue({ count: 1 });
         prisma.ticket.findMany.mockResolvedValue([
             { id: 't1', payload: { email: 'coach@example.com' } },
@@ -368,6 +376,13 @@ describe('DELETE /api/data/user', () => {
         expect(prisma.ticket.deleteMany).toHaveBeenCalledWith({
             where: { id: { in: ['t1'] } },
         });
+        expect(prisma.user.update).toHaveBeenCalledWith(expect.objectContaining({
+            where: { id: 'test-user-id' },
+            data: expect.objectContaining({ tokensInvalidatedAt: expect.any(Date) }),
+        }));
+        const invalidateOrder = prisma.user.update.mock.invocationCallOrder[0];
+        const deleteOrder = prisma.user.delete.mock.invocationCallOrder[0];
+        expect(invalidateOrder).toBeLessThan(deleteOrder);
         expect(prisma.user.delete).toHaveBeenCalled();
     });
 });

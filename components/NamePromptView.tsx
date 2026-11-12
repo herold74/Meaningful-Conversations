@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Hand } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
+import { syncGuestSession } from '../utils/guestSession';
 import Button from './shared/Button';
 
 const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -30,7 +31,9 @@ const NamePromptView: React.FC<NamePromptViewProps> = ({ onContinue, onSkip, saf
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
-    try { localStorage.setItem('guestName', trimmed); } catch {}
+    try {
+      syncGuestSession(trimmed);
+    } catch {}
     onContinue(trimmed);
   };
 

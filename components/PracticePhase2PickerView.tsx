@@ -13,6 +13,7 @@ import { BOTS } from '../constants';
 import { ChevronDown, ChevronUp, Info, Lock, Sparkles } from 'lucide-react';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import { rollScopeBoundaryTheme } from '../utils/practiceScopeBoundary';
+import { resolvePracticeScenarioBriefFromParts } from '../utils/practiceScenarioBrief';
 
 interface PracticePhase2PickerViewProps {
   currentUser: User | null;
@@ -67,6 +68,16 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
   }, [isPrivileged, unlocks, phase2Context.scenarioId, frameworkId]);
 
   const scenario = catalog?.scenarios.find((s) => s.id === phase2Context.scenarioId);
+  const contractingScenario = catalog?.contractingScenarios.find(
+    (s) => s.id === phase2Context.scenarioId,
+  );
+  const catalogConcern = scenario?.concern ?? contractingScenario?.concern ?? null;
+
+  const phase2ScenarioBrief = resolvePracticeScenarioBriefFromParts(language, catalogConcern, {
+    contentLanguage: phase2Context.contentLanguage,
+    clarifiedConcern: phase2Context.clarifiedConcern,
+    scenarioNameFallback: catalogConcern ?? undefined,
+  });
 
   const sortedFrameworks = useMemo(() => {
     if (!catalog || !scenario) return catalog?.frameworks ?? [];
@@ -94,7 +105,7 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
         frameworkId: 'free-play',
         frameworkName: t('practice_free_play_title'),
         scenarioId: phase2Context.scenarioId,
-        scenarioName: phase2Context.clarifiedConcern || scenario?.concern || '',
+        scenarioName: phase2Context.clarifiedConcern || catalogConcern || '',
         coacheeName: phase2Context.coacheeName,
         coacheeAvatar: phase2Context.coacheeAvatar,
         coacheeGender: phase2Context.coacheeGender ?? scenario?.coacheeGender,
@@ -108,6 +119,7 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
         clarifiedConcern: phase2Context.clarifiedConcern,
         sessionContract: phase2Context.sessionContract,
         followsContractingEvaluationId: phase2Context.contractingEvaluationId,
+        contentLanguage: phase2Context.contentLanguage ?? language,
       };
     }
 
@@ -115,7 +127,7 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
       frameworkId: fw!.id,
       frameworkName: fw!.name,
       scenarioId: phase2Context.scenarioId,
-      scenarioName: phase2Context.clarifiedConcern || scenario?.concern || '',
+      scenarioName: phase2Context.clarifiedConcern || catalogConcern || '',
       coacheeName: phase2Context.coacheeName,
       coacheeAvatar: phase2Context.coacheeAvatar,
       coacheeGender: phase2Context.coacheeGender ?? scenario?.coacheeGender,
@@ -129,6 +141,7 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
       clarifiedConcern: phase2Context.clarifiedConcern,
       sessionContract: phase2Context.sessionContract,
       followsContractingEvaluationId: phase2Context.contractingEvaluationId,
+      contentLanguage: phase2Context.contentLanguage ?? language,
     };
   };
 
@@ -169,13 +182,16 @@ const PracticePhase2PickerView: React.FC<PracticePhase2PickerViewProps> = ({
         <div className="min-w-0">
           <p className="font-semibold text-content-primary">{phase2Context.coacheeName}</p>
           <p className="text-sm text-content-secondary mt-1 leading-relaxed break-words">
-            {phase2Context.clarifiedConcern}
+            {phase2ScenarioBrief}
           </p>
           {phase2Context.sessionContract && (
-            <p className="text-xs text-content-secondary mt-2 leading-relaxed break-words">
-              <span className="font-semibold text-content-primary">{t('practice_review_session_contract')}:</span>{' '}
-              {phase2Context.sessionContract}
-            </p>
+            <div className="text-xs text-content-secondary mt-2 leading-relaxed break-words">
+              <p className="font-semibold text-content-primary">{t('practice_review_session_contract')}</p>
+              {phase2Context.contentLanguage && phase2Context.contentLanguage !== language && (
+                <p className="italic text-content-subtle mt-1 mb-1">{t('practice_eval_artifact_language_note')}</p>
+              )}
+              <p>{phase2Context.sessionContract}</p>
+            </div>
           )}
         </div>
       </div>

@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
+import { usePracticeCatalog } from '../hooks/usePracticeCatalog';
+import { getFrameworkDisplayName } from '../utils/practiceFrameworkLabels';
 
 interface PracticeSelfRatingViewProps {
-  frameworkName: string;
+  frameworkId: string;
   onSubmit: (rating: number | undefined) => void;
   onSkip: () => void;
 }
 
-const PracticeSelfRatingView: React.FC<PracticeSelfRatingViewProps> = ({ frameworkName, onSubmit, onSkip }) => {
-  const { t } = useLocalization();
+const PracticeSelfRatingView: React.FC<PracticeSelfRatingViewProps> = ({ frameworkId, onSubmit, onSkip }) => {
+  const { t, language } = useLocalization();
+  const { catalog } = usePracticeCatalog(language);
+  const frameworkName = useMemo(
+    () => getFrameworkDisplayName(frameworkId, { catalog, t, language }),
+    [frameworkId, catalog, t, language],
+  );
   const [rating, setRating] = useState<number | null>(null);
 
   return (

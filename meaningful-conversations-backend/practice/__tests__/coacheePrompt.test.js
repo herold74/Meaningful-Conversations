@@ -56,6 +56,17 @@ describe('buildCoacheeSystemPrompt — role guard', () => {
     expect(prompt).toContain('NEGATIV-BEISPIEL');
   });
 
+  test('includes professional boundary guard for coach misconduct', () => {
+    const prompt = buildCoacheeSystemPrompt({
+      frameworkId: 'forward-focused-coaching',
+      scenarioId: 'relationship-boundary',
+      difficulty: 'moderate',
+      language: 'de',
+    });
+    expect(prompt).toContain('Professionelle Grenzen');
+    expect(prompt).toContain('Selbstbefriedigung');
+  });
+
   test('English prompt includes ROLE GUARD with forbidden coach techniques', () => {
     const prompt = buildCoacheeSystemPrompt({
       frameworkId: 'forward-focused-coaching',

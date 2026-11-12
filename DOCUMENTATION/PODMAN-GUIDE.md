@@ -166,7 +166,20 @@ podman machine ssh
 
 **Automatic fix (preferred):** `deploy-manualmode.sh` runs `scripts/ensure-local-podman.sh` before any local build — start machine, wait for `podman info`, restart once if needed.
 
-**Manual preflight:**
+**Automatic local disk retention (before each local build):** The deploy script runs `scripts/prune-local-mc-podman-images.sh` immediately after Podman is ready. It keeps **at most the 2 newest semver-tagged builds** per MC image (`meaningful-conversations-backend`, `-frontend`, `-tts`), always retains the current `package.json` version if present locally, removes older MC tags, then `podman image prune -f` for dangling layers. It does **not** run `podman system prune -af` (other projects’ images stay untouched). You do not need to prune manually before deploy.
+
+Manual preflight (only if you want to run retention outside deploy):
+```bash
+./scripts/prune-local-mc-podman-images.sh
+```
+
+**Symptoms of a full local Podman VM disk** (if retention was skipped or a build failed mid-layer):
+- `no space left on device` during `podman build` / `COPY . .` under `/var/tmp/container_images_storage…`
+- Fix: run `./deploy-manualmode.sh` again (runs retention first) or `./scripts/prune-local-mc-podman-images.sh` — avoid `podman system prune -af` unless you intentionally wipe all unused local images.
+
+**Staging API 502 while frontend loads:** nginx routes to a backend container IP that is not listening (crash-loop or nginx refreshed too early). Remote deploy waits for backend health + in-container HTTP before nginx, then checks public `/api/health`. Recovery: full stack restart — `cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml down && podman-compose -f podman-compose-staging.yml up -d`, wait for backend healthy, then `/usr/local/bin/update-nginx-ips.sh staging` — avoid single-service `force-recreate` (Podman pod deps).
+
+**Manual preflight (Podman socket):**
 ```bash
 ./scripts/ensure-local-podman.sh
 # or same shell session:

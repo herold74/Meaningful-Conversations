@@ -82,9 +82,7 @@ const RedeemCodeView: React.FC<RedeemCodeViewProps> = ({ onRedeemSuccess, onBack
         <p className="text-center text-sm text-content-secondary mt-6">
             {t('redeem_info_text')}
             <a 
-                href={brand.providerUrl}
-                target="_blank" 
-                rel="noopener noreferrer" 
+                href={`mailto:${brand.contactEmail}`}
                 className="font-medium text-accent-primary hover:text-accent-primary-hover"
             >
                 {brand.providerName}

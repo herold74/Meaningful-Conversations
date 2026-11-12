@@ -129,6 +129,7 @@ async function ensureRevenueCatConfigured(): Promise<boolean> {
       if (!loaded) return false;
       const apiKey = import.meta.env.VITE_REVENUECAT_IOS_KEY;
       if (!apiKey) return false;
+      await Purchases.setLogLevel({ level: 'DEBUG' });
       await Purchases.configure({ apiKey });
       state.initialized = true;
       return true;
@@ -175,6 +176,27 @@ export async function getActiveProductIds(): Promise<Set<string>> {
   }
 }
 
+/** When server access is expired (IAP demo reset), ignore sandbox subscription "Current" badges. */
+export function userHasValidServerAccess(user?: { isAdmin?: boolean; isDeveloper?: boolean; isPremium?: boolean; isClient?: boolean; accessExpiresAt?: string | null } | null): boolean {
+  if (!user) return false;
+  if (user.isAdmin || user.isDeveloper || user.isPremium || user.isClient) return true;
+  if (user.accessExpiresAt == null) return true;
+  return new Date(user.accessExpiresAt) > new Date();
+}
+
+export function filterActiveProductIdsForServerAccess(
+  activeIds: Set<string>,
+  user?: { isAdmin?: boolean; isDeveloper?: boolean; isPremium?: boolean; isClient?: boolean; accessExpiresAt?: string | null; unlockedCoaches?: string[] } | null,
+): Set<string> {
+  if (userHasValidServerAccess(user)) return activeIds;
+  const filtered = new Set<string>();
+  for (const id of activeIds) {
+    const iap = IAP_PRODUCTS.find(p => p.appStoreId === id);
+    if (iap?.type === 'non_consumable') filtered.add(id);
+  }
+  return filtered;
+}
+
 /** Returns access info from local RevenueCat cache. Use when backend sync fails (e.g. merge not complete). */
 export async function getAccessFromRevenueCat(): Promise<{
   hasAccess: boolean;
@@ -218,19 +240,59 @@ export async function getAccessFromRevenueCat(): Promise<{
   }
 }
 
+function resolveActiveOffering(offerings: any): any | null {
+  if (!offerings) return null;
+  return (
+    offerings.current ??
+    Object.values(offerings.all || {}).find((o: any) => (o?.availablePackages?.length ?? 0) > 0) ??
+    null
+  );
+}
+
 export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
+  const { products } = await fetchAvailableProductsWithDiagnostics();
+  return products;
+}
+
+export async function fetchAvailableProductsWithDiagnostics(): Promise<{
+  products: StoreProduct[];
+  configured: boolean;
+  offeringId?: string | null;
+  packageCount?: number;
+  error?: string;
+}> {
   const ready = await ensureRevenueCatConfigured();
-  if (!ready) return [];
+  if (!ready) {
+    return {
+      products: [],
+      configured: false,
+      error: 'RevenueCat not configured (missing API key in build)',
+    };
+  }
 
   try {
     const offerings = await Purchases.getOfferings();
-    const current = offerings.current;
-    if (!current) return [];
+    const offering = resolveActiveOffering(offerings);
 
+    if (!offering) {
+      const allKeys = Object.keys(offerings.all || {});
+      return {
+        products: [],
+        configured: true,
+        offeringId: null,
+        packageCount: 0,
+        error: allKeys.length
+          ? `No current RevenueCat offering (found: ${allKeys.join(', ')})`
+          : 'No RevenueCat offerings returned',
+      };
+    }
+
+    const packages = offering.availablePackages || [];
     const products: StoreProduct[] = [];
 
-    for (const pkg of current.availablePackages || []) {
+    for (const pkg of packages) {
       const storeProduct = pkg.product;
+      if (!storeProduct?.identifier) continue;
       if (PAYWALL_EXCLUDED_APP_STORE_IDS.has(storeProduct.identifier)) continue;
       const iapProduct = IAP_PRODUCTS.find(p => p.appStoreId === storeProduct.identifier);
       if (!iapProduct) continue;
@@ -246,9 +308,24 @@ export async function fetchAvailableProducts(): Promise<StoreProduct[]> {
       });
     }
 
-    return sortPaywallProducts(products);
-  } catch {
-    return [];
+    return {
+      products: sortPaywallProducts(products),
+      configured: true,
+      offeringId: offering.identifier ?? null,
+      packageCount: packages.length,
+      error:
+        packages.length > 0 && products.length === 0
+          ? 'RevenueCat packages exist but StoreKit returned no loadable products'
+          : packages.length === 0
+            ? 'RevenueCat offering has zero packages (App Store Connect / ASC product status?)'
+            : undefined,
+    };
+  } catch (err: any) {
+    return {
+      products: [],
+      configured: true,
+      error: err?.message || 'getOfferings failed',
+    };
   }
 }
 
@@ -261,10 +338,10 @@ export async function purchaseProduct(productId: string): Promise<PurchaseResult
 
   try {
     const offerings = await Purchases.getOfferings();
-    const current = offerings.current;
-    if (!current) return { success: false, error: 'No offerings available' };
+    const offering = resolveActiveOffering(offerings);
+    if (!offering) return { success: false, error: 'No offerings available' };
 
-    const pkg = (current.availablePackages || []).find(
+    const pkg = (offering.availablePackages || []).find(
       (p: any) => p.product.identifier === productId
     );
     if (!pkg) return { success: false, error: 'Product not found' };

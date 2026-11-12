@@ -4,7 +4,7 @@
 
 ```bash
 # Update version (new minor/major release)
-make update-version    # Enter: 2.5.5
+make update-version    # Enter: 2.5.6
 
 # Increment build number only (same version)
 # Edit BUILD_NUMBER file manually, then update sw.js
@@ -19,7 +19,7 @@ When you run `make update-version`, it updates these **5 locations**:
 ### 1️⃣ `package.json`
 ```json
 {
-  "version": "2.5.5"  ← Updated here
+  "version": "2.5.6"  ← Updated here
 }
 ```
 **Why:** Source of truth for version
@@ -29,7 +29,7 @@ When you run `make update-version`, it updates these **5 locations**:
 ### 2️⃣ `meaningful-conversations-backend/package.json`
 ```json
 {
-  "version": "2.5.5"  ← Updated here
+  "version": "2.5.6"  ← Updated here
 }
 ```
 **Why:** Backend version, Docker image tag
@@ -38,7 +38,7 @@ When you run `make update-version`, it updates these **5 locations**:
 
 ### 3️⃣ `public/sw.js` (Service Worker)
 ```javascript
-const CACHE_NAME = 'meaningful-conversations-cache-v2.5.5-b1';  ← Updated here
+const CACHE_NAME = 'meaningful-conversations-cache-v2.5.6-b1';  ← Updated here
 ```
 **Why:** Forces browsers to reload all cached files (critical for PWA updates!)
 
@@ -47,7 +47,7 @@ const CACHE_NAME = 'meaningful-conversations-cache-v2.5.5-b1';  ← Updated here
 ### 4️⃣ `components/AboutView.tsx`
 ```tsx
 <p className="text-sm text-content-subtle">
-    {t('about_version')} 2.5.5  ← Updated here
+    {t('about_version')} 2.5.6  ← Updated here
 </p>
 ```
 **Why:** Displayed on About page
@@ -57,7 +57,7 @@ const CACHE_NAME = 'meaningful-conversations-cache-v2.5.5-b1';  ← Updated here
 ### 5️⃣ `metadata.json`
 ```json
 {
-  "name": "Meaningful Conversations 2.5.5_stream"  ← Updated here
+  "name": "Meaningful Conversations 2.5.6_stream"  ← Updated here
 }
 ```
 **Why:** App metadata
@@ -76,23 +76,23 @@ const CACHE_NAME = 'meaningful-conversations-cache-v2.5.5-b1';  ← Updated here
 
 Each version has a **build number** that increments with each deployment:
 
-- **Version:** `2.5.5` (from `package.json`)
+- **Version:** `2.5.6` (from `package.json`)
 - **Build:** `13` (from `BUILD_NUMBER` file)
-- **Display:** `Version 2.5.5 (Build 13)`
-- **SW Cache:** `v2.5.5-b13`
+- **Display:** `Version 2.5.6 (Build 26)`
+- **SW Cache:** `v2.5.6-b26`
 
 ### ⚠️ Important Rules
 
 1. **New Version = Build 1**
    ```
-   1.7.8 (Build 39) → 2.5.5 (Build 1)  ✅
-   1.7.8 (Build 39) → 2.5.5 (Build 40) ❌
+   1.7.8 (Build 39) → 2.5.6 (Build 1)  ✅
+   1.7.8 (Build 39) → 2.5.6 (Build 40) ❌
    ```
 
 2. **Same Version = Increment Build**
    ```
    Before deploy: Edit BUILD_NUMBER (12 → 13)
-   Update sw.js:  v2.5.5-b12 → v2.5.5-b13
+   Update sw.js:  v2.5.6-b25 → v2.5.6-b26
    ```
 
 ---
@@ -104,14 +104,14 @@ Each version has a **build number** that increments with each deployment:
 ```bash
 # 1. Update version everywhere
 make update-version
-# Enter: 2.5.5
+# Enter: 2.5.6
 
 # 2. Check changes
 git diff
 
 # 3. Commit
 git add .
-git commit -m "Bump version to 2.5.5"
+git commit -m "Bump version to 2.5.6"
 
 # 4. Deploy to staging
 ./deploy-manualmode.sh -e staging -c frontend
@@ -122,8 +122,8 @@ git commit -m "Bump version to 2.5.5"
 ./deploy-manualmode.sh -e production -c frontend
 
 # 7. Tag release
-git tag v2.5.5
-git push origin v2.5.5
+git tag v2.5.6
+git push origin v2.5.6
 ```
 
 ### Bug Fix (Same Version)
@@ -135,11 +135,11 @@ git push origin v2.5.5
 echo "14" > BUILD_NUMBER
 
 # 3. Update service worker cache
-# In public/sw.js: v2.5.5-b13 → v2.5.5-b14
+# In public/sw.js: v2.5.6-b25 → v2.5.6-b26
 
 # 4. Commit
 git add .
-git commit -m "Fix: description (Build 14)"
+git commit -m "Fix: description (Build 26)"
 
 # 5. Deploy
 ./deploy-manualmode.sh -e staging -c frontend
@@ -175,7 +175,7 @@ Without this, users might keep using old cached versions!
 ### Docker Image Tags
 The version from `package.json` becomes your Docker image tag:
 ```
-regy.rhepds.com/gherold/meaningful-conversations-frontend:2.5.5
+regy.rhepds.com/gherold/meaningful-conversations-frontend:2.5.6
 ```
 
 ### Semantic Versioning
@@ -190,19 +190,19 @@ Follow [SemVer](https://semver.org/):
 
 ```bash
 # Frontend package.json
-sed -i '' 's/"version": "[^"]*"/"version": "2.5.5"/' package.json
+sed -i '' 's/"version": "[^"]*"/"version": "2.5.6"/' package.json
 
 # Backend package.json
-sed -i '' 's/"version": "[^"]*"/"version": "2.5.5"/' meaningful-conversations-backend/package.json
+sed -i '' 's/"version": "[^"]*"/"version": "2.5.6"/' meaningful-conversations-backend/package.json
 
 # Service Worker (with build number)
-sed -i '' 's/cache-v[^'"'"']*/cache-v2.5.5-b1/' public/sw.js
+sed -i '' 's/cache-v[^'"'"']*/cache-v2.5.6-b1/' public/sw.js
 
 # About page
-sed -i '' "s/about_version')} [0-9.]*/about_version')} 2.5.5/" components/AboutView.tsx
+sed -i '' "s/about_version')} [0-9.]*/about_version')} 2.5.6/" components/AboutView.tsx
 
 # Metadata
-sed -i '' 's/Meaningful Conversations [0-9.]*/Meaningful Conversations 2.5.5/' metadata.json
+sed -i '' 's/Meaningful Conversations [0-9.]*/Meaningful Conversations 2.5.6/' metadata.json
 
 # Build number
 echo "1" > BUILD_NUMBER
@@ -219,7 +219,7 @@ echo "1" > BUILD_NUMBER
 3. **Increment build number for every staging deploy**
 4. **Tag releases in git** for easy rollback
 5. **Test staging thoroughly** before production
-6. **Don't skip versions** - go 2.5.5 → 1.7.10, not 2.5.5 → 1.8.0 for a bug fix
+6. **Don't skip versions** - go 2.5.6 → 1.7.10, not 2.5.6 → 1.8.0 for a bug fix
 
 ---
 

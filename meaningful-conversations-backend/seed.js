@@ -4,10 +4,8 @@
 // Password for local test users: set SEED_TEST_PASSWORD in .env (default: local-dev-seed-password).
 // Do not commit or reuse the App Store review password for production.
 
-const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
-
-const prisma = new PrismaClient();
+const prisma = require('./prismaClient.js');
 
 const TEST_PASSWORD = process.env.SEED_TEST_PASSWORD || 'local-dev-seed-password';
 

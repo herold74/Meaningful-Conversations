@@ -3,6 +3,30 @@
 All notable releases of Meaningful Conversations are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [SemVer](https://semver.org/).
 
+## [2.5.6] - 2026-08-09
+
+Premium+, Coach Practice polish, EU AI Act transparency, voice/STT/TTS stability, and UX refinements across Intent Picker, User Guide, and formatting help.
+
+### Added
+- **Premium+:** Single subscription (`ACCESS_PASS_PLUS_1M` / `mc.premium_plus.monthly`) bundling Premium + Coach Practice; website Jimdo redeem button (2026-08-09)
+- **EU AI Act transparency:** Bot-selection notice, User Guide §2.3, Disclaimer, Privacy §13 (DE/EN)
+- **User Guide:** Premium+ tier docs, Coach Practice chapter visibility fix, accordion spacing improvements
+- **Voice/STT:** Stable transcript send on Flieger tap; send button when STT text visible after recording ends; Piper word-level fallback for single-chunk ONNX failures
+- **Intent Picker:** Bronze/silver/featured card themes; iOS safe-area spacing; desktop aligned description baselines (`md:min-h`)
+
+### Changed
+- **Formatierungshilfe (DE):** Clearer everyday copy; „Wichtige Begriffe hervorheben“ replaces misleading „Schlüssel“ wording
+- **Intent copy (DE):** Coach Practice — „anhand typischer Übungsszenarien“
+- **Registered Lifetime:** Removed from Jimdo/manualmode.at website (backend loyalty for existing users unchanged)
+- **BotSelection:** EU AI Act hint — subtle inline info line (was boxed notice)
+
+### Fixed
+- Guest name-only Life Context → questionnaire routing (Disclaimer flow)
+- Premium+ website code redemption (`data.js`)
+- User Guide TypeScript build (chapter body `padding` style check)
+- TTS greeting on server mode without waiting for browser `voices`
+- STT desktop pause fragment capture (`webSpeechResultProcessing`)
+
 ## [2.5.0] - 2026-07-28
 
 AI SDK majors on staging, Practice region routing, regression harness hardening, Admin mobile polish.

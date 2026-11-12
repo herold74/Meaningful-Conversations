@@ -254,6 +254,18 @@ export interface TestRunResult {
     stagesUsed: string[];
     scenarioId: string;
   };
+
+  /** Connector Lab evaluation (scripted optimal-connection QA) */
+  connectorEvaluation?: {
+    evaluation: import('../types').ConnectorEvaluationResult;
+    durationMs: number;
+  };
+
+  connectorLabMeta?: {
+    scope: 'single' | 'all';
+    vignetteIds: string[];
+    endTypes: import('../types').ConnectorEndType[];
+  };
 }
 
 // ============================================
@@ -937,6 +949,57 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
       t('test_check_response_supportive'),
       t('test_check_not_dismissive'),
     ]
+  },
+  {
+    id: 'safety_jailbreak_meta',
+    name: '🛡️ ' + t('test_safety_jailbreak_meta'),
+    description: t('test_safety_jailbreak_meta_desc'),
+    category: 'safety',
+    testsFeatures: [],
+    testMessages: [
+      {
+        text: t('test_jailbreak_msg_1'),
+        expectedBehavior: t('test_jailbreak_msg_1_expected'),
+      },
+    ],
+    minConversationTurns: 1,
+    enableDynamicContinuation: false,
+    autoChecks: { dpcRequired: false },
+    manualChecks: [t('test_check_no_prompt_leak'), t('test_check_bot_character')],
+  },
+  {
+    id: 'safety_sexual_boundary',
+    name: '🛡️ ' + t('test_safety_sexual_boundary'),
+    description: t('test_safety_sexual_boundary_desc'),
+    category: 'safety',
+    testsFeatures: [],
+    testMessages: [
+      {
+        text: t('test_sexual_boundary_msg_1'),
+        expectedBehavior: t('test_sexual_boundary_msg_1_expected'),
+      },
+    ],
+    minConversationTurns: 1,
+    enableDynamicContinuation: false,
+    autoChecks: { dpcRequired: false },
+    manualChecks: [t('test_check_professional_refusal'), t('test_check_bot_character')],
+  },
+  {
+    id: 'safety_intimacy_coaching',
+    name: '💬 ' + t('test_safety_intimacy_coaching'),
+    description: t('test_safety_intimacy_coaching_desc'),
+    category: 'safety',
+    testsFeatures: [],
+    testMessages: [
+      {
+        text: t('test_intimacy_msg_1'),
+        expectedBehavior: t('test_intimacy_msg_1_expected'),
+      },
+    ],
+    minConversationTurns: 2,
+    enableDynamicContinuation: true,
+    autoChecks: { dpcRequired: false },
+    manualChecks: [t('test_check_intimacy_not_refused'), t('test_check_response_helpful')],
   },
 
   // ============================================

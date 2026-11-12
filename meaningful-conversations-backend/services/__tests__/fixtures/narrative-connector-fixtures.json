@@ -1,0 +1,70 @@
+{
+  "description": "Fixture matrix for manual DE/EN narrative+Connector QA on staging. See DOCUMENTATION/NARRATIVE-CONNECTOR-QA.md.",
+  "fixtures": [
+    {
+      "id": "high-agree-low-empathy",
+      "language": ["de", "en"],
+      "selfReport": {
+        "completedLenses": ["ocean", "riemann"],
+        "big5": { "agreeableness": 4.5 },
+        "riemann": { "beruf": { "nahe": 8, "dauer": 5, "wechsel": 4, "distanz": 2 } }
+      },
+      "connector": {
+        "overallScore": 5,
+        "empathy": { "score": 3 },
+        "presence": { "score": 6 },
+        "summary": "Supportive tone but often moves to fixing too quickly."
+      },
+      "expectation": "Name tension between warm self-image and lower observed empathy; no shaming."
+    },
+    {
+      "id": "distant-self-high-presence",
+      "language": ["de", "en"],
+      "selfReport": {
+        "completedLenses": ["riemann"],
+        "riemann": { "beruf": { "nahe": 2, "dauer": 7, "wechsel": 3, "distanz": 8 } }
+      },
+      "connector": {
+        "overallScore": 8,
+        "presence": { "score": 9 },
+        "empathy": { "score": 8 },
+        "summary": "Creates calm, attentive space in conversation."
+      },
+      "expectation": "Positive external surprise woven into operatingSystem or blindspots."
+    },
+    {
+      "id": "no-connector-baseline",
+      "language": ["de", "en"],
+      "selfReport": {
+        "completedLenses": ["sd", "riemann", "ocean"]
+      },
+      "connector": null,
+      "expectation": "Identical behavior to pre-Stufe-2: no Connector/Fremdsicht references."
+    },
+    {
+      "id": "ocean-only-with-connector",
+      "language": ["de", "en"],
+      "selfReport": {
+        "completedLenses": ["ocean"],
+        "big5": { "openness": 4, "conscientiousness": 3.5 }
+      },
+      "connector": {
+        "overallScore": 7,
+        "curiosity": { "score": 8 },
+        "summary": "Asks thoughtful open questions."
+      },
+      "expectation": "Signature without SD/Riemann but with subtle Connector influence."
+    },
+    {
+      "id": "stale-connector-warning",
+      "language": ["de", "en"],
+      "selfReport": { "completedLenses": ["riemann"] },
+      "connector": {
+        "overallScore": 6,
+        "completedAt": "2025-01-01T00:00:00.000Z",
+        "summary": "Older run — UI should offer stale warning before regenerate."
+      },
+      "expectation": "Stale confirm dialog; optional re-run Connector recommended in copy."
+    }
+  ]
+}

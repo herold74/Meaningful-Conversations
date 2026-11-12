@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "description": "Freitags-SW-Mail: Patches, Risiko, QA-Aufwand, Features, Abhängigkeiten (technisch + welche Tests/Regression). npm-Ist/Wanted/Latest aus Scan.",
+    "qaEffortScale": {
+      "leicht": "make ci; kurzer Staging-Smoke",
+      "mittel": "Staging deploy + fokussierter Smoke (ohne volle LLM-Regression)",
+      "hoch": "LLM-Regression, IAP-Sandbox, breiter UI/iOS-Check o.ä."
+    },
+    "planRef": "PLANS/software-stack-update-plan.md",
+    "updated": "2026-11-12"
+  },
+  "packages": [
+    {
+      "name": "@google/genai",
+      "scope": "backend",
+      "priority": "P2",
+      "migrationRisk": "hoch",
+      "qaEffort": "hoch",
+      "dependencies": "/llm-regression; Classic + Practice; Staging; nicht parallel zu Prisma/React",
+      "featuresNote": "Major 3.x — API/Streaming; Classic + Practice retest"
+    },
+    {
+      "name": "@mistralai/mistralai",
+      "scope": "backend",
+      "priority": "P2",
+      "migrationRisk": "hoch",
+      "qaEffort": "hoch",
+      "dependencies": "/llm-regression; Overlay-Prompts; Staging; wie GenAI",
+      "featuresNote": "Major 3.x — Mistral SDK breaking changes"
+    },
+    {
+      "name": "@prisma/client",
+      "scope": "backend",
+      "priority": "P3",
+      "migrationRisk": "hoch",
+      "qaEffort": "mittel",
+      "dependencies": "migrate deploy Staging; Auth/API-Smoke; eigene Welle; kein SQL ohne Plan",
+      "featuresNote": "ORM/Engine — nur nach dokumentiertem Migrations-Check"
+    },
+    {
+      "name": "prisma",
+      "scope": "backend",
+      "priority": "P3",
+      "migrationRisk": "hoch",
+      "qaEffort": "mittel",
+      "dependencies": "Mit @prisma/client; Docker generate im Build",
+      "featuresNote": "CLI 7.x — gleiche Welle wie client"
+    },
+    {
+      "name": "react",
+      "scope": "frontend",
+      "priority": "P3",
+      "migrationRisk": "hoch",
+      "qaEffort": "hoch",
+      "dependencies": "make ci; Staging UI-Smoke; iOS WebView; framer-motion mitplanen",
+      "featuresNote": "React 19 — Concurrent/Types; BUILD_NUMBER bei Prod"
+    },
+    {
+      "name": "react-dom",
+      "scope": "frontend",
+      "priority": "P3",
+      "migrationRisk": "hoch",
+      "qaEffort": "hoch",
+      "dependencies": "Mit react; iOS Capacitor WebView",
+      "featuresNote": "Paired mit react Major"
+    },
+    {
+      "name": "express",
+      "scope": "backend",
+      "priority": "Defer",
+      "migrationRisk": "hoch",
+      "qaEffort": "hoch",
+      "dependencies": "Backlog — erst nach React/Node stabil; voller API-Smoke",
+      "featuresNote": "Express 5 — Router/Middleware breaking"
+    },
+    {
+      "name": "@revenuecat/purchases-capacitor",
+      "scope": "frontend",
+      "priority": "P2",
+      "migrationRisk": "mittel",
+      "qaEffort": "hoch",
+      "dependencies": "verify:ios-iap; ASC Sandbox-Kauf; Backend verify-receipt",
+      "featuresNote": "14.x — IAP SDK; kein Auto ohne IAP-Test"
+    },
+    {
+      "name": "@apple/app-store-server-library",
+      "scope": "backend",
+      "priority": "P2",
+      "migrationRisk": "mittel",
+      "qaEffort": "mittel",
+      "dependencies": "JWS Roots G2/G3; Staging notification smoke",
+      "featuresNote": "Server notifications / receipt verify API"
+    },
+    {
+      "name": "framer-motion",
+      "scope": "frontend",
+      "priority": "P1",
+      "migrationRisk": "mittel",
+      "qaEffort": "mittel",
+      "dependencies": "React-Version lockstep; UI animation smoke",
+      "featuresNote": "14.x — API motion components"
+    },
+    {
+      "name": "@capacitor/core",
+      "scope": "frontend",
+      "priority": "P1",
+      "migrationRisk": "niedrig",
+      "qaEffort": "mittel",
+      "dependencies": "cap sync ios; verify-ios-plugin-packages",
+      "featuresNote": "8.x Patch — Native bridge"
+    },
+    {
+      "name": "@capacitor/ios",
+      "scope": "frontend",
+      "priority": "P1",
+      "migrationRisk": "niedrig",
+      "qaEffort": "mittel",
+      "dependencies": "Xcode sync; App Store nur bei Binary-Release",
+      "featuresNote": "Capacitor iOS runtime patches"
+    },
+    {
+      "name": "express-rate-limit",
+      "scope": "backend",
+      "priority": "P1",
+      "migrationRisk": "niedrig",
+      "qaEffort": "leicht",
+      "dependencies": "make ci; Staging deploy",
+      "featuresNote": "Patch/Minor — Rate-limit Middleware"
+    },
+    {
+      "name": "helmet",
+      "scope": "backend",
+      "priority": "P1",
+      "migrationRisk": "niedrig",
+      "qaEffort": "leicht",
+      "dependencies": "make ci",
+      "featuresNote": "Security headers"
+    },
+    {
+      "name": "marked",
+      "scope": "backend",
+      "priority": "P1",
+      "migrationRisk": "niedrig",
+      "qaEffort": "leicht",
+      "dependencies": "Markdown render smoke",
+      "featuresNote": "Markdown parser"
+    },
+    {
+      "name": "axios",
+      "scope": "backend",
+      "priority": "P1",
+      "migrationRisk": "niedrig",
+      "qaEffort": "leicht",
+      "dependencies": "make ci",
+      "featuresNote": "HTTP client patches"
+    },
+    {
+      "name": "pm2",
+      "scope": "backend",
+      "priority": "P1",
+      "migrationRisk": "niedrig",
+      "qaEffort": "leicht",
+      "dependencies": "Advisory akzeptiert (systemPatterns)",
+      "featuresNote": "Process manager — nur Patch"
+    },
+    {
+      "name": "react-markdown",
+      "scope": "frontend",
+      "priority": "P1",
+      "migrationRisk": "mittel",
+      "qaEffort": "mittel",
+      "dependencies": "UI render tests; Staging",
+      "featuresNote": "Major 10 — MD pipeline"
+    }
+  ]
+}

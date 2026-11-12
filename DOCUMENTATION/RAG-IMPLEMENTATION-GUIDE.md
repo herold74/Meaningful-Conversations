@@ -101,8 +101,10 @@ Optionale Felder:
 5. Ressourcen werden in den System-Prompt injiziert:
    "[VERFÜGBARE RESSOURCEN FÜR DIESEN USER]
     - Telefonseelsorge: 142 (24/7, kostenlos)
-    - Psychiatrische Soforthilfe Wien: 01/31330
+    - Psychiatrische Soforthilfe Wien: 01 31330
     Der Coach kann diese Ressourcen bei Bedarf empfehlen."
+
+Live-Katalog (Coach-Prompts, Stand 2026-08-23): `meaningful-conversations-backend/crisisResources.js` und [CRISIS-HELPLINES.md](CRISIS-HELPLINES.md). RAG-Anhang A ist Beispiel, keine zweite Quelle für Nummern.
 
 6. AI generiert Antwort mit optionaler Ressourcen-Empfehlung
 ```

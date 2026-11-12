@@ -463,7 +463,13 @@ async function runBaseline(args, token) {
     scenarios: {},
   };
 
-  for (const scenarioId of args.scenarioIds) {
+  const scenarioDelayMs = Number(process.env.CLASSIC_REGRESSION_DELAY_MS || 0);
+  for (let si = 0; si < args.scenarioIds.length; si++) {
+    const scenarioId = args.scenarioIds[si];
+    if (si > 0 && scenarioDelayMs > 0) {
+      console.log(`  … pacing ${scenarioDelayMs}ms (avoid provider rate limits)…`);
+      await new Promise((r) => setTimeout(r, scenarioDelayMs));
+    }
     const runResult = await runScenario(args.api, token, scenarioId, args.language, t, args.provider);
     const snapshot = buildSnapshot(scenarioId, args.language, args.provider, runResult, {
       apiBase: args.api,

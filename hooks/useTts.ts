@@ -4,6 +4,7 @@ import { Bot, Message, Language, User } from '../types';
 import {
   synthesizeSpeech,
   splitIntoSentences,
+  normalizeTextForTts,
   getBotVoiceSettings,
   saveBotVoiceSettings,
   warmupServerVoice,
@@ -11,8 +12,14 @@ import {
   type TtsMode,
 } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
-import { selectVoice, voiceNameIncludesToken } from '../utils/voiceUtils';
+import { selectVoice } from '../utils/voiceUtils';
 import { getBotGender, resolveTtsBotId } from '../utils/botGender';
+import {
+  pickNativeIosSignatureVoice,
+  resolveCanonicalNativeVoiceIdentifier,
+  savedNativeIosVoiceMatchesLanguage,
+  isAppleAvSpeechVoiceId,
+} from '../utils/nativeIosTtsVoice';
 import { isNativeiOS, nativeTtsService } from '../services/nativeTtsService';
 import { brand } from '../config/brand';
 
@@ -33,11 +40,26 @@ export interface UseTtsParams {
   t: (key: string) => string;
   /** Practice coachee voice gender (maps to gender-specific TTS bot id). */
   genderOverride?: 'male' | 'female';
+  /** Connector handles its own opening TTS when vignette changes. */
+  skipAutoFirstMessage?: boolean;
 }
 
 export type TtsStatus = 'idle' | 'speaking' | 'paused';
 
-export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, isNewSession, t, genderOverride }: UseTtsParams) {
+function cleanTextForTts(text: string): string {
+  return normalizeTextForTts(
+    text
+      .replace(/#{1,6}\s/g, '')
+      .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+      .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
+      .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
+      .replace(/^>\s?/gm, '')
+      .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, ''),
+  );
+}
+
+export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, isNewSession, t, genderOverride, skipAutoFirstMessage }: UseTtsParams) {
   const ttsBotId = useMemo(
     () => resolveTtsBotId(bot.id, genderOverride),
     [bot.id, genderOverride],
@@ -100,6 +122,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   } | null>(null);
   const streamingTtsRef = useRef<{
     active: boolean;
+    streamComplete: boolean;
     sentenceCount: number;
     resolvedBlobs: (Blob | null)[];
     resolvedUrls: string[];
@@ -150,10 +173,90 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, []);
 
   useEffect(() => {
+    const applyNativeIosVoicePick = async (isAuto: boolean): Promise<boolean> => {
+      const bestVoice = await pickNativeIosSignatureVoice(language, botGender);
+      if (!bestVoice) return false;
+      console.log('[TTS Init] Native iOS signature voice:', bestVoice.name, bestVoice.quality, 'auto:', isAuto);
+      setSelectedVoiceURI(bestVoice.identifier);
+      setTtsMode('local');
+      setIsAutoMode(isAuto);
+      saveLanguageVoiceSettings('local', bestVoice.identifier, isAuto);
+      return true;
+    };
+
+    const restoreNativeIosManualVoice = async (savedVoiceId: string, isAuto: boolean): Promise<boolean> => {
+      if (!isAppleAvSpeechVoiceId(savedVoiceId)) return false;
+      const canonicalId = await resolveCanonicalNativeVoiceIdentifier(savedVoiceId, language);
+      const voiceId = canonicalId ?? savedVoiceId;
+      const languageMatches = await savedNativeIosVoiceMatchesLanguage(voiceId, language);
+      if (!languageMatches) return false;
+      console.log('[TTS Init] Native iOS manual voice restored:', voiceId, 'auto:', isAuto);
+      setSelectedVoiceURI(voiceId);
+      setTtsMode('local');
+      setIsAutoMode(isAuto);
+      if (canonicalId && canonicalId !== savedVoiceId) {
+        saveLanguageVoiceSettings('local', canonicalId, isAuto);
+      }
+      return true;
+    };
+
+    const initNativeIosVoiceSettings = async (): Promise<void> => {
+      const settings = getBotVoiceSettings(ttsBotId);
+      const langSettings = settings[language];
+      const savedMode = langSettings.mode;
+      const savedVoiceId = langSettings.voiceId;
+      const savedIsAuto = langSettings.isAuto;
+
+      console.log('[TTS Init] Native iOS voice restore:', { savedMode, savedVoiceId, savedIsAuto });
+
+      if (savedMode === 'server') {
+        console.log('[TTS Init] Native iOS — migrating server preference to device voices');
+        if (!(await applyNativeIosVoicePick(savedIsAuto))) {
+          setSelectedVoiceURI(null);
+          setTtsMode('local');
+          setIsAutoMode(true);
+          saveLanguageVoiceSettings('local', null, true);
+        }
+        return;
+      }
+
+      // Manual device voice — restore without server health check (staging CORS/timeouts must not wipe this)
+      if (savedMode === 'local' && savedVoiceId && savedIsAuto === false) {
+        if (await restoreNativeIosManualVoice(savedVoiceId, false)) {
+          return;
+        }
+        console.warn('[TTS Init] Saved manual native voice invalid — falling back to signature pick');
+        if (await applyNativeIosVoicePick(false)) {
+          return;
+        }
+      }
+
+      if (savedMode === 'local' && savedVoiceId && savedIsAuto) {
+        if (await restoreNativeIosManualVoice(savedVoiceId, true)) {
+          return;
+        }
+      }
+
+      if (savedIsAuto || !savedVoiceId || savedMode === 'local') {
+        if (await applyNativeIosVoicePick(true)) {
+          return;
+        }
+        setSelectedVoiceURI(null);
+        setTtsMode('local');
+        setIsAutoMode(true);
+        saveLanguageVoiceSettings('local', null, true);
+      }
+    };
+
     const checkVoiceAvailability = async () => {
       if (!currentUser) {
         console.log('[TTS Init] Guest user - forcing local TTS only');
         setTtsMode('local');
+        return;
+      }
+
+      if (isNativeiOS) {
+        await initNativeIosVoiceSettings();
         return;
       }
 
@@ -172,6 +275,23 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         });
         const healthData = await healthResponse.json();
         const serverAvailable = healthData.status === 'ok' && healthData.piperAvailable;
+
+        const runServerOrLocalAuto = async () => {
+          if (serverAvailable) {
+            console.log('[TTS Init] Auto mode - server signature voice for bot:', ttsBotId);
+            setSelectedVoiceURI(null);
+            setTtsMode('server');
+            setIsAutoMode(true);
+            saveLanguageVoiceSettings('server', null, true);
+            warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
+          } else {
+            setSelectedVoiceURI(null);
+            setTtsMode('local');
+            setIsAutoMode(true);
+            saveLanguageVoiceSettings('local', null, true);
+          }
+        };
+
         if (savedMode === 'server' && savedVoiceId) {
           if (!serverAvailable) {
             console.warn('[TTS Init] Server unavailable, temporarily using local (keeping saved preference)');
@@ -181,11 +301,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
             warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
           }
         } else if (savedMode === 'local' && savedVoiceId) {
-          const isNativeVoiceId = savedVoiceId.startsWith('com.apple.voice');
+          const isNativeVoiceId = isAppleAvSpeechVoiceId(savedVoiceId);
 
-          if (isNativeVoiceId && isNativeiOS) {
-            console.log('[TTS Init] Native iOS voice valid, keeping:', savedVoiceId);
-          } else if (isNativeVoiceId && !isNativeiOS) {
+          if (isNativeVoiceId) {
             console.warn('[TTS Init] Native voice saved but not on native iOS, resetting to auto mode');
             setIsAutoMode(true);
             setSelectedVoiceURI(null);
@@ -199,54 +317,14 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
               saveLanguageVoiceSettings('local', null, true);
             } else {
               console.log('[TTS Init] Local voice valid, keeping:', savedVoiceId);
+              setSelectedVoiceURI(savedVoiceId);
+              setTtsMode('local');
+              setIsAutoMode(savedIsAuto);
             }
           }
         } else if (savedIsAuto || (!savedVoiceId && savedMode === 'local')) {
           console.log('[TTS Init] Auto mode - selecting best voice for bot gender:', botGender);
-
-          if (isNativeiOS) {
-            try {
-              const nativeVoices = await nativeTtsService.getVoicesForLanguage(language);
-              if (nativeVoices.length > 0) {
-                const qualityVoices = nativeVoices.filter(v => v.quality === 'premium' || v.quality === 'enhanced');
-                const pool = qualityVoices.length > 0 ? qualityVoices : nativeVoices;
-
-                const femaleNames = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie',
-                  'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
-                const maleNames = ['markus', 'viktor', 'yannick', 'martin', 'hans', 'daniel', 'tom', 'alex', 'aaron', 'fred'];
-                const targetNames = botGender === 'female' ? femaleNames : maleNames;
-                const oppositeNames = botGender === 'female' ? maleNames : femaleNames;
-
-                const genderMatched = pool.filter(v => targetNames.some(n => voiceNameIncludesToken(v.name, n)));
-                const notOpposite = genderMatched.length > 0 ? genderMatched
-                  : pool.filter(v => !oppositeNames.some(n => voiceNameIncludesToken(v.name, n)));
-                const candidateVoices = notOpposite.length > 0 ? notOpposite : pool;
-
-                const bestVoice = candidateVoices.find(v => v.quality === 'premium')
-                  || candidateVoices.find(v => v.quality === 'enhanced')
-                  || candidateVoices[0];
-                console.log('[TTS Init] Auto mode on native iOS - selected:', bestVoice.name, bestVoice.quality);
-                setSelectedVoiceURI(bestVoice.identifier);
-                setTtsMode('local');
-                saveLanguageVoiceSettings('local', bestVoice.identifier, true);
-                return;
-              }
-            } catch (error) {
-              console.warn('[TTS Init] Could not get native voices:', error);
-            }
-          }
-
-          if (serverAvailable) {
-            console.log('[TTS Init] Auto mode - server signature voice for bot:', ttsBotId);
-            setSelectedVoiceURI(null);
-            setTtsMode('server');
-            saveLanguageVoiceSettings('server', null, true);
-            warmupPromiseRef.current = warmupServerVoice(ttsBotId, language as 'de' | 'en');
-          } else {
-            setSelectedVoiceURI(null);
-            setTtsMode('local');
-            saveLanguageVoiceSettings('local', null, true);
-          }
+          await runServerOrLocalAuto();
         }
       } catch (error) {
         console.warn('[TTS Init] Could not check voice availability:', error);
@@ -317,29 +395,12 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [isVoiceMode, bot.name]);
 
   useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      if (currentAudioUrlRef.current) {
-        URL.revokeObjectURL(currentAudioUrlRef.current);
-        currentAudioUrlRef.current = null;
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
-      if (audioLoadingTimeoutRef.current) {
-        clearTimeout(audioLoadingTimeoutRef.current);
-        audioLoadingTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     hasSpokenFirstMessageRef.current = false;
-  }, [bot.id, isNewSession]);
+  }, [bot.id, isNewSession, genderOverride]);
+
+  const resetFirstMessageSpoken = useCallback(() => {
+    hasSpokenFirstMessageRef.current = false;
+  }, []);
 
   const unlockAudioSession = useCallback(() => {
     if (!audioContextRef.current) {
@@ -392,6 +453,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [isIOS]);
 
   const stopTts = useCallback(() => {
+    if (streamingTtsRef.current) {
+      streamingTtsRef.current.resolvedUrls.forEach((u) => u && URL.revokeObjectURL(u));
+      streamingTtsRef.current = null;
+    }
     if (sentenceQueueRef.current) {
       sentenceQueueRef.current.active = false;
       sentenceQueueRef.current.urls.forEach(u => u && URL.revokeObjectURL(u));
@@ -399,6 +464,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     }
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.src = '';
     }
     if (gongAudioRef.current) {
       gongAudioRef.current.pause();
@@ -411,7 +477,61 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       clearInterval(speechPollingRef.current);
       speechPollingRef.current = null;
     }
+    isSpeakingRef.current = false;
+    setIsLoadingAudio(false);
     setTtsStatus('idle');
+  }, [setIsLoadingAudio]);
+
+  useEffect(() => {
+    return () => {
+      stopTts();
+      if (currentAudioUrlRef.current) {
+        URL.revokeObjectURL(currentAudioUrlRef.current);
+        currentAudioUrlRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      if (audioLoadingTimeoutRef.current) {
+        clearTimeout(audioLoadingTimeoutRef.current);
+        audioLoadingTimeoutRef.current = null;
+      }
+    };
+  }, [stopTts]);
+
+  const resumeStreamingPlaybackIfNeeded = useCallback(() => {
+    const s = streamingTtsRef.current;
+    const queue = sentenceQueueRef.current;
+    if (!s?.active || !queue?.active || !s.hasStartedPlaying) return;
+
+    const audio = s.audio ?? audioRef.current;
+    if (!audio) return;
+
+    const idx = queue.currentIndex;
+    if (idx >= s.synthQueue.length) return;
+
+    const playAt = (index: number) => {
+      const url = queue.urls[index];
+      if (url === 'skip') {
+        queue.currentIndex = index + 1;
+        if (queue.currentIndex < s.synthQueue.length) playAt(queue.currentIndex);
+        return;
+      }
+      if (url) {
+        queue.currentIndex = index;
+        audio.src = url;
+        audio.play().catch(() => {
+          setTtsStatus('idle');
+          setIsLoadingAudio(false);
+          isSpeakingRef.current = false;
+        });
+      }
+    };
+
+    if (audio.paused || audio.ended || !audio.src) {
+      playAt(idx);
+    }
   }, []);
 
   const processStreamingSynthQueue = useCallback(async () => {
@@ -465,7 +585,44 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
           const totalSentences = streaming ? streaming.synthQueue.length : queue.urls.length;
 
           if (queue.currentIndex >= totalSentences) {
-            if (!streaming || !streaming.active) {
+            if (streaming && !streaming.streamComplete) {
+              const pollId = window.setInterval(() => {
+                const st = streamingTtsRef.current;
+                const q = sentenceQueueRef.current;
+                if (!q?.active || !st) {
+                  window.clearInterval(pollId);
+                  return;
+                }
+                const total = st.synthQueue.length;
+                if (q.currentIndex < total) {
+                  window.clearInterval(pollId);
+                  const nextUrl = q.urls[q.currentIndex];
+                  if (nextUrl === 'skip') {
+                    audio.dispatchEvent(new Event('ended'));
+                    return;
+                  }
+                  if (nextUrl) {
+                    audio.src = nextUrl;
+                    audio.play().catch(() => {
+                      setTtsStatus('idle');
+                      setIsLoadingAudio(false);
+                      isSpeakingRef.current = false;
+                    });
+                  }
+                  return;
+                }
+                if (st.streamComplete && q.currentIndex >= total) {
+                  window.clearInterval(pollId);
+                  st.active = false;
+                  setTtsStatus('idle');
+                  isSpeakingRef.current = false;
+                  sentenceQueueRef.current = null;
+                }
+              }, 100);
+              return;
+            }
+            if (!streaming || streaming.streamComplete) {
+              if (streaming) streaming.active = false;
               setTtsStatus('idle');
               isSpeakingRef.current = false;
               sentenceQueueRef.current = null;
@@ -510,6 +667,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
         audio.src = url;
         await audio.play();
+      } else {
+        resumeStreamingPlaybackIfNeeded();
       }
     } catch (err) {
       console.warn(`[TTS Stream] Sentence ${nextIdx + 1} synthesis failed:`, err);
@@ -548,7 +707,8 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     }
 
     if (s.synthQueue.length > s.resolvedBlobs.length) processStreamingSynthQueue();
-  }, [ttsBotId, language]);
+    else resumeStreamingPlaybackIfNeeded();
+  }, [ttsBotId, language, resumeStreamingPlaybackIfNeeded]);
 
   /**
    * Initialize streaming TTS. Returns true if sentence-level streaming
@@ -577,6 +737,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
     streamingTtsRef.current = {
       active: true,
+      streamComplete: false,
       sentenceCount: 0,
       resolvedBlobs: [],
       resolvedUrls: [],
@@ -603,15 +764,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     const s = streamingTtsRef.current;
     if (!s || !s.active) return;
 
-    const cleanSentence = sentence
-      .replace(/#{1,6}\s/g, '')
-      .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-      .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
-      .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
-      .replace(/^>\s?/gm, '')
-      .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
-      .trim();
+    const cleanSentence = cleanTextForTts(sentence);
 
     if (!cleanSentence) return;
 
@@ -628,24 +781,58 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   const finishStreamingTts = useCallback((finalText: string) => {
     const s = streamingTtsRef.current;
     if (!s) return;
-    s.active = false;
-    lastSpokenTextRef.current = finalText
-      .replace(/#{1,6}\s/g, '')
-      .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-      .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
-      .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
-      .replace(/^>\s?/gm, '')
-      .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '')
-      .trim();
+    // Mark stream ended but keep active=true until last sentence finishes playing
+    s.streamComplete = true;
+    lastSpokenTextRef.current = cleanTextForTts(finalText);
+    resumeStreamingPlaybackIfNeeded();
+  }, [resumeStreamingPlaybackIfNeeded]);
 
-    const queue = sentenceQueueRef.current;
-    if (queue && queue.currentIndex >= s.sentenceCount) {
-      setTtsStatus('idle');
-      isSpeakingRef.current = false;
-      sentenceQueueRef.current = null;
+  /**
+   * Enqueue any final sentences missing from the stream (Connector holdback tail,
+   * stage-direction strip, or late-arriving chunks).
+   */
+  const reconcileStreamingWithFinalText = useCallback((finalText: string) => {
+    const s = streamingTtsRef.current;
+    if (!s || !s.active) return;
+
+    const cleanFinal = cleanTextForTts(finalText);
+    if (!cleanFinal) return;
+
+    const normalize = (t: string) => t.replace(/\s+/g, ' ').trim();
+    const queued = normalize(s.synthQueue.join(' '));
+    const normalizedFinal = normalize(cleanFinal);
+
+    const enqueueMissing = (text: string) => {
+      for (const sentence of splitIntoSentences(normalizeTextForTts(text))) {
+        const norm = normalize(sentence);
+        if (!norm) continue;
+        const already = s.synthQueue.some((q) => {
+          const nq = normalize(q);
+          return nq === norm || nq.includes(norm) || norm.includes(nq);
+        });
+        if (!already) {
+          s.synthQueue.push(sentence);
+          s.sentenceCount++;
+        }
+      }
+      processStreamingSynthQueue();
+      resumeStreamingPlaybackIfNeeded();
+    };
+
+    if (!queued) {
+      enqueueMissing(cleanFinal);
+      return;
     }
-  }, []);
+
+    if (normalizedFinal.startsWith(queued)) {
+      const suffix = normalizedFinal.slice(queued.length).trim();
+      if (suffix) enqueueMissing(suffix);
+      return;
+    }
+
+    // Final text was trimmed vs streamed — enqueue any sentences not yet queued
+    enqueueMissing(cleanFinal);
+  }, [processStreamingSynthQueue, resumeStreamingPlaybackIfNeeded]);
 
   /** Cancel pending (not yet played) streaming sentences. */
   const cancelPendingSentences = useCallback(() => {
@@ -688,19 +875,12 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
       setIsLoadingAudio(true);
     });
 
-    const cleanText = text
-      .replace(/#{1,6}\s/g, '')
-      .replace(/(\*\*|__|\*|_|~~|`|```)/g, '')
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-      .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
-      .replace(/^-{3,}|^\*{3,}|^_{3,}/gm, '')
-      .replace(/^>\s?/gm, '')
-      .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]/gu, '');
+    const cleanText = cleanTextForTts(text);
 
     lastSpokenTextRef.current = cleanText;
 
     const isValidServerVoice = selectedVoiceURI && ['de-thorsten', 'de-eva', 'en-amy', 'en-ryan'].includes(selectedVoiceURI);
-    const isNativeVoice = selectedVoiceURI?.startsWith('com.apple.voice');
+    const isNativeVoice = isNativeiOS && isAppleAvSpeechVoiceId(selectedVoiceURI);
 
     const iosSafariForcesLocal = isIOS && !isNativeiOS;
     const nativeiOSForcesLocal = isNativeiOS && ttsMode === 'server';
@@ -1170,13 +1350,14 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
         (chatHistory.length === 2 && chatHistory[0].role === 'user'));
 
     if (isInitialBotResponse &&
+      !skipAutoFirstMessage &&
       (ttsMode === 'server' || voices.length > 0) &&
       isTtsEnabled &&
       !hasSpokenFirstMessageRef.current) {
       hasSpokenFirstMessageRef.current = true;
       speak(lastMessage.text);
     }
-  }, [chatHistory, voices, isTtsEnabled, ttsMode, speak]);
+  }, [chatHistory, voices, isTtsEnabled, ttsMode, speak, skipAutoFirstMessage]);
 
   const handlePreviewVoice = useCallback(async (voice: SpeechSynthesisVoice) => {
     if (!voice || !window.speechSynthesis) return;
@@ -1235,30 +1416,10 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
       if (isNativeiOS) {
         console.log('[TTS Select] Auto mode - fetching native voices for language:', language, 'botGender:', botGender);
-        const nativeVoices = await nativeTtsService.getVoicesForLanguage(language);
+        const bestVoice = await pickNativeIosSignatureVoice(language, botGender);
 
-        if (nativeVoices.length > 0) {
-          const femaleNames = ['anna', 'helena', 'petra', 'katja', 'marlene', 'vicki', 'marie',
-            'samantha', 'karen', 'moira', 'tessa', 'siri', 'allison', 'ava', 'susan', 'serena', 'nicky'];
-          const maleNames = ['markus', 'viktor', 'yannick', 'martin', 'hans', 'daniel', 'tom', 'alex', 'aaron', 'fred'];
-
-          const genderFilteredVoices = nativeVoices.filter(v => {
-            const nameLower = v.name.toLowerCase();
-            const matchesMale = maleNames.some(n => voiceNameIncludesToken(nameLower, n));
-            const matchesFemale = femaleNames.some(n => voiceNameIncludesToken(nameLower, n));
-            if (botGender === 'male') {
-              return matchesMale || !matchesFemale;
-            }
-            return matchesFemale || !matchesMale;
-          });
-
-          const candidateVoices = genderFilteredVoices.length > 0 ? genderFilteredVoices : nativeVoices;
-
-          const bestVoice = candidateVoices.find(v => v.quality === 'premium')
-            || candidateVoices.find(v => v.quality === 'enhanced')
-            || candidateVoices[0];
-
-          console.log('[TTS Select] Auto mode - selected:', bestVoice.name, bestVoice.quality, 'from', candidateVoices.length, 'candidates');
+        if (bestVoice) {
+          console.log('[TTS Select] Auto mode - selected:', bestVoice.name, bestVoice.quality);
           setSelectedVoiceURI(bestVoice.identifier);
           setTtsMode('local');
           saveLanguageVoiceSettings('local', bestVoice.identifier, true);
@@ -1309,9 +1470,19 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     } else if (selection.type === 'native') {
       console.log('[TTS Select] Native voice selected:', selection.voiceIdentifier);
       setIsAutoMode(false);
-      setSelectedVoiceURI(selection.voiceIdentifier);
       setTtsMode('local');
+      setSelectedVoiceURI(selection.voiceIdentifier);
       saveLanguageVoiceSettings('local', selection.voiceIdentifier, false);
+      try {
+        const canonicalId = await resolveCanonicalNativeVoiceIdentifier(selection.voiceIdentifier, language);
+        const voiceId = canonicalId ?? selection.voiceIdentifier;
+        if (voiceId !== selection.voiceIdentifier) {
+          setSelectedVoiceURI(voiceId);
+          saveLanguageVoiceSettings('local', voiceId, false);
+        }
+      } catch (err) {
+        console.warn('[TTS Select] Could not resolve canonical native voice id:', err);
+      }
     }
     setIsVoiceModalOpen(false);
   }, [ttsBotId, language, botGender, saveLanguageVoiceSettings]);
@@ -1356,7 +1527,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
   const handleToggleTts = useCallback(() => {
     if (isTtsEnabled) {
-      const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+      const isNativeVoiceSelected = isNativeiOS && isAppleAvSpeechVoiceId(selectedVoiceURI);
 
       if (isNativeVoiceSelected) {
         nativeTtsService.stop();
@@ -1382,7 +1553,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [isTtsEnabled, selectedVoiceURI, ttsMode]);
 
   const handlePauseTTS = useCallback(() => {
-    const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+    const isNativeVoiceSelected = isNativeiOS && isAppleAvSpeechVoiceId(selectedVoiceURI);
 
     if (isNativeVoiceSelected) {
       nativeTtsService.pause();
@@ -1395,7 +1566,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
   }, [selectedVoiceURI, ttsMode]);
 
   const handleResumeTTS = useCallback(() => {
-    const isNativeVoiceSelected = isNativeiOS && selectedVoiceURI?.startsWith('com.apple.voice');
+    const isNativeVoiceSelected = isNativeiOS && isAppleAvSpeechVoiceId(selectedVoiceURI);
 
     if (isNativeVoiceSelected) {
       nativeTtsService.resume();
@@ -1412,10 +1583,9 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
 
   const handleRepeatTTS = useCallback(() => {
     if (lastSpokenTextRef.current) {
-      invalidateCachedAudio();
-      speak(lastSpokenTextRef.current, false, false, false, true);
+      speak(lastSpokenTextRef.current, false, false, false, false);
     }
-  }, [speak, invalidateCachedAudio]);
+  }, [speak]);
 
   const setIsTtsEnabledFromParent = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
     setIsTtsEnabled(value);
@@ -1426,6 +1596,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     initStreamingTts,
     enqueueSentence,
     finishStreamingTts,
+    reconcileStreamingWithFinalText,
     cancelPendingSentences,
     botGender,
     ttsBotId,
@@ -1452,6 +1623,7 @@ export function useTts({ bot, language, currentUser, chatHistory, isVoiceMode, i
     resetAudioSessionAfterRecording,
     unlockAudioSession,
     stopTts,
+    resetFirstMessageSpoken,
     audioRef,
     lastSpokenTextRef,
     gongAudioRef,

@@ -472,6 +472,17 @@ html.dark body::before {
   filter: brightness(1.06);
 }
 
+/* Intent picker: mobile tiles share viewport (3-up stack); md+ height = grid row only. */
+:root {
+  --intent-picker-chrome: 10.5rem;
+  --intent-tile-h-mobile: min(18.5rem, calc((100dvh - var(--intent-picker-chrome)) / 3));
+}
+@media (max-width: 767px) {
+  .intent-picker-tile {
+    height: var(--intent-tile-h-mobile);
+  }
+}
+
 /* Solid accent CTA — use instead of bg-accent-primary + text-white */
 .btn-accent-solid {
   background-color: rgb(var(--accent-primary));

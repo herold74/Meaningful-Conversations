@@ -37,9 +37,14 @@ Files are archived with their original names. If you're looking for something sp
 - **DOCUMENTATION-CLEANUP-SUMMARY.md** - Earlier cleanup details
 
 ### Development History
-- **DEVELOPMENT-HISTORY.md** - Detailed feature development timeline (superseded by FEATURE-DEVELOPMENT-TIMELINE.md for recent work)
+- **DEVELOPMENT-HISTORY.md** - Detailed feature development timeline
+- **FEATURE-DEVELOPMENT-TIMELINE.md** - Stakeholder timeline (archived 2026-11-02; current status is `memory-bank/activeContext.md` and `DOCUMENTATION/CHANGELOG.md`)
+- **KEYWORD-CRITIQUE.md** - 2024 keyword analysis of coach prompts (archived 2026-11-02)
+
+### Superseded TTS
+- **TTS-HYBRID-README.md** - Hybrid TTS write-up. Current voice status: `DOCUMENTATION/TTS-FINAL-STATUS.md`
+- **TTS-SETUP-STATUS.md** - Setup report from v1.6.0
 
 ---
 
-**Archived:** February 13, 2026  
-**By:** Documentation consolidation (v1.8.7)
+**Archived:** February 13, 2026 (cleanup), November 2, 2026 (timeline, keyword critique, hybrid TTS)

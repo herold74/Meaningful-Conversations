@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language } from './types';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, ProposedUpdate, TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticePhase2Context, Language, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions, ConnectorHandoffPayload } from './types';
+import { resolveConnectorPremiumAccess } from './utils/connectorAccess';
+import { userHasSavedConnector } from './utils/connectorProfile';
+import { sealConnectorForProfile } from './utils/connectorSignatureTranslation';
 import { useLocalization } from './context/LocalizationContext';
 import * as api from './services/api';
 import * as userService from './services/userService';
@@ -30,9 +33,30 @@ import {
     type HighlightSection,
 } from './utils/userIntent';
 import { resolvePracticeAccess } from './utils/practiceAccess';
-import type { SurveyResult } from './components/PersonalitySurvey';
+import {
+    getPersistedGuestLifeContextTemplate,
+    hasGuestNameProvided,
+    hasGuestPiiAcknowledged,
+    resolveGuestName,
+    setGuestPiiAcknowledged,
+    syncGuestSession,
+} from './utils/guestSession';
+import type { SurveyResult, LensType } from './components/PersonalitySurvey';
 import { generatePDF, generateSurveyPdfFilename } from './utils/pdfGeneratorReact';
 import { encryptPersonalityProfile, decryptPersonalityProfile } from './utils/personalityEncryption';
+import { encryptData } from './utils/encryption';
+import {
+    botFromConnectorVignette,
+    openingMessageFromVignette,
+    CONNECTOR_PERSONA_BOT_ID,
+    type ConnectorRunState,
+    type ConnectorRunMode,
+} from './utils/connectorRun';
+import {
+    buildGloriaConnectionPrepStarter,
+    isGloriaConnectionPrepMessage,
+    type GloriaInterviewMode,
+} from './utils/gloriaInterview';
 import { BOTS } from './constants';
 import { updateServiceWorker } from './utils/serviceWorkerUtils';
 import PageTransition from './components/shared/PageTransition';
@@ -41,6 +65,11 @@ import { getNextThemeInCycle, HAS_MULTIPLE_THEMES } from './config/themes';
 import { brand } from './config/brand';
 import { hexToRgb } from './utils/colorUtils';
 import PracticeResumePrompt from './components/PracticeResumePrompt';
+import CoachingResumePrompt from './components/CoachingResumePrompt';
+import CoachingDiscardSessionModal from './components/CoachingDiscardSessionModal';
+import type { CoachingSessionResumeBannerProps } from './components/CoachingSessionResumeBanner';
+import MaintenanceNoticeBanner from './components/MaintenanceNoticeBanner';
+import { isMaintenanceBannerHidden } from './utils/maintenanceNotice';
 import { isNativeApp } from './utils/platformDetection';
 import {
     botFromPracticeConfig,
@@ -49,6 +78,15 @@ import {
     savePracticeSessionDraft,
     type PracticeSessionDraft,
 } from './utils/practiceSessionDraft';
+import {
+    clearCoachingSessionDraft,
+    getCoachingDraftOwnerId,
+    isStandardCoachingChatBotId,
+    loadCoachingSessionDraft,
+    saveCoachingSessionDraft,
+    type CoachingSessionDraft,
+} from './utils/coachingSessionDraft';
+import { canOfferCoachingSessionResume } from './utils/coachingSessionResume';
 
 const DEFAULT_GAMIFICATION_STATE: GamificationState = {
     xp: 0,
@@ -82,6 +120,7 @@ function appendBekkyAuditTasksFromMessages(
 const App: React.FC = () => {
     const { t, language } = useLocalization();
     const [view, setView] = useState<NavView>('welcome');
+    const [userGuideFocusAnchor, setUserGuideFocusAnchor] = useState<string | null>(null);
     const [menuView, setMenuView] = useState<NavView | null>(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [authRedirectReason, setAuthRedirectReason] = useState<string | null>(null);
@@ -152,11 +191,39 @@ const App: React.FC = () => {
     // Coach Practice states
     const [practiceConfig, setPracticeConfig] = useState<CoachPracticeConfig | null>(null);
     const [practiceEvaluation, setPracticeEvaluation] = useState<PracticeEvaluationResult | null>(null);
+    const [practiceEvalArtifactLanguage, setPracticeEvalArtifactLanguage] = useState<Language | null>(null);
     const [practiceSelfRating, setPracticeSelfRating] = useState<number | undefined>(undefined);
     const [practiceDraftPrompt, setPracticeDraftPrompt] = useState<PracticeSessionDraft | null>(null);
+    const [coachingDraftPrompt, setCoachingDraftPrompt] = useState<CoachingSessionDraft | null>(null);
+    const [pendingBotSelection, setPendingBotSelection] = useState<Bot | null>(null);
     const [practicePhase2Context, setPracticePhase2Context] = useState<PracticePhase2Context | null>(null);
     const [practiceTranscriptForPhase2, setPracticeTranscriptForPhase2] = useState<string>('');
     const [practiceEvalError, setPracticeEvalError] = useState<string | null>(null);
+
+    // The Connector states
+    const [connectorRun, setConnectorRun] = useState<ConnectorRunState | null>(null);
+    const [connectorEvaluation, setConnectorEvaluation] = useState<ConnectorEvaluationResult | null>(null);
+    const [connectorQualitativeEvaluation, setConnectorQualitativeEvaluation] = useState<ConnectorQualitativeEvaluationResult | null>(null);
+    const [connectorAwaitingNext, setConnectorAwaitingNext] = useState<ConnectorEndType | null>(null);
+    const [isConnectorStarting, setIsConnectorStarting] = useState(false);
+    const [isConnectorEvaluating, setIsConnectorEvaluating] = useState(false);
+    const [connectorSaveState, setConnectorSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    const [connectorPracticeFocus, setConnectorPracticeFocus] = useState<ConnectorDimensionKey | null>(null);
+    const [gloriaConnectionPrep, setGloriaConnectionPrep] = useState(false);
+    /** Invisible Connector ladder handoff for chat API (Start conversation button only). */
+    const [connectorChatHandoff, setConnectorChatHandoff] = useState<ConnectorChatHandoff | null>(null);
+    /** One-turn API payload for Connector scene context (cleared after first assistant reply). */
+    const [connectorHandoffPayload, setConnectorHandoffPayload] = useState<ConnectorHandoffPayload | null>(null);
+
+    const connectorHandoffForBot = (botId: string): ConnectorChatHandoff | null => {
+        if (botId === 'gloria-interview') return 'gloria';
+        if (botId === 'sam-forward-focused' || botId === 'nexus-goal-path-solution') return 'coaching';
+        return null;
+    };
+
+    const handleConnectorHandoffPayloadConsumed = useCallback(() => {
+        setConnectorHandoffPayload(null);
+    }, []);
 
     const routeToCoachPractice = useCallback(() => {
         if (!currentUser || !resolvePracticeAccess(currentUser).canAccessPractice) {
@@ -174,9 +241,13 @@ const App: React.FC = () => {
     }, [currentUser]);
 
     const openUpgrade = useCallback((focus?: 'premium_plus') => {
+        if (!currentUser) {
+            setView('auth');
+            return;
+        }
         setUpgradeFocus(focus ?? null);
         setMenuView('upgrade');
-    }, []);
+    }, [currentUser]);
 
     const buildPracticeTranscriptSummary = useCallback((history: Message[], lang: Language) => {
         const coacheeLabel = lang === 'de' ? 'Coachee' : 'Coachee';
@@ -232,6 +303,7 @@ const App: React.FC = () => {
     const handleLogout = useCallback(() => {
         clearPracticeSessionDraft();
         setPracticeDraftPrompt(null);
+        setCoachingDraftPrompt(null);
         authLogout();
     }, [authLogout]);
 
@@ -272,6 +344,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!currentUser?.id || !practiceConfig || chatHistory.length === 0) return;
+        if (view !== 'practiceChat' || practiceEvaluation) return;
         savePracticeSessionDraft({
             userId: currentUser.id,
             practiceConfig,
@@ -279,7 +352,198 @@ const App: React.FC = () => {
             userMessageCount,
             baselineMessageCount,
         });
-    }, [currentUser?.id, practiceConfig, chatHistory, userMessageCount, baselineMessageCount]);
+    }, [currentUser?.id, practiceConfig, chatHistory, userMessageCount, baselineMessageCount, view, practiceEvaluation]);
+
+    const coachingDraftOwnerId = useMemo(
+        () => getCoachingDraftOwnerId(
+            currentUser?.id,
+            resolveGuestName(lifeContext, questionnaireAnswers.profile_name),
+        ),
+        [currentUser?.id, lifeContext, questionnaireAnswers.profile_name],
+    );
+
+    const clearCoachingDraftState = useCallback(() => {
+        clearCoachingSessionDraft();
+        setCoachingDraftPrompt(null);
+    }, []);
+
+    const hasInMemoryStandardCoachingSession = useCallback(() => {
+        if (isTestMode || practiceConfig || connectorRun || !selectedBot) return false;
+        if (!isStandardCoachingChatBotId(selectedBot.id)) return false;
+        return chatHistory.some((m) => m.role === 'user');
+    }, [isTestMode, practiceConfig, connectorRun, selectedBot, chatHistory]);
+
+    const getActiveCoachingCoachName = useCallback((): string => {
+        if (hasInMemoryStandardCoachingSession() && selectedBot) {
+            return selectedBot.name;
+        }
+        const draft = coachingDraftOwnerId
+            ? loadCoachingSessionDraft(coachingDraftOwnerId)
+            : null;
+        return draft?.bot.name ?? selectedBot?.name ?? '';
+    }, [coachingDraftOwnerId, hasInMemoryStandardCoachingSession, selectedBot]);
+
+    const hasActiveStandardCoachingSession = useCallback(() => {
+        if (hasInMemoryStandardCoachingSession()) return true;
+        if (!coachingDraftOwnerId) return false;
+        return loadCoachingSessionDraft(coachingDraftOwnerId) !== null;
+    }, [coachingDraftOwnerId, hasInMemoryStandardCoachingSession]);
+
+    useEffect(() => {
+        if (!canOfferCoachingSessionResume(view)) {
+            return;
+        }
+        if (!coachingDraftOwnerId || practiceConfig || connectorRun) return;
+        if (hasInMemoryStandardCoachingSession()) return;
+        const draft = loadCoachingSessionDraft(coachingDraftOwnerId);
+        if (draft) setCoachingDraftPrompt(draft);
+    }, [view, coachingDraftOwnerId, practiceConfig, connectorRun, hasInMemoryStandardCoachingSession]);
+
+    useEffect(() => {
+        if (!coachingDraftOwnerId || !selectedBot || isTestMode || practiceConfig || connectorRun) return;
+        if (!isStandardCoachingChatBotId(selectedBot.id)) return;
+        if (view === 'sessionReview') return;
+        if (!chatHistory.some((m) => m.role === 'user')) return;
+        saveCoachingSessionDraft({
+            ownerId: coachingDraftOwnerId,
+            bot: selectedBot,
+            chatHistory,
+            userMessageCount,
+            baselineMessageCount,
+        });
+    }, [
+        coachingDraftOwnerId,
+        selectedBot,
+        chatHistory,
+        userMessageCount,
+        baselineMessageCount,
+        view,
+        isTestMode,
+        practiceConfig,
+        connectorRun,
+    ]);
+
+    const handleResumeCoachingSession = useCallback(() => {
+        if (hasInMemoryStandardCoachingSession()) {
+            setView('chat');
+            setCoachingDraftPrompt(null);
+            return;
+        }
+        const draft = coachingDraftPrompt
+            ?? (coachingDraftOwnerId ? loadCoachingSessionDraft(coachingDraftOwnerId) : null);
+        if (!draft) return;
+        const bot = BOTS.find((b) => b.id === draft.bot.id) ?? draft.bot;
+        setSelectedBot(bot);
+        setChatHistory(draft.chatHistory);
+        setUserMessageCount(draft.userMessageCount);
+        setBaselineMessageCount(draft.baselineMessageCount);
+        setView('chat');
+        setCoachingDraftPrompt(null);
+    }, [
+        coachingDraftOwnerId,
+        coachingDraftPrompt,
+        hasInMemoryStandardCoachingSession,
+    ]);
+
+    const handleDiscardCoachingDraft = useCallback(() => {
+        clearCoachingDraftState();
+        setSelectedBot(null);
+        setChatHistory([]);
+        setUserMessageCount(0);
+        setBaselineMessageCount(0);
+    }, [clearCoachingDraftState]);
+
+    const persistLifeContextEdits = useCallback(async (newContext: string) => {
+        setLifeContext(newContext);
+        if (!currentUser) {
+            const guestName = resolveGuestName(newContext, questionnaireAnswers.profile_name);
+            if (guestName) syncGuestSession(guestName, newContext);
+            return;
+        }
+        if (encryptionKey) {
+            try {
+                await userService.saveUserData(
+                    newContext,
+                    serializeGamificationState(gamificationState),
+                    encryptionKey,
+                );
+            } catch (error) {
+                console.error('Failed to save edited context:', error);
+            }
+        }
+    }, [currentUser, encryptionKey, gamificationState, questionnaireAnswers.profile_name]);
+
+    const handleLcEditorSaveFromContextChoice = useCallback(async (newContext: string) => {
+        await persistLifeContextEdits(newContext);
+        if (hasActiveStandardCoachingSession()) {
+            handleResumeCoachingSession();
+            return;
+        }
+        setCameFromContextChoice(true);
+        setView('botSelection');
+    }, [
+        persistLifeContextEdits,
+        hasActiveStandardCoachingSession,
+        handleResumeCoachingSession,
+    ]);
+
+    const handleLcEditorSaveFromLanding = useCallback(async (newContext: string) => {
+        await persistLifeContextEdits(newContext);
+        if (hasActiveStandardCoachingSession()) {
+            handleResumeCoachingSession();
+            return;
+        }
+        applyIntentLogic(null, { lifeContextOverride: newContext });
+    }, [
+        persistLifeContextEdits,
+        hasActiveStandardCoachingSession,
+        handleResumeCoachingSession,
+        applyIntentLogic,
+    ]);
+
+    const coachingSessionResume: CoachingSessionResumeBannerProps | null = useMemo(() => {
+        const resumeViews: NavView[] = [
+            'landing',
+            'contextChoice',
+            'lcEditorFromLanding',
+            'lcEditorFromContextChoice',
+            'botSelection',
+        ];
+        if (
+            !canOfferCoachingSessionResume(view)
+            || view === 'chat'
+            || practiceConfig
+            || connectorRun
+            || !resumeViews.includes(view)
+        ) {
+            return null;
+        }
+        if (hasInMemoryStandardCoachingSession() && selectedBot) {
+            return {
+                coachName: selectedBot.name,
+                messageCount: chatHistory.length,
+                onResume: handleResumeCoachingSession,
+            };
+        }
+        const draft = coachingDraftOwnerId
+            ? loadCoachingSessionDraft(coachingDraftOwnerId)
+            : null;
+        if (!draft) return null;
+        return {
+            coachName: draft.bot.name,
+            messageCount: draft.chatHistory.length,
+            onResume: handleResumeCoachingSession,
+        };
+    }, [
+        view,
+        practiceConfig,
+        connectorRun,
+        hasInMemoryStandardCoachingSession,
+        selectedBot,
+        chatHistory.length,
+        coachingDraftOwnerId,
+        handleResumeCoachingSession,
+    ]);
     
     const calculateNewGamificationState = useCallback((
         currentState: GamificationState,
@@ -527,6 +791,13 @@ const App: React.FC = () => {
         setCameFromContextChoice(false);
         setGamificationState(DEFAULT_GAMIFICATION_STATE);
         setTempContext(context);
+        if (!currentUser && hasGuestPiiAcknowledged()) {
+            setLifeContext(context);
+            const guestName = resolveGuestName(context, questionnaireAnswers.profile_name);
+            if (guestName) syncGuestSession(guestName, context);
+            setView('botSelection');
+            return;
+        }
         setView('piiWarning');
     };
 
@@ -543,10 +814,15 @@ const App: React.FC = () => {
 
         // Guest flow
         if (!currentUser) {
-            if (!localStorage.getItem('guestName')) {
+            const persistedLc = getPersistedGuestLifeContextTemplate();
+            const effectiveLc = lifeContext.trim() || persistedLc || '';
+            if (!lifeContext.trim() && persistedLc) setLifeContext(persistedLc);
+            if (!hasGuestNameProvided(effectiveLc, questionnaireAnswers.profile_name)) {
                 setView('namePrompt');
             } else {
-                applyIntentLogic(intent);
+                const guestName = resolveGuestName(effectiveLc, questionnaireAnswers.profile_name);
+                if (guestName) syncGuestSession(guestName, effectiveLc);
+                applyIntentLogic(intent, { lifeContextOverride: effectiveLc });
             }
             return;
         }
@@ -566,7 +842,7 @@ const App: React.FC = () => {
 
         // Registered user: substantial LC + profile → profile hint or intent logic
         routeWithProfileHint(intent);
-    }, [currentUser, hasPersonalityProfile, lifeContext, routeWithProfileHint, routeToCoachPractice, applyIntentLogic]);
+    }, [currentUser, hasPersonalityProfile, lifeContext, questionnaireAnswers.profile_name, routeWithProfileHint, routeToCoachPractice, applyIntentLogic]);
 
     const routeAfterOcean = useCallback(() => {
         if (postOceanRoute === 'landing') {
@@ -666,7 +942,8 @@ const App: React.FC = () => {
                                 big5: result.big5
                             },
                             narratives: result.narratives,
-                            language
+                            language,
+                            connector: result.connector ?? null,
                         });
                         
                         if (narrativeResponse.narrativeProfile) {
@@ -743,42 +1020,83 @@ const App: React.FC = () => {
     };
 
     const handlePiiConfirm = async () => {
-        setLifeContext(tempContext);
+        const contextToSave = tempContext;
+        setLifeContext(contextToSave);
         setTempContext('');
+        if (!currentUser) {
+            setGuestPiiAcknowledged();
+            const guestName = resolveGuestName(contextToSave, questionnaireAnswers.profile_name);
+            if (guestName) syncGuestSession(guestName, contextToSave);
+        }
         setView('botSelection');
 
         if (currentUser && encryptionKey) {
             try {
-                await userService.saveUserData(tempContext, serializeGamificationState(gamificationState), encryptionKey);
+                await userService.saveUserData(contextToSave, serializeGamificationState(gamificationState), encryptionKey);
             } catch (error) {
                 console.error('Failed to auto-save Life Context after questionnaire:', error);
             }
         }
     };
     
-    const handleSelectBot = (bot: Bot) => {
+    const confirmSelectBot = (bot: Bot) => {
+        clearCoachingDraftState();
+        setPendingBotSelection(null);
+
         // Stop any ongoing voice output
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
-        
+
         // Stop server audio if playing
         const audioElements = document.querySelectorAll('audio');
         audioElements.forEach(audio => {
             audio.pause();
             audio.currentTime = 0;
         });
-        
+
+        if (bot.id === 'gloria-interview') {
+            setSelectedBot(bot);
+            setUserMessageCount(0);
+            setBaselineMessageCount(0);
+            setChatHistory([]);
+            setGloriaConnectionPrep(false);
+            setConnectorChatHandoff(null);
+            setConnectorHandoffPayload(null);
+            setView('gloriaInterviewIntro');
+            return;
+        }
+
         setSelectedBot(bot);
         setUserMessageCount(0);
         setBaselineMessageCount(0);
         setChatHistory([]);
+        setConnectorChatHandoff(null);
+        setConnectorHandoffPayload(null);
         setView('chat');
     };
 
-    const handleReferralSwitch = useCallback((targetBotId: string, seedUserMessage: string) => {
-        const targetBot = BOTS.find((b) => b.id === targetBotId);
-        if (!targetBot) return;
+    const handleSelectBot = (bot: Bot) => {
+        if (hasActiveStandardCoachingSession()) {
+            setPendingBotSelection(bot);
+            return;
+        }
+        confirmSelectBot(bot);
+    };
+
+    const handleConfirmDiscardCoachingForNewBot = () => {
+        if (pendingBotSelection) {
+            confirmSelectBot(pendingBotSelection);
+        }
+    };
+
+    const handleCancelDiscardCoachingForNewBot = () => {
+        setPendingBotSelection(null);
+    };
+
+    const handleStartGloriaInterview = (mode: GloriaInterviewMode) => {
+        const bot = BOTS.find((b) => b.id === 'gloria-interview');
+        if (!bot) return;
 
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
@@ -789,10 +1107,57 @@ const App: React.FC = () => {
             audio.currentTime = 0;
         });
 
-        setSelectedBot(targetBot);
+        const connectionPrep = mode === 'connectionPrep';
+        setGloriaConnectionPrep(connectionPrep);
+        setConnectorChatHandoff(null);
+        setConnectorHandoffPayload(null);
+        setSelectedBot(bot);
         setUserMessageCount(0);
         setBaselineMessageCount(0);
         setCameFromContextChoice(false);
+
+        if (connectionPrep) {
+            setChatHistory([
+                {
+                    id: `user-${Date.now()}`,
+                    text: buildGloriaConnectionPrepStarter(language),
+                    role: 'user',
+                    timestamp: new Date().toISOString(),
+                },
+            ]);
+        } else {
+            setChatHistory([]);
+        }
+        setView('chat');
+    };
+
+    const handleReferralSwitch = useCallback((targetBotId: string, seedUserMessage: string) => {
+        const targetBot = BOTS.find((b) => b.id === targetBotId);
+        if (!targetBot) return;
+
+        clearCoachingDraftState();
+
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach((audio) => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+
+        setMenuView(null);
+        setSelectedBot(targetBot);
+        setUserMessageCount(1);
+        setBaselineMessageCount(0);
+        setCameFromContextChoice(false);
+        setConnectorChatHandoff(null);
+        setConnectorHandoffPayload(null);
+        if (targetBotId === 'gloria-interview') {
+            setGloriaConnectionPrep(isGloriaConnectionPrepMessage(seedUserMessage));
+        } else {
+            setGloriaConnectionPrep(false);
+        }
         setChatHistory([
             {
                 id: `user-${Date.now()}`,
@@ -802,9 +1167,13 @@ const App: React.FC = () => {
             },
         ]);
         setView('chat');
-    }, []);
+    }, [clearCoachingDraftState]);
 
-    const handleStartSessionFromEval = (botId: string, examplePrompt: string) => {
+    const handleStartSessionFromEval = (
+        botId: string,
+        examplePrompt: string,
+        options?: ConnectorCoachSessionStartOptions,
+    ) => {
         const bot = BOTS.find(b => b.id === botId);
         if (!bot) return;
 
@@ -824,11 +1193,26 @@ const App: React.FC = () => {
             role: 'user',
             timestamp: new Date().toISOString(),
         };
+        setMenuView(null);
         setSelectedBot(bot);
         setChatHistory([userMessage]);
-        setUserMessageCount(0);
+        setUserMessageCount(1);
         setBaselineMessageCount(0);
         setCameFromContextChoice(false);
+        if (options?.serverHandoff) {
+            setConnectorChatHandoff(connectorHandoffForBot(botId));
+            setConnectorHandoffPayload(options.handoffPayload ?? null);
+        } else {
+            setConnectorChatHandoff(null);
+            setConnectorHandoffPayload(null);
+        }
+        if (botId === 'gloria-interview') {
+            setGloriaConnectionPrep(
+                options?.serverHandoff === true || isGloriaConnectionPrepMessage(examplePrompt),
+            );
+        } else {
+            setGloriaConnectionPrep(false);
+        }
         setView('chat');
     };
     
@@ -847,6 +1231,23 @@ const App: React.FC = () => {
     const handleEndSession = async () => {
         if (!selectedBot) return;
 
+        // --- The Connector mode: ending means finishing the run early ---
+        if (connectorRun && selectedBot.id === CONNECTOR_PERSONA_BOT_ID) {
+            const hasUserMessages = chatHistory.some((m) => m.role === 'user');
+            const current = connectorRun.vignettes[connectorRun.currentIndex];
+            const entries = hasUserMessages && current
+                ? [...connectorRun.entries, { vignetteId: current.id, history: chatHistory, endType: 'aborted' as ConnectorEndType }]
+                : connectorRun.entries;
+            if (entries.length === 0) {
+                resetConnectorState();
+                setView(connectorHubView(connectorRun.mode));
+                return;
+            }
+            setConnectorRun({ ...connectorRun, entries });
+            await finishConnectorRun(entries, connectorRun.liveMode, connectorRun.mode, connectorRun);
+            return;
+        }
+
         // --- Coach Practice mode ---
         if (practiceConfig && selectedBot.id === 'practice-coachee') {
             if (userMessageCount === 0) {
@@ -863,6 +1264,8 @@ const App: React.FC = () => {
         
         // --- Special Handling for Gloria Interview Bot ---
         if (selectedBot.id === 'gloria-interview') {
+            setConnectorChatHandoff(null);
+            setConnectorHandoffPayload(null);
             if (userMessageCount === 0 && !isTestMode) {
                 setSelectedBot(null);
                 setChatHistory([]);
@@ -933,12 +1336,16 @@ const App: React.FC = () => {
         // --- Standard Session Analysis for all other bots ---
         // In test mode, skip the "no messages" check since test scenarios always have messages
         if ((userMessageCount - baselineMessageCount) === 0 && !isTestMode) {
+            clearCoachingDraftState();
             setSelectedBot(null);
             setChatHistory([]);
             applyIntentLogic(null);
             return;
         }
 
+        clearCoachingDraftState();
+        setConnectorChatHandoff(null);
+        setConnectorHandoffPayload(null);
         setIsAnalyzing(true);
         try {
             const analysis = await geminiService.analyzeSession(chatHistory, lifeContext, language);
@@ -1187,6 +1594,7 @@ const App: React.FC = () => {
             await new Promise(resolve => setTimeout(resolve, 50));
         }
         
+        clearCoachingDraftState();
         setSelectedBot(null);
         setChatHistory([]);
         applyIntentLogic(null);
@@ -1207,19 +1615,47 @@ const App: React.FC = () => {
         setPracticeEvalError(null);
         setPracticeDraftPrompt(null);
         clearPracticeSessionDraft();
+        clearCoachingDraftState();
         setHighlightSection(null);
         
         // Close menu
         setIsMenuOpen(false);
         setMenuView(null);
 
-        if (!currentUser) {
-            setLifeContext('');
-            setGamificationState(DEFAULT_GAMIFICATION_STATE);
-        }
-
         setView('intentPicker');
-    }, [currentUser]);
+    }, [clearCoachingDraftState]);
+
+    const resumeGuestFromAuth = useCallback(() => {
+        setMenuView(null);
+        analyticsService.trackGuestLogin();
+        const persistedLc = getPersistedGuestLifeContextTemplate();
+        const effectiveLc = lifeContext.trim() || persistedLc || '';
+        if (!hasGuestNameProvided(effectiveLc, questionnaireAnswers.profile_name)) {
+            setLifeContext('');
+            setView('intentPicker');
+            return;
+        }
+        const guestName = resolveGuestName(effectiveLc, questionnaireAnswers.profile_name);
+        if (guestName) {
+            syncGuestSession(guestName, effectiveLc);
+            if (!lifeContext.trim() && persistedLc) setLifeContext(persistedLc);
+        }
+        const storedIntent = getStoredUserIntent();
+        if (storedIntent) {
+            setHighlightSection(getHighlightSectionForIntent(storedIntent));
+            applyIntentLogic(storedIntent, { lifeContextOverride: effectiveLc });
+        } else {
+            setView('intentPicker');
+        }
+    }, [applyIntentLogic, lifeContext, questionnaireAnswers.profile_name]);
+
+    const handleGuestAuthRequired = useCallback(() => {
+        if (!currentUser) {
+            const guestName = resolveGuestName(lifeContext, questionnaireAnswers.profile_name);
+            if (guestName) syncGuestSession(guestName, lifeContext);
+        }
+        setView('auth');
+    }, [currentUser, lifeContext, questionnaireAnswers.profile_name]);
 
     const handleRunTestSession = async (scenario: TestScenario, adminLifeContext: string) => {
         // Set up test mode state
@@ -1279,6 +1715,360 @@ const App: React.FC = () => {
         setPracticeDraftPrompt(null);
     };
 
+    // --- The Connector handlers ---
+
+    const connectorHubView = (mode: ConnectorRunMode): NavView => {
+        if (mode === 'open') return 'connectorOpenSituation';
+        if (mode === 'practice') return 'connectorCatalog';
+        return 'botSelection';
+    };
+
+    const resetConnectorState = () => {
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorQualitativeEvaluation(null);
+        setConnectorAwaitingNext(null);
+        setConnectorSaveState('idle');
+        setConnectorPracticeFocus(null);
+        setSelectedBot(null);
+        setChatHistory([]);
+    };
+
+    const seedConnectorVignette = (run: ConnectorRunState, index: number) => {
+        const vignette = run.vignettes[index];
+        setSelectedBot(botFromConnectorVignette(vignette));
+        setChatHistory([openingMessageFromVignette(vignette)]);
+        setUserMessageCount(0);
+        setBaselineMessageCount(0);
+        setView('connectorChat');
+    };
+
+    const handleOpenConnectorIntro = async () => {
+        if (!currentUser) return;
+        resetConnectorState();
+        setIsConnectorStarting(true);
+        try {
+            const hasPrior = await userHasSavedConnector(encryptionKey);
+            if (hasPrior) {
+                setView('connectorCatalog');
+            } else {
+                setView('connectorIntro');
+            }
+        } finally {
+            setIsConnectorStarting(false);
+        }
+    };
+
+    const handleConnectorNewAssessment = () => {
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorSaveState('idle');
+        setView('connectorIntro');
+    };
+
+    const handleStartConnectorRun = async (liveMode: boolean) => {
+        if (!currentUser) return;
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        setIsConnectorStarting(true);
+        try {
+            const { vignettes } = await geminiService.startConnectorRun(language);
+            const run: ConnectorRunState = {
+                mode: 'assessment',
+                vignettes,
+                currentIndex: 0,
+                entries: [],
+                liveMode,
+                practiceFocus: connectorPracticeFocus ?? undefined,
+            };
+            setConnectorPracticeFocus(null);
+            setConnectorRun(run);
+            setConnectorEvaluation(null);
+            setConnectorSaveState('idle');
+            seedConnectorVignette(run, 0);
+        } catch (error) {
+            console.error('Connector start failed:', error);
+            alert(t('connector_start_error'));
+        } finally {
+            setIsConnectorStarting(false);
+        }
+    };
+
+    const handleStartConnectorPractice = async (vignetteId: string, liveMode: boolean) => {
+        if (!currentUser) return;
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        setIsConnectorStarting(true);
+        try {
+            const { vignette } = await geminiService.fetchConnectorVignette(vignetteId, language);
+            const run: ConnectorRunState = {
+                mode: 'practice',
+                vignettes: [vignette],
+                currentIndex: 0,
+                entries: [],
+                liveMode,
+            };
+            setConnectorRun(run);
+            setConnectorEvaluation(null);
+            setConnectorSaveState('idle');
+            seedConnectorVignette(run, 0);
+        } catch (error) {
+            console.error('Connector practice start failed:', error);
+            alert(t('connector_start_error'));
+        } finally {
+            setIsConnectorStarting(false);
+        }
+    };
+
+    const finishConnectorRun = async (
+        entries: ConnectorRunState['entries'],
+        liveMode: boolean,
+        runMode: ConnectorRunState['mode'] = 'assessment',
+        runState?: ConnectorRunState | null,
+    ) => {
+        const evaluable = entries.filter((e) => e.history.some((m) => m.role === 'user'));
+        if (evaluable.length === 0) {
+            resetConnectorState();
+            setView(connectorHubView(runMode));
+            return;
+        }
+        setIsConnectorEvaluating(true);
+        try {
+            if (runMode === 'open' && runState?.customScenarioId) {
+                const entry = evaluable[0];
+                const result = await geminiService.evaluateConnectorQualitative({
+                    customScenarioId: runState.customScenarioId,
+                    history: entry.history,
+                    endType: entry.endType,
+                    language,
+                    liveMode,
+                    lengthPreset: runState.lengthPreset,
+                    relationshipBucket: runState.relationshipBucket,
+                });
+                setConnectorQualitativeEvaluation(result.evaluation);
+                setConnectorEvaluation(null);
+                setSelectedBot(null);
+                setChatHistory([]);
+                setView('connectorOpenResults');
+            } else {
+                const result = await geminiService.evaluateConnectorRun(evaluable, language, liveMode);
+                setConnectorEvaluation({
+                    ...result.evaluation,
+                    contentLanguage: language,
+                    primaryLocale: language,
+                });
+                setConnectorQualitativeEvaluation(null);
+                setSelectedBot(null);
+                setChatHistory([]);
+                setView('connectorResults');
+            }
+        } catch (error) {
+            console.error('Connector evaluation failed:', error);
+            alert(t('connector_eval_error'));
+            resetConnectorState();
+            setView(connectorHubView(runMode));
+        } finally {
+            setIsConnectorEvaluating(false);
+        }
+    };
+
+    const handleStartConnectorOpenSituation = async (params: {
+        relationship: string;
+        situation: string;
+        personaName: string;
+        personaGender: 'male' | 'female';
+        lengthPreset: 'short' | 'standard' | 'long';
+        liveMode: boolean;
+    }) => {
+        if (!currentUser) return;
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        setIsConnectorStarting(true);
+        try {
+            const compiled = await geminiService.compileConnectorOpenScenario({
+                relationship: params.relationship,
+                situation: params.situation,
+                personaName: params.personaName,
+                personaGender: params.personaGender,
+                lengthPreset: params.lengthPreset,
+                language,
+            });
+            const run: ConnectorRunState = {
+                mode: 'open',
+                vignettes: [compiled.vignette],
+                currentIndex: 0,
+                entries: [],
+                liveMode: params.liveMode,
+                customScenarioId: compiled.customScenarioId,
+                maxUserTurns: compiled.maxUserTurns,
+                lengthPreset: compiled.lengthPreset,
+            };
+            setConnectorRun(run);
+            setConnectorEvaluation(null);
+            setConnectorQualitativeEvaluation(null);
+            setConnectorSaveState('idle');
+            seedConnectorVignette(run, 0);
+        } catch (error) {
+            console.error('Connector open situation start failed:', error);
+            alert(t('connector_start_error'));
+        } finally {
+            setIsConnectorStarting(false);
+        }
+    };
+
+    const advanceConnector = (endType: ConnectorEndType) => {
+        if (!connectorRun) return;
+        const current = connectorRun.vignettes[connectorRun.currentIndex];
+        const entries = [...connectorRun.entries, { vignetteId: current.id, history: chatHistory, endType }];
+        const nextIndex = connectorRun.currentIndex + 1;
+        if (nextIndex < connectorRun.vignettes.length) {
+            const run = { ...connectorRun, entries, currentIndex: nextIndex };
+            setConnectorRun(run);
+            seedConnectorVignette(run, nextIndex);
+        } else {
+            setConnectorRun({ ...connectorRun, entries, currentIndex: nextIndex });
+            finishConnectorRun(entries, connectorRun.liveMode, connectorRun.mode, connectorRun);
+        }
+    };
+
+    const handleConnectorEnded = (endType: 'heard' | 'timeout') => {
+        setConnectorAwaitingNext(endType);
+    };
+
+    const handleConnectorContinue = () => {
+        const endType = connectorAwaitingNext;
+        setConnectorAwaitingNext(null);
+        if (endType) advanceConnector(endType);
+    };
+
+    /** Persist assessment result E2EE in the personality profile. Returns false on failure. */
+    const persistConnectorEvaluationToProfile = async (): Promise<boolean> => {
+        if (!currentUser || !encryptionKey || !connectorEvaluation) return false;
+        setConnectorSaveState('saving');
+        try {
+            const existing = await api.loadPersonalityProfile();
+            let decrypted: any = {};
+            let completedLenses: string[] = [];
+            let testType = 'CONNECTOR';
+            if (existing?.encryptedData) {
+                try {
+                    decrypted = await decryptPersonalityProfile(existing.encryptedData, encryptionKey);
+                } catch (decryptError) {
+                    console.error('Connector save: could not decrypt existing profile, aborting to avoid data loss.', decryptError);
+                    setConnectorSaveState('error');
+                    return false;
+                }
+                testType = existing.testType || testType;
+                try {
+                    completedLenses = typeof existing.completedLenses === 'string'
+                        ? JSON.parse(existing.completedLenses)
+                        : (existing.completedLenses || []);
+                } catch { completedLenses = []; }
+            }
+            const connectorToSave = sealConnectorForProfile(
+                connectorEvaluation,
+                connectorEvaluation.primaryLocale ?? connectorEvaluation.contentLanguage ?? language,
+            );
+            decrypted.connector = connectorToSave;
+            if (decrypted.narrativeProfile?.externalPerspectiveNote) {
+                const { externalPerspectiveNote: _removed, ...narrativeWithoutNote } = decrypted.narrativeProfile;
+                decrypted.narrativeProfile = narrativeWithoutNote;
+            }
+            const profilePath = (['BIG5', 'SD', 'RIEMANN'].includes(testType) ? testType : 'RIEMANN') as SurveyResult['path'];
+            const encryptedData = await encryptPersonalityProfile({
+                completedLenses: completedLenses.filter((l): l is LensType => l === 'sd' || l === 'riemann' || l === 'ocean'),
+                path: profilePath,
+                adaptationMode: decrypted.adaptationMode || 'stable',
+                spiralDynamics: decrypted.spiralDynamics,
+                riemann: decrypted.riemann,
+                big5: decrypted.big5,
+                narratives: decrypted.narratives,
+                narrativeProfile: decrypted.narrativeProfile,
+                connector: connectorToSave,
+            }, encryptionKey);
+            await api.savePersonalityProfile({
+                testType,
+                completedLenses,
+                encryptedData,
+                adaptationMode: decrypted.adaptationMode,
+            });
+            setHasPersonalityProfile(true);
+            setConnectorSaveState('saved');
+            return true;
+        } catch (error) {
+            console.error('Connector save failed:', error);
+            setConnectorSaveState('error');
+            return false;
+        }
+    };
+
+    const handleConnectorResultsDone = async (skipProfileSave: boolean) => {
+        const isAssessment = connectorRun?.mode === 'assessment';
+        if (isAssessment && !skipProfileSave && currentUser && encryptionKey && connectorEvaluation) {
+            const ok = await persistConnectorEvaluationToProfile();
+            if (!ok) return;
+        }
+        handleConnectorDone();
+    };
+
+    const handleConnectorRestart = async () => {
+        setConnectorPracticeFocus(null);
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorSaveState('idle');
+        const hasPrior = connectorSaveState === 'saved' || await userHasSavedConnector(encryptionKey);
+        setView(hasPrior ? 'connectorCatalog' : 'connectorIntro');
+    };
+
+    const handleConnectorRestartWithFocus = (focus: ConnectorDimensionKey) => {
+        setConnectorPracticeFocus(focus);
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorSaveState('idle');
+        setView('connectorIntro');
+    };
+
+    const handleConnectorStartCoachSession = (
+        botId: string,
+        starterPrompt: string,
+        options?: ConnectorCoachSessionStartOptions,
+    ) => {
+        handleStartSessionFromEval(botId, starterPrompt, {
+            serverHandoff: options?.serverHandoff ?? true,
+        });
+        setConnectorRun(null);
+        setConnectorEvaluation(null);
+        setConnectorQualitativeEvaluation(null);
+        setConnectorAwaitingNext(null);
+        setConnectorSaveState('idle');
+        setConnectorPracticeFocus(null);
+    };
+
+    const handleConnectorDone = () => {
+        const mode = connectorRun?.mode;
+        resetConnectorState();
+        if (mode) setView(connectorHubView(mode));
+        else setView('botSelection');
+    };
+
+    const handleConnectorOpenAgain = () => {
+        setConnectorRun(null);
+        setConnectorQualitativeEvaluation(null);
+        setView('connectorOpenSituation');
+    };
+
+    const handleConnectorOpenToCatalog = () => {
+        resetConnectorState();
+        setView('connectorCatalog');
+    };
+
+    const handleConnectorPracticeCrossSell = () => {
+        if (currentUser && resolvePracticeAccess(currentUser).canAccessPractice) {
+            resetConnectorState();
+            routeToCoachPractice();
+        } else {
+            resetConnectorState();
+            openUpgrade('premium_plus');
+        }
+    };
+
     const runPracticeEvaluation = async (selfRating?: number) => {
         if (!practiceConfig) return;
         setIsAnalyzing(true);
@@ -1292,6 +2082,7 @@ const App: React.FC = () => {
                 selfRating,
             );
             setPracticeEvaluation({ ...result.evaluation, id: result.id || undefined });
+            setPracticeEvalArtifactLanguage(language);
             if (practiceConfig.practiceMode === 'contracting') {
                 setPracticeTranscriptForPhase2(buildPracticeTranscriptSummary(chatHistory, language));
             }
@@ -1331,6 +2122,7 @@ const App: React.FC = () => {
         setPracticeDraftPrompt(null);
         setPracticeConfig(null);
         setPracticeEvaluation(null);
+        setPracticeEvalArtifactLanguage(null);
         setPracticePhase2Context(null);
         setPracticeTranscriptForPhase2('');
         setSelectedBot(null);
@@ -1355,6 +2147,7 @@ const App: React.FC = () => {
                 || practiceConfig.scenarioName,
             sessionContract: practiceEvaluation.sessionContract,
             contractingEvaluationId: practiceEvaluation.id,
+            contentLanguage: language,
         });
         setPracticeConfig(null);
         setPracticeEvaluation(null);
@@ -1498,14 +2291,10 @@ const App: React.FC = () => {
 
     const handleNavigateToLifeContext = useCallback(() => {
         setIsMenuOpen(false);
+        setMenuView(null);
         if (currentUser && lifeContext.trim()) {
-            setMenuView(null);
             setView('contextChoice');
-        } else if (!currentUser && lifeContext.trim()) {
-            setLifeContextEditorReturnView(null);
-            setMenuView('lifeContextEditor');
         } else {
-            setMenuView(null);
             setView('landing');
         }
     }, [currentUser, lifeContext]);
@@ -1594,6 +2383,8 @@ const App: React.FC = () => {
         setPracticeConfig,
         practiceEvaluation,
         setPracticeEvaluation,
+        practiceEvalArtifactLanguage,
+        setPracticeEvalArtifactLanguage,
         practicePhase2Context,
         setPracticePhase2Context,
         practiceEvalError,
@@ -1606,6 +2397,32 @@ const App: React.FC = () => {
         handlePracticeDone,
         navigateToPracticeHistory,
         handlePracticeHistoryBack,
+        connectorRun,
+        connectorEvaluation,
+        connectorQualitativeEvaluation,
+        isConnectorStarting,
+        connectorSaveState,
+        connectorPracticeFocus,
+        gloriaConnectionPrep,
+        setGloriaConnectionPrep,
+        connectorChatHandoff,
+        connectorHandoffPayload,
+        onConnectorHandoffPayloadConsumed: handleConnectorHandoffPayloadConsumed,
+        handleStartGloriaInterview,
+        handleOpenConnectorIntro,
+        handleStartConnectorRun,
+        handleStartConnectorPractice,
+        handleStartConnectorOpenSituation,
+        handleConnectorOpenAgain,
+        handleConnectorOpenToCatalog,
+        handleConnectorNewAssessment,
+        handleConnectorEnded,
+        handleConnectorResultsDone,
+        handleConnectorRestart,
+        handleConnectorRestartWithFocus,
+        handleConnectorStartCoachSession,
+        handleConnectorDone,
+        handleConnectorPracticeCrossSell,
         refinementPreview,
         isLoadingRefinementPreview,
         refinementPreviewError,
@@ -1615,6 +2432,8 @@ const App: React.FC = () => {
         handleFileUpload,
         handleQuestionnaireSubmit,
         handlePiiConfirm,
+        handleLcEditorSaveFromContextChoice,
+        handleLcEditorSaveFromLanding,
         handleSelectBot,
         handleReferralSwitch,
         handleStartSessionFromEval,
@@ -1627,6 +2446,8 @@ const App: React.FC = () => {
         handleContinueSession,
         handleSwitchCoach,
         handleStartOver,
+        resumeGuestFromAuth,
+        handleGuestAuthRequired,
         handleRunTestSession,
         handleTestComfortCheck,
         handleNavigateFromMenu,
@@ -1641,6 +2462,9 @@ const App: React.FC = () => {
         setLifeContextEditorReturnView,
         buildEmptyLifeContextTemplate,
         t,
+        userGuideFocusAnchor,
+        setUserGuideFocusAnchor,
+        coachingSessionResume,
     };
 
     const isAnyModalOpen = useIsAnyModalOpen();
@@ -1654,6 +2478,24 @@ const App: React.FC = () => {
     const baseSpacerBarHeight = isLandscape ? (minimalBar ? 48 : 60) : nativeBarHeight;
     const isChatLandscapeNoSpacer = false;
     const spacerBarHeight = baseSpacerBarHeight;
+
+    const maintenanceBannerTop = useMemo(() => {
+        const safe = effectiveSafeAreaTop;
+        if (!showGamificationBar) {
+            return `calc(0.5rem + ${safe}px)`;
+        }
+        if (useNativeGamificationBar) {
+            return `calc(${spacerBarHeight}px + ${safe}px + 0.5rem)`;
+        }
+        const barRem = minimalBar ? 4 : 5;
+        return `calc(${barRem}rem + ${safe}px + 0.25rem)`;
+    }, [
+        showGamificationBar,
+        useNativeGamificationBar,
+        spacerBarHeight,
+        effectiveSafeAreaTop,
+        minimalBar,
+    ]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -1672,11 +2514,15 @@ const App: React.FC = () => {
 
     // Scroll to top on every view change so the heading is always visible.
     // Chat view is excluded because it manages its own scroll (bottom-anchored).
+    // User guide deep links scroll themselves — avoid resetting to Kapitel 1.
     useEffect(() => {
         if (view !== 'chat') {
+            if (view === 'userGuide' && userGuideFocusAnchor) {
+                return;
+            }
             window.scrollTo(0, 0);
         }
-    }, [view]);
+    }, [view, userGuideFocusAnchor]);
 
     const handleNativeGamificationBarAction = useCallback((action: string) => {
         if (action === 'menu') {
@@ -1783,6 +2629,9 @@ const App: React.FC = () => {
             {showGamificationBar && useNativeGamificationBar && (
                 <div ref={nativeSpacerRef} style={{ height: `calc(${spacerBarHeight}px + ${effectiveSafeAreaTop}px + 20px)` }} />
             )}
+            {!isMaintenanceBannerHidden(menuView || view) && (
+                <MaintenanceNoticeBanner top={maintenanceBannerTop} />
+            )}
             <main className={`container mx-auto px-4 ${view === 'chat' ? 'flex-1 min-h-0 py-0' : ''}`}>
                 <PageTransition viewKey={menuView || view}>
                     <AppViewRouter {...appViewRouterProps} />
@@ -1800,6 +2649,54 @@ const App: React.FC = () => {
             />
             <UpdateNotification onUpdate={updateServiceWorker} />
             {isAnalyzing && <AnalyzingView />}
+            {isConnectorEvaluating && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-fadeIn text-center px-6">
+                    <BrandLoader size="lg" />
+                    <h1 className="mt-6 text-2xl font-bold text-gray-200">{t('connector_evaluating_title')}</h1>
+                    <p className="mt-2 text-lg text-gray-400">{t('connector_evaluating_subtitle')}</p>
+                </div>
+            )}
+            {connectorAwaitingNext && connectorRun && !isConnectorEvaluating && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-fadeIn text-center px-6">
+                    <div className="text-4xl mb-4" aria-hidden>{connectorAwaitingNext === 'heard' ? '🤝' : '👋'}</div>
+                    <h1 className="text-2xl font-bold text-gray-200">
+                        {connectorAwaitingNext === 'heard' ? t('connector_transition_heard_title') : t('connector_transition_timeout_title')}
+                    </h1>
+                    <p className="mt-2 text-lg text-gray-400">
+                        {connectorRun.mode === 'practice' || connectorRun.mode === 'open'
+                            ? t('connector_transition_practice_to_results')
+                            : connectorRun.currentIndex + 1 < connectorRun.vignettes.length
+                            ? t('connector_transition_next', { current: String(connectorRun.currentIndex + 2), total: String(connectorRun.vignettes.length) })
+                            : t('connector_transition_last')}
+                    </p>
+                    {connectorRun.mode === 'assessment'
+                        && connectorRun.currentIndex + 1 < connectorRun.vignettes.length && (
+                        <div className="mt-4 max-w-md mx-auto rounded-lg bg-white/10 px-4 py-3 text-left">
+                            <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">
+                                {t('connector_transition_scenario_label')}
+                            </p>
+                            <p className="text-sm font-semibold text-gray-200">
+                                {connectorRun.vignettes[connectorRun.currentIndex + 1].personaName}
+                                {' · '}
+                                {connectorRun.vignettes[connectorRun.currentIndex + 1].relationship}
+                            </p>
+                            <p className="text-sm text-gray-300 mt-1 leading-snug">
+                                {connectorRun.vignettes[connectorRun.currentIndex + 1].scenarioBrief}
+                            </p>
+                        </div>
+                    )}
+                    <button
+                        onClick={handleConnectorContinue}
+                        className="mt-6 py-3 px-8 bg-accent-primary hover:bg-accent-primary/90 text-white font-semibold rounded-lg transition-colors"
+                    >
+                        {connectorRun.mode === 'practice' || connectorRun.mode === 'open'
+                            ? t('connector_transition_to_results')
+                            : connectorRun.currentIndex + 1 < connectorRun.vignettes.length
+                            ? t('connector_transition_continue')
+                            : t('connector_transition_to_results')}
+                    </button>
+                </div>
+            )}
             {isSavingProfile && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-fadeIn text-center">
                     <BrandLoader size="lg" />
@@ -1821,6 +2718,24 @@ const App: React.FC = () => {
                     draft={practiceDraftPrompt}
                     onResume={handleResumePracticeDraft}
                     onDiscard={handleDiscardPracticeDraft}
+                />
+            )}
+            {coachingDraftPrompt
+                && canOfferCoachingSessionResume(view)
+                && !practiceConfig
+                && view !== 'chat'
+                && !hasInMemoryStandardCoachingSession() && (
+                <CoachingResumePrompt
+                    draft={coachingDraftPrompt}
+                    onResume={handleResumeCoachingSession}
+                    onDiscard={handleDiscardCoachingDraft}
+                />
+            )}
+            {pendingBotSelection && hasActiveStandardCoachingSession() && (
+                <CoachingDiscardSessionModal
+                    coachName={getActiveCoachingCoachName()}
+                    onConfirm={handleConfirmDiscardCoachingForNewBot}
+                    onCancel={handleCancelDiscardCoachingForNewBot}
                 />
             )}
         </div>

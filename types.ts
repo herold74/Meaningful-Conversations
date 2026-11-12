@@ -22,6 +22,7 @@ export type NavView =
     | 'paywall'
     | 'achievements'
     | 'userGuide'
+    | 'tutorialHub'
     | 'formattingHelp'
     | 'faq'
     | 'about'
@@ -36,10 +37,17 @@ export type NavView =
     | 'exportData'
     | 'personalitySurvey'
     | 'personalityProfile'
+    | 'connectorIntro'
+    | 'connectorCatalog'
+    | 'connectorOpenSituation'
+    | 'connectorChat'
+    | 'connectorResults'
+    | 'connectorOpenResults'
     | 'lifeContextEditor'
     | 'transcriptEval'
     | 'transcriptRecord'
     | 'interviewTranscript'
+    | 'gloriaInterviewIntro'
     | 'oceanOnboarding'
     | 'intentPicker'
     | 'namePrompt'
@@ -278,6 +286,8 @@ export interface PracticePhase2Context {
     sessionContract?: string;
     /** Source contracting evaluation (for follow-up tracking). */
     contractingEvaluationId?: string;
+    /** Language used when contracting evaluation artifacts were produced. */
+    contentLanguage?: Language;
 }
 
 export type ScopeBoundaryTheme =
@@ -346,6 +356,8 @@ export interface PracticeContractingScenario {
     coacheeName: string;
     avatar: string;
     coacheeGender?: 'male' | 'female';
+    /** Present in catalog API for localized display (hidden in contracting picker UI). */
+    concern?: string;
 }
 
 export interface PracticeCatalog {
@@ -382,6 +394,8 @@ export interface CoachPracticeConfig {
     sessionContract?: string;
     /** Links a Phase 2 session back to its contracting evaluation. */
     followsContractingEvaluationId?: string;
+    /** Language of scenarioName / contracting artifacts when the session was started. */
+    contentLanguage?: Language;
 }
 
 export interface PracticeDimensionScore {
@@ -473,4 +487,92 @@ export interface PracticeEvaluationSummary {
     summary: string;
     overallScore: number;
     evaluationData: PracticeEvaluationResult;
+}
+
+// --- The Connector ---
+
+export interface ConnectorVignetteCatalogEntry {
+    id: string;
+    personaName: string;
+    gender: 'male' | 'female';
+    relationship: string;
+    pickerTeaser: string;
+    /** User-facing situational context (no opening-line spoilers). */
+    scenarioBrief: string;
+}
+
+export interface ConnectorVignettePublic extends ConnectorVignetteCatalogEntry {
+    opening: string;
+}
+
+export type ConnectorEndType = 'heard' | 'timeout' | 'aborted';
+
+export interface ConnectorDimensionScore {
+    score: number;
+    evidence: string[];
+}
+
+export type ConnectorDimensionKey = 'empathy' | 'presence' | 'curiosity' | 'nonJudgment' | 'steadiness';
+
+/** Invisible API flag when Connector ladder uses “Start conversation” (not copy/paste). */
+export type ConnectorChatHandoff = 'gloria' | 'coaching';
+
+export interface ConnectorCoachSessionStartOptions {
+  serverHandoff?: boolean;
+  /** Sent once on first chat turn when serverHandoff is true (not copy/paste). */
+  handoffPayload?: ConnectorHandoffPayload | null;
+}
+
+/** Minimal Connector eval slice for server-side vignette context (one injection per session). */
+export interface ConnectorHandoffPayload {
+  vignetteId: string;
+  focusDimension: ConnectorDimensionKey;
+  highlight?: string;
+  missedCue?: string;
+}
+
+/** Localized Connector copy (scores live on the parent result). */
+export interface ConnectorLocaleBundle {
+    summary: string;
+    strengths: string[];
+    growthAreas: string[];
+    perVignette: { vignetteId: string; highlight: string; missedCue: string }[];
+    empathy: { evidence: string[] };
+    presence: { evidence: string[] };
+    curiosity: { evidence: string[] };
+    nonJudgment: { evidence: string[] };
+    steadiness: { evidence: string[] };
+    /** Set on translated locale: must match parent `completedAt` or locale is stale. */
+    sourceCompletedAt?: string;
+}
+
+export interface ConnectorEvaluationResult {
+    /** Language of the assessment run (canonical text in `locales[primaryLocale]`). */
+    primaryLocale?: 'de' | 'en';
+    locales?: Partial<Record<'de' | 'en', ConnectorLocaleBundle>>;
+    /** @deprecated Use `primaryLocale` + `locales`; kept for legacy blobs and flat fallbacks. */
+    contentLanguage?: 'de' | 'en';
+    summary: string;
+    empathy: ConnectorDimensionScore;
+    presence: ConnectorDimensionScore;
+    curiosity: ConnectorDimensionScore;
+    nonJudgment: ConnectorDimensionScore;
+    steadiness: ConnectorDimensionScore;
+    strengths: string[];
+    growthAreas: string[];
+    perVignette: { vignetteId: string; highlight: string; missedCue: string }[];
+    overallScore: number | null;
+    vignetteIds: string[];
+    endTypes: ConnectorEndType[];
+    completedAt: string;
+}
+
+export interface ConnectorQualitativeEvaluationResult {
+    summary: string;
+    strengths: string[];
+    missedOpportunities: string[];
+    developmentFieldsTouched: ConnectorDimensionKey[];
+    completedAt: string;
+    endType: ConnectorEndType;
+    customScenarioId: string;
 }

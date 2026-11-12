@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic } from 'lucide-react';
+import { Search, MessageCircle, Target, GraduationCap, ClipboardList, Mic, Info } from 'lucide-react';
 import { Bot, BotWithAvailability, User, BotAccessTier, Language, CoachingMode, BotRecommendationEntry } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
 import { getBots } from '../services/userService';
@@ -14,22 +14,39 @@ import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { speechService } from '../services/capacitorSpeechService';
 import { brand } from '../config/brand';
 import { resolveAssetUrl } from '../utils/assetUrl';
+import CoachingContactPrompt from './shared/CoachingContactPrompt';
 import TranscriptMicAvatar from './icons/TranscriptMicAvatar';
+import ConnectorTileAvatar from './icons/ConnectorTileAvatar';
+import TutorialTileAvatar from './icons/TutorialTileAvatar';
+import PracticeTileAvatar from './icons/PracticeTileAvatar';
 import {
   getCoachSessionRing,
   getCoachSessionRingClass,
   COACH_SESSION_RING_I18N,
   CoachSessionRing,
 } from '../utils/coachSessionRing';
+import { getEffectiveCoachingMode } from '../utils/coachingMode';
 import { resolvePracticeAccess, type PracticeAccessReason } from '../utils/practiceAccess';
+import { isNativeIOS } from '../utils/platformDetection';
 import type { UserIntent } from './IntentPickerView';
 import { getBotSelectionSectionState, type HighlightSection } from '../utils/userIntent';
+import {
+  getKommunikationTutorialTilePosition,
+  KOMMUNIKATION_TUTORIAL_TILE_POSITION_EVENT,
+  type KommunikationTutorialTilePosition,
+} from '../utils/kommunikationTutorialTilePrefs';
+
+/** Utility tile icons — same footprint as coach avatars on Bot Selection (no 4.75rem inset). */
+const UTILITY_TILE_AVATAR_CLASS =
+  'w-20 h-20 rounded-full border-2 border-background-secondary object-cover';
 
 interface BotSelectionProps {
   onSelect: (bot: Bot) => void;
   onTranscriptEval?: () => void;
   onTranscriptRecord?: () => void;
   onCoachPractice?: () => void;
+  onConnector?: () => void;
+  onTutorials?: () => void;
   onAuthRequired?: () => void;
   onUpgrade?: () => void;
   onPracticeUpgrade?: () => void;
@@ -77,13 +94,14 @@ interface TopicSearchProps {
     bots: BotWithAvailability[];
     onStartSessionWithPrompt?: (botId: string, examplePrompt: string) => void;
     onUpgrade?: () => void;
+    onAuthRequired?: () => void;
     currentUser: User | null;
     language: Language;
     highlighted?: boolean;
     sectionRef?: React.Ref<HTMLDivElement>;
 }
 
-const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWithPrompt, onUpgrade, currentUser, language, highlighted, sectionRef }) => {
+const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWithPrompt, onUpgrade, onAuthRequired, currentUser, language, highlighted, sectionRef }) => {
     const { t } = useLocalization();
     const [topic, setTopic] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -105,6 +123,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
     }, [topic]);
 
     const isLoggedIn = !!currentUser;
+    const canUseTopicSearch = isLoggedIn;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -252,10 +271,20 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                 <div className="flex items-center gap-2 mb-2">
                     <Search className="w-5 h-5 text-accent-primary flex-shrink-0 opacity-60" aria-hidden="true" />
                     <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-background-tertiary border border-border-secondary rounded-lg">
-                        {!isLoggedIn ? (
-                            <p className="flex-1 text-sm text-content-secondary py-1">
-                                {t('botSearch_login_hint')}
-                            </p>
+                        {!canUseTopicSearch ? (
+                            onAuthRequired ? (
+                                <button
+                                    type="button"
+                                    onClick={onAuthRequired}
+                                    className="flex-1 text-sm text-content-secondary py-1 text-left hover:text-accent-primary transition-colors"
+                                >
+                                    {t('botSearch_login_hint')}
+                                </button>
+                            ) : (
+                                <p className="flex-1 text-sm text-content-secondary py-1">
+                                    {t('botSearch_login_hint')}
+                                </p>
+                            )
                         ) : (
                             <textarea
                                 ref={topicTextareaRef}
@@ -267,7 +296,7 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit(e as any); }}
                             />
                         )}
-                        {isLoggedIn && (
+                        {canUseTopicSearch && (
                             <>
                                 <button
                                     type="button"
@@ -294,10 +323,11 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
                     </div>
                 </div>
 
-                {/* Bottom row: hint text centered */}
+                {canUseTopicSearch && (
                 <div className="text-xs font-semibold text-content-subtle text-center pt-0.5">
                     {t('botSearch_section_title')}
                 </div>
+                )}
                 </div>
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent"></div>
               </div>
@@ -318,46 +348,61 @@ const TopicSearchSection: React.FC<TopicSearchProps> = ({ bots, onStartSessionWi
 };
 
 interface TranscriptToolsTileProps {
+  isGuest: boolean;
   isPremiumPlus: boolean;
   isClientPlus: boolean;
   onTranscriptEval?: () => void;
   onTranscriptRecord?: () => void;
   onUpgrade?: () => void;
+  onAuthRequired?: () => void;
 }
 
 const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
+  isGuest,
   isPremiumPlus,
   isClientPlus,
   onTranscriptEval,
   onTranscriptRecord,
   onUpgrade,
+  onAuthRequired,
 }) => {
   const { t } = useLocalization();
   const evalLocked = !isPremiumPlus;
   const recordLocked = !isClientPlus;
+  const bothActionsLocked = evalLocked && recordLocked;
 
-  const handleEval = () => {
-    if (evalLocked) onUpgrade?.();
-    else onTranscriptEval?.();
+  const handleLockedAction = (locked: boolean, onUnlocked: () => void) => {
+    if (!locked) {
+      onUnlocked();
+      return;
+    }
+    if (isGuest) onAuthRequired?.();
+    else onUpgrade?.();
   };
 
-  const handleRecord = () => {
-    if (recordLocked) onUpgrade?.();
-    else onTranscriptRecord?.();
-  };
+  const handleEval = () => handleLockedAction(evalLocked, () => onTranscriptEval?.());
+  const handleRecord = () => handleLockedAction(recordLocked, () => onTranscriptRecord?.());
 
   return (
     <motion.div
-      className="flex flex-col items-center text-center p-6 h-full
-        bg-background-secondary border border-border-primary rounded-card shadow-card"
+      className={`flex flex-col items-center text-center p-6 h-full
+        bg-background-secondary border border-border-primary rounded-card shadow-card
+        ${bothActionsLocked ? 'opacity-70' : ''}`}
       title={t(COACH_SESSION_RING_I18N.tool)}
-      whileHover={{ y: -3 }}
+      whileHover={bothActionsLocked ? undefined : { y: -3 }}
       transition={{ duration: 0.15 }}
     >
-      <div className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)}`}>
-        <div className="w-20 h-20 rounded-full border-2 border-background-secondary bg-background-secondary overflow-hidden flex items-center justify-center">
-          <TranscriptMicAvatar className="w-[4.75rem] h-[4.75rem]" />
+      <div className="relative flex-shrink-0" title={t(COACH_SESSION_RING_I18N.tool)}>
+        <div className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', bothActionsLocked)}`}>
+            <TranscriptMicAvatar
+              className={`${UTILITY_TILE_AVATAR_CLASS} ${bothActionsLocked ? 'filter grayscale opacity-80' : ''}`}
+            />
         </div>
+        {bothActionsLocked && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background-primary/50 backdrop-blur-[2px] rounded-full">
+            <LockIcon className="w-7 h-7 text-content-primary" />
+          </div>
+        )}
       </div>
 
       <div className="mt-3 flex flex-col flex-1 w-full justify-between">
@@ -398,10 +443,153 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
             </button>
           </div>
           {(evalLocked || recordLocked) && (
+            <p
+              className="text-[0.625rem] sm:text-[0.6875rem] text-content-subtle leading-snug pt-1 whitespace-nowrap overflow-hidden text-ellipsis"
+              title={
+                evalLocked && recordLocked
+                  ? t('botSelection_transcript_lockedBoth')
+                  : evalLocked
+                    ? t('te_premium_required')
+                    : t('botSelection_client_required')
+              }
+            >
+              {evalLocked && recordLocked
+                ? t('botSelection_transcript_lockedBoth')
+                : evalLocked
+                  ? t('te_premium_required')
+                  : t('botSelection_client_required')}
+            </p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+interface TutorialsTileProps {
+  onTutorials?: () => void;
+}
+
+/** QuickStart & Tutorials — first utility tile in Kommunikation (position user-configurable). */
+const TutorialsTile: React.FC<TutorialsTileProps> = ({ onTutorials }) => {
+  const { t } = useLocalization();
+
+  return (
+    <motion.div
+      role="button"
+      tabIndex={0}
+      onClick={() => onTutorials?.()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onTutorials?.();
+        }
+      }}
+      className="flex flex-col items-center text-center p-6 h-full
+        bg-background-secondary border border-section-bronze/35 rounded-card shadow-card cursor-pointer transition-all duration-200
+        hover:border-section-bronze hover:shadow-card-hover"
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div
+        className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', false)}`}
+        title={t(COACH_SESSION_RING_I18N.tool)}
+      >
+        <TutorialTileAvatar className={UTILITY_TILE_AVATAR_CLASS} />
+      </div>
+
+      <div className="mt-3 flex flex-col flex-1 w-full justify-between min-h-0">
+        <div>
+          <h3 className="text-xl font-semibold text-content-primary tracking-tight">
+            {t('tutorialTile_title')}
+          </h3>
+          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+            {t('tutorialTile_desc')}
+          </p>
+        </div>
+
+        <div className="mt-auto pt-4 w-full">
+          <p className="text-[0.6875rem] text-content-subtle leading-snug pb-2 min-h-[2.25rem] flex items-end justify-center">
+            {t('tutorialTile_hint')}
+          </p>
+          <span className="inline-flex items-center justify-center gap-1.5 w-full px-2 py-2.5 rounded-lg text-sm font-semibold transition-all border border-section-bronze bg-section-bronze/10 text-section-bronze hover:bg-section-bronze hover:text-button-foreground-on-accent">
+            <span className="truncate">{t('tutorialTile_open')}</span>
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+interface ConnectorTileProps {
+  isGuest: boolean;
+  onConnector?: () => void;
+  onAuthRequired?: () => void;
+}
+
+/**
+ * The Connector — discovery tile in the Kommunikation section.
+ * Registered users start the experience; for guests the tile doubles as the
+ * registration motivator (locked state + register CTA).
+ */
+const ConnectorTile: React.FC<ConnectorTileProps> = ({ isGuest, onConnector, onAuthRequired }) => {
+  const { t } = useLocalization();
+
+  const handleClick = () => {
+    if (isGuest) {
+      onAuthRequired?.();
+    } else {
+      onConnector?.();
+    }
+  };
+
+  return (
+    <motion.div
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
+      className={`flex flex-col items-center text-center p-6 h-full
+        bg-background-secondary border rounded-card shadow-card cursor-pointer transition-all duration-200
+        ${isGuest
+          ? 'border-border-primary opacity-75 hover:opacity-90'
+          : 'border-accent-primary/40 hover:border-accent-primary hover:shadow-card-hover'}`}
+      whileHover={isGuest ? undefined : { y: -3 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div
+        className={`rounded-full p-0.5 shrink-0 ${getCoachSessionRingClass('tool', isGuest)} ${isGuest ? 'opacity-60' : ''}`}
+        title={t(COACH_SESSION_RING_I18N.tool)}
+      >
+        <ConnectorTileAvatar
+          className={`${UTILITY_TILE_AVATAR_CLASS} ${isGuest ? 'filter grayscale opacity-80' : ''}`}
+        />
+      </div>
+
+      <div className="mt-3 flex flex-col flex-1 w-full justify-between">
+        <div>
+          <h3 className="text-xl font-semibold text-content-primary tracking-tight">
+            {t('connector_title')}
+          </h3>
+          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+            {t('connector_tile_desc')}
+          </p>
+        </div>
+
+        <div className="mt-4 w-full">
+          <span
+            className={`inline-flex items-center justify-center gap-1.5 w-full px-2 py-2.5 rounded-lg text-sm font-semibold transition-all border ${
+              isGuest
+                ? 'border-border-primary bg-background-primary/40 text-content-secondary'
+                : 'border-accent-primary bg-accent-primary/10 text-accent-primary hover:bg-accent-primary hover:text-button-foreground-on-accent'
+            }`}
+          >
+            {isGuest && <LockIcon className="w-4 h-4 shrink-0" />}
+            <span className="truncate">{isGuest ? t('connector_tile_register_cta') : t('connector_tile_start')}</span>
+          </span>
+          {isGuest && (
             <p className="text-[0.6875rem] text-content-subtle leading-snug pt-1">
-              {evalLocked && t('te_premium_required')}
-              {evalLocked && recordLocked && ' · '}
-              {recordLocked && t('botSelection_client_required')}
+              {t('connector_tile_guest_hint')}
             </p>
           )}
         </div>
@@ -419,8 +607,9 @@ interface CoachPracticeHeroProps {
 
 const practiceLockMessageKey = (reason?: PracticeAccessReason) => {
   if (reason === 'login_required') return 'botSelection_practice_login_required';
-  if (reason === 'premium_required') return 'botSelection_practice_premium_required';
-  if (reason === 'practice_required') return 'botSelection_practice_premium_plus_required';
+  if (reason === 'premium_required' || reason === 'practice_required') {
+    return 'botSelection_practice_premium_plus_required';
+  }
   return 'botSelection_client_required';
 };
 
@@ -465,8 +654,13 @@ const CoachPracticeHero: React.FC<CoachPracticeHeroProps> = ({
             <LockIcon className="w-5 h-5 text-content-secondary" />
           </div>
         )}
-        <div className="rounded-full p-3 bg-accent-primary/10 mb-4">
-          <GraduationCap className="w-10 h-10 text-accent-primary" aria-hidden />
+        <div
+          className={`rounded-full p-0.5 shrink-0 mb-4 ${getCoachSessionRingClass('tool', locked)} ${locked ? 'opacity-60' : ''}`}
+          title={t(COACH_SESSION_RING_I18N.tool)}
+        >
+          <PracticeTileAvatar
+            className={`${UTILITY_TILE_AVATAR_CLASS} ${locked ? 'filter grayscale opacity-80' : ''}`}
+          />
         </div>
         <h3 className="text-xl font-semibold text-content-primary">{t('practice_title')}</h3>
         <p className="mt-2 text-sm text-content-secondary leading-relaxed">
@@ -492,11 +686,10 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     const isLocked = !bot.isAvailable;
     const sessionRing = getCoachSessionRing(bot.id);
     const hasMeditation = bot.id === 'rob' || bot.id === 'kenji-resilience' || bot.id === 'chloe-structured-reflection';
-    // Nobody (nexus-goal-path-solution) doesn't support DPFL - show DPC instead
-    // DPFL requires full coaching sessions which Nobody doesn't conduct
+    // Nobody & Sam: DPC only (no DPFL session learning) — see utils/coachingMode.ts
     // Gloria Interview has no coaching integration at all - never show badge
     const isNonCoachingBot = bot.id === 'gloria-interview';
-    const effectiveCoachingMode = isNonCoachingBot ? undefined : ((bot.id === 'nexus-goal-path-solution' || bot.id === 'sam-forward-focused') && coachingMode === 'dpfl') ? 'dpc' : coachingMode;
+    const effectiveCoachingMode = isNonCoachingBot ? undefined : getEffectiveCoachingMode(bot.id, coachingMode);
     // Show coaching mode badge for all bots if profile exists and mode is active
     const showCoachingBadge = hasPersonalityProfile && effectiveCoachingMode && effectiveCoachingMode !== 'off' && !isLocked;
     
@@ -601,13 +794,16 @@ const BotCard: React.FC<BotCardProps> = ({ bot, onSelect, onUpgrade, language, h
     );
 };
 
-const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onAuthRequired, onUpgrade, onPracticeUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone, entryIntent = null }) => {
+const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval, onTranscriptRecord, onCoachPractice, onConnector, onTutorials, onAuthRequired, onUpgrade, onPracticeUpgrade, onStartSessionWithPrompt, currentUser, hasPersonalityProfile, coachingMode, highlightSection, onHighlightDone, entryIntent = null }) => {
   const { t, language } = useLocalization();
-  const initialSectionState = getBotSelectionSectionState(entryIntent);
+  const initialSectionState = getBotSelectionSectionState(entryIntent, !currentUser);
   const [bots, setBots] = useState<BotWithAvailability[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeHighlight, setActiveHighlight] = useState<HighlightSection>(null);
   const [coachingView, setCoachingView] = useState<'coaches' | 'practice'>(initialSectionState.coachingView);
+  const [tutorialTilePosition, setTutorialTilePosition] = useState<KommunikationTutorialTilePosition>(
+    () => getKommunikationTutorialTilePosition(),
+  );
   const isClientPlus = !!(currentUser?.isClient || currentUser?.isAdmin || currentUser?.isDeveloper);
   const isPremiumPlus = !!(currentUser?.isPremium || isClientPlus);
   const practiceAccess = resolvePracticeAccess(currentUser);
@@ -619,12 +815,18 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   const coachingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const next = getBotSelectionSectionState(entryIntent);
+    const next = getBotSelectionSectionState(entryIntent, !currentUser);
     setKommunikationSectionOpen(next.kommunikationOpen);
     setCoachingSectionOpen(next.coachingOpen);
     setClientSectionOpen(next.clientOpen);
     setCoachingView(next.coachingView);
-  }, [entryIntent]);
+  }, [entryIntent, currentUser]);
+
+  useEffect(() => {
+    const syncTilePosition = () => setTutorialTilePosition(getKommunikationTutorialTilePosition());
+    window.addEventListener(KOMMUNIKATION_TUTORIAL_TILE_POSITION_EVENT, syncTilePosition);
+    return () => window.removeEventListener(KOMMUNIKATION_TUTORIAL_TILE_POSITION_EVENT, syncTilePosition);
+  }, []);
 
   useEffect(() => {
     if (!highlightSection || isLoading) return;
@@ -634,12 +836,14 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         target = managementRef.current;
       } else if (highlightSection === 'topicSearch') {
         target = currentUser ? topicSearchRef.current : coachingRef.current;
-      } else if (highlightSection === 'coachPractice') {
+      } else if (highlightSection === 'coachPractice' || highlightSection === 'coaching') {
         target = coachingRef.current;
       }
       if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setActiveHighlight(highlightSection);
+        const visualHighlight =
+          !currentUser && highlightSection === 'topicSearch' ? 'coaching' : highlightSection;
+        setActiveHighlight(visualHighlight);
         setTimeout(() => {
           setActiveHighlight(null);
           onHighlightDone?.();
@@ -722,7 +926,9 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           return t('botSelection_guestMessage');
       }
       // For registered users, the message is always relevant as they can unlock more coaches.
-      return t('botSelection_registeredMessage');
+      return isNativeIOS()
+        ? t('botSelection_registeredMessage_ios')
+        : t('botSelection_registeredMessage');
   }
 
   const unlockMessage = getUnlockMessage();
@@ -738,6 +944,25 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
   
   const availableKommunikationBots = kommunikationBots.filter(b => b.isAvailable);
   const lockedKommunikationBots = kommunikationBots.filter(b => !b.isAvailable);
+  const kommunikationBotsOrdered = [...availableKommunikationBots, ...lockedKommunikationBots];
+  const kommunikationLeadBot =
+    tutorialTilePosition === 'last' && kommunikationBotsOrdered.length > 0
+      ? kommunikationBotsOrdered[0]
+      : null;
+  const kommunikationTrailBots =
+    tutorialTilePosition === 'last' ? kommunikationBotsOrdered.slice(1) : kommunikationBotsOrdered;
+
+  const renderKommunikationBotCard = (bot: BotWithAvailability) => (
+    <BotCard
+      key={bot.id}
+      bot={bot}
+      onSelect={onSelect}
+      onUpgrade={bot.isAvailable ? undefined : onUpgrade}
+      language={language}
+      hasPersonalityProfile={hasPersonalityProfile}
+      coachingMode={coachingMode}
+    />
+  );
   
   const availableCoachingBots = coachingBots.filter(b => b.isAvailable);
   const lockedCoachingBots = coachingBots.filter(b => !b.isAvailable);
@@ -749,20 +974,25 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
         <p className="mt-2 text-base text-content-secondary leading-relaxed">
         {t('botSelection_subtitle')}
         </p>
-        <div
+        <p
           role="note"
-          className="mt-4 mx-auto max-w-2xl text-center text-sm text-content-secondary leading-relaxed px-4 py-3 rounded-lg border border-border-primary bg-background-secondary/80"
+          className="mt-3 mx-auto max-w-2xl flex items-start justify-center gap-2 text-xs text-content-subtle leading-relaxed px-2 text-left sm:text-center"
         >
-          <p>{t('botSelection_ai_act_notice')}</p>
-          <p className="mt-2">{t('botSelection_voice_natural_notice')}</p>
-        </div>
+          <Info className="w-3.5 h-3.5 text-accent-primary/70 shrink-0 mt-0.5 sm:mt-px" aria-hidden />
+          <span className="min-w-0">
+            {t('botSelection_ai_act_notice')}
+            <span className="text-content-subtle/50 mx-1.5" aria-hidden>·</span>
+            {t('botSelection_voice_natural_notice')}
+          </span>
+        </p>
       </div>
 
-      {(currentUser || entryIntent === 'coaching') && (
+      {(currentUser) && (
         <TopicSearchSection
           bots={bots}
           onStartSessionWithPrompt={onStartSessionWithPrompt}
           onUpgrade={onUpgrade}
+          onAuthRequired={onAuthRequired}
           currentUser={currentUser}
           language={language}
           highlighted={activeHighlight === 'topicSearch'}
@@ -808,38 +1038,33 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
           {kommunikationSectionOpen && (
           <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Nobody Bot Card */}
-            {availableKommunikationBots.map((bot) => (
-              <BotCard 
-                key={bot.id} 
-                bot={bot} 
-                onSelect={onSelect} 
-                language={language}
-                hasPersonalityProfile={hasPersonalityProfile}
-                coachingMode={coachingMode}
-              />
-            ))}
-            
-            {/* Locked Kommunikation Bots */}
-            {lockedKommunikationBots.map((bot) => (
-              <BotCard 
-                key={bot.id} 
-                bot={bot} 
-                onSelect={onSelect} 
-                onUpgrade={onUpgrade}
-                language={language}
-                hasPersonalityProfile={hasPersonalityProfile}
-                coachingMode={coachingMode}
-              />
-            ))}
+            {tutorialTilePosition === 'first' && (
+              <TutorialsTile onTutorials={onTutorials} />
+            )}
+
+            {kommunikationLeadBot && renderKommunikationBotCard(kommunikationLeadBot)}
+
+            <ConnectorTile
+              isGuest={!currentUser}
+              onConnector={onConnector}
+              onAuthRequired={onAuthRequired}
+            />
+
+            {kommunikationTrailBots.map(renderKommunikationBotCard)}
 
             <TranscriptToolsTile
+              isGuest={!currentUser}
               isPremiumPlus={isPremiumPlus}
               isClientPlus={isClientPlus}
               onTranscriptEval={onTranscriptEval}
               onTranscriptRecord={onTranscriptRecord}
               onUpgrade={onUpgrade}
+              onAuthRequired={onAuthRequired}
             />
+
+            {tutorialTilePosition === 'last' && (
+              <TutorialsTile onTutorials={onTutorials} />
+            )}
           </div>
           <CoachRingLegend />
           </>
@@ -848,28 +1073,13 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
 
         {/* 2. Coaching Section — Silver toggle: Coaches | Coach Practice */}
         <section className="w-full max-w-6xl mx-auto">
-          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'coachPractice' || (!currentUser && activeHighlight === 'topicSearch') ? 'ring-4 ring-section-silver/70 shadow-xl shadow-section-silver/20 bg-section-silver/5 animate-pulse' : ''}`}>
+          <div ref={coachingRef} className={`mb-6 transition-all duration-700 rounded-2xl ${activeHighlight === 'coachPractice' || activeHighlight === 'coaching' ? 'ring-4 ring-section-silver/70 shadow-xl shadow-section-silver/20 bg-section-silver/5 animate-pulse' : ''}`}>
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-silver/50 to-transparent" />
               <div
                 className="inline-flex bot-section-pill-silver p-1 items-center gap-1"
                 role="presentation"
               >
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-section-silver/80 hover:text-section-silver transition-colors shrink-0"
-                  onClick={() => setCoachingSectionOpen(prev => !prev)}
-                  aria-expanded={coachingSectionOpen}
-                  aria-label={coachingSectionOpen ? t('botSelection_section_collapse') : t('botSelection_section_expand')}
-                >
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${coachingSectionOpen ? 'rotate-180' : ''}`}
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
                 <div
                   className="inline-flex p-1"
                   role="tablist"
@@ -910,6 +1120,21 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
                   <span>{t('botSelection_tab_practice')}</span>
                 </button>
                 </div>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-section-silver/80 hover:text-section-silver transition-colors shrink-0"
+                  onClick={() => setCoachingSectionOpen(prev => !prev)}
+                  aria-expanded={coachingSectionOpen}
+                  aria-label={coachingSectionOpen ? t('botSelection_section_collapse') : t('botSelection_section_expand')}
+                >
+                  <svg
+                    className={`w-4 h-4 text-section-silver shrink-0 transition-transform duration-200 ${coachingSectionOpen ? 'rotate-180' : ''}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
               </div>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-section-silver/50 to-transparent" />
             </div>
@@ -1019,10 +1244,11 @@ const BotSelection: React.FC<BotSelectionProps> = ({ onSelect, onTranscriptEval,
               
               {/* Client contact info for non-clients */}
               {!currentUser?.isClient && (
-                <div className="max-w-4xl mx-auto mt-6">
-                  <p className="text-sm text-section-gold p-3 bg-section-gold-bg dark:bg-section-gold/10 border border-section-gold/30 text-center rounded-lg">
-                    {t('botSelection_clientContactMessage')}
-                  </p>
+                <div className="max-w-4xl mx-auto mt-6 px-1 sm:px-0">
+                  <CoachingContactPrompt
+                    userEmail={currentUser?.email}
+                    messageParams={{ providerName: brand.providerName }}
+                  />
                 </div>
               )}
             </>

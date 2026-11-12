@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { MessageCircle, Lightbulb, GraduationCap, ChevronRight, type LucideIcon } from 'lucide-react';
+import { MessageCircle, Lightbulb, GraduationCap, ChevronRight, Info, type LucideIcon } from 'lucide-react';
 import { LogoIcon } from './icons/LogoIcon';
 import { useLocalization } from '../context/LocalizationContext';
+import ModalOverlay from './shared/ModalOverlay';
 
 export type UserIntent = 'communication' | 'coaching' | 'coachPractice';
 
@@ -13,14 +14,147 @@ interface IntentPickerViewProps {
   safeAreaTop?: number;
 }
 
-const INTENTS: { id: UserIntent; Icon: LucideIcon; titleKey: string; descKey: string; featured?: boolean }[] = [
-  { id: 'communication', Icon: MessageCircle, titleKey: 'intent_communication_title', descKey: 'intent_communication_desc' },
-  { id: 'coaching', Icon: Lightbulb, titleKey: 'intent_coaching_title', descKey: 'intent_coaching_desc', featured: true },
-  { id: 'coachPractice', Icon: GraduationCap, titleKey: 'intent_coach_practice_title', descKey: 'intent_coach_practice_desc' },
+type IntentCardTheme = 'bronze' | 'featured' | 'silver';
+
+const INTENTS: { id: UserIntent; Icon: LucideIcon; titleKey: string; descKey: string; theme: IntentCardTheme }[] = [
+  { id: 'communication', Icon: MessageCircle, titleKey: 'intent_communication_title', descKey: 'intent_communication_desc', theme: 'bronze' },
+  { id: 'coaching', Icon: Lightbulb, titleKey: 'intent_coaching_title', descKey: 'intent_coaching_desc', theme: 'featured' },
+  { id: 'coachPractice', Icon: GraduationCap, titleKey: 'intent_coach_practice_title', descKey: 'intent_coach_practice_desc', theme: 'silver' },
 ];
+
+const CARD_THEME_CLASSES: Record<IntentCardTheme, {
+  card: string;
+  iconBox: string;
+  icon: string;
+  title: string;
+  desc: string;
+  cta: string;
+}> = {
+  bronze: {
+    card: 'surface-elevated shadow-card border border-section-bronze/25 bg-section-bronze/[0.06] hover:border-section-bronze/50 hover:shadow-card-elevated hover:bg-section-bronze/[0.09]',
+    iconBox: 'bg-section-bronze/15 ring-1 ring-section-bronze/20',
+    icon: 'text-section-bronze',
+    title: 'text-content-primary group-hover:text-section-bronze transition-colors',
+    desc: 'text-content-secondary',
+    cta: 'text-section-bronze opacity-80 group-hover:opacity-100 transition-opacity',
+  },
+  featured: {
+    card: 'surface-elevated shadow-card border border-accent-primary/45 bg-accent-primary/[0.07] hover:border-accent-primary/60 hover:shadow-card-elevated hover:bg-accent-primary/[0.10]',
+    iconBox: 'bg-accent-primary/15 ring-1 ring-accent-primary/25',
+    icon: 'text-accent-primary',
+    title: 'text-content-primary group-hover:text-accent-primary transition-colors',
+    desc: 'text-content-secondary',
+    cta: 'text-accent-primary opacity-80 group-hover:opacity-100 transition-opacity',
+  },
+  silver: {
+    card: 'surface-elevated shadow-card border border-section-silver/25 bg-section-silver/[0.06] hover:border-section-silver/45 hover:shadow-card-elevated hover:bg-section-silver/[0.09]',
+    iconBox: 'bg-section-silver/15 ring-1 ring-section-silver/20',
+    icon: 'text-section-silver',
+    title: 'text-content-primary group-hover:text-section-silver transition-colors',
+    desc: 'text-content-secondary',
+    cta: 'text-section-silver opacity-80 group-hover:opacity-100 transition-opacity',
+  },
+};
+
+function useElementTextClamped(ref: React.RefObject<HTMLElement | null>, text: string) {
+  const [clamped, setClamped] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) {
+      setClamped(false);
+      return;
+    }
+    const measure = () => {
+      setClamped(el.scrollHeight > el.clientHeight + 1);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [text]);
+  return clamped;
+}
+
+interface IntentPickerCardProps {
+  Icon: LucideIcon;
+  title: string;
+  description: string;
+  styles: (typeof CARD_THEME_CLASSES)[IntentCardTheme];
+  motionDelay: number;
+  onSelect: () => void;
+  onShowInfo: () => void;
+}
+
+const IntentPickerCard: React.FC<IntentPickerCardProps> = ({
+  Icon,
+  title,
+  description,
+  styles,
+  motionDelay,
+  onSelect,
+  onShowInfo,
+}) => {
+  const { t } = useLocalization();
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const descClamped = useElementTextClamped(descRef, description);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: motionDelay, duration: 0.4, ease: 'easeOut' }}
+      className={`intent-picker-tile w-full max-md:h-full md:h-full rounded-card transition-all group ${styles.card}`}
+    >
+      <div className="flex gap-0.5 items-stretch p-4 md:p-5 h-full min-h-0">
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.98 }}
+          onClick={onSelect}
+          aria-label={t('intent_card_select_label', { title })}
+          className="flex-1 min-w-0 min-h-0 flex flex-col text-left h-full"
+        >
+          <div className="flex items-start gap-3 mb-2 md:mb-0 md:block shrink-0">
+            <div className={`w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center flex-shrink-0 md:mb-4 ${styles.iconBox}`}>
+              <Icon className={`w-5 h-5 ${styles.icon}`} aria-hidden="true" />
+            </div>
+            <h3 className={`text-[15px] md:text-base font-semibold leading-snug md:mb-1 md:min-h-[2.75rem] ${styles.title}`}>
+              {title}
+            </h3>
+          </div>
+          <p
+            ref={descRef}
+            className={`text-sm leading-snug md:leading-relaxed shrink-0 line-clamp-3 md:line-clamp-none ${styles.desc}`}
+          >
+            {description}
+          </p>
+          <div className="flex-1 min-h-0 max-md:min-h-[0.25rem] md:min-h-0" aria-hidden="true" />
+          <div className={`pt-2 md:pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${styles.cta}`}>
+            <span>{t('intent_card_cta')}</span>
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+          </div>
+        </motion.button>
+        {descClamped && (
+          <button
+            type="button"
+            onClick={onShowInfo}
+            aria-label={t('intent_card_info_label', { title })}
+            className="md:hidden shrink-0 inline-flex items-start justify-center p-2 -mr-1 rounded-lg text-accent-primary hover:bg-accent-primary/10 transition-colors"
+          >
+            <Info className="w-5 h-5" aria-hidden />
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+};
 
 const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, safeAreaTop = 0 }) => {
   const { t } = useLocalization();
+  const [intentInfo, setIntentInfo] = useState<{ title: string; description: string } | null>(null);
 
   return (
     <>
@@ -28,62 +162,69 @@ const IntentPickerView: React.FC<IntentPickerViewProps> = ({ onSelect, isGuest, 
       <div className="fixed top-0 left-0 right-0 z-50 bg-background-secondary/80 backdrop-blur-md" style={{ height: safeAreaTop }} />,
       document.body
     )}
-    <div className="flex flex-col items-center justify-center min-h-[80dvh] px-4 sm:px-6 pb-8 max-w-3xl mx-auto" style={{ paddingTop: Math.max(32, safeAreaTop) }}>
+    <div
+      className="flex flex-col items-center justify-center min-h-[100dvh] md:min-h-[80dvh] px-4 sm:px-6 pb-6 md:pb-8 max-w-3xl mx-auto max-md:overflow-hidden"
+      style={{ paddingTop: Math.max(16, safeAreaTop) }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex flex-col items-center text-center mb-8"
+        className="flex flex-col items-center text-center mb-4 md:mb-8 shrink-0"
       >
-        <LogoIcon className="w-12 h-12 text-accent-primary mb-5" aria-hidden="true" />
-        <h1 className="text-2xl sm:text-3xl font-semibold text-content-primary tracking-tight mb-2">
+        <LogoIcon
+          className={`w-10 h-10 md:w-12 md:h-12 text-accent-primary mb-3 md:mb-5${safeAreaTop > 0 ? ' mt-2 md:mt-3' : ''}`}
+          aria-hidden="true"
+        />
+        <h1 className="text-xl md:text-2xl sm:text-3xl font-semibold text-content-primary tracking-tight mb-1 md:mb-2">
           {t('intent_title')}
         </h1>
-        <p className="text-sm sm:text-base text-content-secondary max-w-md leading-relaxed">
+        <p className="text-xs md:text-sm sm:text-base text-content-secondary max-w-md leading-snug md:leading-relaxed">
           {t('intent_subtitle')}
         </p>
       </motion.div>
 
-      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 md:items-stretch">
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-5 md:items-stretch max-md:min-h-0 max-md:flex-1 max-md:content-center">
         {INTENTS.map((intent, i) => {
           const description = isGuest && t(`${intent.descKey}_guest`) !== `${intent.descKey}_guest`
             ? t(`${intent.descKey}_guest`)
             : t(intent.descKey);
-          const featured = intent.featured;
+          const title = t(intent.titleKey);
+          const styles = CARD_THEME_CLASSES[intent.theme];
 
           return (
-            <motion.button
+            <IntentPickerCard
               key={intent.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 + i * 0.1, duration: 0.4, ease: 'easeOut' }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onSelect(intent.id)}
-              className={`
-                w-full h-full flex flex-col text-left rounded-card p-5 transition-all group
-                ${featured
-                  ? 'action-card-featured shadow-card-elevated border border-transparent'
-                  : 'surface-elevated shadow-card hover:border-accent-primary/40 hover:shadow-card-elevated'
-                }
-              `}
-            >
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mb-4 ${featured ? 'bg-black/10 dark:bg-black/20' : 'bg-accent-primary/10'}`}>
-                <intent.Icon className={`w-5 h-5 ${featured ? 'text-inherit' : 'text-accent-primary'}`} aria-hidden="true" />
-              </div>
-              <h3 className={`text-base font-semibold leading-snug mb-2 min-h-[2.75rem] ${featured ? 'text-inherit' : 'text-content-primary group-hover:text-accent-primary transition-colors'}`}>
-                {t(intent.titleKey)}
-              </h3>
-              <p className={`text-sm leading-relaxed flex-1 ${featured ? 'text-inherit opacity-90' : 'text-content-secondary'}`}>
-                {description}
-              </p>
-              <div className={`mt-auto pt-4 flex items-center gap-1 text-sm font-medium shrink-0 ${featured ? 'text-inherit' : 'text-accent-primary opacity-70 group-hover:opacity-100 transition-opacity'}`}>
-                <span>{t('intent_card_cta')}</span>
-                <ChevronRight className="w-4 h-4" aria-hidden="true" />
-              </div>
-            </motion.button>
+              Icon={intent.Icon}
+              title={title}
+              description={description}
+              styles={styles}
+              motionDelay={0.15 + i * 0.1}
+              onSelect={() => onSelect(intent.id)}
+              onShowInfo={() => setIntentInfo({ title, description })}
+            />
           );
         })}
       </div>
+
+      <ModalOverlay
+        isOpen={!!intentInfo}
+        onClose={() => setIntentInfo(null)}
+        title={intentInfo?.title ?? ''}
+      >
+        {intentInfo && (
+          <>
+            <p className="text-sm text-content-secondary leading-relaxed">{intentInfo.description}</p>
+            <button
+              type="button"
+              onClick={() => setIntentInfo(null)}
+              className="mt-6 w-full py-2.5 rounded-lg btn-accent-solid text-sm font-semibold"
+            >
+              {t('aria_close')}
+            </button>
+          </>
+        )}
+      </ModalOverlay>
     </div>
     </>
   );

@@ -8,7 +8,15 @@ const { sendNewsletterEmail } = require('../services/mailService.js');
 const aiProviderService = require('../services/aiProviderService.js');
 const { getActivityStats } = require('../services/activityTracker.js');
 const { computePracticeAdminStats } = require('../services/practiceStatsService.js');
+const { computeConnectorAdminStats } = require('../services/connectorStatsService.js');
+const {
+    getCurrentMaintenanceNotice,
+    validateMaintenancePayload,
+    maintenanceDbErrorResponse,
+} = require('../services/maintenanceService.js');
 const brand = require('../config/brand');
+const { invalidateTokensForUser } = require('../services/tokenInvalidation.js');
+const { requireAdminActor, auditAdminAction } = require('../middleware/requireAdmin.js');
 
 // Configure marked for email-safe HTML
 marked.setOptions({
@@ -63,6 +71,7 @@ router.get('/users', async (req, res) => {
 
 // PUT /api/admin/users/:id/activate
 router.put('/users/:id/activate', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
     try {
         const user = await prisma.user.findUnique({ where: { id } });
@@ -82,6 +91,7 @@ router.put('/users/:id/activate', async (req, res) => {
                 activationTokenExpires: null,
             },
         });
+        auditAdminAction(req, 'activate-user', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error activating user:", error);
@@ -91,6 +101,7 @@ router.put('/users/:id/activate', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-premium
 router.put('/users/:id/toggle-premium', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
     try {
         const user = await prisma.user.findUnique({ where: { id } });
@@ -100,6 +111,8 @@ router.put('/users/:id/toggle-premium', async (req, res) => {
             where: { id },
             data: { isPremium: !user.isPremium },
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-premium', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling premium:", error);
@@ -109,6 +122,7 @@ router.put('/users/:id/toggle-premium', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-admin
 router.put('/users/:id/toggle-admin', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
 
     if (id === req.userId) {
@@ -123,6 +137,8 @@ router.put('/users/:id/toggle-admin', async (req, res) => {
             where: { id },
             data: { isAdmin: !user.isAdmin },
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-admin', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling admin:", error);
@@ -132,6 +148,7 @@ router.put('/users/:id/toggle-admin', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-client
 router.put('/users/:id/toggle-client', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
 
     try {
@@ -142,6 +159,8 @@ router.put('/users/:id/toggle-client', async (req, res) => {
             where: { id },
             data: { isClient: !user.isClient },
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-client', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling client:", error);
@@ -151,6 +170,7 @@ router.put('/users/:id/toggle-client', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-registered
 router.put('/users/:id/toggle-registered', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
     try {
         const user = await prisma.user.findUnique({ where: { id } });
@@ -162,6 +182,8 @@ router.put('/users/:id/toggle-registered', async (req, res) => {
             where: { id },
             data: { accessExpiresAt: isRegistered ? new Date() : null },
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-registered', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling registered:", error);
@@ -171,7 +193,12 @@ router.put('/users/:id/toggle-registered', async (req, res) => {
 
 // PUT /api/admin/users/:id/toggle-developer
 router.put('/users/:id/toggle-developer', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
+
+    if (id === req.userId) {
+        return res.status(403).json({ error: 'Cannot change your own developer status.' });
+    }
 
     try {
         const user = await prisma.user.findUnique({ where: { id } });
@@ -188,6 +215,8 @@ router.put('/users/:id/toggle-developer', async (req, res) => {
             where: { id },
             data: updateData,
         });
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'toggle-developer', id);
         res.status(204).send();
     } catch (error) {
         console.error("Admin: Error toggling developer:", error);
@@ -197,6 +226,7 @@ router.put('/users/:id/toggle-developer', async (req, res) => {
 
 // POST /api/admin/users/:id/reset-password
 router.post('/users/:id/reset-password', async (req, res) => {
+    if (!requireAdminActor(req, res)) return;
     const { id } = req.params;
     try {
         const newPassword = crypto.randomBytes(8).toString('hex');
@@ -213,6 +243,8 @@ router.post('/users/:id/reset-password', async (req, res) => {
         });
         const { clearPersonalityProfileOnPasswordReset } = require('../services/gdprAccountCleanup.js');
         await clearPersonalityProfileOnPasswordReset(id);
+        await invalidateTokensForUser(id);
+        auditAdminAction(req, 'reset-password', id);
 
         res.json({ newPassword });
     } catch (error) {
@@ -834,6 +866,156 @@ router.get('/practice-stats', async (req, res) => {
     } catch (error) {
         console.error('[Admin] practice-stats error:', error);
         res.status(500).json({ error: 'Failed to load practice statistics.' });
+    }
+});
+
+// GET /api/admin/connector-stats?days=90&language=de
+// GDPR: aggregated Connector metrics only (no userId, no transcript/evaluation text).
+router.get('/connector-stats', async (req, res) => {
+    try {
+        const days = Math.min(Math.max(parseInt(req.query.days, 10) || 90, 7), 365);
+        const language = req.query.language === 'en' ? 'en' : 'de';
+        const end = new Date();
+        const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+
+        const rows = await prisma.connectorRunStat.findMany({
+            where: { createdAt: { gte: start, lte: end } },
+            select: {
+                overallScore: true,
+                empathy: true,
+                presence: true,
+                curiosity: true,
+                nonJudgment: true,
+                steadiness: true,
+                vignetteIds: true,
+                endTypes: true,
+                language: true,
+                liveMode: true,
+                createdAt: true,
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        const distinctUsers = await prisma.apiUsage.groupBy({
+            by: ['userId'],
+            where: {
+                endpoint: '/api/gemini/connector/evaluate',
+                success: true,
+                createdAt: { gte: start, lte: end },
+            },
+        });
+
+        const stats = computeConnectorAdminStats(rows, distinctUsers.length, { days, language });
+        res.json(stats);
+    } catch (error) {
+        console.error('[Admin] connector-stats error:', error);
+        res.status(500).json({ error: 'Failed to load connector statistics.' });
+    }
+});
+
+// --- Maintenance windows ---
+
+router.get('/maintenance-windows', async (req, res) => {
+    try {
+        const windows = await prisma.maintenanceWindow.findMany({
+            orderBy: { startsAt: 'desc' },
+            take: 50,
+        });
+        res.json(windows);
+    } catch (error) {
+        const dbErr = maintenanceDbErrorResponse(error);
+        if (dbErr) {
+            return res.status(dbErr.status).json(dbErr.body);
+        }
+        console.error('[Admin] maintenance-windows list error:', error);
+        res.status(500).json({ error: 'Failed to load maintenance windows.' });
+    }
+});
+
+router.post('/maintenance-windows', async (req, res) => {
+    const validationError = validateMaintenancePayload(req.body);
+    if (validationError) {
+        return res.status(400).json({ error: validationError });
+    }
+    const { startsAt, endsAt, announceAt, titleDe, titleEn, bodyDe, bodyEn } = req.body;
+    try {
+        const row = await prisma.maintenanceWindow.create({
+            data: {
+                startsAt: new Date(startsAt),
+                endsAt: new Date(endsAt),
+                announceAt: new Date(announceAt),
+                titleDe: titleDe.trim(),
+                titleEn: titleEn.trim(),
+                bodyDe: bodyDe.trim(),
+                bodyEn: bodyEn.trim(),
+                createdBy: req.userId || null,
+            },
+        });
+        res.status(201).json(row);
+    } catch (error) {
+        const dbErr = maintenanceDbErrorResponse(error);
+        if (dbErr) {
+            return res.status(dbErr.status).json(dbErr.body);
+        }
+        console.error('[Admin] maintenance-windows create error:', error);
+        res.status(500).json({ error: 'Failed to create maintenance window.' });
+    }
+});
+
+router.put('/maintenance-windows/:id', async (req, res) => {
+    const { id } = req.params;
+    const validationError = validateMaintenancePayload(req.body);
+    if (validationError) {
+        return res.status(400).json({ error: validationError });
+    }
+    const { startsAt, endsAt, announceAt, titleDe, titleEn, bodyDe, bodyEn } = req.body;
+    try {
+        const row = await prisma.maintenanceWindow.update({
+            where: { id },
+            data: {
+                startsAt: new Date(startsAt),
+                endsAt: new Date(endsAt),
+                announceAt: new Date(announceAt),
+                titleDe: titleDe.trim(),
+                titleEn: titleEn.trim(),
+                bodyDe: bodyDe.trim(),
+                bodyEn: bodyEn.trim(),
+            },
+        });
+        res.json(row);
+    } catch (error) {
+        if (error?.code === 'P2025') {
+            return res.status(404).json({ error: 'Maintenance window not found.' });
+        }
+        console.error('[Admin] maintenance-windows update error:', error);
+        res.status(500).json({ error: 'Failed to update maintenance window.' });
+    }
+});
+
+router.post('/maintenance-windows/:id/archive', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const row = await prisma.maintenanceWindow.update({
+            where: { id },
+            data: { archivedAt: new Date() },
+        });
+        res.json(row);
+    } catch (error) {
+        if (error?.code === 'P2025') {
+            return res.status(404).json({ error: 'Maintenance window not found.' });
+        }
+        console.error('[Admin] maintenance-windows archive error:', error);
+        res.status(500).json({ error: 'Failed to archive maintenance window.' });
+    }
+});
+
+router.get('/maintenance-windows/preview', async (req, res) => {
+    try {
+        const notice = await getCurrentMaintenanceNotice();
+        res.json({ notice });
+    } catch (error) {
+        console.error('[Admin] maintenance preview error:', error);
+        res.status(500).json({ error: 'Failed to preview maintenance notice.' });
     }
 });
 
