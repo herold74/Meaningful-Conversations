@@ -1,63 +1,55 @@
-# Cursor Cloud Environment (Meaningful Conversations)
+# Cursor Cloud Environment (Meaningful Conversations 2.6.0)
 
-Copy this folder into `.cursor/` at the repo root (`.cursor/` is gitignored here; this `templates/` copy is the shared source of truth).
+Cloud Agents read **`.cursor/environment.json`**. That file is the full local stack (MariaDB in Docker, backend on port 3001, Vite on port 5173). Scripts and the UI-only profile live in this folder. The rest of `.cursor/` stays gitignored.
 
-```bash
-mkdir -p .cursor
-cp templates/cursor-cloud-environment/docker-compose.dev.yml .cursor/
-cp templates/cursor-cloud-environment/start.sh .cursor/
-cp templates/cursor-cloud-environment/environment.json .cursor/environment.json
-# optional UI-only (no Docker/DB):
-# cp templates/cursor-cloud-environment/environment.light.json .cursor/environment.json
-chmod +x .cursor/start.sh
-```
-
-Point `install` in `.cursor/environment.json` at the template script (repo path) or copy `install.sh` into `.cursor/` and use `bash .cursor/install.sh`.
+This template does not deploy staging or production and does not open a shell on the server.
 
 ## Profiles
 
 | File | Use when |
 |------|----------|
-| `environment.json` | Full stack: MariaDB in Docker + local backend + frontend |
-| `environment.light.json` | UI/frontend work against **staging** API (faster, fewer secrets) |
+| `.cursor/environment.json` (same content as `environment.json` here) | Full stack: MariaDB 11.2 + local API + frontend |
+| `environment.light.json` | UI work against staging. Copy it over `.cursor/environment.json`. |
 
-Set `MC_CLOUD_DEV_DB=0` in Cloud Secrets to skip Docker in `start.sh` even with the full config.
+Set `MC_CLOUD_DEV_DB=0` in Cloud Secrets to skip Docker even with the full profile.
+
+## How the app picks an API
+
+`services/api.ts` does not read `VITE_BACKEND_URL_*`. On `localhost:5173` the app calls `http://localhost:3001`. Staging is the query parameter:
+
+- Local API: `http://localhost:5173`
+- Staging API: `http://localhost:5173/?backend=staging` (`mc-beta.manualmode.at`)
 
 ## Cloud Secrets (Dashboard → Cloud Agents → Secrets)
 
-**Full local API**
+**Full local API** — names match `meaningful-conversations-backend/.env.example`.
 
 | Variable | Example / notes |
 |----------|-----------------|
 | `DATABASE_URL` | `mysql://mcdev:mcdevchangeme@127.0.0.1:3306/meaningful_conversations_dev` |
 | `JWT_SECRET` | `openssl rand -base64 32` |
-| `GOOGLE_API_KEY` | Gemini |
-| `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, `MAILJET_SENDER_EMAIL` | Email flows |
-| `FRONTEND_URL` | `http://localhost:5173` |
-| `ALLOWED_ORIGINS` | `http://localhost:5173` |
+| `GOOGLE_API_KEY` | Gemini. `API_KEY` is the legacy alias. |
 | `ENVIRONMENT_TYPE` | `development` |
+| `FRONTEND_URL` | `http://localhost:5173` (CORS allowlist) |
+| `PORT` | `3001` (default if unset) |
 
-Optional: `MISTRAL_API_KEY`, PayPal/Apple/RevenueCat keys (see `meaningful-conversations-backend/.env.example`).
+Email flows also need `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, and `MAILJET_SENDER_EMAIL`. EU model calls need `MISTRAL_API_KEY`. PayPal, Apple, and RevenueCat keys are in the same example file.
 
-**UI-only (staging backend)**
+`npx prisma generate` works without `DATABASE_URL` (`prisma.config.ts` uses a placeholder). `prisma migrate deploy` in `start.sh` runs only when `DATABASE_URL` is set.
 
-| Variable | Example |
-|----------|---------|
-| `VITE_BACKEND_URL_STAGING` | `https://mc-beta.manualmode.at` (or your staging API base) |
+Node **22** or newer (`package.json` `engines`). Backend ORM is **Prisma 7**.
 
-Frontend default without `?backend=local` already targets staging when env is set.
-
-## Hybrid workflow reminder
-
-- Local and Cloud share code via **git push/pull** only.
-- Commit `.cursor/environment.json` only if you remove `.cursor/` from `.gitignore` or keep using this `templates/` copy + manual sync.
-- Cloud agents do **not** run Podman compose files; use `docker-compose.dev.yml` here or hit staging.
-
-## Verify after first Build
+## Verify after the first Build
 
 ```bash
 npm run ci
-curl -s http://localhost:3001/api/health   # full profile, after backend terminal up
+curl -s http://localhost:3001/api/health
 ```
+
+`install.sh` installs dependencies and generates the Prisma client. It does not run the test suite, so a red test does not block the snapshot.
+
+## Hybrid workflow
+
+Local and Cloud share code through git push and pull. Podman compose files stay the server deploy path. This folder’s `docker-compose.dev.yml` is Docker, which Cloud VMs use.
 
 Docs: [Cloud Environment Setup](https://cursor.com/docs/cloud-agent/setup)
