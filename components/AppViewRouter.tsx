@@ -852,6 +852,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       return (
         <ConnectorCatalogView
           currentUser={currentUser}
+          encryptionKey={encryptionKey}
           onStartPractice={handleStartConnectorPractice}
           onOpenSituation={() => setView('connectorOpenSituation')}
           onBack={() => setView('botSelection')}

@@ -1,6 +1,7 @@
 import * as api from '../services/api';
 import * as userService from '../services/userService';
 import { deserializeGamificationState } from '../utils/gamificationSerializer';
+import { readOfflineLifeContext, saveOfflineLifeContext } from '../utils/offlineLifeContext';
 import { logInRevenueCat, initializePurchases, isIAPAvailable, getAccessFromRevenueCat } from '../services/purchaseService';
 import type { User, GamificationState, NavView } from '../types';
 
@@ -37,9 +38,22 @@ export function useAuthHandlers({
             void initializePurchases().then(() => logInRevenueCat(user.id));
         }
         try {
+            let local: Awaited<ReturnType<typeof readOfflineLifeContext>> = null;
+            try {
+                local = await readOfflineLifeContext(user.id, key);
+            } catch (decryptError) {
+                console.warn('Stored life context cannot be opened with this password. It stays on the device and is not uploaded.', decryptError);
+            }
+            if (local?.dirty) {
+                setLifeContext(local.context || '');
+                setGamificationState(deserializeGamificationState(local.gamificationState));
+                await routeWithIntentPicker(!!local.context);
+                return;
+            }
             const data = await userService.loadUserData(key);
             setLifeContext(data.context || '');
             setGamificationState(deserializeGamificationState(data.gamificationState));
+            await saveOfflineLifeContext(user.id, key, data.context || '', data.gamificationState || '{}', { dirty: false });
 
             if (user.isAdmin || user.isDeveloper) {
                 const startupPref = localStorage.getItem('adminStartupPref');
@@ -52,6 +66,14 @@ export function useAuthHandlers({
                 await routeWithIntentPicker(!!data.context);
             }
         } catch (error) {
+            const local = await readOfflineLifeContext(user.id, key).catch(() => null);
+            if (local) {
+                console.warn('Using the life context stored on this device.', error);
+                setLifeContext(local.context || '');
+                setGamificationState(deserializeGamificationState(local.gamificationState));
+                await routeWithIntentPicker(!!local.context);
+                return;
+            }
             console.error("Failed to load user data after login, logging out.", error);
             api.clearSession();
             setAndProcessUser(null);

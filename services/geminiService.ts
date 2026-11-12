@@ -457,20 +457,44 @@ export const deletePracticeTranscript = async (id: string): Promise<void> => {
 export const startConnectorRun = async (
     language: Language,
 ): Promise<{ mode: 'assessment'; vignettes: ConnectorVignettePublic[]; maxUserTurns: number }> => {
-    return await apiFetch(`/gemini/connector/start?language=${language}`);
+    try {
+        return await apiFetch(`/gemini/connector/start?language=${language}`);
+    } catch (error) {
+        const { bundledAssessmentVignettes, CONNECTOR_MAX_USER_TURNS } = await import('../utils/connectorLocalBundle');
+        console.warn('[connector] Using bundled assessment vignettes', error);
+        return {
+            mode: 'assessment',
+            vignettes: bundledAssessmentVignettes(language),
+            maxUserTurns: CONNECTOR_MAX_USER_TURNS,
+        };
+    }
 };
 
 export const fetchConnectorCatalog = async (
     language: Language,
 ): Promise<{ vignettes: ConnectorVignetteCatalogEntry[]; maxUserTurns: number }> => {
-    return await apiFetch(`/gemini/connector/catalog?language=${language}`);
+    try {
+        return await apiFetch(`/gemini/connector/catalog?language=${language}`);
+    } catch (error) {
+        const { bundledConnectorCatalog, CONNECTOR_MAX_USER_TURNS } = await import('../utils/connectorLocalBundle');
+        console.warn('[connector] Using bundled catalog', error);
+        return { vignettes: bundledConnectorCatalog(language), maxUserTurns: CONNECTOR_MAX_USER_TURNS };
+    }
 };
 
 export const fetchConnectorVignette = async (
     vignetteId: string,
     language: Language,
 ): Promise<{ vignette: ConnectorVignettePublic; maxUserTurns: number }> => {
-    return await apiFetch(`/gemini/connector/vignette/${encodeURIComponent(vignetteId)}?language=${language}`);
+    try {
+        return await apiFetch(`/gemini/connector/vignette/${encodeURIComponent(vignetteId)}?language=${language}`);
+    } catch (error) {
+        const { bundledPublicVignette, CONNECTOR_MAX_USER_TURNS } = await import('../utils/connectorLocalBundle');
+        const vignette = bundledPublicVignette(vignetteId, language);
+        if (!vignette) throw error;
+        console.warn('[connector] Using bundled vignette', error);
+        return { vignette, maxUserTurns: CONNECTOR_MAX_USER_TURNS };
+    }
 };
 
 export const compileConnectorOpenScenario = async (

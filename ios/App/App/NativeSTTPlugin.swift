@@ -185,8 +185,13 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
 
         if #available(iOS 13.0, *) {
             if recognizer.supportsOnDeviceRecognition {
-                request.requiresOnDeviceRecognition = false
-                print("[NativeSTT] On-device recognition available (using server for quality)")
+                request.requiresOnDeviceRecognition = true
+                print("[NativeSTT] Using on-device recognition")
+            } else {
+                print("[NativeSTT] On-device recognition is not available for this language")
+                MCAudioSession.deactivate(AVAudioSession.sharedInstance(), notifyOthers: true) { }
+                call.reject("On-device speech recognition is not available. Download the language in iOS Settings and try again.")
+                return
             }
         }
 
