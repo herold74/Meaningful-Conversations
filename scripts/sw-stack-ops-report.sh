@@ -218,7 +218,7 @@ _sync_scan_repo() {
 }
 
 check_npm_stack() {
-  section "npm (repo scan via $NODE_IMAGE)"
+  section "npm outdated (lockfile/registry, no npm ci — $NODE_IMAGE)"
   if [[ "$SKIP_NPM" == true ]]; then
     append "Skipped (--skip-npm-scan)"
     SUMMARY_NPM="skipped"
@@ -258,9 +258,12 @@ check_npm_stack() {
     "$NODE_IMAGE" \
     bash -c '
       cd /repo
-      npm outdated --json > /out/frontend.json 2>/dev/null || echo "{}" > /out/frontend.json
+      npm outdated --json > /out/frontend.json 2>/dev/null || true
+      [[ -s /out/frontend.json ]] || echo "{}" > /out/frontend.json
       cd /repo/meaningful-conversations-backend
-      npm outdated --json > /out/backend.json 2>/dev/null || echo "{}" > /out/backend.json
+      npm outdated --json > /out/backend.json 2>/dev/null || true
+      [[ -s /out/backend.json ]] || echo "{}" > /out/backend.json
+      exit 0
     ' >>"$npm_log" 2>&1; then
     append "WARN: npm scan container failed (see log)"
     bump_status WARN
