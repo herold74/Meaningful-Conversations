@@ -1,3 +1,4 @@
+// In-app user guide, synced with app v2.6.0 (November 2026).
 import React, { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -266,7 +267,7 @@ Mit **Mit einem Interview erweitern** schreiben Sie Ihre Geschichte gemeinsam mi
 
 ### 1.5 Wenn Sie wiederkommen
 
-So geht es dort weiter, wo Sie aufgehört haben: Nach der Anmeldung fragt die App kurz, was Sie heute vorhaben (§1.1). Währenddessen entschlüsselt sie Ihre gespeicherten Daten mit Ihrem Passwort direkt auf Ihrem Gerät und stellt Ihren Lebenskontext sofort bereit. Dann wählen Sie Ihren Coach und legen los. Mit Premium erinnert Sie die App gelegentlich daran, dass die Tests Spiral Dynamics und Riemann-Thomann Ihr Profil noch abrunden.
+So geht es dort weiter, wo Sie aufgehört haben: Nach der Anmeldung fragt die App kurz, was Sie heute vorhaben (§1.1). Währenddessen entschlüsselt sie Ihre gespeicherten Daten mit Ihrem Passwort direkt auf Ihrem Gerät und stellt Ihren Lebenskontext sofort bereit. Dann wählen Sie Ihren Coach und legen los. Mit **Premium** erscheint nach der Anmeldung der Hinweis **„Vertiefen Sie Ihr Profil!“**, sobald der OCEAN-Test abgeschlossen ist und **Spiral Dynamics** oder **Riemann-Thomann** noch fehlen. **Jetzt entdecken** startet die fehlenden Tests, **Später** verschiebt den Hinweis, **Nicht mehr anzeigen** blendet ihn dauerhaft aus. Der Hinweis bleibt aus, wenn beide Premium-Tests vorliegen, und er erscheint nicht auf dem Weg in die Coach-Übung.
 
 **Ihren Kontext ansehen oder neu beginnen:** Über **Menü → Lebenskontext** (oder direkt nach dem Anmelden, wenn Sie die Startfrage ausgeschaltet haben) öffnet sich der Bildschirm „Willkommen zurück“. Dort sehen Sie Ihren Kontext in der Vorschau, können ihn bearbeiten und entscheiden:
 - **Mit gespeichertem Kontext fortfahren** bringt Sie zur Coach-Auswahl.
@@ -325,6 +326,8 @@ Jede Stufe öffnet Ihnen weitere Möglichkeiten. Sie entscheiden, wie weit Sie g
 ${isNative ? `- Direkt in der App über den **Apple In-App-Kauf** (Menü → **Upgrade**): Registered Monats- oder Jahresabo, Premium Monats- oder Jahresabo, Premium+ Monatsabo und Coach-Freischaltungen (Kenji, Chloe). Am Ende des Bildschirms finden Sie **Käufe wiederherstellen**. Ihre Abonnements verwalten Sie über Ihr Apple-Konto.` : `- **iOS-App:** Direkt in der App über den Apple In-App-Kauf. Wählen Sie **Premium** oder **Premium+** (Premium inklusive Coaching üben). Ihre Abonnements verwalten Sie über Ihr Apple-Konto.
 - **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **„Upgrade“**. Dort finden Sie Premium- und Premium+-Pässe sowie Einzelcoach-Freischaltungen via PayPal.
 - **Zugangscode:** Unter **Kontoverwaltung → „Code einlösen“** geben Sie Ihren Zugangscode ein.`}
+
+${guideInfoBox('<p class="m-0"><strong>Schloss heißt nicht „fehlt“:</strong> Coaches und Tools mit Schloss-Symbol (🔒) gehören zu einer höheren Zugangsstufe. Sie bleiben sichtbar, damit Sie sehen, was ein Upgrade oder ein Zugangscode freischaltet.</p>')}
 
 ${isNative ? '' : `### Sprachausgabe & Browser (Web)
 
@@ -664,7 +667,9 @@ Hier finden Sie den Coach, der zu Ihrem heutigen Vorhaben passt. Die Coach-Auswa
 - **Bekky** -- Gedanken-Audit: belastende Überzeugungen strukturiert prüfen und Perspektiven wechseln (Klienten)
 - **Dan** -- Innere Überzeugungen in Ihrer eigenen Sprache erkunden — ohne fremde Metaphern (Klienten)
 
-Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Premium- oder Klienten-Abo. Coaches mit einem 🔔-Symbol bieten **geführte Meditationsübungen** während der Sitzung an.
+Einige Coaches und Tools sind mit einem Schloss-Symbol gekennzeichnet. Das Schloss markiert eine höhere Zugangsstufe (Premium, Premium+ oder Klient); die Karte fehlt nicht. Coaches mit einem 🔔-Symbol bieten **geführte Meditationsübungen** während der Sitzung an.
+
+**Session-Rhythmus-Ringe:** Der farbige Ring um den Avatar zeigt den Gesprächsstil, nicht das Geschlecht des Coaches: **klären & strukturieren**, **herausarbeiten & vertiefen** oder **Zukunftsfokus & Commitment**. Bei gesperrten Coaches ist der Ring neutral.
 
 **Klicken Sie auf einen Namen, um mehr zu erfahren:**
 
@@ -1331,7 +1336,7 @@ Zusätzlich bewertet die KI den **Session-Flow** (Contracting, Eröffnung, Absch
 
 Die **Gesamtbewertung (1–10)** priorisiert die **Methoden-Treue**. Volle **10/10** gibt es nur bei sehr starker Methodenanwendung (≥9) **und** stimmigem Session-Flow; bei optimaler Methode ohne vollständig stimmigen Ablauf liegt das Maximum bei **9/10**.
 
-Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden verweist die Übung auf einen **Live-Coach** derselben Methode — nützlich, um die Methode aus Klientensicht kennenzulernen.
+Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei Methoden mit einem zugehörigen Coach — zum Beispiel **Gabrielle** (Vier-Phasen-Coaching), **Sam** (zukunftsorientiert) und **Mike** (Ambivalenz-Coaching) — weist die Übung auf diesen **Live-Coach** hin. So sehen Sie die Methode aus Klientensicht.
 
 ### Verlauf & Fortschritt
 
@@ -1462,7 +1467,7 @@ With **Extend with an Interview**, you continue your story together with Gloria.
 
 ### 1.5 When You Come Back
 
-You continue right where you left off: after signing in, the app briefly asks what you have in mind today (§1.1). Meanwhile, it decrypts your stored data with your password directly on your device and makes your Life Context available immediately. Then you choose your coach and get started. With Premium, the app occasionally reminds you that the Spiral Dynamics and Riemann-Thomann tests would round out your profile.
+You continue right where you left off: after signing in, the app briefly asks what you have in mind today (§1.1). Meanwhile, it decrypts your stored data with your password directly on your device and makes your Life Context available immediately. Then you choose your coach and get started. With **Premium**, after you sign in the app shows **“Deepen your profile!”** once the OCEAN test is complete and **Spiral Dynamics** or **Riemann-Thomann** is still missing. **Discover now** starts the missing tests, **Later** postpones the hint, and **Don't show again** hides it for good. The hint stays away once both Premium tests are done, and it does not appear on the way into Coach Practice.
 
 **Viewing your context or starting fresh:** Via **Menu → Life Context** (or right after signing in, if you switched the opening question off), the “Welcome back” screen opens. There you see your context in the preview, can edit it, and decide:
 - **Continue with Saved Context** takes you to the coach selection.
@@ -1521,6 +1526,8 @@ Each tier opens up further possibilities. You decide how far you want to go — 
 ${isNative ? `- Directly in the app via **Apple In-App Purchase** (Menu → **Upgrade**): Registered monthly or annual, Premium monthly or annual, Premium+ monthly, and coach unlocks (Kenji, Chloe). At the bottom of the screen you find **Restore Purchases**. You manage your subscriptions through your Apple account.` : `- **iOS app:** Directly in the app via Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). You manage your subscriptions through your Apple account.
 - **Web browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium and Premium+ passes and individual coach unlocks via PayPal.
 - **Access code:** Under **Account Management → "Redeem Code"**, enter your access code.`}
+
+${guideInfoBox('<p class="m-0"><strong>A lock does not mean “missing”:</strong> Coaches and tools with a lock icon (🔒) belong to a higher access tier. They stay visible so you can see what an upgrade or an access code unlocks.</p>')}
 
 ${isNative ? '' : `### Voice Output & Browsers (Web)
 
@@ -1834,7 +1841,9 @@ Here you find the coach who fits what you have in mind today. The coach selectio
 - **Bekky** -- Thought audit: structured review of stressful beliefs and perspective shifts (Client)
 - **Dan** -- Explore inner beliefs in your own language — without imported metaphors (Client)
 
-Some coaches are marked with a lock icon and require a premium or client subscription. Coaches with a 🔔 icon offer **guided meditation exercises** during the session.
+Some coaches and tools are marked with a lock icon. The lock marks a higher access tier (Premium, Premium+, or Client); the card is not missing. Coaches with a 🔔 icon offer **guided meditation exercises** during the session.
+
+**Session rhythm rings:** The colored ring around an avatar shows the conversation style, not the coach's gender: **clarify & structure**, **draw out & deepen**, or **forward focus & commitment**. Locked coaches use a neutral ring.
 
 **Click on a name to learn more:**
 
@@ -2501,7 +2510,7 @@ The AI also assesses **session flow** (contracting, opening, closing — appropr
 
 The **overall score (1–10)** prioritizes **method compliance**. A perfect **10/10** requires strong method application (≥9) **and** a coherent session flow; optimal method without a fully coherent flow is capped at **9/10**.
 
-You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods, practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
+You also receive a summary, covered method stages, strengths, development areas, and suggested drills. When a method has a matching coach — for example **Gabrielle** (four-stage coaching), **Sam** (forward-focused), and **Mike** (ambivalence coaching) — practice points to that **live coach**, so you can see the method from the client's side.
 
 ### History & progress
 
