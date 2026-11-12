@@ -80,8 +80,10 @@ backups/
 *.ntvs*
 *.njsproj
 *.sln
-# Cursor IDE — local only (maintainer workflow / IP; not versioned)
-.cursor/
+# Cursor IDE — local only (maintainer workflow / IP; not versioned).
+# Cloud Agents read .cursor/environment.json; the rest of .cursor stays local.
+.cursor/*
+!.cursor/environment.json
 AGENTS.md
 
 # OS generated files
