@@ -16,8 +16,8 @@ interface DecryptedUserData {
     gamificationState: string;
 }
 
-export const loadUserData = async (key: CryptoKey): Promise<DecryptedUserData> => {
-    const data: EncryptedUserData = await apiFetch('/data/user');
+export const loadUserData = async (key: CryptoKey, signal?: AbortSignal): Promise<DecryptedUserData> => {
+    const data: EncryptedUserData = await apiFetch('/data/user', { signal });
     
     let decryptedContext = '';
     // If there's context to decrypt, wrap it in a try...catch
@@ -46,10 +46,11 @@ export const saveUserData = async (context: string, gamificationState: string, k
     });
 };
 
-export const login = async (email: string, password: string): Promise<{ user: User, token: string, accessExpired?: boolean }> => {
+export const login = async (email: string, password: string, signal?: AbortSignal): Promise<{ user: User, token: string, accessExpired?: boolean }> => {
     const session = await apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
+        signal,
     });
     setSession(session);
     return session;

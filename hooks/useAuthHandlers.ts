@@ -50,7 +50,14 @@ export function useAuthHandlers({
                 await routeWithIntentPicker(!!local.context);
                 return;
             }
-            const data = await userService.loadUserData(key);
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 8000);
+            let data;
+            try {
+                data = await userService.loadUserData(key, controller.signal);
+            } finally {
+                clearTimeout(timer);
+            }
             setLifeContext(data.context || '');
             setGamificationState(deserializeGamificationState(data.gamificationState));
             await saveOfflineLifeContext(user.id, key, data.context || '', data.gamificationState || '{}', { dirty: false });
@@ -67,11 +74,19 @@ export function useAuthHandlers({
             }
         } catch (error) {
             const local = await readOfflineLifeContext(user.id, key).catch(() => null);
+            const offline = error instanceof api.ApiError && error.isNetworkError;
             if (local) {
                 console.warn('Using the life context stored on this device.', error);
                 setLifeContext(local.context || '');
                 setGamificationState(deserializeGamificationState(local.gamificationState));
                 await routeWithIntentPicker(!!local.context);
+                return;
+            }
+            if (offline) {
+                console.warn('Signed in from the device record. Life context will sync when the network is back.', error);
+                setLifeContext('');
+                setGamificationState(DEFAULT_GAMIFICATION_STATE);
+                await routeWithIntentPicker(false);
                 return;
             }
             console.error("Failed to load user data after login, logging out.", error);

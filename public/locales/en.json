@@ -48,6 +48,7 @@
   "login_register_link": "Register here",
   "login_email_placeholder": "your@email.com",
   "login_error_credentials": "Invalid email or password. Please try again.",
+  "login_offline_needs_online_once": "This device does not know the password yet. Sign in once while online. After that the same password works in airplane mode.",
   "register_title": "Create Account",
   "register_trial_info": "Start with 9 days of free Premium access — all features included.",
   "register_email_label": "Email",

@@ -48,6 +48,7 @@
   "login_register_link": "Hier registrieren",
   "login_email_placeholder": "deine@email.at",
   "login_error_credentials": "Ungültige E-Mail oder ungültiges Passwort. Bitte versuchen Sie es erneut.",
+  "login_offline_needs_online_once": "Dieses Gerät kennt das Passwort noch nicht. Bitte einmal mit Netz anmelden. Danach gilt dasselbe Passwort auch im Flugmodus.",
   "register_title": "Konto erstellen",
   "register_trial_info": "Starte mit 9 Tagen kostenlosem Premium-Zugang — alle Features inklusive.",
   "register_email_label": "E-Mail",

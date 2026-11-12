@@ -1,6 +1,7 @@
 import { User, ConnectorEvaluationResult } from '../types';
 import { brand } from '../config/brand';
 import { isNativeIOS } from '../utils/platformDetection';
+import { isFetchNetworkFailure } from '../utils/fetchNetworkError';
 
 // Custom error class for API fetch errors.
 // This allows other parts of the app to inspect the error details.
@@ -211,6 +212,18 @@ export const clearSession = (): void => {
 };
 
 
+/** Fetch failures, including iOS airplane mode ("The Internet connection appears to be offline.") and aborted requests. */
+export function toNetworkApiError(error: unknown, backendUrl: string): ApiError | null {
+    if (!isFetchNetworkFailure(error)) return null;
+    return new ApiError(
+        `Could not connect to the server at ${backendUrl}.`,
+        0,
+        { error: 'Network Error' },
+        true,
+        backendUrl,
+    );
+}
+
 // --- API Fetch Wrapper ---
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
@@ -241,14 +254,9 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     let response;
     try {
         response = await fetch(finalUrl, config);
-    } catch (error: any) {
-        const msg = error?.message || '';
-        if (error instanceof TypeError && (msg.includes('Failed to fetch') || msg.includes('Load failed'))) {
-             throw new ApiError(
-                `Could not connect to the server at ${apiBaseUrl}.`, 
-                0, { error: 'Network Error' }, true, apiBaseUrl
-            );
-        }
+    } catch (error: unknown) {
+        const networkError = toNetworkApiError(error, apiBaseUrl);
+        if (networkError) throw networkError;
         throw error;
     }
 
@@ -330,16 +338,8 @@ export const loadPersonalityProfile = async () => {
       cache: 'no-store',
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : '';
-    if (error instanceof TypeError && (msg.includes('Failed to fetch') || msg.includes('Load failed'))) {
-      throw new ApiError(
-        `Could not connect to the server at ${apiBaseUrl}.`,
-        0,
-        { error: 'Network Error' },
-        true,
-        apiBaseUrl,
-      );
-    }
+    const networkError = toNetworkApiError(error, apiBaseUrl);
+    if (networkError) throw networkError;
     throw error;
   }
 

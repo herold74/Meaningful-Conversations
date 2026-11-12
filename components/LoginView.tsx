@@ -50,8 +50,12 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedPassword = password.trim();
 
+    const stored = await secureGet(unlockStorageKey(trimmedEmail));
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), stored ? 8000 : 20000);
+
     try {
-        const { user, token, accessExpired } = await userService.login(trimmedEmail, trimmedPassword);
+        const { user, token, accessExpired } = await userService.login(trimmedEmail, trimmedPassword, controller.signal);
         
         if (!user.encryptionSalt) {
             throw new Error("Encryption salt is missing for this user.");
@@ -82,8 +86,8 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
 
     } catch (err: any) {
         console.error("Login failed:", err);
-        if (err.isNetworkError || (err instanceof ApiError && err.isNetworkError)) {
-            const stored = await secureGet(unlockStorageKey(trimmedEmail));
+        const networkFailure = err?.isNetworkError || (err instanceof ApiError && err.isNetworkError);
+        if (networkFailure) {
             if (stored) {
                 try {
                     const unlocked = await matchOfflineUnlock(JSON.parse(stored), trimmedEmail, trimmedPassword);
@@ -94,11 +98,13 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
                         onLoginSuccess(unlocked.user, unlocked.key);
                         return;
                     }
+                    setError(t('login_error_credentials'));
+                    return;
                 } catch (unlockError) {
                     console.warn('[login] offline unlock failed', unlockError);
                 }
             }
-            setError(t('error_network_detailed', { url: err.backendUrl || '' }));
+            setError(t('login_offline_needs_online_once'));
         } else if (err.status === 401) {
             setError(t('login_error_credentials'));
         } else if (err.status === 403) {
@@ -107,6 +113,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onAccessExpired, 
             setError(err.message || 'An unknown error occurred. Please try again.');
         }
     } finally {
+        clearTimeout(timer);
         setIsLoading(false);
     }
   };
