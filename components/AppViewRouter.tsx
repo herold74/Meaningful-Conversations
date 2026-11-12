@@ -11,7 +11,7 @@ import type { Big5Result } from '../utils/bfi2';
 import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions, ConnectorHandoffPayload } from '../types';
 import type { ConnectorRunState } from '../utils/connectorRun';
 import type { UserIntent } from './IntentPickerView';
-import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
+import { getHighlightSectionForIntent, getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
 import { isTemplateOnlyLifeContext } from '../utils/lifeContext';
 import { syncGuestSession, resolveGuestName } from '../utils/guestSession';
 import type { SurveyResult } from './PersonalitySurvey';
@@ -667,7 +667,13 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
               }
             } else {
               syncGuestSession(name, template);
-              setView('landing');
+              const intent = getStoredUserIntent();
+              if (intent) {
+                setHighlightSection(getHighlightSectionForIntent(intent));
+                applyIntentLogic(intent, { lifeContextOverride: template });
+              } else {
+                setView('landing');
+              }
             }
           }}
           onSkip={!currentUser ? () => setView('landing') : undefined}
