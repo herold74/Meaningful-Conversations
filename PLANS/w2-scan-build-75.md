@@ -1,5 +1,7 @@
 # W2-Scan — Patch/Minor-Bundle (Build 75 Baseline)
 
+**Status (2026-11-12):** W2 ist auf Produktion. Dieses Dokument hält den Scan vom 2026-11-07 fest (Baseline Build 75). Die In-Range-Schritte unten sind abgeschlossen.
+
 **Datum:** 2026-11-07 (Europe/Vienna)  
 **App-Stand (laut Repo):** v2.6.0 **Build 75** (`BUILD_NUMBER`, `public/sw.js` `v2.6.0-b75`)  
 **Scope W2:** Nur Semver-Updates innerhalb der `package.json`-Ranges — **keine** Majors (React 19, Prisma 7, GenAI 3, RevenueCat 14, Express 5, …).
@@ -91,6 +93,8 @@
 ---
 
 ## Vorgeschlagene Umsetzung (Staging @ b75)
+
+Abgeschlossen und auf Produktion. Die folgenden Schritte bleiben als Protokoll des Scans.
 
 ### PR-1 — Backend W2 core (`npm update` im Backend)
 
