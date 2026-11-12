@@ -161,6 +161,27 @@ Log: `/var/log/mc-ops-report.log` (Zeitstempel **UTC**, Server `timedatectl`; Cr
 | **07:30** | täglich | Ops-Report | `/usr/local/bin/server-ops-report.sh` (strukturierte Mail: Gesamtstatus / HANDLUNG / KURZÜBERSICHT) |
 | **07:45** | Mo | Ops Wochen-OK-Mail | `server-ops-report.sh --weekly-summary` |
 | **08:30** | Mo | Production-Pull | `/root/deploy-mc-production.sh` → `/tmp/mc-deploy-production.log` |
+| **20:00** | Fr | SW-Stack-Report | `/usr/local/bin/sw-stack-ops-report.sh` → `/var/log/sw-stack-ops-report.log` |
+
+## 📧 Software-Stack (Freitag Abend)
+
+**Zweck:** Laufende npm-Updates laut `PLANS/software-stack-update-plan.md` — **nicht** Host-Ops (`server-ops-report.sh`).
+
+| Inhalt | Quelle |
+|--------|--------|
+| **Paket-Tabelle** | `stack-package-tracker.json` + `sw-stack-merge-table.jq` + npm outdated JSON |
+| Spalten | Patches, Risiko, **QA** (leicht/mittel/hoch), Features, Abhängigkeiten (Tests/Deploys) |
+| Prod vs Staging | `sw.js` / `/api/health` |
+| npm audit | Shallow-Git-Clone → Podman `node:22` (`/var/lib/mc-sw-stack-scan`) |
+
+**Mail:** Freitag **20:00** Europe/Vienna — **immer**.
+
+```bash
+/usr/local/bin/sw-stack-ops-report.sh --dry-run
+/usr/local/bin/sw-stack-ops-report.sh --skip-npm-scan   # schneller Test
+/usr/local/bin/sw-stack-ops-report.sh --test-mail
+# Pflege: stack-package-tracker.json (Risiko, Features, Abhängigkeiten/QA)
+```
 
 Montag-Reihenfolge: Backup (06:00) → Schema → Updates → Ops → Weekly-Mail → **Puffer** → Prod-Pull **08:30** (kein Overlap mit Backup). Siehe Project-Doc `server-cron-schedule-proposal.md` §5.
 
