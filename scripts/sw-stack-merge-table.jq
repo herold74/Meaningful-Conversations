@@ -47,9 +47,9 @@ null
 | . as $name
 | ($out[$name]) as $o
 | tracker_for($name; $tr) as $meta
-| (if $o then ($o.current | tostring) else "aktuell" end) as $cur
-| (if $o then ($o.wanted | tostring) else "aktuell" end) as $want
-| (if $o then ($o.latest | tostring) else "aktuell" end) as $lat
+| (if $o then ((($o.current // $o.wanted) | tostring)) else "aktuell" end) as $cur
+| (if $o then (($o.wanted | tostring)) else "aktuell" end) as $want
+| (if $o then (($o.latest | tostring)) else "aktuell" end) as $lat
 | patch_kind($cur; $want; $lat) as $patches
 | {
     package: $name,

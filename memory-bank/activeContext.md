@@ -3,6 +3,7 @@
 ## Current Status
 **Version:** 2.6.0. Repo `BUILD_NUMBER` **78**. **Staging** Build **78** (W6 React 19 deploy 2026-11-12). **Production** Build **77** (React 18 Frontend bis Prod-Pull).
 **Ops-Report (2026-11-04):** `scripts/server-ops-report.sh` prüft Produktions- und Staging-Dumps getrennt (`production-*.sql.gz` / `staging-*.sql.gz`: Alter, Größe, gzip). Kurzübersicht: `Backup Prod` und `Backup Staging`. Cron bleibt `/usr/local/bin/server-ops-report.sh` (Kopie, nicht Teil des App-Deploys).
+**SW-Stack-Report (2026-11-12):** Freitag **20:00** `sw-stack-ops-report.sh` + `stack-package-tracker.json` / `sw-stack-merge-table.jq` auf Server (`/usr/local/bin/`). Mail: Paket-Tabelle (Patches, Risiko, QA leicht/mittel/hoch, Features, Abhängigkeiten) + npm-Scan. Commit `6181a993`.
 **Patches (2026-11-12 W1):** `dnf update --security` — Kernel **5.14.0-687.66.2**, glibc, Cockpit, qemu-guest-agent, webkit; Reboot; Prod+Staging Health 200. Details: `PLANS/w1-host-security-2026-11-12.md`. *(Vorher 2026-11-04: 687.65.1, Podman 5.8.2-8.)*
 **Staging:** v**2.6.0** Build **78** — https://mc-beta.manualmode.at (`sw.js` `v2.6.0-b78`; W6 React 19.3 Frontend).
 **Production:** v**2.6.0** Build **77** — https://mc-app.manualmode.at (`sw.js` `v2.6.0-b77`; `/api/health` mit `version` + `prisma`).
