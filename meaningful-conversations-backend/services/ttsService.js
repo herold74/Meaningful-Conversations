@@ -2,9 +2,6 @@
 // Handles communication with the Piper TTS container/process
 
 const axios = require('axios');
-const { exec } = require('child_process');
-const { promisify } = require('util');
-const execAsync = promisify(exec);
 const { getPhoneticReplacements } = require('../utils/phoneticDictionary');
 
 // Configuration
@@ -203,39 +200,10 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
         }
     }
     
-    // Fallback: Local Piper (if available)
-    // Check if Piper is available first
-    try {
-        await execAsync('which piper');
-    } catch {
-        // Piper not available - return null so frontend can use Web Speech API
-        console.log('Piper TTS not available, suggesting fallback to Web Speech API');
-        throw new Error('Piper TTS not available: Local Piper not found on system');
-    }
-    
-    const voiceDir = process.env.PIPER_VOICE_DIR || '/models';
-    const modelPath = `${voiceDir}/${model}.onnx`;
-    const piperCommand = process.env.PIPER_COMMAND || 'piper';
-    
-    // Build Piper command
-    let command = `echo "${cleanText.replace(/"/g, '\\"')}" | ${piperCommand} --model ${modelPath} --length_scale ${lengthScale} --output-file -`;
-    
-    try {
-        const { stdout, stderr } = await execAsync(command, {
-            encoding: 'buffer',
-            maxBuffer: 10 * 1024 * 1024, // 10MB max buffer for audio
-        });
-        
-        if (stderr && stderr.length > 0) {
-            console.warn('Piper stderr:', stderr.toString());
-        }
-        
-        console.log('TTS via local Piper');
-        return { buffer: stdout, contentType: 'audio/wav' };
-    } catch (error) {
-        console.error('Piper TTS error:', error);
-        throw new Error(`Failed to synthesize speech: ${error.message}`);
-    }
+    // No local Piper process. Speech text must never be passed to a shell.
+    // The client falls back to Web Speech when the container is down.
+    console.log('Piper TTS container unavailable, suggesting fallback to Web Speech API');
+    throw new Error('Piper TTS not available: container is not reachable');
 }
 
 /**
@@ -246,6 +214,44 @@ async function synthesizeSpeech(text, botId, language, isMeditation = false, voi
  * @param {string} language - Language code for phonetic replacements (default: 'de')
  * @returns {string} - Cleaned text ready for TTS
  */
+/**
+ * Build regex for a phonetic term (whole word or German compound prefix).
+ * @param {string} escapedTerm - Regex-safe term
+ * @param {string|null} matchMode - e.g. 'germanCompound' for Team → Teamleistung, Teams
+ */
+function buildPhoneticTermRegex(escapedTerm, matchMode) {
+    if (matchMode === 'germanCompound') {
+        // Standalone, plural (Teams), or compound (Teamleistung)
+        return `\\b${escapedTerm}(?=[a-zäöüß]|s\\b|\\b)`;
+    }
+    return `\\b${escapedTerm}\\b`;
+}
+
+function applyTtsPacingMarkers(text) {
+    let t = (text || '').replace(/\r\n/g, '\n');
+    t = t.replace(/\n\s*\n+/g, ', ');
+    t = t.replace(/\n+/g, ' ');
+    return t
+        .replace(/[\u2013\u2014]/g, ', ')
+        .replace(/\s--\s/g, ', ')
+        .replace(/\s+/g, ' ')
+        .replace(/,\s*(,\s*)+/g, ', ')
+        .trim();
+}
+
+function applyPausePatterns(text, language) {
+    const patterns = getPhoneticReplacements(language).filter((p) => p.ttsBehavior === 'pause');
+    let out = text;
+    for (const { term, phonetic } of patterns) {
+        if (!term) continue;
+        const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        out = out.replace(new RegExp(escapedTerm, 'g'), phonetic || ', ');
+    }
+    // Long runs of dots (e.g. ....) → pause even if not in dictionary
+    out = out.replace(/\.{3,}/g, ', ');
+    return out;
+}
+
 function cleanTextForSpeech(text, language = 'de') {
     // Load phonetic replacements from dictionary
     // Dictionary is cached, so this has no I/O overhead
@@ -266,19 +272,23 @@ function cleanTextForSpeech(text, language = 'de') {
         // Remove blockquote markers
         .replace(/^>\s?/gm, '');
     
+    cleanedText = applyPausePatterns(cleanedText, language);
+    
+    cleanedText = applyTtsPacingMarkers(cleanedText);
     // Apply phonetic replacements for better pronunciation
     // Use word boundaries to avoid partial replacements
     let replacementsApplied = 0;
     const replacementLog = [];
     for (const pattern of phoneticReplacements) {
-        const { term, phonetic, caseSensitive } = pattern;
+        if (pattern.ttsBehavior === 'pause') continue;
+        const { term, phonetic, caseSensitive, matchMode } = pattern;
         
         // Escape special regex characters in the term
         const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         
         // Create regex with appropriate flags (case-sensitive or not)
         const flags = caseSensitive ? 'g' : 'gi';
-        const regex = new RegExp(`\\b${escapedTerm}\\b`, flags);
+        const regex = new RegExp(buildPhoneticTermRegex(escapedTerm, matchMode), flags);
         
         const matches = cleanedText.match(regex);
         if (matches) {
@@ -297,10 +307,11 @@ function cleanTextForSpeech(text, language = 'de') {
         .normalize('NFKC')
         .replace(/[\u2018\u2019]/g, "'")
         .replace(/[\u201C\u201D]/g, '"')
-        .replace(/[\u2013\u2014]/g, '-')
-        .replace(/\u2026/g, '...')
+        .replace(/[\u2013\u2014]/g, ', ')
+        .replace(/\u2026/g, ', ')
         .replace(/\u00AD/g, '')
         .replace(/\s+/g, ' ')
+        .replace(/,\s*(,\s*)+/g, ', ')
         .trim();
 }
 
@@ -316,20 +327,11 @@ async function isPiperAvailable() {
             return response.data.status === 'ok';
         } catch (error) {
             console.warn('TTS container not available:', error.message);
-            // Fall through to check local Piper
+            return false;
         }
     }
-    
-    // Check local Piper
-    try {
-        const piperCommand = process.env.PIPER_COMMAND || 'piper';
-        // Piper --help returns exit code 0, unlike --version which requires --model
-        await execAsync(`${piperCommand} --help`, { timeout: 5000 });
-        return true;
-    } catch (error) {
-        console.warn('Piper TTS not available:', error.message);
-        return false;
-    }
+
+    return false;
 }
 
 /**

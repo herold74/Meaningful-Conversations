@@ -1,5 +1,7 @@
 const Mailjet = require('node-mailjet');
 const brand = require('../config/brand');
+const { formatInvoiceAddressLinesDe } = require('../config/brandLegal');
+const { generateInvoicePdfBuffer } = require('./invoicePdf');
 const prisma = require('../prismaClient');
 
 let mailjet;
@@ -607,6 +609,10 @@ const sendInvoiceEmail = async (email, customerName, invoiceNumber, productId, a
     day: '2-digit', month: '2-digit', year: 'numeric'
   });
   const firstName = customerName ? customerName.split(' ')[0] : '';
+  const sellerAddressHtml = formatInvoiceAddressLinesDe()
+    .map((line) => `${line}<br>`)
+    .join('');
+  const sellerAddressText = formatInvoiceAddressLinesDe().join('\n');
 
   const htmlBody = `
     <table width="100%" cellpadding="0" cellspacing="0" style="font-family: sans-serif; line-height: 1.6;">
@@ -618,7 +624,7 @@ const sendInvoiceEmail = async (email, customerName, invoiceNumber, productId, a
             <tr>
               <td bgcolor="${brand.primaryColor}" style="background-color: ${brand.primaryColor}; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
                 <h2 style="margin: 0; font-size: 24px; color: #ffffff; font-family: sans-serif;">Rechnung</h2>
-                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">${brand.appName} (MyCoach AI)</p>
+                <p style="margin: 8px 0 0 0; color: #ffffff; font-family: sans-serif;">${brand.appName}</p>
               </td>
             </tr>
 
@@ -631,9 +637,7 @@ const sendInvoiceEmail = async (email, customerName, invoiceNumber, productId, a
                   <tr>
                     <td style="font-size: 13px; color: #555; vertical-align: top; width: 50%;">
                       <strong style="color: #111827;">Leistungserbringer:</strong><br>
-                      Günter Herold<br>
-                      Gersthofer Straße 148/1/Top 10<br>
-                      1180 Wien, Österreich<br>
+                      ${sellerAddressHtml}
                       <a href="mailto:${brand.contactEmail}" style="color: ${brand.primaryColor};">${brand.contactEmail}</a>
                     </td>
                     <td style="font-size: 13px; color: #555; vertical-align: top; text-align: right;">
@@ -646,7 +650,7 @@ const sendInvoiceEmail = async (email, customerName, invoiceNumber, productId, a
 
                 <!-- Greeting -->
                 <p style="margin-top: 0;">${firstName ? `Hallo ${firstName},` : 'Hallo,'}</p>
-                <p>vielen Dank für Ihren Kauf. Nachfolgend finden Sie Ihre Rechnung.</p>
+                <p>vielen Dank für Ihren Kauf. Nachfolgend finden Sie Ihre Rechnung. Die Rechnung liegt zusätzlich als PDF-Anhang bei.</p>
 
                 <!-- Invoice Table -->
                 <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin: 20px 0;">
@@ -706,9 +710,7 @@ const sendInvoiceEmail = async (email, customerName, invoiceNumber, productId, a
 Datum: ${dateStr}
 
 Leistungserbringer:
-Günter Herold
-Gersthofer Straße 148/1/Top 10
-1180 Wien, Österreich
+${sellerAddressText}
 ${brand.contactEmail}
 
 Leistung: ${productName.de}
@@ -721,12 +723,21 @@ Zahlung erhalten per PayPal.
 
 Bei Fragen: ${brand.contactEmail}`;
 
+  const pdfBuffer = await generateInvoicePdfBuffer({
+    invoiceNumber,
+    productNameDe: productName.de,
+    amount,
+    purchaseDate,
+  });
+  const pdfFilename = `Rechnung_${invoiceNumber}.pdf`;
+
   if (!isProductionOrStaging) {
     console.log('\n--- SIMULATED INVOICE EMAIL ---');
     console.log(`To: ${email}`);
     console.log(`Subject: Rechnung ${invoiceNumber} — ${brand.appName}`);
     console.log(`Product: ${productName.de}`);
     console.log(`Amount: ${amount.toFixed(2)} €`);
+    console.log(`PDF attachment: ${pdfFilename} (${pdfBuffer.length} bytes)`);
     console.log('-------------------------------\n');
     return;
   }
@@ -743,6 +754,11 @@ Bei Fragen: ${brand.contactEmail}`;
       Subject: `Rechnung ${invoiceNumber} — ${brand.appName}`,
       TextPart: textBody,
       HTMLPart: htmlBody,
+      Attachments: [{
+        ContentType: 'application/pdf',
+        Filename: pdfFilename,
+        Base64Content: pdfBuffer.toString('base64'),
+      }],
     }]
   });
 

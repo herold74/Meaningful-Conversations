@@ -58,7 +58,8 @@ export function useAppRouting({
     );
 
     const applyIntentLogic = useCallback(
-        (intent: UserIntent | null) => {
+        (intent: UserIntent | null, options?: { lifeContextOverride?: string }) => {
+            const lc = options?.lifeContextOverride ?? lifeContext;
             const i = normalizeUserIntent(intent) ?? getStoredUserIntent();
             switch (i) {
                 case 'coachPractice':
@@ -66,14 +67,26 @@ export function useAppRouting({
                     break;
                 case 'communication':
                 case 'coaching':
-                    routeToBotSelectionForIntent(i);
+                    if (!currentUser) {
+                        if (!lc?.trim()) {
+                            setView('landing');
+                        } else {
+                            routeToBotSelectionForIntent(i);
+                        }
+                    } else {
+                        routeToBotSelectionForIntent(i);
+                    }
                     break;
                 default:
-                    setView(lifeContext ? 'contextChoice' : 'landing');
+                    if (!currentUser) {
+                        setView(lc?.trim() ? 'botSelection' : 'landing');
+                    } else {
+                        setView(lc ? 'contextChoice' : 'landing');
+                    }
                     break;
             }
         },
-        [lifeContext, routeToBotSelectionForIntent, routeToCoachPractice, setView],
+        [currentUser, lifeContext, routeToBotSelectionForIntent, routeToCoachPractice, setView],
     );
 
     const shouldShowProfileHint = useCallback((): boolean => {

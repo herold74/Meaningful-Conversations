@@ -97,10 +97,12 @@ Quick reference guide for common issues and where to find solutions.
 | AI not responding | Check API keys, quota limits | [LOCAL-DEV-SETUP.md](./LOCAL-DEV-SETUP.md#ai-not-responding) |
 | Adaptation not working | Verify personality profile exists | [systemPatterns.md](../memory-bank/systemPatterns.md) |
 | Coaching mode issues | Check session state, verify mode config | [COACH-BEHAVIOR-MATRIX.md](./COACH-BEHAVIOR-MATRIX.md) |
+| Jailbreak / harassment / intimacy boundaries | Prompt policy + Test Runner `safety_*` scenarios | [SAFETY-PROMPT-POLICY.md](./SAFETY-PROMPT-POLICY.md) |
 | Personality profile errors | Check encryption/decryption flow | [systemPatterns.md](../memory-bank/systemPatterns.md) |
 
 **Primary Resources:**
 - [COACH-BEHAVIOR-MATRIX.md](./COACH-BEHAVIOR-MATRIX.md)
+- [SAFETY-PROMPT-POLICY.md](./SAFETY-PROMPT-POLICY.md)
 - [systemPatterns.md](../memory-bank/systemPatterns.md)
 
 ---

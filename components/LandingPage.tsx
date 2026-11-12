@@ -10,6 +10,9 @@ import { LogoIcon } from './icons/LogoIcon';
 import Button from './shared/Button';
 import { isNativeIOS } from '../utils/platformDetection';
 import { MessageCircle, Mic, ChevronRight } from 'lucide-react';
+import CoachingSessionResumeBanner, {
+  type CoachingSessionResumeBannerProps,
+} from './CoachingSessionResumeBanner';
 
 interface LandingPageProps {
   onSubmit: (context: string) => void;
@@ -18,15 +21,17 @@ interface LandingPageProps {
   onEditContext?: (context: string) => void;
   existingContext?: string;
   isTemplateContext?: boolean;
+  coachingResume?: CoachingSessionResumeBannerProps | null;
 }
 
 const removeGamificationKey = (text: string) => {
     return text.replace(/<!-- (gmf-data|do_not_delete): (.*?) -->\s*$/, '').trim();
 };
 
-const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, onEditContext, existingContext, isTemplateContext }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnaire, onStartInterview, onEditContext, existingContext, isTemplateContext, coachingResume }) => {
   const { t, language } = useLocalization();
   const native = isNativeIOS() && window.innerWidth < 768;
+  const hideUploadDropzone = isNativeIOS();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileContent, setFileContent] = useState('');
   const [fileName, setFileName] = useState('');
@@ -125,6 +130,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
     openFilePicker();
   };
 
+  const handleConversationCard = () => {
+    if (existingContext?.trim() && onEditContext && !isTemplateContext) {
+      onEditContext(existingContext);
+      return;
+    }
+    onStartQuestionnaire();
+  };
+
   const isNewUpload = !!fileContent && fileContent !== existingContext;
   const showEdit = !!fileContent && (isNewUpload || !isTemplateContext);
 
@@ -141,6 +154,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
           </p>
         </div>
 
+        {coachingResume && (
+          <div className="w-full max-w-2xl mx-auto text-left">
+            <CoachingSessionResumeBanner
+              coachName={coachingResume.coachName}
+              messageCount={coachingResume.messageCount}
+              onResume={coachingResume.onResume}
+            />
+          </div>
+        )}
+
         <input
           ref={fileInputRef}
           id="file-upload"
@@ -152,8 +175,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
         />
 
         {!fileContent ? (
-          <>
-            <div className={`grid grid-cols-1 ${native ? '' : 'md:grid-cols-3'} gap-4 md:gap-5 md:items-stretch`}>
+          <div className="flex flex-col gap-4 md:gap-5">
+            <div className={`${hideUploadDropzone ? '' : 'order-2 md:order-1 '}grid grid-cols-1 ${native ? '' : 'md:grid-cols-3'} gap-4 md:gap-5 md:items-stretch`}>
               <button
                 type="button"
                 onClick={handleContextCard}
@@ -174,7 +197,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
 
               <button
                 type="button"
-                onClick={onStartQuestionnaire}
+                onClick={handleConversationCard}
                 className="h-full flex flex-col text-left rounded-card p-5 action-card-featured shadow-card-elevated border border-transparent transition-all"
               >
                 <div className="w-11 h-11 rounded-xl bg-black/10 dark:bg-black/20 flex items-center justify-center mb-4 shrink-0">
@@ -207,9 +230,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
               </button>
             </div>
 
+            {!hideUploadDropzone && (
             <label
               htmlFor="file-upload"
-              className={`relative block w-full max-w-2xl mx-auto ${native ? 'p-4' : 'p-6'} text-center border-2 transition-colors duration-300 rounded-card cursor-pointer group
+              className={`order-1 md:order-2 relative block w-full max-w-2xl mx-auto ${native ? 'p-4' : 'p-6'} text-center border-2 transition-colors duration-300 rounded-card cursor-pointer group
                 ${isDragging
                   ? 'border-solid bg-status-success-background border-status-success-border'
                   : 'bg-background-secondary/90 backdrop-blur-sm border-border-primary hover:border-accent-primary shadow-card'
@@ -245,7 +269,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSubmit, onStartQuestionnair
                 )}
               </div>
             </label>
-          </>
+            )}
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto space-y-4 text-left">
             <div className="p-4 space-y-4 bg-background-secondary/90 backdrop-blur-sm border border-border-primary rounded-card shadow-card animate-fadeIn">

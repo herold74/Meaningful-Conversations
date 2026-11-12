@@ -179,7 +179,29 @@ https://mc-app.manualmode.at/privacy
 
 ## Review Notes (für Apple Reviewer, Englisch)
 
-**Copy into App Store Connect → App Review Information → Notes** (adjust password placeholder).
+### ASC Einreichung — Checkliste (5 Schritte)
+
+**Version 2.5.7** · Production-API (`mc-app.manualmode.at`) · Build laut Xcode/ASC (z. B. **2.5.7 (3)** nach Upload).
+
+| # | Wo in App Store Connect | Was eintragen |
+|---|-------------------------|---------------|
+| **1** | Version **2.5.7** → Build auswählen | Neuesten Build zuweisen (nach „Processing“ → „Ready to Submit“) |
+| **2** | **App Review Information → Sign-In required** | Username: `premium@manualmode.at` · Password: *(Review-Passwort)* |
+| **3** | **App Review Information → Notes** | **Nur** den **Copy-paste block** unten (Englisch) — **keine** 12-Schritte-Demo |
+| **4** | **App Review Information → Attachments** | ~7-Min-Screen-Recording (Sandbox-IAP + App-Features) **als Datei**, nicht in Notes |
+| **5** | **Submit for Review** (+ IAPs mit Binary resubmiten falls „Rejected“) | Optional vorher: Resolution Center (siehe unten) |
+
+**Drei verschiedene Orte — nicht verwechseln:**
+
+| Ort | Zweck |
+|-----|--------|
+| **Notes** | Alles für den Reviewer: Test-Account, Sandbox, Video-Inhalt, Compliance |
+| **Sign-In required** | Login-Daten (Apple öffnet oft separat) |
+| **Resolution Center** | Kurze Antwort auf die **Ablehnung** 2.5.6 — nur wenn du dort antwortest, **bevor** oder **beim** Resubmit |
+
+Die ausführliche **Demo-Anleitung (Schritte 1–12)** unten ist **Referenz** — poste sie **nicht** in Notes, wenn das Video angehängt ist.
+
+---
 
 ### Test Account
 - Email: `premium@manualmode.at`
@@ -193,7 +215,9 @@ podman exec meaningful-conversations-backend-production node scripts/setup-app-s
 ```
 Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account.js` — sets `isPremium`, `hasPracticeAccess`, same expiry (~2 years), `isClient=false`.
 
-### Demo Instructions (English)
+### Demo Instructions (English) — Referenz, nicht in Notes kopieren
+
+*Nur bei Nachfrage von Apple oder wenn kein Screen Recording angehängt ist.*
 
 1. Open the app. On the Welcome screen, choose **Deutsch** or **English**.
 2. Tap **Log in** / **Anmelden**. Sign in with the test account above.
@@ -204,19 +228,172 @@ Script: `meaningful-conversations-backend/scripts/setup-app-store-review-account
 7. **Coach Practice (Premium+):** Back to coach selection. Toggle tab **Coach Practice** / **Coaching üben** (graduation cap). Tap **Start practice** / **Übung starten**. Pick a method (e.g. GROW), scenario, and difficulty → run the conversation as coach → receive structured evaluation at the end.
 8. **Life Context:** Landing page → **Edit Life Context File** / **LEBENSKONTEXT-DATEI EDITIEREN**.
 9. **Personality profile:** Menu (☰) → **Personality Profile** (OCEAN pre-filled on test account).
-10. **In-App Purchases:** Menu → **About** → **Upgrade**. Premium+ subscription `mc.premium_plus.monthly` is listed. Sandbox purchase optional; test account already has Premium+ access.
-11. **Account deletion:** Menu → **Disclaimer** → delete account flow (do not delete the review account during testing).
+10. **In-App Purchases:** Menu (☰) → **Upgrade** (not About). Subscriptions and coach unlocks load via StoreKit/RevenueCat. For a **sandbox purchase demo**, sign in with a Sandbox Apple ID (Settings → App Store → Sandbox Account) on a **physical iPhone** — use an account **without** active Premium (not `premium@manualmode.at` for the purchase flow).
+11. **Restore Purchases:** On the Upgrade screen, tap **Restore Purchases** / **Käufe wiederherstellen**.
+12. **Account deletion:** Menu → **Disclaimer** → delete account flow (do not delete the review account during testing).
 
 ### Notes for Reviewer
 - **Store listing name:** ManualMode (previously MyCoach AI). In-app display name is already **ManualMode**.
+- **Upgrade codes removed (v2.5.7):** Code redemption UI is not available in the iOS app. Digital unlock is exclusively via In-App Purchase.
 - **Premium+** (`mc.premium_plus.monthly`): bundles Premium and Coach Practice in one subscription.
+- **Screen recording:** Attached (~7 min, edited for length) — see **Copy-paste block** below.
 - Primary app language: German. Full English via language toggle on Welcome screen.
 - Internet required for AI. Guest mode available without account.
 - Voice mode requires microphone permission.
 
+### Copy-paste block → **Notes** (Schritt 3 der Checkliste)
+
+**Das hier** in App Store Connect → App Review Information → **Notes** einfügen (Passwort-Zeile anpassen oder weglassen, wenn schon unter Sign-In required):
+
+```
+TEST ACCOUNT (feature demo — Premium+ incl. Coach Practice):
+Email: premium@manualmode.at
+Password: [same as Sign-In required field]
+
+SANDBOX IAP (screen recording):
+Use a Sandbox Apple ID on the device (Settings → Developer → Sandbox Apple Account).
+MC app login on staging/production API as above; purchases run through Apple Sandbox.
+
+SCREEN RECORDING (~7 min, edited for length):
+- Home Screen → app launch → login (English UI via Welcome screen toggle)
+- Menu (☰) → Upgrade: all IAP products visible with prices
+- Sandbox purchases demonstrated: Registered Monthly, Premium Monthly, Premium+ Monthly, coach unlocks (Kenji, Chloe)
+- Yearly subscriptions (Registered Annual, Premium Annual) are configured in App Store Connect but not shown in this clip to keep review time reasonable; monthly tiers and Premium+ demonstrate the same subscription group and upgrade path
+- Premium+ purchase → Coach Practice tab → short practice demo (method, scenario, session start)
+- Restore Purchases on Upgrade screen
+- Typical app features: Intent picker, coach selection, coaching session, Life Context, Personality Profile (test account may have empty profile after IAP demo reset)
+
+COMPLIANCE (v2.5.7):
+- Upgrade-code redemption UI removed from iOS (Guideline 3.1.1). Digital unlock via In-App Purchase only.
+- IAP products in binary via StoreKit/RevenueCat (Menu → Upgrade). Product IDs: mc.registered.monthly, mc.registered.yearly.v2, mc.premium.monthly, mc.premium.yearly, mc.premium_plus.monthly, mc.coach.kenji, mc.coach.chloe
+- Privacy Policy and Terms links on Upgrade screen (Guideline 3.1.2)
+
+LANGUAGE: Primary store metadata German; full English in-app via Welcome screen language toggle.
+```
+
+### Resolution Center reply — **optional** (separater Tab, nicht Notes)
+
+**Wo:** App Store Connect → App → **App Review** → Tab **Resolution Center** (Nachrichtenverlauf zur Ablehnung 2.5.6).
+
+**Wann:** Nur wenn du dort explizit auf Apple antwortest. Bei reinem Resubmit mit neuem Build reichen oft Notes + Video.
+
+**Text (Englisch, ein Satz):**
+
+> We removed upgrade-code UI from iOS, attached a ~7-minute sandbox IAP screen recording (monthly tiers + Premium+ with Coach Practice demo + Restore), and resubmitted IAP products with build 2.5.7.
+
 ---
 
-## Was ist neu — App Store Connect (v2.5.4, Build 1) — **aktuelle Einreichung**
+## Was ist neu — App Store Connect (v2.6.0) — **aktuelle Einreichung**
+
+**In ASC:** Version **2.6.0** anlegen → Build aus Xcode wählen (z. B. **2.6.0 (48)** nach Upload/Processing; `CURRENT_PROJECT_VERSION` = Repo-`BUILD_NUMBER`). Pro Lokalisierung **Deutsch** und **Englisch (Kanada)** unter „Was ist neu in dieser Version“ einfügen.
+
+**Screenshots (Stand 2026-11):** ASC-Upload **`screenshots/app-store/v2.6.0/asc-upload/iphone-dynamic-island-medium/{de|en}/`** — **9×** **1179×2556** je **Deutsch** und **Englisch (Kanada)** (`00`–`08`). Masters: `iphone/` (1284×2778). Generierung: `frame-asc-marketing-device.py v260` + `export-asc-iphone-upload.py`. Apple verlangt min. **3** — Set ist upload-fertig.
+
+**Store-Beschreibung (optional, nicht zwingend pro Release):** Wenn ihr die lange Beschreibung aktualisiert, Abschnitt **„Beschreibung — Ergänzung 2.6.0“** unten in DE + EN einfügen.
+
+### Deutsch — „Was ist neu in dieser Version“ (copy-paste)
+
+```
+The Connector: Üben Sie zuhörende Kurzgespräche mit KI-Personas — per Text oder Sprache. Ihre Verbindungs-Signatur macht Empathie, Präsenz, Neugier und mehr sichtbar (optional verschlüsselt im Profil).
+
+Profil & Reflexion: Ergebnisse im Persönlichkeitsprofil, optional eine kurze Fremdsicht zu Ihrem Lebenskontext (opt-in, Ende-zu-Ende-verschlüsselt).
+
+Verbindungsvorbereitung mit Gloria, verfeinertes Coaching üben, drei Farbwelten für Tag und Stimmung sowie Stabilität und Feinschliff in Profil, PDF-Export und Oberfläche.
+```
+
+### English (Canada) — What’s New (copy-paste)
+
+```
+The Connector: Practice short, listening-focused conversations with AI personas — by text or voice. Your connection signature highlights empathy, presence, curiosity, and more (optionally saved encrypted in your profile).
+
+Profile & reflection: Results in your personality profile, plus an optional short external perspective on your Life Context (opt-in, end-to-end encrypted).
+
+Connection prep with Gloria, refined Coach Practice, three color themes for your day, and stability and polish across profile, PDF export, and UI.
+```
+
+### Beschreibung — Ergänzung 2.6.0 (optional in ASC einfügen)
+
+**Deutsch** — nach „COACHING ÜBEN (PREMIUM+)“ oder als eigener Absatz:
+
+```
+THE CONNECTOR
+Kurze Alltags-Szenen mit KI-Personas: Üben Sie zuhörende Gespräche per Text oder Sprache, erhalten Sie ein Radar-Profil zu fünf Dimensionen und speichern Ihr Ergebnis optional verschlüsselt im Profil. Optional: kurze Fremdsicht zu Ihrem Lebenskontext (opt-in).
+```
+
+**English (Canada)** — after “COACH PRACTICE (PREMIUM+)” or as its own paragraph:
+
+```
+THE CONNECTOR
+Short everyday scenarios with AI personas: practice listening conversations by text or voice, get a five-dimension radar profile, and optionally save your result encrypted in your profile. Optional: a short external perspective on your Life Context (opt-in).
+```
+
+### Review Notes — Ergänzung v2.6.0
+
+**Checkliste:** Version **2.6.0** · Production-API (`mc-app.manualmode.at`) · `npm run build && npx cap sync ios` (**nicht** `sync:ios-staging`) vor Archive.
+
+**Demo-Schritte (Referenz)** — nach Login, Intent **Coaching**:
+
+1. **Coach-Auswahl → Kommunikation:** Tile **The Connector** (Registrierung nötig; Gäste sehen gesperrte Kachel).
+2. **Intro:** Modus Text oder Sprache wählen → Szenen starten (3 von 5 Kurzdialogen).
+3. **Auswertung:** Radar + Stärken/Entwicklung → optional **Speichern** (E2EE im Profil).
+4. **Profil:** Menü → Persönlichkeitsprofil → Abschnitt Connector / „Wie du interagierst“; optional **Fremdsicht** generieren (opt-in).
+5. **Coach Practice** und **IAP** wie in der Demo-Anleitung v2.5.7 (unverändert).
+
+**Copy-paste block — Zusatz für Notes** (unter dem v2.5.7-Block oder ersetzen mit aktualisierter Versionszeile):
+
+```
+VERSION 2.6.0 — NEW FEATURE DEMO:
+After login (Premium+ test account): Intent → Coaching → Coach grid → Communication section → The Connector.
+Complete intro (text or voice), finish vignettes, view radar evaluation, optionally save to profile.
+Profile → Personality → Connector section; optional external perspective (opt-in, E2EE).
+Production API: mc-app.manualmode.at (iOS archive built with npm run build && npx cap sync ios).
+IAP / compliance: unchanged from v2.5.7 (upgrade codes removed; Menu → Upgrade; Restore Purchases).
+```
+
+**Screen recording:** Bestehendes ~7-Min-IAP-Video weiter nutzen, sofern Premium+ + Practice noch abgedeckt; **empfohlen:** kurzer Zusatzclip oder neues Recording mit Connector-Flow (30–90 s) als zweites Attachment oder aktualisiertes Gesamtvideo.
+
+---
+
+## Was ist neu — App Store Connect (v2.5.7, Build 1) — **Resubmission nach Ablehnung 2.5.6 (2026-08-13)**
+
+**Rejection:** Guideline 3.1.1 (upgrade codes) + 2.1(b) (IAP not found in binary).
+
+**Fixes in this build:**
+- Upgrade-code UI removed from iOS (Apple 3.1.1)
+- RevenueCat key verification before archive (`npm run verify:ios-iap`)
+- Review path: Menu → Upgrade
+
+### Deutsch
+
+```
+App Store Compliance: Upgrade-Code-Einlösung in der iOS-App entfernt — Freischaltung nur noch über In-App-Käufe.
+
+In-App-Käufe: Verbesserte StoreKit/RevenueCat-Integration und klarere Upgrade-Navigation.
+
+Weitere Verbesserungen: Stabilität und kleinere Korrekturen.
+```
+
+### English (Canada)
+
+```
+App Store compliance: Removed upgrade-code redemption from the iOS app — unlock digital content via In-App Purchase only.
+
+In-App Purchases: Improved StoreKit/RevenueCat integration and clearer Upgrade navigation.
+
+Other improvements: Stability and minor fixes.
+```
+
+**Pre-archive checklist:** See `DOCUMENTATION/ASC-RESUBMIT-2.5.7.md`
+
+---
+
+## Was ist neu — App Store Connect (v2.5.6, Build 26) — **abgelehnt 2026-08-13**
+
+**Status:** Rejected **2026-08-13** (3.1.1 upgrade codes + 2.1(b) IAP). Superseded by **2.5.7 Build 1**.
+
+---
+
+## Was ist neu — App Store Connect (v2.5.4, Build 1) — **vorherige Einreichung (Referenz)**
 
 **In ASC:** Pro Lokalisierung **Deutsch** und **Englisch (Kanada)** unter „Was ist neu in dieser Version“ einfügen. Neue Version **2.5.4** anlegen (nicht die zurückgezogene 2.5.1-Einreichung).
 
@@ -360,7 +537,7 @@ node scripts/capture-app-store-screenshots.mjs --lang all
 node scripts/capture-app-store-screenshots.mjs --lang en --device iphone
 ```
 
-Output: `screenshots/app-store/v2.5.4/{iphone|ipad}/*-{de|en}.png` — in App Store Connect **pro Lokalisierung** hochladen.
+Output: `screenshots/app-store/v2.6.0/{iphone|ipad}/*-{de|en}.png` (aktuell) — in App Store Connect **pro Lokalisierung** hochladen. Ältere Sets: `v2.5.4/`.
 
 **v2.5.4 DE (Practice):** `scripts/prepare-asc-screenshots-from-assets.py` — iPhone/iPad Practice-Screens aus Geräte-Exports + Basis-Screens aus v2.4.2.
 

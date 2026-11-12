@@ -1,5 +1,6 @@
-import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog } from '../types';
+import { Bot, Message, ProposedUpdate, SessionAnalysis, Language, SolutionBlockage, TranscriptPreAnswers, TranscriptEvaluationResponse, TranscriptEvaluationSummary, BotRecommendationEntry, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticeCatalog, ConnectorVignettePublic, ConnectorVignetteCatalogEntry, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorEndType, ConnectorChatHandoff, ConnectorHandoffPayload } from '../types';
 import { apiFetch, getApiBaseUrl, getSession } from './api';
+import type { ConnectorRunMode } from '../utils/connectorRun';
 
 // This service is now a client for our secure backend, which proxies requests to the Gemini API.
 
@@ -10,7 +11,9 @@ export const sendMessage = async (
     language: Language,
     isNewSession: boolean,
     coachingMode?: string,
-    decryptedPersonalityProfile?: any
+    decryptedPersonalityProfile?: any,
+    connectorChatHandoff?: ConnectorChatHandoff | null,
+    connectorHandoffPayload?: ConnectorHandoffPayload | null,
 ): Promise<{ text: string; provider?: string | null }> => {
 
     return await apiFetch('/gemini/chat/send-message', {
@@ -22,7 +25,9 @@ export const sendMessage = async (
             language,
             isNewSession,
             coachingMode,
-            decryptedPersonalityProfile
+            decryptedPersonalityProfile,
+            connectorChatHandoff: connectorChatHandoff ?? undefined,
+            connectorHandoffPayload: connectorHandoffPayload ?? undefined,
         }),
     });
 };
@@ -42,6 +47,8 @@ export const sendMessageStream = async (
     onChunk: (chunk: string) => void,
     coachingMode?: string,
     decryptedPersonalityProfile?: any,
+    connectorChatHandoff?: ConnectorChatHandoff | null,
+    connectorHandoffPayload?: ConnectorHandoffPayload | null,
 ): Promise<{ text: string; provider?: string | null }> => {
     const session = getSession();
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -56,6 +63,8 @@ export const sendMessageStream = async (
         body: JSON.stringify({
             botId, context, history, language, isNewSession,
             coachingMode, decryptedPersonalityProfile,
+            connectorChatHandoff: connectorChatHandoff ?? undefined,
+            connectorHandoffPayload: connectorHandoffPayload ?? undefined,
             stream: true,
         }),
     });
@@ -214,13 +223,20 @@ export const rateTranscriptEvaluation = async (
 export const generateInterviewTranscript = async (
     history: Message[],
     language: Language,
-    userName?: string
-): Promise<{ summary: string; setup: string; transcript: string }> => {
+    userName?: string,
+    connectionPrep?: boolean,
+): Promise<{ summary: string; setup: string; transcript: string; connectionPoints?: string; connectionPrep?: boolean }> => {
     const response = await apiFetch('/gemini/interview/transcript', {
         method: 'POST',
-        body: JSON.stringify({ history, language, userName }),
+        body: JSON.stringify({ history, language, userName, connectionPrep }),
     });
-    return { summary: response.summary, setup: response.setup, transcript: response.transcript };
+    return {
+        summary: response.summary,
+        setup: response.setup,
+        transcript: response.transcript,
+        connectionPoints: response.connectionPoints,
+        connectionPrep: response.connectionPrep,
+    };
 };
 
 export const transcribeAudio = async (
@@ -434,4 +450,157 @@ export const deletePracticeEvaluation = async (id: string): Promise<void> => {
 
 export const deletePracticeTranscript = async (id: string): Promise<void> => {
     await apiFetch(`/practice/evaluations/${id}/transcript`, { method: 'DELETE' });
+};
+
+// --- The Connector ---
+
+export const startConnectorRun = async (
+    language: Language,
+): Promise<{ mode: 'assessment'; vignettes: ConnectorVignettePublic[]; maxUserTurns: number }> => {
+    return await apiFetch(`/gemini/connector/start?language=${language}`);
+};
+
+export const fetchConnectorCatalog = async (
+    language: Language,
+): Promise<{ vignettes: ConnectorVignetteCatalogEntry[]; maxUserTurns: number }> => {
+    return await apiFetch(`/gemini/connector/catalog?language=${language}`);
+};
+
+export const fetchConnectorVignette = async (
+    vignetteId: string,
+    language: Language,
+): Promise<{ vignette: ConnectorVignettePublic; maxUserTurns: number }> => {
+    return await apiFetch(`/gemini/connector/vignette/${encodeURIComponent(vignetteId)}?language=${language}`);
+};
+
+export const compileConnectorOpenScenario = async (
+    params: {
+        relationship: string;
+        situation: string;
+        personaName: string;
+        personaGender: 'male' | 'female';
+        lengthPreset: 'short' | 'standard' | 'long';
+        language: Language;
+    },
+): Promise<{
+    customScenarioId: string;
+    vignette: ConnectorVignettePublic;
+    maxUserTurns: number;
+    lengthPreset: string;
+}> => {
+    return await apiFetch('/gemini/connector/scenario/from-description', {
+        method: 'POST',
+        body: JSON.stringify(params),
+    });
+};
+
+/**
+ * Send one Connector turn with SSE streaming.
+ * Returns final text plus whether the persona ended the conversation
+ * ('heard' = felt heard and closed; 'timeout' = everyday-excuse exit at turn cap).
+ */
+export const sendConnectorTurnStream = async (
+    vignetteId: string,
+    history: Message[],
+    language: Language,
+    liveMode: boolean,
+    onChunk: (chunk: string) => void,
+    options?: {
+        runMode?: ConnectorRunMode;
+        customScenarioId?: string;
+    },
+): Promise<{ text: string; ended: boolean; endType: ConnectorEndType | null; provider?: string | null }> => {
+    const session = getSession();
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (session?.token) {
+        headers['Authorization'] = `Bearer ${session.token}`;
+    }
+
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/api/gemini/connector/turn`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+            vignetteId,
+            customScenarioId: options?.customScenarioId,
+            runMode: options?.runMode ?? 'assessment',
+            history,
+            language,
+            liveMode,
+            stream: true,
+        }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+        const data = await response.json();
+        onChunk(data.text);
+        return { text: data.text, ended: !!data.ended, endType: data.endType ?? null, provider: data.provider ?? null };
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let streamedText = '';
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+            if (line.startsWith('data: ')) {
+                try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.chunk) {
+                        streamedText += data.chunk;
+                        onChunk(data.chunk);
+                    }
+                    if (data.done) {
+                        return {
+                            text: data.text || streamedText,
+                            ended: !!data.ended,
+                            endType: data.endType ?? null,
+                            provider: data.provider ?? null,
+                        };
+                    }
+                } catch { /* ignore partial JSON */ }
+            }
+        }
+    }
+    return { text: streamedText, ended: false, endType: null, provider: null };
+};
+
+export const evaluateConnectorRun = async (
+    entries: { vignetteId: string; history: Message[]; endType: ConnectorEndType }[],
+    language: Language,
+    liveMode: boolean,
+): Promise<{ evaluation: ConnectorEvaluationResult; durationMs: number }> => {
+    return await apiFetch('/gemini/connector/evaluate', {
+        method: 'POST',
+        body: JSON.stringify({ vignettes: entries, language, liveMode }),
+    });
+};
+
+export const evaluateConnectorQualitative = async (
+    params: {
+        customScenarioId: string;
+        history: Message[];
+        endType: ConnectorEndType;
+        language: Language;
+        liveMode: boolean;
+        lengthPreset?: string;
+        relationshipBucket?: string;
+    },
+): Promise<{ evaluation: ConnectorQualitativeEvaluationResult; durationMs: number }> => {
+    return await apiFetch('/gemini/connector/evaluate-qualitative', {
+        method: 'POST',
+        body: JSON.stringify(params),
+    });
 };

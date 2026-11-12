@@ -1,0 +1,537 @@
+#!/bin/bash
+#
+# Meaningful Conversations — server ops report (health, backups, patches).
+# Cron (CRON_TZ=Europe/Vienna): 07:30 daily; Mon 07:45 --weekly-summary;
+# Mon 08:30 deploy-mc-production (see MONITORING-QUICK-REFERENCE.md).
+#
+# Usage:
+#   server-ops-report.sh [--dry-run] [--weekly-summary] [--test-mail]
+#
+# Config (server only): /root/.mc-ops-report.env → MC_OPS_REPORT_EMAIL
+#
+set -euo pipefail
+
+ENV_FILE="/root/.mc-ops-report.env"
+LOG_FILE="/var/log/mc-ops-report.log"
+BACKUP_LOG="/var/log/meaningful-conversations-backup.log"
+BACKUP_DIRS=(
+  "/var/backups/meaningful-conversations"
+)
+BACKUP_MAX_AGE_HOURS=26
+BACKUP_MIN_BYTES=10240
+DISK_WARN_PCT=85
+HEALTH_PROD_URL="https://mc-app.manualmode.at/api/health"
+HEALTH_STAGING_URL="https://mc-beta.manualmode.at/api/health"
+CHECK_STAGING_HEALTH=true
+
+PROD_CONTAINERS=(
+  meaningful-conversations-mariadb-production
+  meaningful-conversations-backend-production
+  meaningful-conversations-frontend-production
+  meaningful-conversations-tts-production
+)
+WATCHDOG_LOG="/var/log/mc-stack-watchdog.log"
+WATCHDOG_HANDLUNG="mc-stack-watchdog.timer (alle ~3 min) soll reparieren; Log: $WATCHDOG_LOG; ggf. systemctl start mc-stack-watchdog.service"
+
+DRY_RUN=false
+WEEKLY_SUMMARY=false
+TEST_MAIL=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=true ;;
+    --weekly-summary) WEEKLY_SUMMARY=true ;;
+    --test-mail) TEST_MAIL=true ;;
+    -h|--help)
+      sed -n '2,12p' "$0"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+if [[ -f "$ENV_FILE" ]]; then
+  # shellcheck source=/dev/null
+  source "$ENV_FILE"
+fi
+
+MC_OPS_REPORT_EMAIL="${MC_OPS_REPORT_EMAIL:-support@manualmode.at}"
+
+log_line() {
+  local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+  echo "$msg" >> "$LOG_FILE"
+  if [[ -t 1 ]] || [[ "$DRY_RUN" == true ]]; then
+    echo "$msg"
+  fi
+}
+
+OVERALL=0
+DETAILS=""
+ACTIONS=()
+SUMMARY_BACKUP_PROD="OK"
+SUMMARY_BACKUP_STAGING="OK"
+SUMMARY_PROD="OK"
+SUMMARY_STAGING="—"
+SUMMARY_DISK="OK"
+SUMMARY_KERNEL="OK"
+SUMMARY_PATCHES="OK"
+
+section() {
+  DETAILS+=$'\n'"=== $* ==="$'\n'
+}
+
+append() {
+  DETAILS+="$*"$'\n'
+}
+
+bump_status() {
+  local level="$1"
+  if [[ "$level" == "FAIL" && "$OVERALL" -lt 2 ]]; then
+    OVERALL=2
+  elif [[ "$level" == "WARN" && "$OVERALL" -lt 1 ]]; then
+    OVERALL=1
+  fi
+}
+
+add_action() {
+  local level="$1" what="$2" todo="$3"
+  ACTIONS+=("[$level] $what — $todo")
+}
+
+# Newest dump for one environment across BACKUP_DIRS. Echoes the path, or nothing.
+latest_backup_for_env() {
+  local env_name="$1" dir candidate latest="" latest_mtime=0 mtime
+  for dir in "${BACKUP_DIRS[@]}"; do
+    [[ -d "$dir" ]] || continue
+    while IFS= read -r -d '' candidate; do
+      mtime=$(stat -c %Y "$candidate" 2>/dev/null || stat -f %m "$candidate")
+      if [[ "$mtime" -gt "$latest_mtime" ]]; then
+        latest=$candidate
+        latest_mtime=$mtime
+      fi
+    done < <(find "$dir" -maxdepth 1 -type f \( -name "${env_name}-*.sql.gz" -o -name "${env_name}-*.sql" \) -print0 2>/dev/null)
+  done
+  printf '%s' "$latest"
+}
+
+# Sets ASSESS_SUMMARY. Age, size, and gzip are checked for this file only.
+assess_backup_file() {
+  local env_name="$1" latest="$2"
+  local age_hours size base problems=() reason
+  age_hours=$(( ( $(date +%s) - $(stat -c %Y "$latest" 2>/dev/null || stat -f %m "$latest") ) / 3600 ))
+  size=$(stat -c %s "$latest" 2>/dev/null || stat -f %z "$latest")
+  base=$(basename "$latest")
+
+  if [[ "$age_hours" -gt "$BACKUP_MAX_AGE_HOURS" ]]; then
+    problems+=("älter als ${BACKUP_MAX_AGE_HOURS}h")
+    add_action "FAIL" "DB-Backup ${env_name} zu alt (${age_hours}h)" "SSH: /usr/local/bin/backup-databases.sh; $latest prüfen"
+  fi
+  if [[ "$size" -lt "$BACKUP_MIN_BYTES" ]]; then
+    problems+=("Datei zu klein")
+    add_action "FAIL" "Backup ${env_name} zu klein (${size}B)" "Dump/DB prüfen; backup-databases.sh Log lesen"
+  fi
+  if [[ "$latest" == *.gz ]] && command -v gzip >/dev/null; then
+    if ! gzip -t "$latest" 2>/dev/null; then
+      problems+=("gzip defekt")
+      add_action "FAIL" "Backup ${env_name} gzip-Integrität" "SSH: gzip -t $latest; neues Backup erzeugen"
+    fi
+  fi
+
+  if [[ ${#problems[@]} -eq 0 ]]; then
+    append "OK ${env_name}: ${base} age=${age_hours}h size=${size}B"
+    ASSESS_SUMMARY="OK (${age_hours}h, ${base})"
+    return 0
+  fi
+
+  bump_status FAIL
+  reason=$(IFS=', '; echo "${problems[*]}")
+  append "FAIL ${env_name}: ${base} age=${age_hours}h size=${size}B (${reason})"
+  ASSESS_SUMMARY="FAIL (${reason}, ${base})"
+}
+
+check_backups() {
+  section "Database backups"
+  local found_any=false dir env_name latest
+
+  if [[ -f "$BACKUP_LOG" ]]; then
+    append "Backup log (last 3 lines):"
+    while IFS= read -r line; do append "  $line"; done < <(tail -n 3 "$BACKUP_LOG")
+  else
+    append "Backup log missing: $BACKUP_LOG"
+    bump_status WARN
+    add_action "WARN" "Backup-Log fehlt" "SSH: ls -la $BACKUP_LOG; Cron backup-databases.sh (06:00 Vienna) prüfen"
+  fi
+
+  for dir in "${BACKUP_DIRS[@]}"; do
+    [[ -d "$dir" ]] && found_any=true
+  done
+
+  if [[ "$found_any" == false ]]; then
+    append "FAIL: no backup directory found (checked: ${BACKUP_DIRS[*]})"
+    bump_status FAIL
+    SUMMARY_BACKUP_PROD="FAIL (kein Verzeichnis)"
+    SUMMARY_BACKUP_STAGING="FAIL (kein Verzeichnis)"
+    add_action "FAIL" "Backup-Verzeichnis fehlt" "SSH: mkdir/Permissions ${BACKUP_DIRS[*]}; backup-databases.sh"
+    return 0
+  fi
+
+  for env_name in production staging; do
+    latest=$(latest_backup_for_env "$env_name")
+    if [[ -z "$latest" ]]; then
+      append "FAIL ${env_name}: no backup file in ${BACKUP_DIRS[*]}"
+      bump_status FAIL
+      add_action "FAIL" "Kein ${env_name}-Backup" "SSH: ls ${BACKUP_DIRS[*]}/${env_name}-*.sql.gz; /usr/local/bin/backup-databases.sh"
+      if [[ "$env_name" == production ]]; then
+        SUMMARY_BACKUP_PROD="FAIL (fehlt)"
+      else
+        SUMMARY_BACKUP_STAGING="FAIL (fehlt)"
+      fi
+      continue
+    fi
+    assess_backup_file "$env_name" "$latest"
+    if [[ "$env_name" == production ]]; then
+      SUMMARY_BACKUP_PROD="$ASSESS_SUMMARY"
+    else
+      SUMMARY_BACKUP_STAGING="$ASSESS_SUMMARY"
+    fi
+  done
+}
+
+_ops_http_code() {
+  curl -s -o "$2" -w '%{http_code}' --connect-timeout 15 --max-time 30 "$1" 2>/dev/null || echo "000"
+}
+
+_ops_backend_ip() {
+  podman inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$1" 2>/dev/null || true
+}
+
+_ops_backend_local_ok() {
+  local name="$1" ip code
+  ip=$(_ops_backend_ip "$name")
+  [[ -z "$ip" ]] && return 1
+  code=$(_ops_http_code "http://${ip}:8080/api/health" /dev/null)
+  [[ "$code" == "200" ]]
+}
+
+_ops_podman_health_status() {
+  podman inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$1" 2>/dev/null || echo "none"
+}
+
+_ops_prod_stack_running() {
+  local c
+  for c in "${PROD_CONTAINERS[@]}"; do
+    podman ps --filter "name=^${c}$" --filter status=running -q 2>/dev/null | grep -q . || return 1
+  done
+  return 0
+}
+
+check_health() {
+  section "Health / availability"
+  local code body missing=0 prod_public_ok=false
+  local prod_backend="meaningful-conversations-backend-production"
+
+  code=$(_ops_http_code "$HEALTH_PROD_URL" /tmp/mc-ops-health-prod.json)
+  body=$(head -c 120 /tmp/mc-ops-health-prod.json 2>/dev/null || true)
+  append "Production $HEALTH_PROD_URL -> HTTP $code ${body:-(no body)}"
+  if [[ "$code" == "200" ]] && grep -q '"status":"ok"' /tmp/mc-ops-health-prod.json 2>/dev/null; then
+    SUMMARY_PROD="OK (HTTP 200)"
+    prod_public_ok=true
+  elif [[ "$code" == "502" ]] || [[ "$code" == "503" ]] || [[ "$code" == "504" ]]; then
+    bump_status FAIL
+    SUMMARY_PROD="FAIL (HTTP $code)"
+    add_action "FAIL" "Production API $code (Gateway)" "$WATCHDOG_HANDLUNG"
+  elif [[ "$code" == "000" ]]; then
+    bump_status FAIL
+    SUMMARY_PROD="FAIL (unreachable)"
+    add_action "FAIL" "Production Health nicht erreichbar" "curl -v $HEALTH_PROD_URL; nginx + podman ps; $WATCHDOG_HANDLUNG"
+  else
+    bump_status FAIL
+    SUMMARY_PROD="FAIL (HTTP $code)"
+    add_action "FAIL" "Production Health nicht OK (HTTP $code)" "curl -sS $HEALTH_PROD_URL; podman logs $prod_backend; $WATCHDOG_HANDLUNG"
+  fi
+
+  if [[ "$CHECK_STAGING_HEALTH" == true ]]; then
+    if staging_running=$(podman ps --filter "name=meaningful-conversations-backend-staging" --format '{{.Names}}' 2>/dev/null | wc -l); then
+      if [[ "${staging_running:-0}" -gt 0 ]]; then
+        code=$(_ops_http_code "$HEALTH_STAGING_URL" /tmp/mc-ops-health-staging.json)
+        body=$(head -c 120 /tmp/mc-ops-health-staging.json 2>/dev/null || true)
+        append "Staging $HEALTH_STAGING_URL -> HTTP $code ${body:-(no body)}"
+        if [[ "$code" == "200" ]] && grep -q '"status":"ok"' /tmp/mc-ops-health-staging.json 2>/dev/null; then
+          SUMMARY_STAGING="OK (HTTP 200)"
+        else
+          bump_status WARN
+          SUMMARY_STAGING="WARN (HTTP $code)"
+          add_action "WARN" "Staging Health nicht OK (HTTP $code)" "$WATCHDOG_HANDLUNG"
+        fi
+      else
+        append "Staging: not running (skipped)"
+        SUMMARY_STAGING="— (nicht gestartet)"
+      fi
+    fi
+  fi
+
+  section "Production containers (podman)"
+  for c in "${PROD_CONTAINERS[@]}"; do
+    # Avoid `podman ps | grep` under pipefail (SIGPIPE → false "not running").
+    running_id=$(podman ps --filter "name=^${c}$" --filter status=running -q 2>/dev/null | head -1)
+    if [[ -n "$running_id" ]]; then
+      status=$(podman ps --filter "name=^${c}$" --format '{{.Status}}' 2>/dev/null | head -1)
+      append "OK $c: $status"
+    else
+      append "FAIL $c: not running"
+      missing=$((missing + 1))
+    fi
+  done
+  if [[ "$missing" -gt 0 ]]; then
+    bump_status FAIL
+    SUMMARY_PROD="FAIL ($missing Container fehlen)"
+    add_action "FAIL" "$missing Production-Container fehlen" "SSH: podman ps -a; cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml up -d; $WATCHDOG_HANDLUNG"
+  elif _ops_prod_stack_running; then
+    local hstatus local_ok front_code
+    hstatus=$(_ops_podman_health_status "$prod_backend")
+    append "Production backend podman health: $hstatus"
+    if [[ "$hstatus" == "unhealthy" ]]; then
+      bump_status FAIL
+      SUMMARY_PROD="FAIL (backend unhealthy)"
+      add_action "FAIL" "Production-Backend podman unhealthy" "$WATCHDOG_HANDLUNG"
+    fi
+    if ! _ops_backend_local_ok "$prod_backend"; then
+      bump_status FAIL
+      SUMMARY_PROD="FAIL (backend :8080 nicht erreichbar)"
+      add_action "FAIL" "Production-Backend lokal :8080/api/health fehlgeschlagen" "$WATCHDOG_HANDLUNG"
+    fi
+    if [[ "$prod_public_ok" == false ]]; then
+      front_code=$(_ops_http_code "https://mc-app.manualmode.at/" /dev/null)
+      append "Production site root -> HTTP $front_code (API war nicht 200)"
+      if [[ "$front_code" == "200" ]]; then
+        append "Hinweis: Frontend erreichbar, API nicht — typisch nginx-IP oder Zombie-Backend"
+      fi
+    fi
+  fi
+}
+
+check_disk() {
+  section "Disk usage"
+  local line pct mount
+  line=$(df -hP / 2>/dev/null | tail -1)
+  if [[ -n "$line" ]]; then
+    append "$line"
+    pct=$(echo "$line" | awk '{print $5}' | tr -d '%')
+    mount=$(echo "$line" | awk '{print $6}')
+    if [[ "$pct" =~ ^[0-9]+$ ]] && [[ "$pct" -ge "$DISK_WARN_PCT" ]]; then
+      bump_status WARN
+      SUMMARY_DISK="WARN (${pct}% auf $mount)"
+      add_action "WARN" "Disk ≥${DISK_WARN_PCT}% auf $mount" "SSH: df -h; /usr/local/bin/podman-image-cleanup.sh; große Logs prüfen"
+    else
+      SUMMARY_DISK="OK (${pct:-?}% auf $mount)"
+    fi
+  fi
+}
+
+check_patches() {
+  section "Security patches (report only)"
+  if command -v apt-get >/dev/null; then
+    export DEBIAN_FRONTEND=noninteractive
+    local sim
+    sim=$(apt-get -s upgrade 2>/dev/null | grep -E '^Inst' | grep -Ei 'security|important' || true)
+    if [[ -n "$sim" ]]; then
+      append "$sim"
+      bump_status WARN
+      SUMMARY_PATCHES="WARN (apt security updates)"
+      add_action "WARN" "Security-Updates (apt) ausstehend" "SSH: apt-get upgrade (HTIL + Wartungsfenster); nicht automatisch per Cron"
+    else
+      append "No pending security/important apt upgrades."
+      SUMMARY_PATCHES="OK (keine apt security)"
+    fi
+  elif command -v dnf >/dev/null; then
+    local sec_lines count
+    sec_lines=$(dnf check-update --security -q 2>/dev/null | grep -E '^[[:alnum:]]' || true)
+    count=$(echo "$sec_lines" | grep -c . || true)
+    if [[ "${count:-0}" -gt 0 ]]; then
+      append "${count} security package(s) available:"
+      while IFS= read -r l; do append "  $l"; done < <(echo "$sec_lines" | head -n 15)
+      [[ "$count" -gt 15 ]] && append "  ... ($(( count - 15 )) more)"
+      bump_status WARN
+      SUMMARY_PATCHES="WARN ($count dnf security)"
+      add_action "WARN" "$count DNF-Security-Updates" "SSH: dnf check-update --security; Patch-Fenster mit Banner planen (HTIL, kein Auto-dnf)"
+    else
+      append "No pending security updates (dnf check-update --security)."
+      SUMMARY_PATCHES="OK (keine dnf security)"
+    fi
+  else
+    append "Patch check skipped (no apt/dnf)"
+    bump_status WARN
+    SUMMARY_PATCHES="WARN (kein dnf)"
+  fi
+}
+
+check_kernel_reboot() {
+  section "Kernel / reboot (live)"
+  local running latest
+  running=$(uname -r)
+  append "Running: $running"
+  if command -v rpm >/dev/null; then
+    latest=$(rpm -q kernel --last 2>/dev/null | head -1 | sed 's/^kernel-//' | awk '{print $1}')
+    append "Latest installed: ${latest:-unknown}"
+    if [[ -n "$latest" && "$running" != "$latest" ]]; then
+      bump_status WARN
+      SUMMARY_KERNEL="WARN (Reboot für $latest)"
+      add_action "WARN" "Kernel: läuft $running, installiert $latest" "Wartungsfenster + Reboot planen (HTIL); uname -r nach Boot prüfen"
+    else
+      SUMMARY_KERNEL="OK ($running)"
+    fi
+  fi
+  if command -v dnf >/dev/null; then
+    if dnf needs-restarting -r >/dev/null 2>&1; then
+      append "dnf needs-restarting: no reboot required"
+    else
+      append "dnf needs-restarting: reboot suggested"
+      bump_status WARN
+      [[ "$SUMMARY_KERNEL" == OK* ]] && SUMMARY_KERNEL="WARN (dnf needs-reboot)"
+      add_action "WARN" "dnf needs-restarting meldet Reboot" "SSH: dnf needs-restarting -r; Reboot im Wartungsfenster (HTIL)"
+    fi
+  fi
+}
+
+check_weekly_maintenance() {
+  section "Weekly maintenance (log references)"
+  if [[ -f /var/log/update-check.log ]]; then
+    local last_header
+    last_header=$(grep "^Update-Check:" /var/log/update-check.log 2>/dev/null | tail -1 || true)
+    [[ -n "$last_header" ]] && append "Last check-updates.sh: $last_header"
+  fi
+
+  if [[ -f /var/log/schema-drift.log ]]; then
+    local last_run_start last_block
+    last_run_start=$(grep -n 'Weekly Schema Drift Check Started' /var/log/schema-drift.log 2>/dev/null | tail -1 | cut -d: -f1)
+    if [[ -n "$last_run_start" ]]; then
+      append "schema-drift (latest run):"
+      while IFS= read -r line; do append "  $line"; done < <(tail -n +"$last_run_start" /var/log/schema-drift.log | head -n 10)
+      last_block=$(tail -n +"$last_run_start" /var/log/schema-drift.log 2>/dev/null)
+      if echo "$last_block" | grep -qiE 'drift detected|schema drift found|unterschied|✗.*schema'; then
+        bump_status WARN
+        add_action "WARN" "Schema-Drift (letzter Mo-Lauf)" "SSH: tail /var/log/schema-drift.log; Staging/Prod Migrationen vergleichen"
+      fi
+    fi
+  fi
+}
+
+build_report() {
+  local status_label host_line ts
+  STATUS_LABEL=OK
+  [[ "$OVERALL" -eq 1 ]] && STATUS_LABEL=WARN
+  [[ "$OVERALL" -eq 2 ]] && STATUS_LABEL=FAIL
+
+  host_line="${HOSTNAME:-$(hostname)}"
+  ts=$(date '+%Y-%m-%d %H:%M %Z')
+
+  local body=""
+  if [[ "$WEEKLY_SUMMARY" == true && "$OVERALL" -eq 0 ]]; then
+    body+="Wochenzusammenfassung — alle Checks OK."$'\n\n'
+  fi
+
+  body+="Gesamtstatus: ${STATUS_LABEL} — ${host_line} — ${ts}"$'\n\n'
+  body+="HANDLUNG ERFORDERLICH"$'\n'
+  if [[ ${#ACTIONS[@]} -eq 0 ]]; then
+    body+="Keine — alles im grünen Bereich."$'\n\n'
+  else
+    local i=1
+    for action in "${ACTIONS[@]}"; do
+      body+="${i}. ${action}"$'\n'
+      i=$((i + 1))
+    done
+    body+=$'\n'
+  fi
+
+  body+="KURZÜBERSICHT"$'\n'
+  body+="• Backup Prod:    ${SUMMARY_BACKUP_PROD}"$'\n'
+  body+="• Backup Staging: ${SUMMARY_BACKUP_STAGING}"$'\n'
+  body+="• Prod:     ${SUMMARY_PROD}"$'\n'
+  body+="• Staging:  ${SUMMARY_STAGING}"$'\n'
+  body+="• Disk:     ${SUMMARY_DISK}"$'\n'
+  body+="• Kernel:   ${SUMMARY_KERNEL}"$'\n'
+  body+="• Patches:  ${SUMMARY_PATCHES}"$'\n\n'
+  body+="DETAILS"$'\n'
+  body+="${DETAILS}"
+
+  REPORT="$body"
+  SUBJECT="MC ops [${STATUS_LABEL}] ${host_line} $(date +%Y-%m-%d)"
+}
+
+send_mail() {
+  local subject="$1"
+  local body="$2"
+  if [[ "$DRY_RUN" == true ]]; then
+    log_line "DRY-RUN: would email $MC_OPS_REPORT_EMAIL subject=$subject"
+    return 0
+  fi
+  if command -v msmtp >/dev/null && { [[ -f /etc/msmtprc ]] || [[ -f /root/.msmtprc ]]; }; then
+    {
+      if [[ -n "${MC_OPS_REPORT_FROM:-}" ]]; then
+        echo "From: $MC_OPS_REPORT_FROM"
+      fi
+      echo "To: $MC_OPS_REPORT_EMAIL"
+      echo "Subject: $subject"
+      echo ""
+      echo "$body"
+    } | msmtp -a default "$MC_OPS_REPORT_EMAIL" 2>>"$LOG_FILE" && {
+      log_line "Mail sent via msmtp (account default)"
+      return 0
+    }
+  fi
+  if command -v mail >/dev/null; then
+    echo "$body" | mail -r "mc-ops@$(hostname -f 2>/dev/null || hostname)" -s "$subject" "$MC_OPS_REPORT_EMAIL" 2>>"$LOG_FILE"
+    return 0
+  fi
+  log_line "ERROR: no mail/msmtp available"
+  return 1
+}
+
+if [[ "$TEST_MAIL" == true ]]; then
+  if send_mail "MC ops report test" "Test message from $(hostname) at $(date). If you receive this, outbound mail works."; then
+    log_line "Test mail queued/sent to $MC_OPS_REPORT_EMAIL"
+    exit 0
+  fi
+  exit 2
+fi
+
+# Tests source this file with MC_OPS_REPORT_SOURCE_ONLY=1 and call the functions directly.
+if [[ "${MC_OPS_REPORT_SOURCE_ONLY:-}" == "1" ]]; then
+  return 0 2>/dev/null || exit 0
+fi
+
+HOSTNAME=$(hostname -f 2>/dev/null || hostname)
+
+check_backups
+check_health
+check_disk
+check_patches
+check_kernel_reboot
+check_weekly_maintenance
+
+build_report
+
+log_line "Run complete: $STATUS_LABEL (code=$OVERALL)"
+
+should_send=false
+if [[ "$OVERALL" -ge 1 ]]; then
+  should_send=true
+elif [[ "$WEEKLY_SUMMARY" == true && "$OVERALL" -eq 0 ]]; then
+  should_send=true
+fi
+
+if [[ "$should_send" == true ]]; then
+  send_mail "$SUBJECT" "$REPORT" || true
+elif [[ "$DRY_RUN" == true ]]; then
+  log_line "DRY-RUN: no mail (status OK, not weekly summary)"
+fi
+
+if [[ "$DRY_RUN" == true ]]; then
+  echo "$REPORT"
+fi
+
+exit "$OVERALL"

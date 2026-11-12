@@ -21,6 +21,8 @@ android/capacitor-cordova-android-plugins/build/
 
 # Build output
 /dist
+/build/
+*.xcarchive
 meaningful-conversations-backend/dist/
 
 # Logs
@@ -43,6 +45,17 @@ server.log
 !.env.server.example
 !env.*.template
 *.summary
+scripts/pdf-qa-password-candidates.local
+# Local QA output and decrypted profile dumps. Never commit.
+tmp/
+
+# Password-candidate tooling for E2EE profile recovery. Ops-only, public repo.
+meaningful-conversations-backend/scripts/decrypt-profiles-with-candidates.js
+meaningful-conversations-backend/scripts/try-decrypt-profile-candidates.js
+meaningful-conversations-backend/scripts/dump-personality-profiles-for-pdf.js
+
+# Third-party ICF standard PDF — keep local; redistribution is not cleared.
+DOCUMENTATION/icf-res-coaching-platform-standards.pdf
 
 # Alternative server environment files (contain secrets)
 .env.staging
@@ -121,6 +134,15 @@ SYSTEM-CONFIG.md
 
 # Social Media & Marketing Content (not part of the repository)
 DOCUMENTATION/SOCIAL-MEDIA/
+
+# Coach practice print materials — local only (not in the public repo)
+DOCUMENTATION/COACH-BEHAVIOR-MATRIX.md
+DOCUMENTATION/practice-method-cheatsheet.html
+DOCUMENTATION/coach-behavior-matrix-infographic.html
+DOCUMENTATION/coach-behavior-matrix-infographic-a4-single.html
+DOCUMENTATION/VERGLEICH-SAM-GABRIELLE-VICTOR.md
+DOCUMENTATION/VERGLEICH-SAM-GABRIELLE-VICTOR.html
+DOCUMENTATION/print/
 
 # Operational & Infrastructure Documentation (sensitive)
 MONITORING-GUIDE.md

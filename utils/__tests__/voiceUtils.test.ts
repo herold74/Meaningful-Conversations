@@ -2,11 +2,11 @@
  * Tests for voice utilities
  */
 
-import { getVoiceGender, cleanVoiceName, selectVoice, voiceNameIncludesToken } from '../voiceUtils';
+import { getVoiceGender, cleanVoiceName, selectVoice, voiceNameIncludesToken, dedupeSpeechSynthesisVoices } from '../voiceUtils';
 import type { Language } from '../types';
 
-const createVoice = (name: string, lang: string = 'de-DE', localService = true, isDefault = false): SpeechSynthesisVoice =>
-  ({ name, lang, localService, default: isDefault } as SpeechSynthesisVoice);
+const createVoice = (name: string, lang: string = 'de-DE', localService = true, isDefault = false, voiceURI?: string): SpeechSynthesisVoice =>
+  ({ name, lang, localService, default: isDefault, voiceURI: voiceURI ?? `uri-${name}-${lang}` } as SpeechSynthesisVoice);
 
 describe('voiceUtils', () => {
   describe('getVoiceGender', () => {
@@ -74,6 +74,18 @@ describe('voiceUtils', () => {
     test('strips " - " suffix when no parenthesis', () => {
       const result = cleanVoiceName('Anna - German');
       expect(result).toContain('Anna');
+    });
+  });
+
+  describe('dedupeSpeechSynthesisVoices', () => {
+    test('collapses duplicate Safari entries with identical display names', () => {
+      const voices = [
+        createVoice('Daniel', 'en-US', true, false, 'com.apple.voice.compact.en-US.Daniel'),
+        createVoice('Daniel', 'en-US', true, false, 'com.apple.voice.enhanced.en-US.Daniel'),
+      ];
+      const deduped = dedupeSpeechSynthesisVoices(voices);
+      expect(deduped).toHaveLength(1);
+      expect(deduped[0].voiceURI).toContain('enhanced');
     });
   });
 

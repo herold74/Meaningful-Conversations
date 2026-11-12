@@ -218,3 +218,45 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Reasoning:** When a stale Docker image lacks `dist/avatars/`, the old fallback served HTML for `/avatars/*.png`, breaking coach portraits silently. Explicit 404 makes deploy/asset gaps obvious in DevTools and curl.
 - **Implementation:** `server.js` — regex test on `req.path` before `sendFile(index.html)`.
 
+### 26. Admin tab bar at capacity — no more icon tabs (2026-09-06)
+- **Decision:** The Admin Console icon tab bar in `AdminView.tsx` is **full** (7 tabs admin, 8 developer). **Do not add another top-level icon tab** without redesigning navigation first.
+- **Reasoning:** Below `lg`, tabs are icon-only (`flex-1`); at ~320px width with 8 tabs, touch targets are ~40px — already below Apple’s 44pt guideline. Another tab would worsen usability; labels only appear from 1024px up.
+- **Future options (when needed):** horizontal scroll on mobile; grouped sections (Operations / Analytics / Developer); overflow „Mehr“ menu; secondary nav inside a tab.
+- **Current tabs:** users, feedback, tickets, codes, [runner dev-only], practice-analytics, connector-analytics, api-usage.
+
+### 27. Connector SSE holdback must flush for streaming TTS (2026-09-07)
+- **Decision:** When stripping `[CONNECTOR_END]` from Connector SSE chunks, **flush the holdback tail** as a final chunk before `done: true`, not only in the final `done.text` payload.
+- **Reasoning:** Client streaming TTS enqueues sentences from SSE chunks; tail text left in the holdback buffer never reached TTS, so the last sentence was often silent. Coaching/practice streams have no holdback — unaffected.
+- **Implementation:** `routes/gemini/connector.js` — after the generator loop, emit `pending` (marker stripped) as one last SSE chunk. Frontend: `reconcileStreamingWithFinalText()` as safety net in `ChatView` + streaming playback wait in `useTts.ts`.
+
+### 29. DPC-only coaches (Nobody, Sam) under DPFL accounts (2026-09-24)
+- **Decision:** When `coachingMode === 'dpfl'`, **Nobody** and **Sam** still run as **DPC** (no Comfort Check, no profile refinement); all other coaching bots use full DPFL.
+- **Reasoning:** Management & communication / brief forward-focused sessions are poor fit for adaptive profile learning; avoids UI/runtime mismatch.
+- **Implementation:** `utils/coachingMode.ts` (`getEffectiveCoachingMode`, `botSupportsDpflSessionFlow`) used in `BotSelection`, `ChatView`, `SessionReview`; client sends effective mode to chat API.
+
+### 30. Maintenance windows — public banner, no extra admin tab (2026-09-27)
+- **Decision:** Scheduled downtime is a `MaintenanceWindow` row. `GET /api/maintenance/current` is public. The banner shows for **registered users and guests** on in-app views including the auth chooser; it stays off login, register, and password screens. Upcoming notices dismiss per browser via `maintenanceNoticeDismissedId` (window id). An **active** window stays visible. Admin editing lives in a collapsible section above the admin tabs — not a new icon tab (Decision #26).
+- **Reasoning:** Guests use the same host; a login-only notice would miss them. Dismiss-by-id avoids a user table (GDPR-minimal) and still resurfaces the next window. Active downtime should not be dismissible.
+
+### 28. Multi-tile grids — aligned baselines (2026-09-23)
+- **Decision:** Side-by-side (or visually grouped) **selection tiles** must keep **aligned content rails**: same vertical start for body copy, **CTA/footer pinned to the card bottom** (`flex-col` + `mt-auto` on the link row). Use a **fixed min-height on the title block** (typically two lines) so shorter titles do not shift description start.
+- **Reasoning:** Product owner explicitly rejects neighboring tiles where text or links sit on different vertical levels.
+- **Implementation:** Pattern in `IntentPickerView` (`min-h` on `h3`, `flex-1` description, `mt-auto` CTA, grid `items-stretch` + tile `height: 100%` from `md` up). Apply the same rule to future card grids (catalog pickers, hub rows).
+
+### 32. Sessions and developer test mode (2026-11-02)
+- **Decision:** A JWT is accepted only for an existing user with `status === 'ACTIVE'`, and only if it was issued after `tokensInvalidatedAt`. Admin password reset, account deletion, and role toggles invalidate that user's tokens. Role and credential mutations require `isAdmin` (developers keep read access and the test runner). `X-Test-Mode` skips the daily cost cap only for `isDeveloper`, and never when `ENVIRONMENT_TYPE=production`.
+- **Reasoning:** A deleted or reset account must not keep a 7-day session. The test header was a client-controlled spend bypass. Express 4 does not catch async rejections; Node 22 exits on them, so route rejections are forwarded to an error middleware and process-level handlers shut the worker down cleanly.
+- **Implementation:** `middleware/auth.js`, `middleware/adminAuth.js`, `middleware/requireAdmin.js`, `services/tokenInvalidation.js`, `utils/testMode.js`, `middleware/asyncHandler.js`, `middleware/errorHandler.js`.
+
+### 33. Software-stack dependency waves (2026-11-07)
+- **Decision:** Dependency updates follow **layers and waves** (W1 host security → W2 npm patch/minor + image rebuild → W3 LLM SDK minors with regression → later majors Prisma/React/Express). **One wave per deploy focus** — do not mix kernel reboot, Prisma major, and LLM SDK in one rollout.
+- **Staging first;** production pulls the same registry tags. **Rollback:** `deploy-manualmode.sh` + `.previous-version` on the server (see `techContext.md`).
+- **Build numbering:** Functional stack bumps can soak on staging at the current `BUILD_NUMBER`; increment **BUILD_NUMBER** (e.g. 75 → 76) on the production deploy that marks the wave complete.
+- **Reference:** `PLANS/software-stack-update-plan.md`.
+
+### 31. Xcode web sync — agent runs npm scripts (2026-10-29)
+- **Decision:** The maintainer does **not** deploy to Xcode manually (no “run `npx cap sync ios`” handoffs, no Merksatz checklists of npm commands in chat). When they ask to **deploy / sync to Xcode**, the **agent** runs the repo script and reports done + “Run in Xcode (scheme App)”.
+- **Scripts:** `npm run sync:ios-staging` (mc-beta API) · `npm run sync:ios-production` (mc-app API, default `npm run build`). Never suggest raw `npx cap sync ios` alone to the user.
+- **Default mapping:** “Deploy nach Xcode” + production device testing → `sync:ios-production`; staging iPhone → `sync:ios-staging`. Ask once if ambiguous.
+- **Reasoning:** Owner tests via Xcode builds on device; repeating CLI recipes in prose feels like ignored instructions and wastes attention.
+

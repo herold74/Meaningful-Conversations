@@ -97,14 +97,31 @@
     - [x] Shared component library (Card, Badge, Avatar, SectionHeader, InputField, ModalOverlay, Skeleton, PageTransition)
     - [x] Framer Motion page transitions & micro-interactions
     - [x] 30+ views modernized (rounded cards, elevated shadows, pill buttons)
-- [x] **Visual modernization Phases 1–4 (2026-07-23 – 2026-07-24, staging build 35):**
+- [x] **IntentPicker UX (2026-08-09):** iOS safe-area spacing above logo; desktop card title min-height for aligned descriptions; tighter title→body gap; DE intent copy update
+- [x] **User Guide UX (2026-08-09):** Tighter `<details>` chapter accordion spacing (summary/content gap)
+- [x] **Formatierungshilfe DE (2026-08-09):** Everyday German copy; „Wichtige Begriffe hervorheben“ instead of misleading „Schlüssel“
     - [x] Ambient dual corner gradients (`body::before`), teal-tinted dark palette, 16px card radius, Button gradient variant
     - [x] Chat shell, session review dashboard, bot selection polish (Lucide headers, featured glow)
     - [x] Paywall/auth semantic tokens
     - [x] Entry screens: WelcomeScreen hero + orbiting avatars; IntentPicker 3-card grid; LandingPage 3-card hub + upload zone
     - [x] `.action-card-featured` dark-teal gradient for featured selection tiles
 - [x] **v2.1.1 release (2026-07-24):** Readability/contrast patch — ScoreBadge, semantic tokens, button and evaluation screen contrast
-- [x] **Production v2.5.6 (2026-08-05):** https://mc-app.manualmode.at, health OK (staging Build 11 images; FAQ trim + cumulative 2.5.6 changes)
+- [x] **Staging + Production v2.6.0 (2026-11):** Build **75** — Repo `BUILD_NUMBER` 75, `sw.js` v2.6.0-b75; Staging & Production parity (laut Projektstand)
+- [x] **Production v2.6.0 (2026-11-03):** Build **72** — superseded by b75
+- [x] **Staging v2.6.0 (2026-11-02):** Build **70** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b70; deps/audit + Capacitor 8.6; from `bc497fec` + deploy `68094440`)
+- [x] **Staging v2.6.0 (2026-10-30):** Build **64** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b64; iOS manual voice save + dedupe; `3cf711e4`)
+- [x] **Staging v2.6.0 (2026-10-30):** Build **63** — superseded by b64
+- [x] **Staging v2.6.0 (2026-10-28):** Build **52** — superseded by b62 (Connector invisible server handoff + lightweight coach prep)
+- [x] **Staging v2.6.0 (2026-10-28):** Build **51** — superseded by b52 (Connector coach bridge, handbook)
+- [x] **Staging v2.6.0 (2026-10-12):** Build **45** — superseded by b51 (`sw.js` v2.6.0-b45; DE phonetic Team plurals/compounds `f5e49d46`)
+- [x] **Production v2.6.0:** Build **41** — https://mc-app.manualmode.at (`sw.js` v2.6.0-b41; verified 2026-09-29)
+- [x] **Staging v2.6.0 (2026-09-29):** Build **43** — https://mc-beta.manualmode.at (`sw.js` v2.6.0-b43; utility-tile avatar fix + Podman prune hook)
+- [x] **Staging + Production v2.6.0 (2026-09-26):** Build **39** — superseded (production now b41, staging b43)
+- [x] **Production v2.6.0 (2026-09-16):** Build **19** — superseded by Build 39
+- [x] **Staging v2.6.0 (2026-09-21):** Build **23** — superseded by Build 39 (Connector open situation + catalog polish; `bd64ccc4`, `2776454b`)
+- [x] **Staging v2.6.0 (2026-09-14):** Build **19** — superseded by Build 39
+- [x] **Production v2.5.6 (2026-08-09):** Build **26** — superseded by v2.6.0
+- [x] **Staging v2.5.6 (2026-08-09):** Build **26** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b26)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **11** — https://mc-beta.manualmode.at, health OK (`sw.js` v2.5.6-b11; FAQ Intent-Picker-Nachfolger entfernt `bc14105`)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **10** — superseded by Build 11 (FAQ STT wait + signature voice fallback from `77f7396`)
 - [x] **Staging v2.5.6 (2026-08-05):** Build **9** — superseded by Build 10 (voice stable STT send on Flieger tap)
@@ -129,6 +146,8 @@
 - [x] **Staging v2.3.1 (2026-07-26):** Build **2** — superseded by v2.4.2
 - [x] **Production v2.5.0 (2026-07-30):** Build **6** — https://mc-app.manualmode.at, health OK (staging registry images)
 - [x] **App Store iOS 2.5.0 (6):** **Live 2026-08-01** (AT/DE/CH)
+- [x] **App Store iOS 2.5.6 (23):** **Submitted for review 2026-08-09** (Xcode `CURRENT_PROJECT_VERSION=26`) — **rejected 2026-08-13** (3.1.1 redeem codes + 2.1(b) IAP)
+- [x] **App Store iOS 2.5.7 (4):** **Resubmitted for review 2026-08-21** — redeem UI removed on iOS, handbook/IAP audit, production CORS fix, Review Notes + sandbox video + EN screenshots
 - [x] **Production v2.3.1 (2026-07-26):** Build **2** — superseded by v2.5.0
 - [x] **Xcode sync v2.3.1 (2026-07-26):** `npm run build && npx cap sync ios`
 - [x] **Staging v2.3.0 (2026-07-25):** superseded by v2.3.1
@@ -181,12 +200,12 @@
 - [x] **IP Externalization:** Server IP never hardcoded, git history scrubbed
 - [x] **Sensitive data sanitization:** `sanitizeUserForClient()` allowlist — no token leakage in API responses
 - [x] **DB-backed token invalidation:** `tokensInvalidatedAt` column — cross-worker revocation in PM2 cluster
-- [x] **npm audit:** Frontend 0 vulns, Backend 0 vulns (pm2@7.0.3 fixes CVE-2025-5891 + CVE-2026-27699)
+- [x] **npm audit (committed lockfiles):** Keine high/critical in Produktionsabhängigkeiten (pm2@7.0.3: CVE-2025-5891 + CVE-2026-27699 behoben). W2-Scan 2026-11-07: moderate nur Jest/glob-Kette (dev/test); kein `audit fix --force` für W2.
 - [x] **Docker base images:** node:22-bookworm (Debian 12) — Bullseye EOL Nov 2026 avoided
-- [x] **Server OS:** AlmaLinux 9.8, kernel 5.14.0-687, OpenSSL 3.5.5, Podman 5.8.2 (dnf upgrade 2026-07-15)
+- [x] **Server OS:** AlmaLinux 9.8, kernel 5.14.0-687.65.1, Podman 5.8.2-8 (`dnf update --security` + reboot 2026-11-04; previous note 2026-07-15)
 - [x] **Backup script:** Duplicate log line bug fixed; daily backups healthy (2.8 MB / 16 files, 7-day retention)
 
-## Code Quality (v2.5.5)
+## Code Quality (v2.5.6)
 - [x] **Test Coverage:**
     - [x] Frontend: 25 suites, 220 tests — `collectCoverageFrom` widened (utils, services, hooks, context, config); floors 20% statements/lines, 30% branches, 35% functions
     - [x] Backend: 45 suites, 742 tests — coverage includes routes/middleware/practice/utils (excludes `routes/gemini/**`); floors ~40% statements/lines, 30% branches, 50% functions
@@ -203,11 +222,14 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Staging:** Build **37** deployed 2026-07-24 (`6670420` + `11c9c50`) — in-app docs, welcome avatars, SPA asset 404, deploy build-verify stream fallback verified live.
+- **Repo `BUILD_NUMBER`:** **78**. **Staging:** v**2.6.0** **b78** (W6 React 19). **Production:** **b77** (Prod-Pull W6 ausstehend).
+- [x] **SW-Stack Freitags-Mail (2026-11-12):** `sw-stack-ops-report.sh` Fr 20:00 — Tabelle Patches/Risiko/QA/Abhängigkeiten + `npm outdated` (siehe `scripts/MONITORING-QUICK-REFERENCE.md`)
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
+- [x] **Stack watchdog (2026-10-14):** `mc-stack-watchdog.timer` (~3 min) recreates wedged backends + refreshes nginx IPs; ops-report surfaces 502/unhealthy with HANDLUNG
 - [x] **CI/CD:** Deployment scripts with version management + GitHub Actions test-on-push
 - [x] **Admin UI:** Fully responsive design for mobile management
+- [x] **Maintenance windows (local, not deployed):** public banner for registered users and guests; admin section above tabs; migration `20260927130000_add_maintenance_windows` applies on next backend deploy
 
 ## Mobile App (Capacitor)
 - [x] **iOS Integration:** (iPhone and iPad only — macOS availability disabled)
@@ -218,7 +240,7 @@
     - [x] Backend receipt verification (`/api/apple-iap/verify-receipt`)
     - [x] NativePaywall with Restore, active products, legal links (Privacy/Terms)
     - [x] App Store Launch (v2.0.0, 2026-03-07) — AT/DE/CH
-    - [x] Capacitor SPM **8.4.2** synced (2026-07-24, build 35)
+    - [x] Capacitor **8.6.0** (npm + `CapApp-SPM/Package.swift` exact 8.6.0)
     - [x] Apple Review compliance (Guideline 3.1.2c — EULA/Terms links)
     - [x] Static compliance pages (`privacy.html`, `support.html`, `terms.html`)
     - [x] Test account for Apple Review (`premium@manualmode.at` on production)
@@ -229,7 +251,7 @@
 
 ## Monetization & Payments
 - [x] **PayPal Webhook:** Purchase processing, upgrade code generation, email delivery
-- [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption + legal links (iOS)
+- [x] **Paywall UI:** Responsive layout with PayPal checkout + code redemption + legal links (web); iOS uses NativePaywall only — **no redeem codes on iOS** (2026-08-13, Apple 3.1.1)
 - [x] **Upgrade Code System:** Admin generation, referrer tracking, bot-level unlocks
 - [x] **Premium Trial:** 9-day trial for new registrations (includes Coach Practice during trial)
 - [x] **Premium+ (2026-08-02):** Single subscription bundles Premium + Coach Practice (`ACCESS_PASS_PLUS_1M` / `mc.premium_plus.monthly`); Practice add-on legacy-only; staging Build 8
@@ -252,6 +274,9 @@
 - [x] **Content-based template detection** — line-by-line analysis instead of questionnaireAnswers state
 
 ## Pending / Roadmap
+- [x] **Software-Stack W2:** #27 merged; Staging b76.
+- [x] **Software-Stack W3:** #28 merged — `@google/genai` 2.32, `@mistralai` 2.7; Regression `PLANS/w3-regression-results.md`.
+- [x] **Krisen-Hilfsangebote region-aware** *(2026-08-23)*: Kuratierter Katalog AT/DE/CH/CA in `crisisResources.js` (keine LLM-Nummern). `crisisText.js` injiziert die Liste; AT nicht mehr als Default für alle Länder. Doku: `DOCUMENTATION/CRISIS-HELPLINES.md`. 3-Schritt-Protokoll (Verify → Region → Activate) unverändert.
 - [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
 - [ ] **Android:** Capacitor project setup (Android Studio)
 - [ ] **Apple Watch Integration:** watchOS Companion-App (natives Swift/SwiftUI, WatchConnectivity). Kein Capacitor-Support auf watchOS — Watch-App muss nativ in Xcode gebaut werden.
@@ -263,6 +288,7 @@
 - [ ] **PayPal Subscriptions:** Monthly recurring payments on web (3.90 EUR/month)
 - [x] ~~**Performance:** Large context file optimization~~ (not needed — LC files stay 3-5 pages in practice)
 - [ ] **Accessibility:** Formal WCAG audit (axe-core/Lighthouse tooling, prefers-reduced-motion, color contrast verification, screen reader testing)
+- [ ] **Rolling Context / Kontextlimitierung (Developer-Experiment)** *(2026-09-14, Backlog)*: Opt-in **nur für `isDeveloper`** — Classic Coaching (`/gemini/chat/send-message`), nicht Practice/Connector/Gloria. Drei Zonen: unveränderter System-Prompt + rollende Summary (Refresh ca. alle 8 User-Nachrichten) + Kurzfenster (letzte ~6 Nachrichten an das LLM). **UI-Historie und Session Review bleiben vollständig**; Kompression nur im API-Payload; Server ignoriert Flag für Nicht-Developer. Ziel: Context Drift und Token-/RAM-Last testen (Vorbereitung späteres On-Device-8B). Dedizierter Summary-Endpoint + Chat-Header-Toggle (`localStorage`). Aufwand grob **M**. Spezifikation: Cursor-Plan „Dev Rolling Context“ (2026-09-14).
 - [ ] **Self-hosted SLM:** Replace Gemini with server-based model (Llama-3.1-8B-Instruct, LeoLM-8B-chat, or CEREBORN-german). Milestone: >1000 paying users. Requires dedicated larger server with GPU. Eliminates per-request API costs and Google dependency.
 - [ ] **Leuchtfeuer – Micro-Learning für Führungskräfte** *(EN: Beacon)*: Kurz-Lernangebote in den Management-Bereich integrieren. Produktname leitet sich von der Leuchtturm-/Steuerrad-Metapher von manualmode.at ab. **Nobody** als passendes Coach-Profil für proaktive ML-Vorschläge im Gespräch; Verweise auf kuratierte Inhalte (Deep Links / Ressourcenliste). Subline: „Leuchtfeuer – Micro-Learning für Führungskräfte".
 

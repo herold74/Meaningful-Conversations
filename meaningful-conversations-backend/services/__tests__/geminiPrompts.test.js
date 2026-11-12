@@ -318,6 +318,33 @@ describe('geminiPrompts', () => {
       expect(prompt).toContain('Contracting + opening + closing');
     });
 
+    test('prompt includes professional boundary misconduct section', () => {
+      const prompt = practiceEvaluationPrompts.en.prompt({
+        framework: { name: 'Test', stages: 'S', complianceCriteria: 'C', evaluatorRubric: 'R' },
+        scenarioSummary: 'Test',
+        difficulty: 'moderate',
+        selfRating: null,
+        transcript: 'Coach: Hi',
+        currentDate: '2026-09-22',
+        matchTier: 'primary',
+        discouragedReason: '',
+        sessionFlowRubric: '',
+      });
+      expect(prompt).toContain('Professional boundaries / coach misconduct');
+      const promptDe = practiceEvaluationPrompts.de.prompt({
+        framework: { name: 'Test', stages: 'S', complianceCriteria: 'C', evaluatorRubric: 'R' },
+        scenarioSummary: 'Test',
+        difficulty: 'moderate',
+        selfRating: null,
+        transcript: 'Coach: Hi',
+        currentDate: '2026-09-22',
+        matchTier: 'primary',
+        discouragedReason: '',
+        sessionFlowRubric: '',
+      });
+      expect(promptDe).toContain('Professionelle Grenzen / Fehlverhalten');
+    });
+
     test('Type A (four-stage) prompt includes sessionFlowRubric from framework', () => {
       const rubric = 'Full 6-step contracting with session aim → current state → possibilities → commitment progression';
       const prompt = practiceEvaluationPrompts.en.prompt({

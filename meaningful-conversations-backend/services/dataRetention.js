@@ -3,6 +3,7 @@
  * 
  * Automatically deletes old records according to defined retention policies:
  * - ApiUsage: 12 months (Art. 5 Abs. 1 lit. e DSGVO - Speicherbegrenzung)
+ * - ConnectorRunStat: 12 months (anonymized admin aggregates)
  * - UserEvent: 6 months (analytics events, no long-term need)
  * 
  * Other tables:
@@ -15,6 +16,7 @@ const prisma = require('../prismaClient.js');
 
 const RETENTION_POLICIES = {
     apiUsage: { months: 12, label: 'API usage records' },
+    connectorRunStat: { months: 12, label: 'connector run stat records' },
     userEvent: { months: 6, label: 'user event records' },
 };
 
@@ -38,6 +40,22 @@ async function runRetentionCleanup() {
         }
     } catch (error) {
         console.error('[DataRetention] Error cleaning up ApiUsage:', error);
+    }
+
+    // Clean up ConnectorRunStat older than 12 months
+    try {
+        const connectorCutoff = new Date();
+        connectorCutoff.setMonth(connectorCutoff.getMonth() - RETENTION_POLICIES.connectorRunStat.months);
+
+        const connectorResult = await prisma.connectorRunStat.deleteMany({
+            where: { createdAt: { lt: connectorCutoff } },
+        });
+
+        if (connectorResult.count > 0) {
+            console.log(`[DataRetention] Deleted ${connectorResult.count} ${RETENTION_POLICIES.connectorRunStat.label} older than ${RETENTION_POLICIES.connectorRunStat.months} months`);
+        }
+    } catch (error) {
+        console.error('[DataRetention] Error cleaning up ConnectorRunStat:', error);
     }
 
     // Clean up UserEvent older than 6 months
@@ -69,7 +87,7 @@ function initDataRetentionCleanup() {
     // Then run every 24 hours
     setInterval(runRetentionCleanup, 24 * 60 * 60 * 1000);
 
-    console.log('[DataRetention] Data retention cleanup initialized (ApiUsage: 12 months, UserEvent: 6 months)');
+    console.log('[DataRetention] Data retention cleanup initialized (ApiUsage: 12 months, ConnectorRunStat: 12 months, UserEvent: 6 months)');
 }
 
 module.exports = {

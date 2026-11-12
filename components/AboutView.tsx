@@ -6,6 +6,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { HowItWorks } from './HowItWorks';
 import { AboutCoachPractice } from './AboutCoachPractice';
 import { brand } from '../config/brand';
+import { VersionLabels } from './VersionLabels';
 
 interface InfoViewProps {
 }
@@ -27,7 +28,7 @@ const de_markdown_part2 = `
 
 const de_final_sentence = `Diese Anwendung ist ein Projekt, das aus Leidenschaft für persönliches Wachstum und Technologie entstanden ist. Wir hoffen, dass sie Ihnen auf Ihrem Weg eine wertvolle Unterstützung ist.`;
 
-const de_highlight = `Und wenn Sie den direkten Austausch wünschen, können Sie über [**${brand.providerName}**](${brand.providerUrl}) jederzeit einen zertifizierten Lebens- und Sozialberater kontaktieren.`;
+const de_highlight = `Und wenn Sie den direkten Austausch wünschen, können Sie über [**${brand.providerName}**](mailto:${brand.contactEmail}) jederzeit einen zertifizierten Lebens- und Sozialberater kontaktieren.`;
 
 const en_markdown_part1 = `Do you want to deepen the insights from your coaching in your daily life or are you looking for a straightforward way to self-reflection? "${brand.appName}" was developed precisely for this purpose. The app is your intelligent complement to professional coaching and a modern alternative to a self-help book – a personal space for your development that is available to you at any time.
 
@@ -46,7 +47,7 @@ const en_markdown_part2 = `
 
 const en_final_sentence = `This application is a project born from a passion for personal growth and technology. We hope it serves as a valuable support on your journey.`;
 
-const en_highlight = `And if you want direct exchange, you can contact a certified life and social counselor at any time via [**${brand.providerName}**](${brand.providerUrl}).`;
+const en_highlight = `And if you want direct exchange, you can contact a certified life and social counselor at any time via [**${brand.providerName}**](mailto:${brand.contactEmail}).`;
 
 
 type AboutTab = 'about' | 'coach' | 'practice';
@@ -61,17 +62,19 @@ const AboutView: React.FC<InfoViewProps> = () => {
     const highlightContent = language === 'de' ? de_highlight : en_highlight;
 
     return (
-        <div className="flex flex-col items-center w-full space-y-8">
-            <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
+        <div className="flex flex-col items-center w-full max-w-full space-y-8 overflow-x-hidden">
+            <div className="w-full max-w-3xl mx-auto p-4 sm:p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10 box-border">
                 <div className="text-center">
                     <h1 className="text-2xl font-semibold text-content-primary tracking-tight">{t('about_title')}</h1>
-                    <p className="mt-1 text-sm text-content-subtle">{t('about_version')} 2.5.6</p>
+                    <div className="mt-2 flex justify-center">
+                        <VersionLabels align="center" className="text-sm" />
+                    </div>
                 </div>
-                <div className="flex items-center justify-evenly border-b border-border-secondary dark:border-border-primary">
+                <div className="flex items-stretch justify-between gap-1 sm:gap-2 border-b border-border-secondary dark:border-border-primary">
                     <button
                         type="button"
                         onClick={() => setActiveTab('coach')}
-                        className={`pb-3 px-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                        className={`pb-3 px-1 sm:px-2 text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-wide transition-colors text-center flex-1 min-w-0 leading-tight ${
                             activeTab === 'coach'
                                 ? 'text-accent-primary border-b-2 border-accent-primary'
                                 : 'text-content-tertiary hover:text-content-primary'
@@ -82,7 +85,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
                     <button
                         type="button"
                         onClick={() => setActiveTab('practice')}
-                        className={`pb-3 px-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                        className={`pb-3 px-1 sm:px-2 text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-wide transition-colors text-center flex-1 min-w-0 leading-tight ${
                             activeTab === 'practice'
                                 ? 'text-accent-primary border-b-2 border-accent-primary'
                                 : 'text-content-tertiary hover:text-content-primary'
@@ -93,7 +96,7 @@ const AboutView: React.FC<InfoViewProps> = () => {
                     <button
                         type="button"
                         onClick={() => setActiveTab('about')}
-                        className={`pb-3 px-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                        className={`pb-3 px-1 sm:px-2 text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-wide transition-colors text-center flex-1 min-w-0 leading-tight ${
                             activeTab === 'about'
                                 ? 'text-accent-primary border-b-2 border-accent-primary'
                                 : 'text-content-tertiary hover:text-content-primary'

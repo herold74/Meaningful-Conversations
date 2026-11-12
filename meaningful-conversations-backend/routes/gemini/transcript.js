@@ -6,7 +6,55 @@ const { transcriptEvaluationPrompts } = require('../../services/geminiPrompts.js
 const { trackApiUsage } = require('../../services/apiUsageTracker.js');
 const aiProviderService = require('../../services/aiProviderService.js');
 const { audioTranscribeLimiter } = require('../../middleware/rateLimiter.js');
-const { audioUpload, withTimeout } = require('./shared.js');
+const { audioUpload, withTimeout, parseStructuredJsonResponse } = require('./shared.js');
+
+const TRANSCRIPT_EVALUATION_MAX_OUTPUT_TOKENS = 8192;
+
+function mergeTokenUsage(primary = {}, secondary = {}) {
+    return {
+        inputTokens: (primary.inputTokens || 0) + (secondary.inputTokens || 0),
+        outputTokens: (primary.outputTokens || 0) + (secondary.outputTokens || 0),
+        totalTokens: (primary.totalTokens || 0) + (secondary.totalTokens || 0),
+    };
+}
+
+async function generateTranscriptEvaluation({
+    evaluationPrompt,
+    userRegionPreference,
+    language,
+}) {
+    return await withTimeout(
+        aiProviderService.generateContent({
+            model: 'gemini-2.5-pro',
+            contents: evaluationPrompt,
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: transcriptEvaluationPrompts.schema,
+                schemaName: 'transcript_evaluation',
+                temperature: 0.2,
+                maxOutputTokens: TRANSCRIPT_EVALUATION_MAX_OUTPUT_TOKENS,
+            },
+            context: 'analysis',
+            userRegionPreference,
+            language,
+        }),
+        120000,
+        'Transcript evaluation'
+    );
+}
+
+function parseTranscriptEvaluationResponse(rawText, attempt = 1) {
+    try {
+        return parseStructuredJsonResponse(rawText, 'transcript evaluation');
+    } catch (parseErr) {
+        console.error('[transcript-eval] JSON parse failed', {
+            attempt,
+            message: parseErr.message,
+            preview: parseErr.rawPreview || (rawText || '').substring(0, 200),
+        });
+        throw parseErr;
+    }
+}
 
 // POST /api/gemini/transcript/evaluate
 // Requires authentication and Premium+ access
@@ -33,7 +81,14 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
         // Access check: Premium+ only
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: { isPremium: true, isClient: true, isAdmin: true, isDeveloper: true, lifeContext: true }
+            select: {
+                isPremium: true,
+                isClient: true,
+                isAdmin: true,
+                isDeveloper: true,
+                lifeContext: true,
+                aiRegionPreference: true,
+            }
         });
 
         if (!user) {
@@ -91,49 +146,38 @@ router.post('/transcript/evaluate', authMiddleware, async (req, res) => {
         // AI call — respect user's AI region preference (GDPR)
         const userRegionPreference = user.aiRegionPreference || 'optimal';
         const modelName = 'gemini-2.5-pro';
-        const result = await withTimeout(
-            aiProviderService.generateContent({
-                model: modelName,
-                contents: evaluationPrompt,
-                config: {
-                    responseMimeType: 'application/json',
-                    responseSchema: transcriptEvaluationPrompts.schema,
-                    temperature: 0.2,
-                },
-                context: 'analysis',
-                userRegionPreference,
-                language: language || 'de',
-            }),
-            120000,
-            'Transcript evaluation'
-        );
+        let result = await generateTranscriptEvaluation({
+            evaluationPrompt,
+            userRegionPreference,
+            language: language || 'de',
+        });
 
         const durationMs = Date.now() - startTime;
-        const generatedText = result.text || '';
-        const tokenUsage = result.usage || {};
+        let generatedText = result.text || '';
+        let tokenUsage = result.usage || {};
 
-        // Parse response
         let evaluationResult;
         try {
-            let cleanedText = generatedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            try {
-                evaluationResult = JSON.parse(cleanedText);
-            } catch (firstParseErr) {
-                cleanedText = cleanedText
-                    .replace(/""(\w+)":\s*:/g, '"$1":')
-                    .replace(/""(\w+)":/g, '"$1":')
-                    .replace(/"(\w+)"::/g, '"$1":')
-                    .replace(/:\s*\\"/g, ': "')
-                    .replace(/\\",/g, '",')
-                    .replace(/\\"(\s*[}\]])/g, '"$1')
-                    .replace(/,(\s*[}\]])/g, '$1');
-                evaluationResult = JSON.parse(cleanedText);
-                console.log('✓ Transcript evaluation JSON sanitization successful');
-            }
-        } catch (parseErr) {
-            console.error('Failed to parse transcript evaluation response:', parseErr);
-            return res.status(500).json({ error: 'Failed to parse evaluation response.' });
+            evaluationResult = parseTranscriptEvaluationResponse(generatedText, 1);
+        } catch (firstParseErr) {
+            console.warn('[transcript-eval] Retrying evaluation after JSON parse failure');
+            const retryResult = await generateTranscriptEvaluation({
+                evaluationPrompt,
+                userRegionPreference,
+                language: language || 'de',
+            });
+            generatedText = retryResult.text || '';
+            tokenUsage = mergeTokenUsage(tokenUsage, retryResult.usage || {});
+            result = retryResult;
+            evaluationResult = parseTranscriptEvaluationResponse(generatedText, 2);
         }
+
+        console.log('[transcript-eval] success', {
+            provider: result.provider,
+            model: result.model || modelName,
+            outputTokens: tokenUsage.outputTokens || 0,
+            durationMs,
+        });
 
         // Persist evaluation (transcript is NOT stored)
         const savedEvaluation = await prisma.transcriptEvaluation.create({

@@ -78,23 +78,23 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **VERSION-MANAGEMENT.md** - Version update workflow
 
 ### Features
-- **COACH-BEHAVIOR-MATRIX.md** - **⭐ Complete behavior matrix of all coaches (contracting, rhythm, closing, advice policy, boundaries)**; includes **Practice Lab method cheatsheet** (12 method cards, contracting/free-play, scenario→method mapping) for use during Coach Practice sessions
-- **practice-method-cheatsheet.html** - **Printable Practice Lab cheatsheet** (A4 landscape, 4 pages): 12 method cards, Anliegensklärung/Freispiel, scenario→method table; open in browser → Print → Save as PDF (landscape, background graphics on). Markdown source: section in COACH-BEHAVIOR-MATRIX.md. Optional pre-generated copy: **practice-method-cheatsheet.pdf** (same folder, if present).
-- **coach-behavior-matrix-infographic.html** - **Printable infographic** (A4 landscape, 3 pages) summarizing all 14 personas and comparison matrix; open in browser → Print → Save as PDF (landscape, background graphics on). Optional pre-generated copy: **coach-behavior-matrix-infographic.pdf** (same folder, if present).
-- **coach-behavior-matrix-infographic-a4-single.html** - **Compact single-page A4 landscape** table-only variant (12 coaches + Gloria footnote); same print settings. Optional PDF: **coach-behavior-matrix-infographic-a4-single.pdf** (same folder, if present).
-- **TTS-FINAL-STATUS.md** - Text-to-Speech implementation (current)
-- **TTS-HYBRID-README.md** - Hybrid TTS architecture (⚠️ see TTS-FINAL-STATUS for latest)
+- **TTS-FINAL-STATUS.md** - Text-to-Speech implementation (current; gitignored ops copy on the maintainer machine)
 - **TTS-LOCAL-DEVELOPMENT.md** - Local TTS setup
-- **TTS-SETUP-STATUS.md** - TTS setup report v1.6.0 (⚠️ historical, see TTS-FINAL-STATUS)
 - **WAKE-LOCK-VOICE-MODE.md** - Screen wake lock feature
-- **RAG-IMPLEMENTATION-GUIDE.md** - RAG feature (planned)
-- **PERSONALITY-PROFILE-IMPLEMENTATION.md** - Personality feature implementation
-- **PDF-IMPLEMENTATION.md** - PDF export implementation
+- **RAG-IMPLEMENTATION-GUIDE.md** - RAG feature (planned, not shipped)
+- **PERSONALITY-PROFILE-IMPLEMENTATION.md** - Personality feature implementation (this folder, not the repo root)
+- **PDF-IMPLEMENTATION.md** - PDF export implementation (this folder, not the repo root)
 - **GOAL-MANAGEMENT.md** - Goal tracking feature
-- **TRANSCRIPT-EVALUATION-USER-GUIDE.md** - **⭐ User guide for Transcript Evaluation feature (Client-only, DE)**
-- **TRANSCRIPT-EVALUATION-USER-GUIDE-EN.md** - **⭐ User guide for Transcript Evaluation feature (Client-only, EN)**
+- **TRANSCRIPT-EVALUATION-USER-GUIDE.md** - User guide for Transcript Evaluation (Client-only, DE)
+- **TRANSCRIPT-EVALUATION-USER-GUIDE-EN.md** - User guide for Transcript Evaluation (Client-only, EN)
+- **CONNECTOR-OPTIMAL-CONVERSATIONS.md** - Connector QA lab scripts and example turns
+- **NARRATIVE-CONNECTOR-QA.md** - Narrative Connector QA notes
+- **SAFETY-PROMPT-POLICY.md** - Content-safety prompt policy
+- **CRISIS-HELPLINES.md** - Crisis helpline list used by prompts
+- **USER-ACCESS-MATRIX.md** - Guest / registered / premium / client access
+- **UX-FLOWS.md** - Product flows (header may lag the app version; routing detail is in the ux-flow skill)
 
-*Note: TTS-SETUP-STATUS and TTS-HYBRID-README are marked as historical/superseded. Use TTS-FINAL-STATUS for current info.*
+*Historical TTS write-ups live in `ARCHIVED/` (`TTS-HYBRID-README.md`, `TTS-SETUP-STATUS.md`). Use TTS-FINAL-STATUS for current voice behavior.*
 
 ### App Store
 - **APP-STORE-METADATA.md** - **⭐ App Store Connect metadata (description, keywords, review notes, test account, URLs)**
@@ -112,6 +112,9 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **GDPR-TRANSCRIPT-REMOVAL.md** - Classic chat transcript DB removal (Art. 5 minimisation)
 - **GOOGLE-CLOUD-DPA-COMPLIANCE.md** - Google DPA
 - **MAILJET-DPA-COMPLIANCE.md** - Mailjet DPA
+- **MISTRAL-DPA-COMPLIANCE.md** - Mistral DPA
+- **ICF-PLATFORM-COMPLIANCE.md** - ICF Coaching Platform Standards mapping for this product (does not repeat the EU AI Act or GDPR audits). The source PDF stays local and is gitignored.
+- **SECURITY-AUDIT-REPORT-2025-11-28.md** - Point-in-time security audit
 
 ### Payment
 - **PAYPAL-SETUP-GUIDE.md** - PayPal integration
@@ -121,10 +124,9 @@ Located in `.cursor/skills/meaningful-conversations/`:
 
 ### Migration & History
 - **CHANGELOG-MARIADB-POD.md** - PostgreSQL to MariaDB migration
-- **FEATURE-DEVELOPMENT-TIMELINE.md** - Detailed feature timeline
-- **ARCHIVED/** - Historical documents (cleanup summaries, development history)
+- **ARCHIVED/** - Historical documents (cleanup summaries, development history, keyword critique, feature timeline, hybrid TTS, completed server-migration guides)
 
-*Note: COMPLETE-CLEANUP-SUMMARY.md, DOCUMENTATION-CLEANUP-SUMMARY.md, and DEVELOPMENT-HISTORY.md have been moved to ARCHIVED/ folder.*
+*Live copies of completed server-migration notes may still sit next to `ARCHIVED/` on a maintainer machine. Prefer the `ARCHIVED/` copies.*
 
 ### Goals & Planning
 - **GOAL-MANAGEMENT.md** - Goal tracking feature
@@ -142,9 +144,11 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **USER-JOURNEY.md** - User flow documentation
 - **MONITORING-GUIDE.md** - System monitoring
 
-### Feature Implementation (Historical)
-- **PERSONALITY-PROFILE-IMPLEMENTATION.md** - Personality feature docs
-- **PDF-IMPLEMENTATION.md** - PDF export docs
+### Feature Implementation
+Personality and PDF implementation notes live under `DOCUMENTATION/`, not the repo root. See Features above.
+
+### Local-only ops docs
+These paths are gitignored so the public repo does not publish server runbooks: `MONITORING-GUIDE.md`, `DEPLOYMENT-CHECKLIST.md`, `DOCUMENTATION/MANUALMODE-DUAL-ENVIRONMENT.md`, `DOCUMENTATION/QUICK-START-MANUALMODE-SERVER.md`, `DOCUMENTATION/TTS-FINAL-STATUS.md`, and the other entries under “Operational & Infrastructure Documentation” in `.gitignore`. On a maintainer checkout they are still the working copies. Agent skills, when present, live in `.cursor/skills/` (source of truth). A `.agents/skills/` tree is a local mirror.
 
 ### Incident Reports
 - **INCIDENT-REPORTS/INCIDENT-REPORT-2025-12-15.md** - Recent incident
@@ -177,6 +181,7 @@ Located in `.cursor/skills/meaningful-conversations/`:
 3. TTS-FINAL-STATUS.md (voice features)
 4. PERSONALITY-PROFILE-IMPLEMENTATION.md (personality system)
 5. TRANSCRIPT-EVALUATION-USER-GUIDE.md (transcript analysis for clients)
+6. CONNECTOR-OPTIMAL-CONVERSATIONS.md and SAFETY-PROMPT-POLICY.md (Connector lab and safety prompts)
 
 ### Debugging/Maintaining
 1. **TROUBLESHOOTING-INDEX.md** (quick reference for common issues)
@@ -204,19 +209,19 @@ Historical drift audits — use for reference; many items resolved in 2026-08 ag
 | **DOCUMENTATION-AUDIT-REPORT-2026-02-26.md** | UX & admin guides |
 | **AUDIT-REPORT-DEPLOYMENT-DOCS.md** | Deployment doc accuracy |
 
-**Still open (as of 2026-08-05):** TTS/PDF doc refresh, env template completeness — see improvement plan in repo.
+February 2026 drift audits are historical. Open product docs for 2.6.0 are indexed above (Connector, safety, access matrix, ICF mapping).
 
 ---
 
 ## Current Setup
 
-- **Version:** 2.5.5
-- **Server:** Hetzner VPS (<YOUR_SERVER_IP>)
-- **Environments:** Staging (mc-beta.manualmode.at) + Production (mc-app.manualmode.at)
+- **Version:** 2.6.0. Repo `BUILD_NUMBER` **75**. **Staging + Production** Build **75** (mc-beta / mc-app). Stack-Update-Plan: `PLANS/software-stack-update-plan.md`.
+- **Server:** Hetzner VPS (`<YOUR_SERVER_IP>` — never commit the real address)
+- **Environments:** Staging + Production. They are not on the same build.
 - **Container Engine:** Podman + podman-compose
 - **Containers:** Frontend, Backend (PM2 x2), TTS (Piper), MariaDB 11.2
 - **Registry:** regy.rhepds.com/gherold/meaningful-conversations
 - **Deploy:** Automatic health checks + auto-rollback on failure
 - **Builds:** Reproducible via `npm ci` in Dockerfiles
 
-**Last Updated:** August 5, 2026
+**Last Updated:** November 2, 2026

@@ -5,7 +5,12 @@ import { XIcon } from './icons/XIcon';
 import { PlayIcon } from './icons/PlayIcon';
 import { Language } from '../types';
 import { useLocalization } from '../context/LocalizationContext';
-import { getVoiceGender, cleanVoiceName, voiceNameIncludesToken } from '../utils/voiceUtils';
+import { getVoiceGender, cleanVoiceName, voiceNameIncludesToken, dedupeSpeechSynthesisVoices } from '../utils/voiceUtils';
+import {
+  dedupeNativeVoicesByName,
+  matchNativeVoiceIdentifierToList,
+  isAppleAvSpeechVoiceId,
+} from '../utils/nativeIosTtsVoice';
 import { InfoIcon } from './icons/InfoIcon';
 import { SERVER_VOICES, type TtsMode, type ServerVoice } from '../services/ttsService';
 import { getApiBaseUrl } from '../services/api';
@@ -104,45 +109,6 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
         }
     }, [isOpen]);
 
-    // Sync state if the modal is reopened with a different external state
-    useEffect(() => {
-        if (isOpen) {
-            console.log('[VoiceModal SYNC] Props:', { currentVoiceURI, currentTtsMode, isAutoMode, isIOSBrowser });
-            
-            // On iOS, server voices are not available - switch to auto if server voice was selected
-            if (isIOSBrowser && currentTtsMode === 'server') {
-                console.log('[VoiceModal SYNC] -> iOS browser, forcing auto');
-                setSelection({ type: 'auto' });
-                return;
-            }
-            
-            // Sync modal state with parent props
-            if (isAutoMode) {
-                // Auto mode is enabled - always show the Auto radio button as selected
-                console.log('[VoiceModal SYNC] -> Auto mode (showing auto selected)');
-                setSelection({ type: 'auto' });
-            } else if (currentTtsMode === 'server' && currentVoiceURI) {
-                console.log('[VoiceModal SYNC] -> Server voice:', currentVoiceURI);
-                setSelection({ type: 'server', voiceId: currentVoiceURI });
-            } else if (currentVoiceURI) {
-                // Check if it's a native iOS voice (com.apple.voice identifier)
-                // IMPORTANT: Only treat as 'native' on actual iOS Native app!
-                // Safari Desktop also uses com.apple.voice.* URIs but should be 'local'
-                if (currentVoiceURI.startsWith('com.apple.voice') && isNativeiOS) {
-                    console.log('[VoiceModal SYNC] -> Native iOS voice:', currentVoiceURI);
-                    setSelection({ type: 'native', voiceIdentifier: currentVoiceURI });
-                } else {
-                    console.log('[VoiceModal SYNC] -> Local voice:', currentVoiceURI);
-                    setSelection({ type: 'local', voiceURI: currentVoiceURI });
-                }
-            } else {
-                console.log('[VoiceModal SYNC] -> Default auto (no voiceURI)');
-                setSelection({ type: 'auto' });
-            }
-        }
-    }, [isOpen, currentVoiceURI, currentTtsMode, isAutoMode, isIOSBrowser]);
-
-
     const localVoices = useMemo(() => {
         if (!voices || voices.length === 0) {
             console.log('[VoiceModal] No voices available, voices.length =', voices?.length || 0);
@@ -182,7 +148,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             whitelistedVoices.map(v => v.name));
 
         if (whitelistedVoices.length > 0) {
-            return whitelistedVoices.sort((a, b) => cleanVoiceName(a.name).localeCompare(cleanVoiceName(b.name)));
+            return dedupeSpeechSynthesisVoices(whitelistedVoices);
         }
         
         // Debug: If no whitelisted voices, show all voices for the language
@@ -231,18 +197,7 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             console.log('[VoiceModal] iOS fallback - all local voices:', genderFilteredVoices.length);
         }
 
-        // De-duplicate and sort the broader list
-        const uniqueVoicesMap = new Map<string, SpeechSynthesisVoice>();
-        genderFilteredVoices.forEach(voice => {
-            const baseName = voice.name.replace(/\s*\([^)]*\)$/, '').trim();
-            const existing = uniqueVoicesMap.get(baseName);
-            if (!existing || (!/enhanced|premium|erweitert/i.test(existing.name) && /enhanced|premium|erweitert/i.test(voice.name))) {
-                uniqueVoicesMap.set(baseName, voice);
-            }
-        });
-
-        const result = Array.from(uniqueVoicesMap.values())
-            .sort((a, b) => cleanVoiceName(a.name).localeCompare(cleanVoiceName(b.name)));
+        const result = dedupeSpeechSynthesisVoices(genderFilteredVoices);
         
         console.log('[VoiceModal] FINAL localVoices result:', result.length, result.map(v => v.name));
         return result;
@@ -286,14 +241,79 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
             genderFiltered = filtered;
         }
 
-        // Sort by quality (premium > enhanced > default), then by name
-        return genderFiltered.sort((a, b) => {
-            const qualityOrder = { premium: 0, enhanced: 1, default: 2 };
-            const qualityDiff = (qualityOrder[a.quality] || 2) - (qualityOrder[b.quality] || 2);
-            if (qualityDiff !== 0) return qualityDiff;
-            return a.name.localeCompare(b.name);
-        });
+        // Sort by quality (premium > enhanced > default), then by name; one row per speaker name
+        return dedupeNativeVoicesByName(genderFiltered);
     }, [nativeVoices, botLanguage, botGender]);
+
+    const nativeVoicesForLanguage = useMemo(() => {
+        if (!isNativeiOS || nativeVoices.length === 0) return [];
+        return nativeVoices.filter(v =>
+            v.language.toLowerCase().startsWith(botLanguage.toLowerCase()),
+        );
+    }, [nativeVoices, botLanguage]);
+
+    const nativeSelectionListId = useMemo(() => {
+        if (selection.type !== 'native') return null;
+        const id = (selection as { type: 'native'; voiceIdentifier: string }).voiceIdentifier;
+        if (filteredNativeVoices.length === 0) return id;
+        return matchNativeVoiceIdentifierToList(id, filteredNativeVoices, nativeVoicesForLanguage);
+    }, [selection, filteredNativeVoices, nativeVoicesForLanguage]);
+
+    // Sync modal selection when reopened (manual choice before auto; map native id to list row)
+    useEffect(() => {
+        if (!isOpen) return;
+
+        console.log('[VoiceModal SYNC] Props:', { currentVoiceURI, currentTtsMode, isAutoMode, isIOSBrowser });
+
+        if (isIOSBrowser && currentTtsMode === 'server') {
+            console.log('[VoiceModal SYNC] -> iOS browser, forcing auto');
+            setSelection({ type: 'auto' });
+            return;
+        }
+
+        if (isNativeiOS && currentTtsMode === 'server') {
+            console.log('[VoiceModal SYNC] -> Native iOS, server mode ignored — auto');
+            setSelection({ type: 'auto' });
+            return;
+        }
+
+        if (!isAutoMode && currentVoiceURI) {
+            if (currentTtsMode === 'server') {
+                console.log('[VoiceModal SYNC] -> Server voice:', currentVoiceURI);
+                setSelection({ type: 'server', voiceId: currentVoiceURI });
+            } else if (isNativeiOS && isAppleAvSpeechVoiceId(currentVoiceURI)) {
+                const listId = matchNativeVoiceIdentifierToList(
+                    currentVoiceURI,
+                    filteredNativeVoices,
+                    nativeVoicesForLanguage,
+                );
+                console.log('[VoiceModal SYNC] -> Native iOS voice:', listId);
+                setSelection({ type: 'native', voiceIdentifier: listId });
+            } else {
+                console.log('[VoiceModal SYNC] -> Local voice:', currentVoiceURI);
+                setSelection({ type: 'local', voiceURI: currentVoiceURI });
+            }
+            return;
+        }
+
+        if (isAutoMode) {
+            console.log('[VoiceModal SYNC] -> Auto mode (showing auto selected)');
+            setSelection({ type: 'auto' });
+            return;
+        }
+
+        console.log('[VoiceModal SYNC] -> Default auto (no voiceURI)');
+        setSelection({ type: 'auto' });
+    }, [
+        isOpen,
+        currentVoiceURI,
+        currentTtsMode,
+        isAutoMode,
+        isIOSBrowser,
+        isNativeiOS,
+        filteredNativeVoices,
+        nativeVoicesForLanguage,
+    ]);
 
     // Helper function to check if a server voice is enabled
     // Server voices are disabled on iOS browser due to autoplay restrictions
@@ -404,23 +424,18 @@ const VoiceSelectionModal: React.FC<VoiceSelectionModalProps> = ({
                                 </p>
                             </div>
                             {filteredNativeVoices.map(voice => (
-                                <div key={voice.identifier} className="p-3 border border-border-primary bg-background-tertiary">
+                                <div key={voice.identifier} className={`p-3 border ${nativeSelectionListId === voice.identifier ? 'border-accent-primary border-2 bg-accent-primary/10' : 'border-border-primary bg-background-tertiary'}`}>
                                     <label className="flex items-center cursor-pointer">
                                         <input
                                             type="radio"
                                             name="voice-selection"
-                                            checked={selection.type === 'native' && (selection as {type: 'native', voiceIdentifier: string}).voiceIdentifier === voice.identifier}
+                                            checked={selection.type === 'native' && nativeSelectionListId === voice.identifier}
                                             onChange={() => setSelection({ type: 'native', voiceIdentifier: voice.identifier })}
                                             className="h-5 w-5 bg-background-secondary dark:bg-background-tertiary border-border-secondary text-accent-primary focus:ring-accent-primary [color-scheme:light] dark:[color-scheme:dark]"
                                         />
                                         <span className="ml-3 flex-1">
                                             <span className="font-semibold text-content-primary">
                                                 {voice.name}
-                                                {voice.quality !== 'default' && (
-                                                    <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-content-tertiary/20 text-content-secondary">
-                                                        {voice.quality}
-                                                    </span>
-                                                )}
                                             </span>
                                             <span className="block text-sm text-content-secondary">
                                                 {voice.language.startsWith('de') ? 'Deutsch' : voice.language.startsWith('en') ? 'English' : voice.language}

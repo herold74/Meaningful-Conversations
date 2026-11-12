@@ -3,10 +3,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
-import { brand } from '../config/brand';
+import { brand, brandProviderMailtoMarkdown } from '../config/brand';
 
 interface InfoViewProps {
 }
+
+const providerContact = brandProviderMailtoMarkdown();
 
 const de_markdown = `Diese Nutzungsbedingungen ("Bedingungen") regeln Ihre Nutzung der Anwendung "${brand.appNameDe}" (der "Dienst"). Durch den Zugriff auf oder die Nutzung des Dienstes erklären Sie sich mit diesen Bedingungen einverstanden.
 
@@ -16,7 +18,7 @@ Der Dienst bietet Zugang zu KI-gesteuerten Coaching-Gesprächen, die zur Selbstr
 - **Gastmodus:** Die Datenverarbeitung erfolgt ausschließlich lokal im Browser des Nutzers. Der Nutzer ist für das Speichern und Verwalten seiner Daten verantwortlich.
 - **Registrierter Modus:** Bietet zusätzliche Funktionen wie die automatische Speicherung des Lebenskontextes und des Persönlichkeitsprofils, die Ende-zu-Ende-verschlüsselt werden.
 
-Der Dienst ist als Web-Anwendung und als native iOS-App verfügbar. Es gibt vier Zugangsstufen: Gast (kostenlos, lokal), Registriert (kostenloses Konto), Premium (kostenpflichtiges Upgrade) und Klient (Zugangscode von ${brand.providerName}). Details zu den Zugangsstufen finden Sie im Benutzerhandbuch.
+Der Dienst ist als Web-Anwendung und als native iOS-App verfügbar. Es gibt vier Zugangsstufen: Gast (kostenlos, lokal), Registriert (kostenloses Konto), Premium (kostenpflichtiges Upgrade) und Klient (Zugangscode von ${providerContact}). Details zu den Zugangsstufen finden Sie im Benutzerhandbuch.
 
 ## 2. Benutzerkonten und Datensicherheit
 **Registrierte Benutzer:** Sie sind für die Geheimhaltung Ihres Passworts verantwortlich. Aufgrund der Ende-zu-Ende-Verschlüsselung haben wir keinen Zugriff auf Ihr Passwort oder Ihre verschlüsselten Daten (Lebenskontext und Persönlichkeitsprofil). **Wenn Sie Ihr Passwort verlieren oder zurücksetzen, gehen Ihre verschlüsselten Daten dauerhaft und unwiederbringlich verloren.** Es liegt in Ihrer Verantwortung, regelmäßig Sicherungskopien Ihrer Daten zu erstellen, indem Sie die Datei herunterladen.
@@ -45,7 +47,7 @@ The Service provides access to AI-powered coaching conversations intended for se
 - **Guest Mode:** Data processing occurs entirely locally in the user's browser. The user is responsible for saving and managing their data.
 - **Registered Mode:** Offers additional features, including automatic saving of the Life Context and Personality Profile, both of which are end-to-end encrypted.
 
-The Service is available as a web application and as a native iOS app. There are four access tiers: Guest (free, local), Registered (free account), Premium (paid upgrade), and Client (access code from ${brand.providerName}). Details about the access tiers can be found in the User Guide.
+The Service is available as a web application and as a native iOS app. There are four access tiers: Guest (free, local), Registered (free account), Premium (paid upgrade), and Client (access code from ${providerContact}). Details about the access tiers can be found in the User Guide.
 
 ## 2. User Accounts and Data Security
 **Registered Users:** You are responsible for maintaining the confidentiality of your password. Due to end-to-end encryption, we have no access to your password or your encrypted data (Life Context and Personality Profile). **If you lose or reset your password, your encrypted data will be permanently and irrecoverably lost.** It is your responsibility to make regular backups of your data by downloading the file.

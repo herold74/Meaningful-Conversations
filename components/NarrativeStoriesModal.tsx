@@ -8,6 +8,7 @@ interface NarrativeStoriesModalProps {
   onComplete: (stories: { flowStory: string; frictionStory: string }) => void;
   onCancel: () => void;
   oldStories?: { flowStory: string; frictionStory: string };
+  includeConnectorInSignature?: boolean;
 }
 
 const MIN_CHARS = 50;
@@ -15,7 +16,8 @@ const MIN_CHARS = 50;
 const NarrativeStoriesModal: React.FC<NarrativeStoriesModalProps> = ({
   onComplete,
   onCancel,
-  oldStories
+  oldStories,
+  includeConnectorInSignature = false,
 }) => {
   const { t } = useLocalization();
   useModalOpen();
@@ -45,6 +47,14 @@ const NarrativeStoriesModal: React.FC<NarrativeStoriesModalProps> = ({
               'Um eine aktuelle und relevante Persönlichkeits-Signatur zu erstellen, beschreibe bitte zwei konkrete Erlebnisse aus deinem aktuellen Leben.'}
           </p>
         </div>
+
+        {includeConnectorInSignature && (
+          <div className="mb-6 p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-300 dark:border-teal-700 rounded-lg">
+            <p className="text-sm text-teal-900 dark:text-teal-100 leading-relaxed">
+              {t('narrative_regenerate_connector_hint')}
+            </p>
+          </div>
+        )}
 
         {/* Info Box: Why we need this */}
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 dark:border-blue-600 rounded-lg">

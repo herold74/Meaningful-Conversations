@@ -1,17 +1,19 @@
 import React from 'react';
-import { Bot, Message, User, GamificationState, NavView, SessionAnalysis } from '../types';
+import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, Language } from '../types';
 import * as api from '../services/api';
 import * as userService from '../services/userService';
 import * as geminiService from '../services/geminiService';
-import * as analyticsService from '../services/analyticsService';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
 import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorReact';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
 import { downloadTextFile } from '../utils/fileDownload';
 import type { Big5Result } from '../utils/bfi2';
-import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context } from '../types';
+import { TranscriptPreAnswers, TranscriptEvaluationResult, CoachPracticeConfig, PracticeEvaluationResult, PracticeEvaluationSummary, PracticePhase2Context, ConnectorEvaluationResult, ConnectorQualitativeEvaluationResult, ConnectorDimensionKey, ConnectorChatHandoff, ConnectorCoachSessionStartOptions, ConnectorHandoffPayload } from '../types';
+import type { ConnectorRunState } from '../utils/connectorRun';
 import type { UserIntent } from './IntentPickerView';
-import { getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
+import { getHighlightSectionForIntent, getStoredUserIntent, type HighlightSection } from '../utils/userIntent';
+import { isTemplateOnlyLifeContext } from '../utils/lifeContext';
+import { syncGuestSession, resolveGuestName } from '../utils/guestSession';
 import type { SurveyResult } from './PersonalitySurvey';
 import type { RefinementPreviewResult } from '../services/api';
 
@@ -26,6 +28,9 @@ import ForgotPasswordView from './ForgotPasswordView';
 import ResetPasswordView from './ResetPasswordView';
 import UnsubscribeView from './UnsubscribeView';
 import ContextChoiceView from './ContextChoiceView';
+import CoachingSessionResumeBanner, {
+  type CoachingSessionResumeBannerProps,
+} from './CoachingSessionResumeBanner';
 import PaywallView from './PaywallView';
 import LandingPage from './LandingPage';
 import PIIWarningView from './PIIWarningView';
@@ -45,15 +50,23 @@ import TranscriptInput from './TranscriptInput';
 import EvaluationReview from './EvaluationReview';
 import EvaluationHistory from './EvaluationHistory';
 import PracticeSetupView from './PracticeSetupView';
+import ConnectorIntroView from './ConnectorIntroView';
+import ConnectorCatalogView from './ConnectorCatalogView';
+import ConnectorOpenSituationView from './ConnectorOpenSituationView';
+import ConnectorQualitativeResultsView from './ConnectorQualitativeResultsView';
+import ConnectorResultsView from './ConnectorResultsView';
 import PracticeEvaluationReview from './PracticeEvaluationReview';
 import PracticeHistoryView from './PracticeHistoryView';
 import PracticeProgressView from './PracticeProgressView';
 import PracticeSelfRatingView from './PracticeSelfRatingView';
 import PracticePhase2PickerView from './PracticePhase2PickerView';
+import GloriaInterviewIntroView from './GloriaInterviewIntroView';
 import InterviewTranscriptView from './InterviewTranscriptView';
 import TranscriptRecorder from './TranscriptRecorder';
 import AchievementsView from './AchievementsView';
 import UserGuideView from './UserGuideView';
+import TutorialHubView, { type TutorialTryAction } from './TutorialHubView';
+import { stashPendingUserGuideAnchor } from '../utils/userGuideAnchors';
 import FormattingHelpView from './FormattingHelpView';
 import FAQView from './FAQView';
 import AboutView from './AboutView';
@@ -69,6 +82,7 @@ import ChangePasswordView from './ChangePasswordView';
 import { TestScenario } from '../utils/testScenarios';
 import { BOTS } from '../constants';
 import { getFrameworkDisplayName, getPracticeDifficultyLabel } from '../utils/practiceFrameworkLabels';
+import { isNativeIOS } from '../utils/platformDetection';
 
 export interface AppViewRouterProps {
   // Navigation
@@ -152,6 +166,8 @@ export interface AppViewRouterProps {
   setPracticeConfig: React.Dispatch<React.SetStateAction<CoachPracticeConfig | null>>;
   practiceEvaluation: PracticeEvaluationResult | null;
   setPracticeEvaluation: React.Dispatch<React.SetStateAction<PracticeEvaluationResult | null>>;
+  practiceEvalArtifactLanguage: Language | null;
+  setPracticeEvalArtifactLanguage: React.Dispatch<React.SetStateAction<Language | null>>;
   practicePhase2Context: PracticePhase2Context | null;
   setPracticePhase2Context: React.Dispatch<React.SetStateAction<PracticePhase2Context | null>>;
   practiceEvalError: string | null;
@@ -164,6 +180,45 @@ export interface AppViewRouterProps {
   handlePracticeDone: () => void;
   navigateToPracticeHistory: () => void;
   handlePracticeHistoryBack: () => void;
+
+  // The Connector
+  connectorRun: ConnectorRunState | null;
+  connectorEvaluation: ConnectorEvaluationResult | null;
+  connectorQualitativeEvaluation: ConnectorQualitativeEvaluationResult | null;
+  isConnectorStarting: boolean;
+  connectorSaveState: 'idle' | 'saving' | 'saved' | 'error';
+  connectorPracticeFocus: ConnectorDimensionKey | null;
+  gloriaConnectionPrep: boolean;
+  setGloriaConnectionPrep: React.Dispatch<React.SetStateAction<boolean>>;
+  connectorChatHandoff: ConnectorChatHandoff | null;
+  connectorHandoffPayload: ConnectorHandoffPayload | null;
+  onConnectorHandoffPayloadConsumed: () => void;
+  handleStartGloriaInterview: (mode: import('../utils/gloriaInterview').GloriaInterviewMode) => void;
+  handleOpenConnectorIntro: () => void;
+  handleStartConnectorRun: (liveMode: boolean) => void;
+  handleStartConnectorPractice: (vignetteId: string, liveMode: boolean) => void;
+  handleStartConnectorOpenSituation: (params: {
+    relationship: string;
+    situation: string;
+    personaName: string;
+    personaGender: 'male' | 'female';
+    lengthPreset: 'short' | 'standard' | 'long';
+    liveMode: boolean;
+  }) => void;
+  handleConnectorOpenAgain: () => void;
+  handleConnectorOpenToCatalog: () => void;
+  handleConnectorNewAssessment: () => void;
+  handleConnectorEnded: (endType: 'heard' | 'timeout') => void;
+  handleConnectorResultsDone: (skipProfileSave: boolean) => Promise<void>;
+  handleConnectorRestart: () => void;
+  handleConnectorRestartWithFocus: (focus: ConnectorDimensionKey) => void;
+  handleConnectorStartCoachSession: (
+    botId: string,
+    starterPrompt: string,
+    options?: ConnectorCoachSessionStartOptions,
+  ) => void;
+  handleConnectorDone: () => void;
+  handleConnectorPracticeCrossSell: () => void;
 
   // Refinement preview (DPFL test)
   refinementPreview: RefinementPreviewResult | null;
@@ -179,9 +234,15 @@ export interface AppViewRouterProps {
   handleFileUpload: (context: string) => void;
   handleQuestionnaireSubmit: (context: string) => void;
   handlePiiConfirm: () => void;
+  handleLcEditorSaveFromContextChoice: (newContext: string) => Promise<void>;
+  handleLcEditorSaveFromLanding: (newContext: string) => Promise<void>;
   handleSelectBot: (bot: Bot) => void;
   handleReferralSwitch: (targetBotId: string, seedUserMessage: string) => void;
-  handleStartSessionFromEval: (botId: string, examplePrompt: string) => void;
+  handleStartSessionFromEval: (
+    botId: string,
+    examplePrompt: string,
+    options?: ConnectorCoachSessionStartOptions,
+  ) => void;
   handleStartInterview: () => void;
   handleIntentSelected: (intent: UserIntent) => void;
   handleOceanOnboardingComplete: (big5: Big5Result) => Promise<void>;
@@ -191,13 +252,15 @@ export interface AppViewRouterProps {
   handleContinueSession: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
   handleSwitchCoach: (newContext: string, options: { preventCloudSave: boolean }) => Promise<void>;
   handleStartOver: () => void;
+  resumeGuestFromAuth: () => void;
+  handleGuestAuthRequired: () => void;
   handleRunTestSession: (scenario: TestScenario, adminLifeContext: string) => Promise<void>;
   handleTestComfortCheck: (withConversationalEnd: boolean) => void;
   handleNavigateFromMenu: (view: NavView) => void;
   onDeleteAccount: () => void;
 
   // Routing helpers
-  applyIntentLogic: (intent: UserIntent | null) => void;
+  applyIntentLogic: (intent: UserIntent | null, options?: { lifeContextOverride?: string }) => void;
   routeWithIntentPicker: (hasContext: boolean) => Promise<void>;
   routeToCoachPractice: () => void;
   handlePracticeSetupBack: () => void;
@@ -209,6 +272,11 @@ export interface AppViewRouterProps {
 
   // Translation
   t: (key: string, params?: Record<string, string>) => string;
+
+  userGuideFocusAnchor: string | null;
+  setUserGuideFocusAnchor: React.Dispatch<React.SetStateAction<string | null>>;
+
+  coachingSessionResume: CoachingSessionResumeBannerProps | null;
 }
 
 const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
@@ -274,6 +342,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     setPracticeConfig,
     practiceEvaluation,
     setPracticeEvaluation,
+    practiceEvalArtifactLanguage,
+    setPracticeEvalArtifactLanguage,
     practicePhase2Context,
     setPracticePhase2Context,
     practiceEvalError,
@@ -286,6 +356,32 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handlePracticeDone,
     navigateToPracticeHistory,
     handlePracticeHistoryBack,
+    connectorRun,
+    connectorEvaluation,
+    connectorQualitativeEvaluation,
+    isConnectorStarting,
+    connectorSaveState,
+    connectorPracticeFocus,
+    gloriaConnectionPrep,
+    setGloriaConnectionPrep,
+    connectorChatHandoff,
+    connectorHandoffPayload,
+    onConnectorHandoffPayloadConsumed,
+    handleStartGloriaInterview,
+    handleOpenConnectorIntro,
+    handleStartConnectorRun,
+    handleStartConnectorPractice,
+    handleStartConnectorOpenSituation,
+    handleConnectorOpenAgain,
+    handleConnectorOpenToCatalog,
+    handleConnectorNewAssessment,
+    handleConnectorEnded,
+    handleConnectorResultsDone,
+    handleConnectorRestart,
+    handleConnectorRestartWithFocus,
+    handleConnectorStartCoachSession,
+    handleConnectorDone,
+    handleConnectorPracticeCrossSell,
     refinementPreview,
     isLoadingRefinementPreview,
     refinementPreviewError,
@@ -295,6 +391,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handleFileUpload,
     handleQuestionnaireSubmit,
     handlePiiConfirm,
+    handleLcEditorSaveFromContextChoice,
+    handleLcEditorSaveFromLanding,
     handleSelectBot,
     handleReferralSwitch,
     handleStartSessionFromEval,
@@ -307,6 +405,8 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     handleContinueSession,
     handleSwitchCoach,
     handleStartOver,
+    resumeGuestFromAuth,
+    handleGuestAuthRequired,
     handleRunTestSession,
     handleTestComfortCheck,
     handleNavigateFromMenu,
@@ -322,6 +422,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     buildEmptyLifeContextTemplate,
     isSessionQualified,
     t,
+    userGuideFocusAnchor,
+    setUserGuideFocusAnchor,
+    coachingSessionResume,
   } = props;
 
   const currentView = menuView || view;
@@ -340,15 +443,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setMenuView(null);
             setView('register');
           }}
-          onGuest={() => {
-            setMenuView(null);
-            analyticsService.trackGuestLogin();
-            try {
-              localStorage.removeItem('guestName');
-            } catch {}
-            setLifeContext('');
-            setView('intentPicker');
-          }}
+          onGuest={resumeGuestFromAuth}
           redirectReason={authRedirectReason}
         />
       );
@@ -401,6 +496,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           user={currentUser!}
           savedContext={lifeContext}
           gamificationState={gamificationState}
+          coachingResume={coachingSessionResume}
           onContinue={() => {
             setCameFromContextChoice(true);
             setView('botSelection');
@@ -473,17 +569,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
         />
       );
     case 'landing': {
-      const isTemplateContext = (() => {
-        if (!lifeContext) return false;
-        const lines = lifeContext.split('\n');
-        const fieldPattern = /^\*\*[^*]+\*\*:\s*(.+)/;
-        let filledCount = 0;
-        for (const line of lines) {
-          const m = line.match(fieldPattern);
-          if (m && m[1].trim()) filledCount++;
-        }
-        return filledCount <= 1;
-      })();
+      const isTemplateContext = isTemplateOnlyLifeContext(lifeContext);
       return (
         <LandingPage
           onSubmit={handleFileUpload}
@@ -495,6 +581,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           }}
           existingContext={lifeContext || undefined}
           isTemplateContext={isTemplateContext}
+          coachingResume={coachingSessionResume}
         />
       );
     }
@@ -516,54 +603,42 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       );
     case 'lcEditorFromLanding':
       return (
+        <div className="space-y-4">
+          {coachingSessionResume && (
+            <div className="container mx-auto px-4 max-w-4xl pt-4">
+              <CoachingSessionResumeBanner {...coachingSessionResume} />
+            </div>
+          )}
         <LifeContextEditorView
           lifeContext={lifeContext}
           showPiiTips={false}
           title={t('lc_editor_title')}
           description={t('lc_editor_desc')}
-          onSave={async (newContext: string) => {
-            setLifeContext(newContext);
-            if (currentUser && encryptionKey) {
-              try {
-                await userService.saveUserData(
-                  newContext,
-                  serializeGamificationState(gamificationState),
-                  encryptionKey
-                );
-              } catch (error) {
-                console.error('Failed to save edited context:', error);
-              }
-            }
-            setView('landing');
-          }}
+          allowSaveWithoutChanges
+          saveLabel={coachingSessionResume ? t('lc_editor_save_return_chat') : undefined}
+          onSave={handleLcEditorSaveFromLanding}
           onCancel={() => setView('landing')}
         />
+        </div>
       );
     case 'lcEditorFromContextChoice':
       return (
+        <div className="space-y-4">
+          {coachingSessionResume && (
+            <div className="container mx-auto px-4 max-w-4xl pt-4">
+              <CoachingSessionResumeBanner {...coachingSessionResume} />
+            </div>
+          )}
         <LifeContextEditorView
           lifeContext={lifeContext}
           showPiiTips={false}
           title={t('lc_editor_title')}
           description={t('lc_editor_desc')}
-          onSave={async (newContext: string) => {
-            setLifeContext(newContext);
-            if (currentUser && encryptionKey) {
-              try {
-                await userService.saveUserData(
-                  newContext,
-                  serializeGamificationState(gamificationState),
-                  encryptionKey
-                );
-              } catch (error) {
-                console.error('Failed to save edited context:', error);
-              }
-            }
-            setCameFromContextChoice(true);
-            setView('botSelection');
-          }}
+          saveLabel={coachingSessionResume ? t('lc_editor_save_return_chat') : undefined}
+          onSave={handleLcEditorSaveFromContextChoice}
           onCancel={() => setView('contextChoice')}
         />
+        </div>
       );
     case 'intentPicker':
       return (
@@ -591,10 +666,17 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
                 applyIntentLogic(null);
               }
             } else {
-              applyIntentLogic(null);
+              syncGuestSession(name, template);
+              const intent = getStoredUserIntent();
+              if (intent) {
+                setHighlightSection(getHighlightSectionForIntent(intent));
+                applyIntentLogic(intent, { lifeContextOverride: template });
+              } else {
+                setView('landing');
+              }
             }
           }}
-          onSkip={!currentUser ? () => applyIntentLogic(null) : undefined}
+          onSkip={!currentUser ? () => setView('landing') : undefined}
           safeAreaTop={iosSafeAreaTop}
         />
       );
@@ -658,6 +740,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setLifeContextEditorReturnView('personalityProfile');
             setMenuView('lifeContextEditor');
           }}
+          onStartCoachSession={handleStartSessionFromEval}
         />
       );
     case 'lifeContextEditor':
@@ -684,6 +767,12 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       );
     case 'botSelection':
       return (
+        <>
+        {coachingSessionResume && (
+          <div className="container mx-auto px-4 max-w-4xl pt-4">
+            <CoachingSessionResumeBanner {...coachingSessionResume} />
+          </div>
+        )}
         <BotSelection
           onSelect={handleSelectBot}
           onTranscriptEval={() => {
@@ -702,7 +791,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
             setPracticeEvaluation(null);
             setView('practiceSetup');
           }}
-          onAuthRequired={() => setView('auth')}
+          onConnector={handleOpenConnectorIntro}
+          onTutorials={() => setView('tutorialHub')}
+          onAuthRequired={handleGuestAuthRequired}
           onUpgrade={() => openUpgrade()}
           onPracticeUpgrade={() => openUpgrade('premium_plus')}
           onStartSessionWithPrompt={handleStartSessionFromEval}
@@ -713,6 +804,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onHighlightDone={() => setHighlightSection(null)}
           entryIntent={getStoredUserIntent()}
         />
+        </>
       );
     case 'chat':
       return (
@@ -728,6 +820,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           encryptionKey={encryptionKey}
           isTestMode={isTestMode}
           onReferralSwitch={handleReferralSwitch}
+          connectorChatHandoff={connectorChatHandoff}
+          connectorHandoffPayload={connectorHandoffPayload}
+          onConnectorHandoffPayloadConsumed={onConnectorHandoffPayloadConsumed}
         />
       );
     case 'practiceChat':
@@ -750,6 +845,93 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           practiceEvalError={practiceEvalError}
         />
       );
+    case 'connectorIntro':
+      return (
+        <ConnectorIntroView
+          onStart={handleStartConnectorRun}
+          onBack={() => setView('botSelection')}
+          isStarting={isConnectorStarting}
+          practiceFocus={connectorPracticeFocus}
+        />
+      );
+    case 'connectorCatalog':
+      return (
+        <ConnectorCatalogView
+          currentUser={currentUser}
+          onStartPractice={handleStartConnectorPractice}
+          onOpenSituation={() => setView('connectorOpenSituation')}
+          onBack={() => setView('botSelection')}
+          onNewAssessment={handleConnectorNewAssessment}
+          onUpgrade={() => openUpgrade()}
+          isStarting={isConnectorStarting}
+        />
+      );
+    case 'connectorOpenSituation':
+      return (
+        <ConnectorOpenSituationView
+          currentUser={currentUser}
+          onBack={() => setView('connectorCatalog')}
+          onUpgrade={() => openUpgrade()}
+          onStart={handleStartConnectorOpenSituation}
+          isStarting={isConnectorStarting}
+        />
+      );
+    case 'connectorChat': {
+      const connectorVignette = connectorRun?.vignettes[connectorRun.currentIndex];
+      return connectorRun && connectorVignette && selectedBot ? (
+        <ChatView
+          key={connectorVignette.id}
+          bot={selectedBot}
+          lifeContext=""
+          chatHistory={chatHistory}
+          setChatHistory={setChatHistory}
+          onEndSession={handleEndSession}
+          onMessageSent={() => setUserMessageCount((c) => c + 1)}
+          currentUser={currentUser}
+          isNewSession={true}
+          encryptionKey={encryptionKey}
+          isTestMode={false}
+          connectorConfig={{
+            vignetteId: connectorVignette.id,
+            personaName: connectorVignette.personaName,
+            personaGender: connectorVignette.gender,
+            liveMode: connectorRun.liveMode,
+            scenarioBrief: connectorVignette.scenarioBrief,
+            runMode: connectorRun.mode,
+            customScenarioId: connectorRun.customScenarioId,
+            maxUserTurns: connectorRun.maxUserTurns,
+          }}
+          onConnectorEnded={handleConnectorEnded}
+        />
+      ) : null;
+    }
+    case 'connectorOpenResults':
+      return connectorQualitativeEvaluation && connectorRun ? (
+        <ConnectorQualitativeResultsView
+          evaluation={connectorQualitativeEvaluation}
+          vignettes={connectorRun.vignettes}
+          onAgain={handleConnectorOpenAgain}
+          onCatalog={handleConnectorOpenToCatalog}
+          onDone={handleConnectorDone}
+        />
+      ) : null;
+    case 'connectorResults':
+      return connectorEvaluation && connectorRun ? (
+        <ConnectorResultsView
+          evaluation={connectorEvaluation}
+          vignettes={connectorRun.vignettes}
+          runMode={connectorRun.mode === 'open' ? 'practice' : connectorRun.mode}
+          onDone={handleConnectorResultsDone}
+          saveState={connectorSaveState}
+          canSave={!!currentUser && !!encryptionKey}
+          currentUser={currentUser}
+          onRestart={handleConnectorRestart}
+          showPracticeCrossSell={(connectorEvaluation.overallScore ?? 0) >= 8}
+          onPracticeCrossSell={handleConnectorPracticeCrossSell}
+          onRestartWithFocus={handleConnectorRestartWithFocus}
+          onStartCoachSession={handleConnectorStartCoachSession}
+        />
+      ) : null;
     case 'practiceSetup':
       return (
         <PracticeSetupView
@@ -764,7 +946,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     case 'practiceSelfRating':
       return practiceConfig ? (
         <PracticeSelfRatingView
-          frameworkName={practiceConfig.frameworkName}
+          frameworkId={practiceConfig.frameworkId}
           onSubmit={handlePracticeSelfRatingSubmit}
           onSkip={handlePracticeSelfRatingSkip}
         />
@@ -773,9 +955,13 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       return practiceEvaluation && practiceConfig ? (
         <PracticeEvaluationReview
           evaluation={practiceEvaluation}
-          frameworkName={practiceConfig.frameworkName}
-          scenarioName={practiceConfig.scenarioName}
+          frameworkId={practiceConfig.frameworkId}
+          scenarioId={practiceConfig.scenarioId}
           difficulty={practiceConfig.difficulty}
+          artifactLanguage={practiceEvalArtifactLanguage ?? practiceConfig.contentLanguage}
+          scenarioNameFallback={practiceConfig.scenarioName}
+          clarifiedConcernForDisplay={practiceConfig.clarifiedConcern}
+          contentLanguage={practiceConfig.contentLanguage}
           practiceMode={practiceConfig.practiceMode || practiceEvaluation.practiceMode || 'method'}
           onDone={handlePracticeDone}
           onContinuePhase2={handleContinueToPhase2}
@@ -805,6 +991,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onProgress={() => setView('practiceProgress')}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
             setPracticeEvaluation({ ...item.evaluationData, id: item.id });
+            setPracticeEvalArtifactLanguage(
+              item.language === 'de' || item.language === 'en' ? (item.language as Language) : null,
+            );
             if (!practiceConfig) {
               setPracticeConfig({
                 frameworkId: item.frameworkId,
@@ -833,6 +1022,9 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
           onHistory={navigateToPracticeHistory}
           onViewEvaluation={(item: PracticeEvaluationSummary) => {
             setPracticeEvaluation({ ...item.evaluationData, id: item.id });
+            setPracticeEvalArtifactLanguage(
+              item.language === 'de' || item.language === 'en' ? (item.language as Language) : null,
+            );
             setPracticeConfig({
               frameworkId: item.frameworkId,
               frameworkName: getFrameworkDisplayName(item.frameworkId, { t, language }),
@@ -970,15 +1162,28 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
       }
       return null;
     }
+    case 'gloriaInterviewIntro':
+      return (
+        <GloriaInterviewIntroView
+          onStart={handleStartGloriaInterview}
+          onBack={() => {
+            setSelectedBot(null);
+            setGloriaConnectionPrep(false);
+            setView('botSelection');
+          }}
+        />
+      );
     case 'interviewTranscript':
       return (
         <InterviewTranscriptView
           chatHistory={chatHistory}
           language={language}
           userName={currentUser?.firstName || undefined}
+          connectionPrep={gloriaConnectionPrep}
           onBack={() => {
             setSelectedBot(null);
             setChatHistory([]);
+            setGloriaConnectionPrep(false);
             setView('botSelection');
           }}
         />
@@ -986,7 +1191,54 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
     case 'achievements':
       return <AchievementsView gamificationState={gamificationState} />;
     case 'userGuide':
-      return <UserGuideView currentUser={currentUser} />;
+      return (
+        <UserGuideView
+          currentUser={currentUser}
+          focusAnchor={userGuideFocusAnchor}
+          onFocusAnchorHandled={() => setUserGuideFocusAnchor(null)}
+        />
+      );
+    case 'tutorialHub': {
+      const handleTutorialTry = (action: TutorialTryAction) => {
+        switch (action) {
+          case 'lifeContext':
+            if (currentUser && lifeContext.trim()) {
+              setView('contextChoice');
+            } else {
+              setView('landing');
+            }
+            break;
+          case 'transcriptEval':
+            setTeStep('pre');
+            setTePreAnswers(null);
+            setTeEvaluation(null);
+            setTePrefillTranscript(null);
+            setView('transcriptEval');
+            break;
+          case 'connector':
+            handleOpenConnectorIntro();
+            break;
+          case 'practiceSetup':
+            if (!currentUser) return;
+            setPracticeConfig(null);
+            setPracticeEvaluation(null);
+            setView('practiceSetup');
+            break;
+        }
+      };
+      return (
+        <TutorialHubView
+          currentUser={currentUser}
+          onBack={() => setView('botSelection')}
+          onOpenHandbook={(anchorId) => {
+            stashPendingUserGuideAnchor(anchorId);
+            setUserGuideFocusAnchor(anchorId);
+            setView('userGuide');
+          }}
+          onTry={handleTutorialTry}
+        />
+      );
+    }
     case 'formattingHelp':
       return <FormattingHelpView />;
     case 'faq':
@@ -1028,6 +1280,15 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
         />
       );
     case 'redeemCode':
+      if (isNativeIOS()) {
+        return (
+          <AccountManagementView
+            currentUser={currentUser!}
+            onNavigate={(v) => setMenuView(v)}
+            onDeleteAccount={onDeleteAccount}
+          />
+        );
+      }
       return (
         <RedeemCodeView
           onBack={view === 'paywall' ? () => setMenuView(null) : undefined}

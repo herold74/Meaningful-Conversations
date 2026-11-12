@@ -10,17 +10,43 @@ const dynamicPromptController = require('../../services/dynamicPromptController.
 const behaviorLogger = require('../../services/behaviorLogger.js');
 const { withTimeout } = require('./shared.js');
 const { normalizeLanguage } = require('../../utils/language.js');
+const {
+  getContentSafetyBlock,
+  getChatContentSafetySurface,
+} = require('../../bots/contentSafetyPromptBlocks.js');
+const {
+  CONNECTOR_COACH_BOTS,
+  detectConnectorCoachingPrepFromHistory,
+  getConnectorCoachingPrepOverride,
+  getGloriaConnectionPrepHandoffOverride,
+} = require('../../utils/connectorCoachingPrep.js');
+const {
+  buildConnectorHandoffContext,
+  getConnectorHandoffContinuationReminder,
+  isFirstConnectorHandoffTurn,
+} = require('../../utils/connectorHandoffContext.js');
+const { isDeveloperTestMode } = require('../../utils/testMode.js');
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     const {
         botId, context, history, language, isNewSession, coachingMode, decryptedPersonalityProfile,
+        connectorChatHandoff,
+        connectorHandoffPayload,
         // Test mode support
         testProfileOverride, includeTestTelemetry, userMessage: testUserMessage
     } = req.body;
     const lang = normalizeLanguage(language);
     const userId = req.userId; // This will be undefined for guests
-    const isTestMode = req.headers['x-test-mode'] === 'true';
+    let loadedUser = null;
+    if (userId) {
+        loadedUser = await prisma.user.findUnique({ where: { id: userId } });
+    }
+    const isTestMode = isDeveloperTestMode({
+        environmentType: process.env.ENVIRONMENT_TYPE,
+        headerValue: req.headers['x-test-mode'],
+        isDeveloper: loadedUser?.isDeveloper,
+    });
 
     // Telemetry collection for test mode
     const testTelemetry = {
@@ -57,7 +83,7 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     if (bot.accessTier === 'guest') {
         hasAccess = true;
     } else if (userId) {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const user = loadedUser;
         if (user) {
             // Store user's AI region preference for later use
             userRegionPreference = user.aiRegionPreference || 'optimal';
@@ -101,6 +127,9 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
     // Replace the date placeholder in the system instruction.
     systemInstruction = systemInstruction.replace(/\[CURRENT_DATE\]/g, formattedDate);
 
+    const safetySurface = getChatContentSafetySurface(bot.id);
+    systemInstruction += getContentSafetyBlock(safetySurface, lang);
+
     const isInitialMessage = history.length === 0;
     const isInterviewBot = bot.id === 'gloria-life-context' || bot.id === 'gloria-interview';
 
@@ -111,6 +140,38 @@ router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
             systemInstruction += "\n\n## ⚠️ KRITISCH — Der Benutzer hat bereits sein Thema genannt:\nDer Benutzer hat sein Thema in der ersten Nachricht klar definiert. Sie MÜSSEN dieses Thema direkt ansprechen. IGNORIEREN Sie vollständig alle 'Initial Interaction Priority'-Regeln und alle 'Achievable Next Steps' aus dem Lebenskontext. Fragen Sie NICHT nach früheren Vorhaben oder Zielen. Beginnen Sie direkt mit dem Thema des Benutzers.";
         } else {
             systemInstruction += "\n\n## ⚠️ CRITICAL — The user has already stated their topic:\nThe user has clearly defined their topic in the first message. You MUST address this topic directly. COMPLETELY IGNORE any 'Initial Interaction Priority' rules and any 'Achievable Next Steps' from the life context. Do NOT ask about previous intentions or goals. Start directly with the user's topic.";
+        }
+    }
+
+    const historyForPrep = (history || []).map((msg) => ({
+        role: msg.role,
+        text: msg.text || msg.parts?.[0]?.text || '',
+    }));
+    const firstConnectorHandoffTurn = isFirstConnectorHandoffTurn(historyForPrep);
+
+    if (bot.id === 'gloria-interview' && connectorChatHandoff === 'gloria') {
+        if (firstConnectorHandoffTurn) {
+            systemInstruction += getGloriaConnectionPrepHandoffOverride(lang);
+            if (connectorHandoffPayload) {
+                systemInstruction += buildConnectorHandoffContext(connectorHandoffPayload, lang);
+            }
+        } else {
+            systemInstruction += getConnectorHandoffContinuationReminder(lang, 'gloria');
+        }
+    }
+
+    const connectorCoachingPrepActive =
+        CONNECTOR_COACH_BOTS.has(bot.id) &&
+        (connectorChatHandoff === 'coaching' || detectConnectorCoachingPrepFromHistory(historyForPrep));
+
+    if (connectorCoachingPrepActive) {
+        if (firstConnectorHandoffTurn) {
+            systemInstruction += getConnectorCoachingPrepOverride(lang);
+            if (connectorChatHandoff === 'coaching' && connectorHandoffPayload) {
+                systemInstruction += buildConnectorHandoffContext(connectorHandoffPayload, lang);
+            }
+        } else {
+            systemInstruction += getConnectorHandoffContinuationReminder(lang, 'coaching');
         }
     } else if (isInitialMessage && isNewSession && !isInterviewBot) {
         if (lang === 'de') {

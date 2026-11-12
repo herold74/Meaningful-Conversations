@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meaningful-conversations-cache-v2.5.6-b11';
+const CACHE_NAME = 'meaningful-conversations-cache-v2.6.0-b78';
 const APP_SHELL_URLS = [
   '/',
   '/index.html',
@@ -45,6 +45,14 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
+    return;
+  }
+  try {
+    const protocol = new URL(event.request.url).protocol;
+    if (protocol !== 'http:' && protocol !== 'https:') {
+      return;
+    }
+  } catch {
     return;
   }
   // Use a stale-while-revalidate strategy for all GET requests.

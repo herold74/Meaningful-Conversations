@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { User } from '../types';
+import { isNativeIOS } from '../utils/platformDetection';
 import { KeyIcon } from './icons/KeyIcon';
 import { DownloadIcon } from './icons/DownloadIcon';
 import { DeleteIcon } from './icons/DeleteIcon';
@@ -53,13 +54,15 @@ const AccountManagementView: React.FC<AccountManagementViewProps> = ({ currentUs
             onClick: () => onNavigate('exportData'),
             color: 'text-green-600 dark:text-green-400',
         },
-        {
-            icon: ShoppingBagIcon,
-            title: t('menu_redeem_code'),
-            description: t('account_redeem_code_desc'),
-            onClick: () => onNavigate('redeemCode'),
-            color: 'text-purple-600 dark:text-purple-400',
-        },
+        ...(!isNativeIOS()
+            ? [{
+                icon: ShoppingBagIcon,
+                title: t('menu_redeem_code'),
+                description: t('account_redeem_code_desc'),
+                onClick: () => onNavigate('redeemCode'),
+                color: 'text-purple-600 dark:text-purple-400',
+            }]
+            : []),
         {
             icon: DeleteIcon,
             title: t('menu_delete_account'),

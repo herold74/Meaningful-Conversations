@@ -4,20 +4,34 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { useLocalization } from '../context/LocalizationContext';
-import { brand } from '../config/brand';
+import { brand, brandProviderMailtoMarkdown } from '../config/brand';
 import { isNativeApp } from '../utils/platformDetection';
 import { User } from '../types';
 import { resolvePracticeAccess } from '../utils/practiceAccess';
+import { USER_GUIDE_ANCHORS, scrollUserGuideToAnchorWhenReady, takePendingUserGuideAnchor } from '../utils/userGuideAnchors';
+import {
+  audioTranscriptionChapterNum,
+  coachPracticeChapterNum,
+  coachingChapterNum,
+  computeCoachingSessionSubsections,
+  computeGamificationSubsections,
+  computeProfileSubsections,
+  computeSessionReviewSubsections,
+  connectorChapterNum,
+  gamificationChapterNum,
+  handbookSectionRef,
+  profileChapterNum,
+  sessionReviewChapterNum,
+  transcriptEvalChapterNum,
+} from '../utils/userGuideStructure';
 
 interface InfoViewProps {
     currentUser?: User | null;
+    focusAnchor?: string | null;
+    onFocusAnchorHandled?: () => void;
 }
 
-/** Coaching chapter index — shifts when install (web) and/or profile (registered) chapters are present. */
-const coachingChapterNum = (isNative: boolean, isRegistered: boolean): number =>
-    (isNative ? 3 : 4) + (isRegistered ? 1 : 0);
-
-const profileChapterNum = (isNative: boolean): number => (isNative ? 3 : 4);
+const providerContact = brandProviderMailtoMarkdown();
 
 const deChapterLabel = (num: number) => `Kapitel ${num}`;
 const enChapterLabel = (num: number) => `Chapter ${num}`;
@@ -41,28 +55,25 @@ const guideInfoBox = (body: string) => `
 
 const deTranscriptToolsSection = (
     isNative: boolean,
-    isRegistered: boolean,
-    showChapter8: boolean,
+    sectionNum: string | null,
 ): string => {
-    if (!showChapter8) return '';
-    const base = coachingChapterNum(isNative, isRegistered);
-    return `### 5.2 Transkript-Tools (Premium)
+    if (!sectionNum) return '';
+    return `<h3 id="${USER_GUIDE_ANCHORS.transcriptTools}">${sectionNum} Transkript-Tools (Premium)</h3>
 
-Im Bereich **Management & Kommunikation** (Nobody, Sam, Gloria) finden Sie die Karte **Transkript-Tools** — ab **Premium**:
-- **Transkript-Auswertung** — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(base + 3)}.
+Im Bereich **Management & Kommunikation** (Nobody, Sam, Gloria) finden Sie die Karte **Transkript-Tools** — ab **Premium** (nach Anmeldung):
+- **Transkript-Auswertung** — Auswertung hochgeladener Gesprächstranskripte. Ausführliche Anleitung: ${deChapterLabel(transcriptEvalChapterNum(isNative))}.
+- **Gäste:** Die Karte ist sichtbar, aber gesperrt — ein Klick führt zur **Anmeldung oder Registrierung**, nicht direkt zum Upgrade-Dialog.
 `;
 };
 
 const dePracticeTabSection = (
     isNative: boolean,
-    isRegistered: boolean,
-    showChapter10: boolean,
+    sectionNum: string | null,
 ): string => {
-    if (!showChapter10) return '';
-    const base = coachingChapterNum(isNative, isRegistered);
-    return `### 5.3 Coaching üben (Premium+, Trial oder Klient)
+    if (!sectionNum) return '';
+    return `### ${sectionNum} Coaching üben (Premium+, Testphase oder Klient)
 
-Im **Coaching-Bereich** wechseln Sie über den Tab **Coaching üben** (neben „Coaching“) in den Übungsmodus. Dort starten Sie eine Session als Coach — die KI spielt Ihren Klienten. Ausführliche Anleitung: ${deChapterLabel(base + 5)}.
+Im **Coaching-Bereich** wechseln Sie über den Tab **Coaching üben** (neben „Coaching“) in den Übungsmodus. Dort starten Sie eine Session als Coach — die KI spielt Ihren Klienten. Ausführliche Anleitung: ${deChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Zugang:** Aktives **Premium+**-Abo, **9-Tage-Testphase** nach Registrierung oder **Klienten**-Zugang. Standard-Premium ohne Premium+ enthält Coach Practice nicht.
 `;
@@ -70,31 +81,88 @@ Im **Coaching-Bereich** wechseln Sie über den Tab **Coaching üben** (neben „
 
 const enTranscriptToolsSection = (
     isNative: boolean,
-    isRegistered: boolean,
-    showChapter8: boolean,
+    sectionNum: string | null,
 ): string => {
-    if (!showChapter8) return '';
-    const base = coachingChapterNum(isNative, isRegistered);
-    return `### 5.2 Transcript Tools (Premium)
+    if (!sectionNum) return '';
+    return `<h3 id="${USER_GUIDE_ANCHORS.transcriptTools}">${sectionNum} Transcript Tools (Premium)</h3>
 
-In the **Management & Communication** section (Nobody, Sam, Gloria), you'll find the **Transcript Tools** card — from **Premium** onward:
-- **Transcript Evaluation** — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(base + 3)}.
+In the **Management & Communication** section (Nobody, Sam, Gloria), you'll find the **Transcript Tools** card — from **Premium** onward (after sign-in):
+- **Transcript Evaluation** — Analyze uploaded conversation transcripts. Full instructions: ${enChapterLabel(transcriptEvalChapterNum(isNative))}.
+- **Guests:** The card is visible but locked — tapping it prompts you to **sign in or register**, not the upgrade dialog directly.
 `;
 };
 
 const enPracticeTabSection = (
     isNative: boolean,
-    isRegistered: boolean,
-    showChapter10: boolean,
+    sectionNum: string | null,
 ): string => {
-    if (!showChapter10) return '';
-    const base = coachingChapterNum(isNative, isRegistered);
-    return `### 5.3 Coach Practice (Premium+, trial, or Client)
+    if (!sectionNum) return '';
+    return `### ${sectionNum} Coach Practice (Premium+, trial, or Client)
 
-In the **Coaching** section, switch to the **Coach Practice** tab (next to "Coaching") to enter training mode. You play the coach and the AI plays your client. Full instructions: ${enChapterLabel(base + 5)}.
+In the **Coaching** section, switch to the **Coach Practice** tab (next to "Coaching") to enter training mode. You play the coach and the AI plays your client. Full instructions: ${enChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Access:** Active **Premium+** subscription, **9-day trial** after registration, or **Client** access. Standard Premium without Premium+ does not include Coach Practice.
 `;
+};
+
+const deConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
+    const ch = connectorChapterNum(isNative, isRegistered);
+    return `<details id="${USER_GUIDE_ANCHORS.connector}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${deChapterLabel(ch)}: The Connector — Gespräche mit Wirkung (Registriert)</summary>
+<div style="padding: 16px;">
+
+**Ihr Gewinn:** The Connector zeigt Ihnen auf freundliche Weise, wie Sie im Gespräch wirken — als Impuls für Ihre Selbstwahrnehmung. Besonders hilfreich ist er, wenn Sie noch kein konkretes Coaching-Thema haben: Sie starten mit kurzen Alltagsdialogen und können sofort loslegen. Die Karte **The Connector** finden Sie im Bereich **Management & Kommunikation**.
+
+**So läuft es ab:** Sie führen drei kurze Gespräche mit KI-Personas, zum Beispiel mit einem Kollegen nach einem frustrierenden Meeting oder einer Freundin nach einer Trennung. Dabei zählt Ihre natürliche Art, so zu sprechen, wie Sie es im echten Leben tun. Zu Beginn wählen Sie **Text** oder **Stimme**. Pro Gespräch antworten Sie drei- bis fünfmal; die Gespräche enden von selbst, und mit **Sitzung beenden** schließen Sie jederzeit ab — ausgewertet wird dann, was bereits besprochen wurde.
+
+**Ihr Ergebnis:** Eine **Verbindungs-Signatur** mit fünf Dimensionen — Empathie, Präsenz, Neugier, Urteilsfreiheit und Stabilität — als Netzdiagramm, dazu Stärken, Wachstumsfelder und konkrete Momente aus Ihren Gesprächen. Verbindung ist mehr Fähigkeit als Talent: Das Profil zeigt, worauf Sie aufbauen können. Mit **Fertig** speichern Sie die Signatur standardmäßig verschlüsselt in Ihrem Persönlichkeitsprofil unter **„Wie du interagierst“** (optional können Sie das Speichern abwählen) — außerdem im PDF-Export.
+
+**Und danach?** Unter **„Dein nächster Schritt“** lädt Sie die App ein, weiterzugehen — ganz in Ihrem Tempo: mit einem kleinen Impuls für Ihr nächstes echtes Gespräch, mit The Connector zu einer Dimension Ihrer Wahl oder mit einem kurzen Coaching-Gespräch zur Vorbereitung. Welche Möglichkeiten Sie sehen, hängt von Ihrem Ergebnis und Ihrem Zugang ab.
+
+${guideInfoBox('<p class="m-0"><strong>KI-Transparenz:</strong> Ihre Gesprächspartner sind KI-Personas; die Auswertung wird von einer KI erstellt. Das Ergebnis ist ein Impuls zur Selbstreflexion — kein psychologisches Gutachten und kein Coaching-Zertifikat.</p>')}
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">Gut zu wissen</summary>
+
+- **Üben mit Premium+:** Im **Übungskatalog** wiederholen Sie einzelne ausgewählte Szenarien; Ihre gespeicherte Signatur bleibt dabei unverändert. Mit **Eigene Situation** beschreiben Sie Beziehung und Kontext mit fiktiven Namen und erhalten nach einem Übungsgespräch qualitatives Feedback.
+- **Datenschutz:** Die Gespräche dienen nur der Auswertung und werden nicht als Chat-Verlauf gespeichert. Optional ergänzen Sie Ihre Signatur über **„Signatur mit Fremdsicht anreichern“** um einen kurzen 360°-Brückentext (mit Vorschau vor dem Speichern).
+- **Im Chat:** Mit einem Tipp auf den Avatar öffnen Sie das vollständige Szenario.
+- **Für Gäste:** Die Karte ist sichtbar; ein Klick führt zur Registrierung.
+
+</details>
+
+</div>
+</details>`;
+};
+
+const enConnectorChapter = (isNative: boolean, isRegistered: boolean) => {
+    const ch = connectorChapterNum(isNative, isRegistered);
+    return `<details id="${USER_GUIDE_ANCHORS.connector}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔗 ${enChapterLabel(ch)}: The Connector — Elevate Conversations (Registered)</summary>
+<div style="padding: 16px;">
+
+**Your benefit:** The Connector shows you in a friendly way how you come across in conversation — as a prompt for your self-awareness. It is especially helpful when you do not yet have a concrete coaching topic: you start with short everyday dialogues and can get going right away. You find **The Connector** card in the **Management & Communication** section.
+
+**How it works:** You have three short conversations with AI personas, for example with a colleague after a frustrating meeting or a friend after a breakup. What counts is your natural way of speaking, just as in real life. At the start, you choose **Text** or **Voice**. In each conversation, you reply three to five times; the conversations end on their own, and with **End Session** you can wrap up at any time — what has already been discussed is then evaluated.
+
+**Your result:** A **Connection Signature** with five dimensions — empathy, presence, curiosity, non-judgment, and steadiness — as a radar chart, plus strengths, growth areas, and specific moments from your conversations. Connection is more skill than talent: the profile shows what to build on. **Done** saves the signature to your personality profile under **“How you interact”** by default, encrypted (you can opt out before finishing) — and in the PDF export.
+
+**And then?** Under **“Your next step”**, the app invites you to go further — entirely at your own pace: with a small nudge for your next real conversation, with The Connector on a dimension of your choice, or with a short coaching conversation to prepare. Which options you see depends on your result and your access.
+
+${guideInfoBox('<p class="m-0"><strong>AI transparency:</strong> Your conversation partners are AI personas, and the evaluation is AI-generated. The result is a prompt for self-reflection — not a psychological assessment and not a coaching certificate.</p>')}
+
+<details>
+<summary style="cursor: pointer; font-weight: 600;">Good to know</summary>
+
+- **Practicing with Premium+:** In the **practice catalog**, you replay individual selected scenarios; your saved signature stays unchanged. With **Your own situation**, you describe relationship and context using fictional names and receive qualitative feedback after one practice conversation.
+- **Privacy:** The conversations serve only the evaluation and are not stored as chat history. Optionally, add a short 360° bridge text to your signature via **“Enrich signature with external view”** (with a preview before saving).
+- **In chat:** Tap the avatar to open the full scenario.
+- **For guests:** The card is visible; a click leads to registration.
+
+</details>
+
+</div>
+</details>`;
 };
 
 const de_markdown = (
@@ -104,108 +172,122 @@ const de_markdown = (
     showChapter8: boolean,
     showChapter9: boolean,
     showChapter10: boolean,
-) => `<details>
+) => {
+    const coachingSub = computeCoachingSessionSubsections({
+        isNative,
+        isRegistered,
+        showTranscriptTools: showChapter8,
+        showPracticeTab: showChapter10,
+    });
+    const sessionReviewSub = computeSessionReviewSubsections({
+        isNative,
+        isRegistered,
+        showDpflBlock: isPremium,
+    });
+    const profileSub = computeProfileSubsections(isNative);
+    const gamSub = computeGamificationSubsections(isNative, isRegistered);
+    return `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Einführung</summary>
 <div style="padding: 16px;">
 
 Willkommen bei "${brand.appNameDe}"! Diese Anleitung führt Sie Schritt für Schritt durch die App. Das Kernkonzept ist Ihre **Lebenskontext**-Datei – ein privates Dokument, das als Gedächtnis Ihres Coaches dient.
 
-${guideInfoBox('<p class="m-0"><strong>Kein Gesprächstagebuch nötig:</strong> Nach jeder Sitzung schlägt die App automatisch Aktualisierungen vor; Sie prüfen sie kurz und übernehmen nur, was für Sie passt — oder passen den Text an, bevor Sie speichern. So bleibt Ihr Coaching kontinuierlich und kontextbezogen, ohne Extra-Aufwand.</p>')}
+${guideInfoBox('<p class="m-0"><strong>Ihr Coach merkt sich Ihre Geschichte:</strong> Nach jeder Sitzung schlägt die App automatisch Aktualisierungen vor; Sie prüfen sie kurz und übernehmen, was für Sie passt — oder passen den Text vor dem Speichern an. So bleibt Ihr Coaching kontinuierlich und persönlich, bei minimalem Aufwand.</p>')}
+
+${isNative ? `${guideInfoBox('<p class="m-0"><strong>App-Updates:</strong> Neue Versionen erhalten Sie über den <strong>Apple App Store</strong> (Einstellungen → App Store → automatische Updates optional).</p>')}` : ''}
 
 </div>
 </details>
 
 ---
 
-<details open>
+<details id="${USER_GUIDE_ANCHORS.ch1}" open>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Kapitel 1: Erste Schritte</summary>
 <div style="padding: 16px;">
 
-Wenn Sie die App zum ersten Mal öffnen, werden Sie durch einen kurzen Onboarding-Prozess geführt.
+Ein guter Start dauert nur wenige Minuten. Hier erfahren Sie, wie Sie in die App hineinfinden, wie Ihr Coach Sie kennenlernt und wie Sie jederzeit dort weitermachen, wo Sie aufgehört haben.
 
-### 1.0 Willkommensbildschirm
+### 1.1 Ihre Startfrage: „Was möchten Sie heute erreichen?“
 
-Nach dem Login erscheint kurz der **Willkommensbildschirm**: Logo, Coach-Avatare im Kreis und der Hinweis „Deine Sitzung wird geladen…“, während Ihre Daten vorbereitet werden.
+Nach einem kurzen Willkommen stellt die App eine einzige Frage. Ihre Antwort führt Sie in wenigen Sekunden zu dem passenden Einstieg — Coach, Coaching-Thema oder Übungsmodus. Drei Karten stehen zur Auswahl:
 
-### 1.1 Intent Picker & Name
+- **Kommunikation & Management** — für ein Gespräch, das Sie vorbereiten oder besser verstehen möchten. Dort warten Nobody und Sam, mit Konto außerdem Gloria und mit Premium die Transkript-Tools.
+- **Coaching zu meinem Anliegen** (hervorgehoben) — für das Thema, das Sie gerade beschäftigt. Mit Konto beschreiben Sie es in eigenen Worten und erhalten eine Coach-Empfehlung; als Gast wählen Sie direkt aus Nobody, Max und Ava.
+- **Als Coach üben** — für alle, die selbst das Coachen trainieren möchten. Mit Premium+, in der Testphase oder mit Klienten-Zugang geht es direkt zum Übungs-Setup; Gäste legen dafür zuerst ein Konto an.
 
-Beim Start erscheint der **Intent Picker** — ein Bildschirm mit **drei Karten** und der Frage „Was möchten Sie heute erreichen?“:
-- **Kommunikation & Management** — Öffnet den Bereich Management & Kommunikation (Nobody, Sam, Gloria, Transkript-Tools)
-- **Coaching zu meinem Anliegen** (hervorgehoben) — Fokus auf die Anliegen-Suche; Coach-Bereiche bleiben eingeklappt
-- **Als Coach üben** — Direkt zur Coach Practice-Übung (Silber-Bereich, Practice-Tab); **überspringt Lebenskontext-Schirme**
+Die App merkt sich Ihre Wahl: Auf der Coach-Auswahl ist anschließend der passende Bereich bereits geöffnet. Möchten Sie die Startfrage lieber nicht sehen, schalten Sie sie unter **Menü → Mein Account** aus; dann sind Management- und Coaching-Bereich auf der Coach-Auswahl von Anfang an geöffnet.
 
-Der gewählte Intent bestimmt, welcher Bereich in der Coach-Auswahl hervorgehoben und ausgeklappt wird.
+**Ihr erster Besuch:** Die App fragt nach Ihrem Namen. Mit Konto begleitet sie Sie danach durch den kurzen Persönlichkeitstest (OCEAN), damit Ihre Coaches Sie von Beginn an besser verstehen. Gäste gelangen nach der Namenseingabe zum Startbildschirm (§1.3).
 
-**Danach werden Sie nach Ihrem Vornamen gefragt** (oder einem Pseudonym). Für Gäste wird daraus eine minimale Lebenskontext-Vorlage erstellt. Für registrierte Nutzer wird der Name in den verschlüsselten Lebenskontext integriert. Gäste können diesen Schritt überspringen.
+### 1.2 Als Gast oder mit Konto
 
-**Hinweis:** Registrierte Benutzer können den Intent Picker unter **Mein Account** deaktivieren.
+Sie können die App zuerst als Gast ausprobieren oder gleich ein Konto anlegen.
 
-### 1.2 Gast vs. Registrierter Benutzer
-- **Als Gast fortfahren:** Ideal zum Ausprobieren. Alle Ihre Daten werden nur lokal auf Ihrem Gerät verarbeitet.
-- **Registrieren/Anmelden:** Erstellen Sie ein kostenloses Konto, um Ihren Fortschritt automatisch zu speichern. Ihr Lebenskontext wird sicher mit Ende-zu-Ende-Verschlüsselung in der Cloud gespeichert.
+- **Als Gast starten:** Sie legen sofort los. Ihr Name, Ihr Lebenskontext und Ihr Fortschritt bleiben auf Ihrem Gerät (${isNative ? 'in der App-Sitzung' : 'im Browser-Tab'}). Als Gast stehen Ihnen 50 Chat-Nachrichten pro Woche und die Stimmen Ihres Geräts bzw. Browsers zum Vorlesen zur Verfügung.
+- **Mit Konto starten:** Sie beginnen mit einer **9-tägigen Premium-Testphase**. Ihr Lebenskontext und Ihr Profil liegen Ende-zu-Ende-verschlüsselt auf dem Server und stehen Ihnen auf all Ihren Geräten zur Verfügung; zusätzlich sind die Server-Stimmen (Web) verfügbar.
 
-${guideWarningBox('<p class="m-0"><strong>Gastmodus — bitte beachten:</strong> Ohne Download geht Ihr Fortschritt verloren. Laden Sie am Ende jeder Sitzung auf dem Analyse-Bildschirm Ihre Lebenskontext-Datei herunter, um sie zu speichern.</p>')}
+${guideInfoBox(`<p class="m-0"><strong>Tipp für Gäste:</strong> Laden Sie am Ende jeder Sitzung im Sitzungs-Review Ihre Lebenskontext-Datei (.md) herunter. Ihre Daten liegen als Gast nur ${isNative ? 'in der laufenden App-Sitzung' : 'im geöffneten Browser-Tab'} — die heruntergeladene Datei bewahrt sie dauerhaft auf, und mit ihr machen Sie beim nächsten Mal genau dort weiter, wo Sie aufgehört haben.</p>`)}
 
-**Sprachauswahl:** Auf dem Anmelde-/Registrierungsbildschirm können Sie zwischen **Deutsch** und **Englisch** wählen. Die Sprachwahl gilt für die gesamte App.
+**Sprache:** Auf dem Anmelde- und Registrierungsbildschirm wählen Sie **Deutsch** oder **Englisch**. Die Sprache gilt für die gesamte App.
 
-**Plattformübergreifend:** Ihr Benutzerkonto funktioniert sowohl in der iOS-App als auch über den Web-Browser unter **${brand.domainProduction}**. Alle Daten werden automatisch synchronisiert.
+${isNative ? '' : `**Überall dabei:** Ihr Konto funktioniert in der iOS-App ebenso wie im Web-Browser unter **${brand.domainProduction}**. Ihre Daten werden automatisch synchronisiert.`}
 
-### 1.3 Der Lebenskontext-Startbildschirm
+### 1.3 Ihr Lebenskontext — das Gedächtnis Ihres Coaches
 
-Nach Auth und Intent landen Sie auf dem **Startbildschirm** mit **drei Aktionskarten** und einem Upload-Bereich darunter:
+Je besser Ihr Coach Sie und Ihre Situation kennt, desto treffender kann er fragen. Dafür gibt es Ihren **Lebenskontext**: ein privates Dokument, das Sie selbst in der Hand behalten. Auf dem Startbildschirm führen drei Wege dorthin:
 
-- **Mit Lebenskontext fortfahren** — Lädt Ihren gespeicherten Kontext (wiederkehrende Nutzer) oder öffnet den Datei-Picker, wenn noch keine substanzielle Datei vorhanden ist.
-- **Neues Gespräch starten** (hervorgehoben) — Startet den Fragebogen zum Erstellen oder Erweitern Ihres Kontexts.
-- **Mit Interview erstellen** — Beginnt ein geführtes Interview mit Gloria.
+- **Mit Lebenskontext fortfahren** — für alle, die schon einen Kontext haben. Sie sehen ihn in der Vorschau oder laden Ihre Datei hoch (Markdown-Datei „.md“ per Klick oder Drag & Drop).
+- **Neues Gespräch starten** (hervorgehoben) — der Weg für einen frischen Anfang. Ein kurzer Fragebogen führt Sie durch die wichtigsten Themen; ist Ihr Kontext bereits gut gefüllt, öffnet sich stattdessen der Editor.
+- **Mit Interview erstellen** — Gloria führt ein Gespräch mit Ihnen. Aus Ihren Antworten entsteht Ihr Lebenskontext, und zum Abschluss erhalten Sie ein Review mit dem Ergebnis.
 
-**Datei hochladen:** Unter den Karten können Sie eine \`.md\`-Lebenskontext-Datei per Klick oder Drag & Drop hochladen. Das ist die typische Methode für Gäste, die eine frühere Sitzung fortsetzen.
+Im Fragebogen ist nur Ihr Name Pflicht; Land und Bundesland geben Sie optional an. Gäste sehen beim ersten Mal ${isNative ? 'in der App-Sitzung' : 'im Tab'} einen kurzen Datenschutzhinweis. Mit **Datei erstellen & Weiter** gelangen Sie zur Coach-Auswahl.
 
-**Fragebogen (über „Neues Gespräch starten"):** Füllen Sie die Felder zu Hintergrund, Zielen und Herausforderungen aus. Nur Ihr Name ist Pflicht. Optional können Sie **Land / Bundesland** angeben (z. B. „Österreich – Wien") für lokale Hilfsangebote. Mit **Datei erstellen & Weiter** geht es zur Coach-Auswahl.
+Den Startbildschirm erreichen Gäste nach der Namenseingabe und jederzeit über **Menü → Lebenskontext**. Registrierte Nutzer sehen ihn nach dem ersten Persönlichkeitstest oder wenn sie über **Neue Sitzung starten** (§1.5) neu beginnen.
 
-**Interview mit Gloria:** Gloria ist **kein** Coach, sondern stellt die Fragebogen-Themen in einem natürlichen Gespräch. Am Ende formatiert sie Ihre Antworten in eine Lebenskontext-Datei.
+### 1.4 Lebenskontext ansehen und bearbeiten
 
-### 1.4 Lebenskontext-Vorschau und Bearbeitung
+Hier behalten Sie die Kontrolle darüber, was Ihr Coach über Sie weiß. Wenn Sie eine Karte wählen oder eine Datei hochladen, öffnet sich die **Vorschau** mit Dateiname und formatiertem Text. Von dort geht es weiter mit:
 
-Wenn Sie eine Karte wählen oder eine Datei hochladen, wechseln Sie in die **Vorschau** mit Dateiname, Markdown-Vorschau und Aktionen:
+- **Sitzung starten** — zur Coach-Auswahl, mit dem geladenen Kontext.
+- **Lebenskontext-Datei erweitern** — wenn Ihr Kontext noch eine Vorlage ist (z. B. nur Ihr Name); der Fragebogen hilft beim Füllen.
+- **Lebenskontext-Datei editieren** — wenn Ihr Kontext bereits gefüllt ist; der Markdown-Editor öffnet sich.
+- **Mit einem Interview erweitern** — Gloria ergänzt Ihren Kontext im Gespräch.
 
-- **Sitzung starten** — Geht zur Coach-Auswahl mit dem geladenen Kontext.
-- **Lebenskontext-Datei erweitern** — Wenn Ihr Kontext noch eine Vorlage ist (z. B. nur Ihr Name). Öffnet den Fragebogen.
-- **Lebenskontext-Datei editieren** — Wenn der Kontext bereits angereichert ist. Öffnet den **Markdown-Editor**.
-- **Mit einem Interview erweitern** — Übergibt den Kontext an Gloria im Erweiterungsmodus.
-
-**Zurück zum Startbildschirm:** Über **Andere Datei wählen** kehren Sie zu den drei Karten zurück.
+Mit **Andere Datei wählen** kehren Sie zu den drei Karten zurück.
 
 #### Der Lebenskontext-Editor
-Der Editor ermöglicht Ihnen die direkte Bearbeitung Ihres Lebenskontexts:
-- **Bearbeiten-Modus:** Zeigt den rohen Markdown-Text in einem Textfeld. Hier können Sie frei Abschnitte hinzufügen, ändern oder entfernen.
-- **Vorschau-Modus:** Zeigt Ihren Lebenskontext formatiert an (Überschriften, Fettdruck, Listen etc.), so wie ihn auch der Coach sieht.
-- **Umschalten:** Verwenden Sie die Tabs "Bearbeiten" und "Vorschau" über dem Textfeld.
-- **Downloads:** Zwei Buttons unter dem Editor ermöglichen den Export:
-  - **📥 .md** — Speichert den Lebenskontext als Markdown-Datei auf Ihrem Gerät.
-  - **📄 PDF** — Generiert ein formatiertes PDF-Dokument mit Ihrem Lebenskontext.
-- **Speichern & Zurück:** Übernimmt Ihre Änderungen und kehrt zum Startbildschirm zurück.
-- **Abbrechen:** Verwirft alle Änderungen.
+Im Editor schreiben Sie frei: Sie fügen Abschnitte hinzu, ändern oder entfernen sie.
+- **Bearbeiten** zeigt den Text im Textfeld, **Vorschau** zeigt ihn formatiert (Überschriften, Fettdruck, Listen) — genau so, wie auch Ihr Coach ihn sieht. Zwischen beiden wechseln Sie über die Tabs über dem Textfeld.
+- Unter dem Editor sichern Sie Ihren Kontext mit **📥 .md** (Markdown-Datei) oder **📄 PDF** (formatiertes Dokument) auf Ihrem Gerät.
+- **Speichern & Zurück** übernimmt Ihre Änderungen: Vom Startbildschirm geht es zur Coach-Auswahl, aus dem Menü zurück zum zuletzt geöffneten Bildschirm. **Abbrechen** verwirft die Änderungen.
 
 #### Lebenskontext mit Gloria erweitern
-**Wenn Sie auf "Mit einem Interview erweitern" klicken**, wird Ihr bestehender Kontext an Gloria übergeben. Im Erweiterungsmodus verhält sie sich anders als bei der Ersterstellung:
-- Gloria begrüßt Sie **persönlich mit Ihrem Namen** und fragt, wie viel Zeit Sie sich heute nehmen möchten.
-- Sie analysiert Ihren bestehenden Kontext und identifiziert **Lücken** — also Abschnitte, die noch leer oder nur oberflächlich ausgefüllt sind.
-- Bereits ausführlich beschriebene Bereiche werden **übersprungen**.
-- **Wenn Sie gezielt einen bestehenden Bereich aktualisieren möchten**, respektiert Gloria das und hilft Ihnen dabei, statt auf der vorgegebenen Reihenfolge zu bestehen.
-- Am Ende des Gesprächs werden die neuen Informationen **mit Ihrem bestehenden Kontext zusammengeführt** — nichts geht verloren.
+Mit **Mit einem Interview erweitern** schreiben Sie Ihre Geschichte gemeinsam mit Gloria fort. Sie begrüßt Sie mit Ihrem Namen, fragt, wie viel Zeit Sie heute haben, und erkennt in Ihrem bestehenden Kontext die Lücken — Abschnitte, die noch leer oder nur kurz beschrieben sind. Bereits ausführliche Bereiche überspringt sie. Möchten Sie gezielt einen bestimmten Bereich aktualisieren, folgt Gloria Ihrem Wunsch. Am Ende werden die neuen Informationen mit Ihrem bestehenden Kontext zusammengeführt, sodass alles Bisherige erhalten bleibt.
 
-### 1.5 Eine neue Sitzung beginnen (für wiederkehrende Benutzer)
-Wenn Sie als registrierter Benutzer mit einem gespeicherten Kontext zurückkehren, sehen Sie den Bildschirm **Kontextauswahl**.
+### 1.5 Wenn Sie wiederkommen
 
-- **Mit gespeichertem Kontext fortfahren:** Lädt Ihren letzten Stand und bringt Sie zur Coach-Auswahl.
-- **Neue Sitzung starten:** Ermöglicht es Ihnen, mit einem leeren Kontext von vorne zu beginnen (ideal, wenn Sie ein völlig neues Thema erkunden möchten).
+So geht es dort weiter, wo Sie aufgehört haben: Nach der Anmeldung fragt die App kurz, was Sie heute vorhaben (§1.1). Währenddessen entschlüsselt sie Ihre gespeicherten Daten mit Ihrem Passwort direkt auf Ihrem Gerät und stellt Ihren Lebenskontext sofort bereit. Dann wählen Sie Ihren Coach und legen los. Mit Premium erinnert Sie die App gelegentlich daran, dass die Tests Spiral Dynamics und Riemann-Thomann Ihr Profil noch abrunden.
+
+**Ihren Kontext ansehen oder neu beginnen:** Über **Menü → Lebenskontext** (oder direkt nach dem Anmelden, wenn Sie die Startfrage ausgeschaltet haben) öffnet sich der Bildschirm „Willkommen zurück“. Dort sehen Sie Ihren Kontext in der Vorschau, können ihn bearbeiten und entscheiden:
+- **Mit gespeichertem Kontext fortfahren** bringt Sie zur Coach-Auswahl.
+- **Neue Sitzung starten** beginnt mit einem frischen Kontext. Die App fragt zur Sicherheit nach und bietet an, den bisherigen Kontext zu archivieren; Ihr gespeicherter Kontext wird erst beim nächsten Speichern ersetzt. Danach geht es zum Startbildschirm (§1.3).
+
+Gibt es ein unterbrochenes Gespräch, erscheint hier außerdem ein Hinweis zum Weitermachen (§1.6).
+
+**Ein neuer Anfang für heute:** **Menü → Neu anfangen** beendet die laufende Sitzung, verwirft offene Gesprächsentwürfe und bringt Sie zurück zur Startfrage. Ihr Lebenskontext bleibt dabei unverändert.
+
+### 1.6 Unterbrochen? Machen Sie einfach weiter
+
+Solange ${isNative ? 'Ihre App-Sitzung' : 'Ihr Browser-Tab'} geöffnet bleibt, bietet die App an, ein unterbrochenes **Coaching-Gespräch fortzusetzen** — auf dem Bildschirm „Willkommen zurück“, auf dem Startbildschirm oder in einem Dialog beim Wiedereinstieg. Der Entwurf liegt dabei nur auf Ihrem Gerät; auf den Server gelangt er erst, wenn Sie die **Sitzung beenden** und auswerten lassen.
+
+Auf dieselbe Weise setzen Sie eine unterbrochene **Übungssitzung (Coach Practice)** fort, im Setup oder im Chat. Auch sie bleibt bis zur Auswertung lokal.
 
 </div>
 </details>
 
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.ch2}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Kapitel 2: Datenschutz & Sicherheit</summary>
 <div style="padding: 16px;">
 
@@ -220,28 +302,34 @@ Ihre Privatsphäre ist entscheidend. Wir verwenden **Ende-zu-Ende-Verschlüsselu
 
 Über das Menü (☰) erreichen Sie die **Kontoverwaltung** mit folgenden Optionen:
 
-- **Profil bearbeiten:** Ändern Sie Ihren Namen und Ihre E-Mail-Adresse.
+- **Profil bearbeiten:** Ändern Sie Ihren Namen und Ihre E-Mail-Adresse. Hier schalten Sie auch die Startfrage „Was möchten Sie heute erreichen?“ ein oder aus (Mein Account).
 - **Passwort ändern:** Aktualisieren Sie Ihr Passwort. **Hinweis:** Da Ihr Passwort den Verschlüsselungsschlüssel generiert, werden Ihre verschlüsselten Daten (Lebenskontext, Persönlichkeitsprofil) automatisch mit dem neuen Schlüssel neu verschlüsselt.
 - **Daten exportieren (DSGVO):** Laden Sie alle Ihre gespeicherten Daten herunter -- als HTML-Bericht oder JSON-Datei. Der Export umfasst: Kontodaten, Gamification-Fortschritt, Lebenskontext, Persönlichkeitsprofil, Feedbacks, eingelöste Codes, Coaching-Übungssessions, Transkript-Auswertungen und Nutzungsstatistiken.
-- **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Klient).
+${isNative ? '' : `- **Code einlösen:** Geben Sie einen Zugangscode ein, um Ihre Zugangsstufe zu erweitern (z.B. Premium oder Klient).
+`}
 - **Konto löschen:** Löscht Ihr Konto und alle zugehörigen Daten vollständig und unwiderruflich von unseren Servern.
 
 ### 2.2 Zugangsstufen & Upgrade
 
-Die App bietet mehrere Zugangsstufen mit steigendem Funktionsumfang:
+Jede Stufe öffnet Ihnen weitere Möglichkeiten. Sie entscheiden, wie weit Sie gehen möchten — vom unverbindlichen Ausprobieren bis zum vollen Funktionsumfang.
 
-| Stufe | Zugang | Coaches | Funktionen |
+| Stufe | So kommen Sie dorthin | Ihre Coaches | Das gewinnen Sie |
 | :--- | :--- | :--- | :--- |
-| **Gast** | Ohne Registrierung | Nobody, Max, Ava | Grundfunktionen, lokale Daten |
-| **Registriert** | Kostenloses Konto inkl. **9-Tage-Premium-Test** | + Gloria, Sam, Gabrielle | Cloud-Speicher (E2EE), OCEAN-Test, DPC-Modus, Gamification; im Test auch Premium-Features und Coach Practice (8 Methoden) |
-| **Premium** | Kostenpflichtiges Upgrade (z. B. €9,90/Monat) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics Tests, DPFL-Modus, adaptives Profil, Transkript-Auswertung |
-| **Premium+** | Premium inkl. Coach Practice (z. B. €14,90/Monat) | wie Premium | + **Coach Practice** (8 Übungsmethoden) |
-| **Klient** | Zugangscode von ${brand.providerName} | + Rob, Victor | Audio-Transkription, **Coach Practice (12 Methoden)**, alle Features |
+| **Gast** | Ohne Registrierung | Nobody, Max, Ava (Gloria begleitet das Lebenskontext-Interview auf dem Startbildschirm) | Sofort ausprobieren: 50 Nachrichten pro Woche, Ihre Daten bleiben auf Ihrem Gerät |
+| **Registriert** | 9-tägige Premium-Testphase nach der Anmeldung, danach Registered-Abo (Preise im Upgrade-Dialog) | + Gloria, Sam, Gabrielle | Verschlüsselte Speicherung auf all Ihren Geräten, Persönlichkeitstest (OCEAN) mit persönlicher Signatur, Coaching, das sich Ihrem Profil anpasst (DPC), Profil als PDF, Fortschritt und Erfolge, Server-Stimmen (Web); in der Testphase zusätzlich Premium-Funktionen und Coach Practice (8 Methoden) |
+| **Premium** | ${isNative ? 'Upgrade in der App' : 'Upgrade (PayPal im Web, Apple In-App-Kauf in der iOS-App)'} | + Kenji, Chloe, Mike | Zwei weitere Persönlichkeitstests (Spiral Dynamics, Riemann-Thomann), Coaching, das Ihr Profil mit jeder Sitzung verfeinert (DPFL), Transkript-Auswertung inklusive PDF |
+| **Premium+** | Premium inklusive Practice-Zugang | wie Premium | Coach Practice dauerhaft (8 Methoden), solange das Practice-Abo aktiv ist |
+| **Klient** | ${isNative ? `Kontakt: ${providerContact}` : `Zugangscode von ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio-Transkription, PEP Lösungsblockaden, Coach Practice (12 Methoden), alle Funktionen |
 
-**So upgraden Sie:**
-${isNative ? `- Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.` : `- **iOS App:** Direkt in der App über den nativen Kaufprozess (Apple In-App Purchase). Wählen Sie **Premium** oder **Premium+** (Premium inkl. Coaching üben). Abonnements werden automatisch über Ihr Apple-Konto verwaltet.
-- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **"Upgrade"**. Dort finden Sie Premium- und Premium+-Pässe sowie Einzelcoach-Freischaltungen via PayPal.`}
-- **Zugangscode:** Unter **Kontoverwaltung → "Code einlösen"** können Sie einen Zugangscode eingeben.
+**So schalten Sie weitere Möglichkeiten frei:**
+${isNative ? `- Direkt in der App über den **Apple In-App-Kauf** (Menü → **Upgrade**): Registered Monats- oder Jahresabo, Premium Monats- oder Jahresabo, Premium+ Monatsabo und Coach-Freischaltungen (Kenji, Chloe). Am Ende des Bildschirms finden Sie **Käufe wiederherstellen**. Ihre Abonnements verwalten Sie über Ihr Apple-Konto.` : `- **iOS-App:** Direkt in der App über den Apple In-App-Kauf. Wählen Sie **Premium** oder **Premium+** (Premium inklusive Coaching üben). Ihre Abonnements verwalten Sie über Ihr Apple-Konto.
+- **Web-Browser:** Öffnen Sie das Menü (☰) und wählen Sie **„Upgrade“**. Dort finden Sie Premium- und Premium+-Pässe sowie Einzelcoach-Freischaltungen via PayPal.
+- **Zugangscode:** Unter **Kontoverwaltung → „Code einlösen“** geben Sie Ihren Zugangscode ein.`}
+
+${isNative ? '' : `### Sprachausgabe & Browser (Web)
+
+Für das Vorlesen (TTS) empfehlen wir **Google Chrome** oder **Apple Safari**: Mit diesen beiden Browsern haben wir Server-Stimmen und Wiedergabe im Sprachmodus getestet. In anderen Browsern (z. B. Firefox oder Edge) kann die Sprachausgabe abweichen oder ausfallen.
+`}
 
 ### 2.3 KI-Transparenz (EU AI Act)
 
@@ -254,6 +342,20 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>KI-Transparenz:</strong> Alle „
 <li><strong>Datenverarbeitung:</strong> Gesprächsinhalte werden zur Antwortgenerierung an den konfigurierten KI-Dienst übermittelt — Details in der Datenschutzerklärung.</li>
 </ul>`)}
 
+### 2.4 Grenzen, Sicherheit & sensibles Thema Intimität
+
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Respektvolle Nutzung:</strong> Die Coaches sind KI-Systeme für Reflexion und Coaching — keine Partner:innen für erotische Rollenspiele oder explizite Inhalte. Sexuelle Ansprache <em>an den Bot</em> wird abgelehnt; die Sitzung kann beendet werden.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Prompt-Manipulation:</strong> Aufforderungen, Systemanweisungen zu ignorieren, den Prompt offenzulegen oder die Rolle zu „hacken“, werden nicht befolgt.</li>
+<li><strong>Partnerschaft & Intimität als Kliententhema:</strong> Wenn <em>Sie</em> Nähe, Distanz oder Gespräche mit Partner:innen als Lebensanliegen ansprechen, können Coaches professionell darauf eingehen — ohne grafische Sexualbeschreibungen und ohne Sexualtherapie. Bei klinischen oder traumatischen Themen: Verweis auf qualifizierte menschliche Hilfe.</li>
+<li><strong>The Connector:</strong> Personas sind fiktive Gesprächspartner — keine romantischen oder erotischen Gegenüber. Belästigung führt zu Grenzsetzung oder Gesprächsende.</li>
+<li><strong>Coach Practice:</strong> Sexuelle Grenzverletzungen durch Übende (z. B. explizite „Übungen“) sind unprofessionell; der simulierte Klient reagiert mit Abgrenzung, die Auswertung kritisiert solches Verhalten.</li>
+</ul>`)}
+
+### 2.5 Geplante Wartung
+
+Bei angekündigten Wartungsfenstern sehen angemeldete Nutzer und Gäste (außer auf Login-/Register-Screens) ein **Hinweis-Banner** unter der Kopfzeile mit Start-/Endzeit in Ihrer Anzeigezeitzone (zusätzlich Europe/Vienna, wenn abweichend). **Bevorstehende** Hinweise können pro Browser ausgeblendet werden; **aktive** Wartung bleibt sichtbar.
+
 </div>
 </details>
 
@@ -263,29 +365,30 @@ ${isNative ? '' : `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Kapitel 3: App installieren</summary>
 <div style="padding: 16px;">
 
-Die ${brand.appName} App (MyCoach AI) ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für alle Plattformen.
+Die **${brand.appNameDe}**-App ist auf zwei Wegen verfügbar: als **native iOS-App** im App Store und als **Progressive Web App (PWA)** für Desktop und Android unter [${brand.domainProduction}](${brand.appUrlProduction}).
 
 ### 3.1 Native iOS App (empfohlen für iPhone/iPad)
 
-Die App ist als native iOS-App im **Apple App Store** verfügbar. Suchen Sie nach "${brand.appName}" oder nutzen Sie den direkten Link auf unserer Website.
+Die App ist als native iOS-App im **Apple App Store** verfügbar. Suchen Sie nach **${brand.iosAppStoreName}** oder öffnen Sie [${brand.iosAppStoreName} im App Store](${brand.appStoreUrl}).
 
 **Vorteile der nativen App:**
 - Optimiert für iOS mit nativer Performance
 - In-App Purchases direkt über Ihr Apple-Konto
 - Hochwertige Apple-Sprachausgabe (Enhanced/Premium-Stimmen)
 - Native Spracherkennung
+- **Updates:** Über den **App Store** (wie bei anderen iOS-Apps); siehe auch Abschnitt 3.5 für Web/PWA.
 
 ### 3.2 Installation als PWA auf iOS (Alternative)
 
 Falls Sie die Web-Version bevorzugen:
-1. Öffnen Sie die App in **Safari** (wichtig: muss Safari sein, Chrome funktioniert nicht).
+1. Öffnen Sie [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Safari** (wichtig: muss Safari sein, Chrome funktioniert nicht).
 2. Tippen Sie auf das **Teilen-Symbol** (das Quadrat mit dem Pfeil nach oben) in der unteren Leiste.
 3. Scrollen Sie nach unten und tippen Sie auf **"Zum Home-Bildschirm"**.
 4. Geben Sie der App einen Namen und tippen Sie auf **"Hinzufügen"**.
 
 ### 3.3 Installation auf Android
 
-1. Öffnen Sie die App in **Chrome** oder einem anderen Browser.
+1. Öffnen Sie [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Chrome** oder einem anderen Browser.
 2. Tippen Sie auf das **Menü-Symbol** (drei Punkte) oben rechts.
 3. Wählen Sie **"Zum Startbildschirm hinzufügen"** oder **"App installieren"**.
 4. Bestätigen Sie mit **"Hinzufügen"** oder **"Installieren"**.
@@ -293,16 +396,15 @@ Falls Sie die Web-Version bevorzugen:
 
 ### 3.4 Installation auf Desktop (Windows/Mac/Linux)
 
-1. Öffnen Sie die App in **Chrome**, **Edge** oder einem anderen unterstützten Browser.
-2. Klicken Sie auf das **Install-Symbol** (⊕) in der Adressleiste oder das **Menü** (drei Punkte).
+1. Öffnen Sie [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Chrome**, **Edge** oder einem anderen unterstützten Browser.
+2. Klicken Sie auf das **Install-Symbol** ⊕ in der Adressleiste oder das **Menü** (drei Punkte).
 3. Wählen Sie **"Installieren"** oder **"App installieren"**.
 4. Die App wird wie eine Desktop-Anwendung installiert und kann über Ihr Startmenü/Dock geöffnet werden.
 
-**Vorteile der Installation:**
-- Schnellerer Zugriff über Ihr App-Icon
-- Vollbildansicht ohne Browser-Chrome
-- Push-Benachrichtigungen (falls aktiviert)
-- Funktioniert teilweise auch offline
+**Vorteile der Installation (PWA / Homescreen):**
+- Schnellerer Start über Ihr App-Icon
+- Vollbildansicht ohne Browser-Leiste
+- **Coaching-Sitzungen bleiben online** — KI-Antworten und Cloud-Funktionen benötigen eine Internetverbindung
 
 ### 3.5 App aktualisieren (Web & PWA)
 
@@ -325,7 +427,7 @@ Nach größeren Updates kann eine zwischengespeicherte Version die App kurz bloc
 
 Dieses Feature steht ausschließlich registrierten Benutzern zur Verfügung und ermöglicht ein personalisiertes Coaching-Erlebnis.
 
-### 4.1 Überblick
+### ${profileSub.overview} Überblick
 
 Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönlichkeitsmerkmale erfasst. Es wird verwendet, um:
 - **Coaching-Modi** für personalisiertes Coaching mit allen Coaches freizuschalten
@@ -334,7 +436,7 @@ Das Persönlichkeitsprofil ist ein verschlüsseltes Dokument, das Ihre Persönli
 
 **Zugriff:** Öffnen Sie das Menü (☰) und wählen Sie **"Persönlichkeitsprofil"**.
 
-### 4.2 Die Persönlichkeitstests
+### ${profileSub.tests} Die Persönlichkeitstests
 
 Sie können aus drei im Coaching bewährten Verfahren wählen. Jedes beleuchtet einen anderen Aspekt Ihrer Persönlichkeit. Sie können nach dem ersten Test jederzeit weitere Tests absolvieren, um Ihr Profil mit zusätzlichen Perspektiven zu ergänzen.
 
@@ -414,7 +516,7 @@ Das **Riemann-Thomann-Modell** verbindet tiefenpsychologische Erkenntnisse mit s
 - **Nähe ↔ Distanz:** Das Spannungsfeld zwischen dem Wunsch nach Verbundenheit und dem Bedürfnis nach Eigenständigkeit
 - **Dauer ↔ Wechsel:** Das Spannungsfeld zwischen dem Wunsch nach Stabilität und dem Bedürfnis nach Veränderung
 
-Jeder Mensch hat Anteile aller vier Strebungen -- die individuelle Mischung macht das persönliche Profil aus. Es gibt kein "besser" oder "schlechter"; jede Position hat Stärken und Herausforderungen.
+Jeder Mensch hat Anteile aller vier Strebungen -- die individuelle Mischung macht das persönliche Profil aus. Jede Position hat ihre eigenen Stärken und Herausforderungen.
 
 **Besonderheit des Modells:** Anders als viele Persönlichkeitsmodelle berücksichtigt Riemann-Thomann explizit, dass sich Menschen **kontextabhängig** unterschiedlich verhalten. Im Beruf zeigen wir oft andere Strebungen als im privaten Umfeld oder in unserer Selbstwahrnehmung. Diese Differenzierung macht das Modell besonders wertvoll für die Arbeit an Beziehungsdynamiken.
 
@@ -485,7 +587,7 @@ ${guideWarningBox('<p class="m-0">Der PVQ-21 misst Werteprioritäten — <strong
 </div>
 </details>
 
-### 4.3 Die Persönlichkeits-Signatur
+### ${profileSub.signature} Die Persönlichkeits-Signatur
 
 Nach dem Test können Sie zwei **"Goldene Fragen"** beantworten:
 - **Flow-Erlebnis:** Eine Situation, in der Sie sich voll in Ihrem Element fühlten
@@ -501,13 +603,12 @@ Basierend auf Ihren Testergebnissen und diesen Geschichten generiert unsere KI e
 
 **PDF-Export:** Über die Schaltfläche **"Als PDF herunterladen"** können Sie Ihr vollständiges Persönlichkeitsprofil -- inklusive Testergebnisse, Signatur und Facetten -- als PDF-Datei exportieren und speichern.
 
-### 4.4 Coaching-Modi
+### ${profileSub.coachingModes} Coaching-Modi
 
 Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie einen **Coaching-Modus** aktivieren, fließt Ihr Profil in die Sitzungen ein. Sie können den Modus jederzeit in Ihrem Persönlichkeitsprofil wechseln.
 
 **Aus (Standard):**
-- Klassisches Coaching ohne Personalisierung
-- Ihr Profil wird nicht verwendet -- auch wenn eines vorhanden ist
+- Klassisches Coaching, unabhängig von Ihrem Profil -- auch wenn eines vorhanden ist
 
 **DPC (Dynamic Personality Coaching):**
 <span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Verfügbar für alle registrierten Nutzer*</span>
@@ -518,13 +619,14 @@ Ein Persönlichkeitsprofil allein verändert das Coaching nicht. Erst wenn Sie e
 
 **DPFL (Dynamic Personality-Focused Learning):**
 <span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Verfügbar ab Premium*</span>
-- Alles was DPC bietet, plus: Ihr Profil wird **adaptiv** und kann ab der **zweiten Sitzung** verfeinert werden
+- Alles, was DPC bietet, plus: Ihr Profil wird **adaptiv** und kann ab der **zweiten Sitzung** verfeinert werden
 - Der Coach schlägt nach dem Gespräch Profilanpassungen vor -- eine Art "Fremdbild"-Feedback, das Ihr "Selbstbild" ergänzt
 - Nach jeder Sitzung findet ein **Comfort Check** statt: Sie bewerten, wie authentisch Sie waren. Profilanpassungen werden erst nach mindestens zwei authentischen Sitzungen vorgeschlagen.
 - Wenn Sie zurück zu DPC oder Aus wechseln, bleiben gesammelte Verfeinerungen erhalten
 - Ideal für: Selbstentdeckung & kontinuierliches Wachstum
+- **Ausnahme:** **Nobody** und **Sam** (Management & Kommunikation) nutzen bei aktiviertem DPFL-Konto weiterhin nur **DPC** — kein Comfort Check und keine Profilverfeinerung nach deren Sitzungen.
 
-${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines neuen Persönlichkeitstests werden alle bisherigen DPFL-Verfeinerungen überschrieben. Das Erstellen oder Aktualisieren der <strong>Persönlichkeits-Signatur</strong> (siehe 4.3) hat hingegen keinen Einfluss auf Ihre Verfeinerungen — im Gegenteil: Es ist besonders sinnvoll, die Signatur nach einigen DPFL-Sitzungen neu zu generieren.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines neuen Persönlichkeitstests werden alle bisherigen DPFL-Verfeinerungen überschrieben. Das Erstellen oder Aktualisieren der <strong>Persönlichkeits-Signatur</strong> (siehe Abschnitt ' + profileSub.signature + ') hat hingegen keinen Einfluss auf Ihre Verfeinerungen — im Gegenteil: Es ist besonders sinnvoll, die Signatur nach einigen DPFL-Sitzungen neu zu generieren.</p>')}
 
 **Anzeige:** Der aktive Coaching-Modus wird im **Coach-Info-Modal** angezeigt (klicken Sie auf den Coach-Namen im Chat).
 
@@ -533,19 +635,20 @@ ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Beim Starten eines n
 
 ---
 
-` : ''}<details>
+` : ''}<details id="${USER_GUIDE_ANCHORS.coachingSession}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${deChapterLabel(coachingChapterNum(isNative, isRegistered))}: Die Coaching-Sitzung</summary>
 <div style="padding: 16px;">
 
-### 5.1 Einen Coach auswählen
-Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. Jeder Coach hat einen eigenen Ansatz und eignet sich für unterschiedliche Situationen. **Klicken Sie auf eine Coach-Karte**, um Ihre Sitzung sofort zu starten.
+### ${coachingSub.coachSelect} Einen Coach auswählen
+
+Hier finden Sie den Coach, der zu Ihrem heutigen Vorhaben passt. Die Coach-Auswahl orientiert sich an Ihrer Antwort auf die Startfrage (siehe Abschnitt 1.1): Wer **Kommunikation** gewählt hat, sieht Management & Kommunikation bereits geöffnet. Bei **Coaching** hilft registrierten Nutzern die **Anliegen-Suche**, den passenden Coach zu finden; Gäste starten im **Coaching-Bereich**. Wer **Als Coach üben** gewählt hat, gelangt mit entsprechender Berechtigung direkt zum Übungs-Setup.
+
+**Ihre Interviewerin:**
+- **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
 
 **Ihr Guide:**
 - **Nobody** -- Ihr pragmatischer Sparringspartner für Management- und Kommunikationsthemen
 - **Sam** -- Kurzes zukunftsorientiertes Coaching für Beruf und Alltag (Registriert)
-
-**Ihre Interviewerin:**
-- **Gloria** -- Professionelle Interviewerin für strukturierte Gespräche zu Ideen, Projekten und Abläufen (Registriert)
 
 **Ihre Coaches:**
 - **Gabrielle** -- Vier-Phasen-Coaching von Klarheit zu verbindlichem Handeln (Registriert)
@@ -554,8 +657,12 @@ Auf dem Bildschirm **Coach-Auswahl** sehen Sie eine Liste verfügbarer Coaches. 
 - **Kenji** -- Stoischer Philosoph für Resilienz und innere Stärke (Premium)
 - **Chloe** -- Strukturierte Reflexion zum Erkennen von Denkmustern (Premium)
 - **Mike** -- Ambivalenz-Coaching bei gemischten Gefühlen gegenüber Veränderung (Premium)
-- **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Klienten)
+
+**Exklusiv für Klienten** (${providerContact}):
+- **Rob** -- Mentale Fitness und Achtsamkeit gegen Selbstsabotage (Klienten) 🔔
 - **Victor** -- Systemischer Coach für Beziehungsmuster und Reaktionsdifferenzierung (Klienten)
+- **Bekky** -- Gedanken-Audit: belastende Überzeugungen strukturiert prüfen und Perspektiven wechseln (Klienten)
+- **Dan** -- Innere Überzeugungen in Ihrer eigenen Sprache erkunden — ohne fremde Metaphern (Klienten)
 
 Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Premium- oder Klienten-Abo. Coaches mit einem 🔔-Symbol bieten **geführte Meditationsübungen** während der Sitzung an.
 
@@ -583,7 +690,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 <summary>Sam -- Zukunftsorientiert, Effizient, Vorwärtsgerichtet (Registriert)</summary>
 <div style="padding: 12px 16px;">
 
-**Kernidee:** Sam nutzt kurzes zukunftsorientiertes Coaching — gewünschte Zukunft, Ausnahmen und Skalierung — für berufliche und alltägliche Herausforderungen, wenn Problemgespräch feststeckt.
+**Kernidee:** Sam nutzt kurzes zukunftsorientiertes Coaching — gewünschte Zukunft, Ausnahmen und Skalierung — für berufliche und alltägliche Herausforderungen, wenn das Problemgespräch feststeckt.
 
 **Ideal für:**
 - Berufliche und alltägliche Themen mit Fokus auf die gewünschte Zukunft
@@ -692,7 +799,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Aufbau innerer Ruhe und Gelassenheit
 - Philosophische Reflexion über Lebensfragen
 
-**Besonderes Feature:** Kenji bietet **geführte Meditationsübungen** an (🔔). Fragen Sie ihn einfach nach einer Meditation -- er wird Sie durch eine stoisch inspirierte Übung leiten.
+**🔔 Meditation:** Stoisch inspirierte Übungen — fragen Sie einfach danach.
 
 **Beispiel-Situationen:** "Ich mache mir Sorgen über Dinge, die ich nicht kontrollieren kann." / "Ich brauche innere Ruhe in einer stressigen Phase." / "Ich möchte eine Meditation machen."
 
@@ -712,7 +819,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Strukturierte Selbstreflexion mit klarem Rahmen
 - Emotionale Herausforderungen systematisch angehen
 
-**Besonderes Feature:** Chloe bietet **geführte Meditationsübungen** an (🔔), die speziell auf achtsame Selbstreflexion ausgerichtet sind.
+**🔔 Meditation:** Auf achtsame Selbstreflexion ausgerichtet.
 
 **Beispiel-Situationen:** "Ich denke immer das Schlimmste und möchte das ändern." / "Ich möchte verstehen, warum ich in bestimmten Situationen immer gleich reagiere." / "Ich brauche einen strukturierten Ansatz für meine Herausforderung."
 
@@ -749,7 +856,7 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Achtsamkeit in den Alltag integrieren
 - Tiefgehende Reflexion über innere Blockaden
 
-**Besonderes Feature:** Rob bietet **geführte Meditationsübungen** an (🔔), die auf mentale Fitness und Achtsamkeit ausgerichtet sind.
+**🔔 Meditation:** Fokus auf mentale Fitness und Achtsamkeit.
 
 **Beispiel-Situationen:** "Ich sabotiere mich selbst und weiß nicht warum." / "Ich möchte mental stärker werden." / "Ich möchte eine Achtsamkeitsübung machen."
 
@@ -768,90 +875,125 @@ Einige Coaches sind mit einem Schloss-Symbol gekennzeichnet und erfordern ein Pr
 - Emotionale Reaktivität in Beziehungen reduzieren
 - Eigene Muster in wiederkehrenden Konflikten erkennen
 - Differenzierung des Selbst -- ein klares "Ich" in Beziehungen entwickeln
+- **Nähe, Wunsch und Intimität in der Partnerschaft** (ein Partner reflektiert — kein Paar- oder Sexualcoaching im Chat)
 
-**Beispiel-Situationen:** "Ich gerate in Familientreffen immer in dieselben Konflikte." / "Ich möchte verstehen, warum bestimmte Beziehungen mich so triggern." / "Ich möchte lernen, in Konflikten gelassener zu bleiben."
+**Beispiel-Situationen:** "Ich gerate in Familientreffen immer in dieselben Konflikte." / "Wir funktionieren, aber mir fehlt Verbindung — ich traue mich nicht, das anzusprechen." / "Ich möchte lernen, in Konflikten gelassener zu bleiben."
 
 **Zugang:** Klienten-Benutzer
 </div>
 </details>
 
-${deTranscriptToolsSection(isNative, isRegistered, showChapter8)}
-${dePracticeTabSection(isNative, isRegistered, showChapter10)}
-### 5.4 Coach-Empfehlung (KI-gestützte Suche)
+<details>
+<summary>Bekky -- Analytisch, Systematisch, Neutral (Klienten)</summary>
+<div style="padding: 12px 16px;">
 
-Über der Coach-Liste befindet sich ein Suchfeld, mit dem Sie sich einen passenden Coach empfehlen lassen können.
+**Kernidee:** Bekky dekonstruiert belastende Überzeugungen durch ein strukturiertes **Gedanken-Audit** — vier Prüfschritte und Perspektivwechsel für mehr Klarheit und Handlungsfähigkeit in Beruf und Privatleben.
 
-- **Situation beschreiben:** Geben Sie in das Textfeld ein, worum es Ihnen geht -- z.B. "Ich stehe vor einer schwierigen Entscheidung im Beruf" oder "Ich möchte an meiner Kommunikation arbeiten".
-- **Spracheingabe:** Sie können Ihre Beschreibung auch per **Mikrofon-Symbol** diktieren (Sprache-zu-Text).
-- **Empfehlung erhalten:** Klicken Sie auf das **Senden-Symbol** (oder drücken Sie Cmd/Ctrl + Enter). Die KI analysiert Ihre Beschreibung und empfiehlt Ihnen zwei Coaches:
-  - **Primäre Empfehlung:** Der Coach, der am besten zu Ihrer Situation passt -- mit Begründung und einem vorgeschlagenen Gesprächseinstieg.
-  - **Alternative Empfehlung:** Ein zweiter Coach mit einer ergänzenden Perspektive.
-- **Sitzung starten:** Klicken Sie auf eine Empfehlungskarte, um die Sitzung direkt mit dem vorgeschlagenen Gesprächseinstieg zu beginnen. Der Coach überspringt dabei seine üblichen Einleitungsfragen und geht sofort auf Ihr Thema ein.
+**Ideal für:**
+- Konkrete, belastende Gedanken zu einer Situation (nicht globale Selbstlabels)
+- Strukturierte Prüfung von Überzeugungen und alternative Perspektiven
+- Wenn Sie einen analytischen, schrittweisen Ansatz bevorzugen
 
-**Hinweis:** Diese Funktion steht nur registrierten Benutzern zur Verfügung. Die Empfehlungen basieren ausschließlich auf Ihrer Beschreibung und den verfügbaren Coach-Profilen.
+**Besonderes:** Direkter Einstieg ins Audit. Bei Bedarf kann Bekky Sie an Rob, Victor oder Dan weiterleiten.
 
-### 5.5 Die Chat-Oberfläche
-- **Kopfzeile:** Oben sehen Sie den Namen und das Avatar des Coaches. **Wenn Sie auf diesen Bereich klicken**, öffnet sich ein Modal mit detaillierten Informationen über den Stil und die Methodik des Coaches. Falls Sie einen Coaching-Modus (DPC/DPFL) aktiviert haben, wird dieser hier ebenfalls angezeigt. Rechts befindet sich die rote Schaltfläche **Sitzung beenden**.
-- **Textmodus (Standard):**
-  - Geben Sie Ihre Nachricht in das Textfeld am unteren Rand ein.
-  - **Klicken Sie auf das Papierflieger-Symbol**, um Ihre Nachricht zu senden.
-  - **Klicken Sie auf das Mikrofon-Symbol**, um die Sprache-zu-Text-Funktion ${isNative ? 'Ihres Gerätes' : 'Ihres Browsers'} zu nutzen und Ihre Nachricht zu diktieren.
-- **Sprachausgabe (TTS):**
-  - **Klicken Sie auf das Lautsprecher-Symbol**, um die Sprachausgabe ein- oder auszuschalten.
-  - Wenn sie aktiviert ist, können Sie die Wiedergabe mit den Symbolen **Pause/Wiedergabe** und **Wiederholen** steuern.
-  - **Klicken Sie auf das Zahnrad-Symbol**, um die **Stimmeinstellungen** zu öffnen. Dort haben Sie folgende Optionen:
-    - **Signaturstimme des Coaches:** Die beste verfügbare Stimme für Sprache und Persönlichkeit des Coaches -- wird automatisch ausgewählt.
-    - **Gerätestimmen:** Stimmen, die direkt auf Ihrem Gerät generiert werden. **Vorteil:** Sofortige Reaktionszeiten und funktionieren auch offline.
-${isNative ? `  - **Hinweis:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium). Diese bieten exzellente Qualität bei sofortiger Reaktionszeit.` : `    - **Server-Stimmen:** *(Nur im Web-Browser verfügbar)* Professionelle Stimmen, die auf unserem Server generiert werden.
-  - **Hinweis für iOS-App:** Die iOS-App nutzt ausschließlich hochwertige Gerätestimmen von Apple (Enhanced/Premium). Diese bieten exzellente Qualität bei sofortiger Reaktionszeit -- Server-Stimmen sind hier nicht verfügbar und auch nicht nötig.`}
-- **Sprachmodus:**
-  - **Klicken Sie auf das Schallwellen-Symbol**, um in den reinen Sprachmodus zu wechseln, der für ein natürlicheres Gesprächserlebnis optimiert ist.
-  - **Tippen Sie auf das große Mikrofon-Symbol**, um die Aufnahme zu starten. Sprechen Sie Ihre Nachricht.
-  - **Tippen Sie erneut auf das Symbol (jetzt ein Papierflieger)**, um die Aufnahme zu beenden und Ihre Nachricht zu senden. Die Antwort des Coaches wird automatisch abgespielt.
-- **Textformatierung:** Ihre Lebenskontext-Datei unterstützt **Markdown-Formatierung** (z.B. \*\*fett\*\*, \*kursiv\*, Aufzählungen, Überschriften). Details finden Sie unter Menü (☰) → **"Formatierung"**.
+**Beispiel-Situationen:** "Ich glaube fest, dass ich in dieser Situation scheitern werde." / "Ich möchte einen stressenden Gedanken systematisch durchleuchten." / "Ich brauche Klarheit, bevor ich handele."
+
+**Zugang:** Klienten-Benutzer
+</div>
+</details>
+
+<details>
+<summary>Dan -- Exakte Klientensprache, Nicht-direktiv, Erkundend (Klienten)</summary>
+<div style="padding: 12px 16px;">
+
+**Kernidee:** Dan hilft Ihnen, innere Überzeugungen durch **Ihre eigene Sprache und Bildwelt** zu erkunden und zu verändern — Dan bleibt dabei ganz bei Ihren Worten.
+
+**Ideal für:**
+- Erkundung innerer Überzeugungen in exakt Ihrer Wortwahl
+- Wenn Sie einen nicht-direktiven, erkundenden Stil bevorzugen
+- Tiefe Reflexion ohne vorgegebene Deutungen
+
+**Besonderes:** Dan arbeitet strikt mit Ihren Formulierungen. Bei passenden fremdgerichteten Glaubenssätzen kann er Sie an Bekky weiterleiten.
+
+**Beispiel-Situationen:** "Ich möchte verstehen, was hinter meiner inneren Überzeugung steckt — in meinen eigenen Worten." / "Ich brauche jemanden, der mir keine fertigen Bilder gibt." / "Ich möchte eine Überzeugung erkunden, ohne interpretiert zu werden."
+
+**Zugang:** Klienten-Benutzer
+</div>
+</details>
+
+${deTranscriptToolsSection(isNative, coachingSub.transcriptTools)}
+${dePracticeTabSection(isNative, coachingSub.practiceTab)}
+### ${coachingSub.coachRecommendation} Coach-Empfehlung (KI-gestützte Suche)
+
+Sie wissen noch nicht, welchen Coach heute zu Ihnen passt? Beschreiben Sie in ein oder zwei Sätzen, worum es Ihnen geht — die KI schlägt Ihnen einen passenden Coach vor und erklärt, warum.
+
+Das Suchfeld finden Sie über der Coach-Liste:
+
+- **Ihr Anliegen in eigenen Worten:** z.B. „Ich stehe vor einer schwierigen Entscheidung im Beruf“ oder „Ich möchte an meiner Kommunikation arbeiten“. Sie können Ihre Beschreibung auch per **Mikrofon-Symbol** diktieren.
+- **Zwei Empfehlungen:** Nach dem Absenden (Senden-Symbol oder Cmd/Ctrl + Enter) erhalten Sie einen **Hauptvorschlag** mit Begründung und Gesprächseinstieg sowie eine **Alternative** mit ergänzender Perspektive.
+- **Direkt loslegen:** Mit einem Klick auf die Empfehlungskarte beginnt die Sitzung mit dem vorgeschlagenen Einstieg, und Ihr Coach geht sofort auf Ihr Thema ein.
+
+Die Anliegen-Suche steht registrierten Nutzern zur Verfügung. Die Empfehlungen beruhen auf Ihrer Beschreibung und den Profilen der Coaches.
+
+<h3 id="${USER_GUIDE_ANCHORS.chatInterface}">${coachingSub.chatInterface} Die Chat-Oberfläche</h3>
+
+Der Chat ist Ihr Gesprächsraum: Sie schreiben, sprechen oder lassen sich die Antworten vorlesen.
+
+- **Kopfzeile:** Hier sehen Sie Name und Avatar Ihres Coaches. Mit einem Tipp darauf erfahren Sie mehr über Stil und Methodik; auch der aktive Coaching-Modus (DPC/DPFL) wird angezeigt. Rechts beenden Sie das Gespräch mit **Sitzung beenden**.
+- **Schreiben und Diktieren:** Tippen Sie Ihre Nachricht unten ein und senden Sie sie mit dem **Papierflieger-Symbol**. Mit dem **Mikrofon-Symbol** diktieren Sie stattdessen (Sprache-zu-Text auf Ihrem ${isNative ? 'Gerät' : 'Gerät bzw. im Browser'}).
+- **Antworten anhören (TTS):** Das **Lautsprecher-Symbol** lässt Ihren Coach seine Antworten vorlesen. Pause, Wiedergabe und Wiederholen steuern Sie direkt im Chat; das **Zahnrad-Symbol** öffnet die **Stimmeinstellungen**:
+  - **Signaturstimme des Coaches:** Die App wählt automatisch die Stimme, die am besten zu Sprache und Persönlichkeit Ihres Coaches passt.
+  - **Gerätestimmen:** Stimmen Ihres Geräts, die sofort reagieren und auch offline funktionieren.
+${isNative ? `  - **iOS-App:** Die App nutzt hochwertige Apple-Gerätestimmen (Enhanced/Premium) — exzellente Qualität bei sofortiger Reaktionszeit.` : `  - **Server-Stimmen:** Professionelle Stimmen von unserem Server (im Web-Browser).
+  - **iOS-App:** Die iOS-App nutzt Apple-Gerätestimmen (Enhanced/Premium).
+  - **Browser (Web):** Die Sprachausgabe wurde mit Google Chrome und Apple Safari getestet und läuft dort am besten.
+  - **Gäste (Web):** Gäste hören Geräte- bzw. Browser-Stimmen (siehe auch §1.2).`}
+- **Sprachmodus:** Das **Schallwellen-Symbol** wechselt in ein reines Sprachgespräch. Tippen Sie auf das große Mikrofon und sprechen Sie; ein weiterer Tipp (das Symbol wird zum Papierflieger) sendet Ihre Nachricht. Die Antwort Ihres Coaches wird automatisch abgespielt.
+- **Formatierung:** Ihre Lebenskontext-Datei unterstützt **Markdown** (z. B. \*\*fett\*\*, \*kursiv\*, Listen, Überschriften). Details finden Sie im Menü (☰) unter **„Formatierung“**.
 
 </div>
 </details>
 
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${deChapterLabel(coachingChapterNum(isNative, isRegistered) + 1)}: Nach der Sitzung - Der Analyseprozess</summary>
+${deConnectorChapter(isNative, isRegistered)}
+
+---
+
+<details id="${USER_GUIDE_ANCHORS.sessionReview}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${deChapterLabel(sessionReviewChapterNum(isNative, isRegistered))}: Nach der Sitzung — Der Analyseprozess</summary>
 <div style="padding: 16px;">
 
-### 6.1 Die Analyse
-**Wenn Sie auf "Sitzung beenden" klicken**, analysiert eine KI Ihr Gespräch. Sie sehen einen Ladebildschirm mit dem Titel **Sitzung wird analysiert...**. Dieser Vorgang dauert in der Regel etwa 15-30 Sekunden.
+### ${sessionReviewSub.analysis} Die Analyse
+Mit **Sitzung beenden** schließen Sie das Gespräch ab, und die KI wertet es für Sie aus. Das dauert meist 15–30 Sekunden (**Sitzung wird analysiert...**).
 
-### 6.2 Der Bildschirm "Diskursanalyse"
-Dies ist der wichtigste Bildschirm zur Erfassung Ihrer Erkenntnisse.
+### ${sessionReviewSub.reviewScreen} Der Bildschirm "Diskursanalyse"
+Hier halten Sie fest, was das Gespräch Ihnen gebracht hat: Ihre Erkenntnisse, Ihre nächsten Schritte und die Weiterentwicklung Ihres Lebenskontexts (in der App als **Diskursanalyse** betitelt).
 
-- **Neue Einsichten:** Eine von der KI erstellte Zusammenfassung Ihrer wichtigsten Erkenntnisse aus der Sitzung.
-- **Bewerten Sie Ihre Sitzung:** Verwenden Sie die Sterne, um Feedback zu geben. Dies hilft uns, die Qualität der Coaches zu verbessern.
-- **Erreichte Ziele:** ⭐ Die KI erkennt automatisch, wenn Sie ein Ziel aus Ihrem Lebenskontext erreicht haben. Erreichte Ziele werden mit ✅ markiert und beim Übernehmen der Updates automatisch aus Ihrem Lebenskontext entfernt. So bleibt Ihre Zielliste aktuell und fokussiert.
-- **Erledigte Aufgaben:** Nächste Schritte aus früheren Sitzungen, die Sie mittlerweile erledigt haben, werden ebenfalls erkannt und automatisch aus der Liste entfernt, wenn Sie die Updates übernehmen.
-- **Umsetzbare nächste Schritte:** Eine Liste konkreter Aufgaben, zu denen Sie sich während des Gesprächs verpflichtet haben.
-  - **Kalenderintegration:** **Klicken Sie auf das Kalender-Symbol** neben einem einzelnen Schritt, um ihn als .ics-Datei zu exportieren und in Ihre Kalender-App (Google Kalender, Outlook, Apple Kalender, etc.) zu importieren.
-  - **Alle exportieren:** **Klicken Sie auf "Alle in Kalender exportieren"**, um alle nächsten Schritte auf einmal zu exportieren.
-  - Die Kalendereinträge werden standardmäßig um 9:00 Uhr am Fälligkeitsdatum erstellt und enthalten eine Erinnerung 24 Stunden vorher.
-- **Vorgeschlagene Kontext-Aktualisierungen:** Die KI schlägt Änderungen an Ihrer Lebenskontext-Datei basierend auf dem Gespräch vor.
-  - **Aktivieren/Deaktivieren:** Verwenden Sie die Kontrollkästchen, um auszuwählen, welche Änderungen Sie übernehmen möchten.
-  - **Aktionstyp ändern:** Sie können ändern, ob ein Vorschlag an einen Abschnitt **angehängt** oder den gesamten Abschnitt **ersetzen** soll.
-  - **Ziel ändern:** Sie können die Zielüberschrift für jeden Vorschlag ändern, auch um neue Abschnitte zu erstellen.
-- **Unterschiedsansicht:** Dieses Feld zeigt Ihnen die genauen Änderungen (rot für entfernt, grün für hinzugefügt), die auf Ihre Datei angewendet werden.
-- **Endgültige Kontextdatei:** **Klicken Sie auf "Anzeigen / Bearbeiten"**, um den vollständigen Text Ihrer neuen Lebenskontext-Datei zu sehen und manuelle Änderungen vorzunehmen.
-- **Transkript & Zusammenfassung herunterladen:**
-  - **Transkript herunterladen:** Speichert den vollständigen Chatverlauf mit Zeitstempeln als \`.txt\`-Datei.
-  - **Zusammenfassung herunterladen:** Speichert die KI-generierte Zusammenfassung und Analyse als Textdatei.
-- **Speichern & Fortfahren:**
+${guideInfoBox('<p class="m-0"><strong>Gloria-Lebenskontext-Interview:</strong> Nach dem Interview mit Gloria (Startbildschirm) zeigt die Diskursanalyse die erzeugte Lebenskontext-Datei. Coaching-Analyse, Ziele und DPFL-Schritte gehören zu den Coaching-Sitzungen.</p>')}
 
-${guideWarningBox('<p class="m-0"><strong>Gastmodus:</strong> Unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre aktualisierte .md-Datei speichern — sonst ist der Fortschritt nach dem Schließen des Browsers weg. Registrierte Nutzer können dies optional als Backup nutzen.</p>')}
+**Das finden Sie hier:**
 
-  - **Kontext herunterladen (Backup):** Klicken Sie hier, um Ihre aktualisierte \`.md\`-Datei zu speichern.
-  - **Mit [Coach] fortfahren:** Speichert die Änderungen und startet eine neue Sitzung mit demselben Coach.
-  - **Coach wechseln:** Speichert die Änderungen und bringt Sie zurück zum Coach-Auswahlbildschirm.
-  - **(Nur für registrierte Benutzer) "Textänderungen nicht speichern...":** Wenn Sie dieses Kästchen ankreuzen, wird Ihr Gamification-Fortschritt gespeichert, aber die Textänderungen an Ihrem Lebenskontext werden verworfen.
+- **Neue Einsichten:** Die KI fasst Ihre wichtigsten Erkenntnisse aus der Sitzung zusammen.
+- **Ihre Bewertung:** Mit den Sternen geben Sie Feedback und helfen, die Qualität der Coaches weiter zu verbessern.
+- **Erreichte Ziele:** ⭐ Die KI erkennt, wenn Sie ein Ziel aus Ihrem Lebenskontext erreicht haben, und markiert es mit ✅. Beim Übernehmen der Updates verschwindet es aus Ihrem Lebenskontext — so bleibt Ihre Zielliste aktuell und fokussiert.
+- **Erledigte Aufgaben:** Nächste Schritte aus früheren Sitzungen, die Sie umgesetzt haben, werden ebenfalls erkannt und beim Übernehmen der Updates aus der Liste genommen.
+- **Nächste Schritte:** Konkrete Aufgaben, zu denen Sie sich im Gespräch entschlossen haben. Über das **Kalender-Symbol** übernehmen Sie einen Schritt als .ics-Datei in Google Kalender, Outlook, Apple Kalender oder eine andere Kalender-App; mit **„Alle in Kalender exportieren“** gelingt das für alle Schritte auf einmal. Die Einträge liegen standardmäßig um 9:00 Uhr am Fälligkeitsdatum, mit Erinnerung 24 Stunden vorher.
+- **Vorgeschlagene Kontext-Aktualisierungen:** Die KI schlägt vor, wie Ihr Lebenskontext das Gespräch widerspiegeln kann — und Sie entscheiden. Mit den Kontrollkästchen wählen Sie die Änderungen aus, die Sie übernehmen möchten. Sie legen fest, ob ein Vorschlag einen Abschnitt **ergänzt** oder **ersetzt**, und Sie können die Zielüberschrift anpassen oder einen neuen Abschnitt anlegen.
+- **Unterschiedsansicht:** Zeigt genau, was sich in Ihrer Datei ändert (rot = entfernt, grün = hinzugefügt).
+- **Endgültige Kontextdatei:** Über **„Anzeigen / Bearbeiten“** lesen Sie den vollständigen Text Ihres neuen Lebenskontexts und passen ihn nach Wunsch an.
+- **Transkript & Zusammenfassung:** Mit **Transkript herunterladen** sichern Sie den Chatverlauf mit Zeitstempeln als TXT-Datei, mit **Zusammenfassung herunterladen** die KI-Zusammenfassung samt Analyse.
 
-${isPremium ? `### 6.3 Authentizitäts-Check & Profilverfeinerung (DPFL-Modus)
+**Und danach?** Sie speichern und gehen weiter, wie es für Sie passt:
+
+${guideWarningBox(`<p class="m-0"><strong>Gäste:</strong> Siehe Abschnitt <strong>1.2</strong> (${isNative ? 'App-Sitzung' : 'Tab-Sitzung'}). Sichern Sie hier unter „Kontext herunterladen (Backup)“ <strong>unbedingt</strong> Ihre .md-Datei, damit Ihr Fortschritt erhalten bleibt. Registrierte Nutzer nutzen dies optional als Backup.</p>`)}
+
+- **Kontext herunterladen (Backup):** Speichert Ihre aktualisierte .md-Datei.
+- **Mit [Coach] fortfahren:** Speichert die Änderungen und startet eine neue Sitzung mit demselben Coach.
+- **Coach wechseln:** Speichert die Änderungen und führt Sie zurück zur Coach-Auswahl.
+- **Nur den Fortschritt speichern (registrierte Nutzer):** Mit dem Kästchen „Textänderungen nicht speichern...“ behalten Sie Ihren Gamification-Fortschritt, und Ihr Lebenskontext bleibt unverändert.
+
+${isPremium ? `### ${sessionReviewSub.dpfl} Authentizitäts-Check & Profilverfeinerung (DPFL-Modus)
 
 Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe ${deChapterLabel(profileChapterNum(isNative))}), erscheinen nach der Sitzung zwei zusätzliche Schritte:
 
@@ -867,19 +1009,14 @@ Wenn Sie den **DPFL-Coaching-Modus** aktiviert haben (siehe ${deChapterLabel(pro
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${deChapterLabel(coachingChapterNum(isNative, isRegistered) + 2)}: Ihren Fortschritt verstehen (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${deChapterLabel(gamificationChapterNum(isNative, isRegistered))}: Ihren Fortschritt verstehen (Gamification)</summary>
 <div style="padding: 16px;">
 
-Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren.
+### ${gamSub.intro} Überblick
 
-### 7.1 Die Gamification-Leiste
-Oben auf dem Bildschirm sehen Sie:
-- **Level:** Ihr Gesamtfortschritt.
-- **Serie:** Die Anzahl der aufeinanderfolgenden Tage, an denen Sie eine Sitzung abgeschlossen haben.
-- **XP-Balken:** Zeigt Ihren Fortschritt zum nächsten Level.
-- **Trophäen-Symbol:** **Klicken Sie hier**, um Ihre **Erfolge**-Seite anzuzeigen.
+Die App verwendet spielerische Elemente, um Sie zu regelmäßiger Selbstreflexion zu motivieren. Über das **Trophäen-Symbol** in der Leiste öffnen Sie **Erfolge**.
 
-### 7.2 Wie man XP verdient
+### ${gamSub.earnXp} Wie man XP verdient
 
 | Aktion | Erhaltene XP |
 | :--- | :--- |
@@ -888,29 +1025,32 @@ Oben auf dem Bildschirm sehen Sie:
 | Erreichen eines bestehenden Ziels | 25 XP |
 | Formeller Abschluss der Sitzung | 50 XP |
 
-### 7.3 Wo wird der Fortschritt gespeichert?
+**Qualifikation:** XP gibt es nur ab **5 Nachrichten** in der Sitzung. Beim **Fortsetzen** mit demselben Coach zählen nur **neue** Nachrichten seit dem letzten Review (jede Nachricht zählt genau einmal). Streaks gelten ebenfalls nur für qualifizierte Sitzungen.
+
+### ${gamSub.storage} Wo wird der Fortschritt gespeichert?
 
 | Benutzertyp | Speicherort der Erfolge | Dauerhaftigkeit |
 | :--- | :--- | :--- |
 | **Registriert** | Auf dem Server, an Ihr Konto gebunden. | **Ja**, über alle Sitzungen und Geräte hinweg. |
-| **Gast** | In der \`.md\`-Datei in einem versteckten Kommentar. | **Nein**, nur wenn Sie dieselbe Datei wiederverwenden. |
+| **Gast** | In der \`.md\`-Datei in einem versteckten Kommentar. | Solange Sie dieselbe Datei wiederverwenden. |
 
-### 7.4 Darstellung & Farbschema
+### ${gamSub.appearance} Darstellung & Farbschema
 
-In der Gamification-Leiste finden Sie zwei Symbole zur Anpassung der Darstellung:
+In der Gamification-Leiste finden Sie Symbole zur Anpassung der Darstellung:
 
 - **Hell-/Dunkelmodus (Mond-/Sonnen-Symbol):** Schaltet zwischen hellem und dunklem Erscheinungsbild um. Standardmäßig wechselt die App automatisch basierend auf der Uhrzeit: **Dunkelmodus** von 18:00 bis 6:00 Uhr, **Hellmodus** von 6:00 bis 18:00 Uhr. Ein manuelles Umschalten deaktiviert den automatischen Wechsel.
-- **Saisonales Farbschema (Paletten-Symbol):** Wechselt zwischen drei Farbschemata: Sommer, Herbst und Brand (W4F/manualmode.at je nach Marke). Die App wählt automatisch das passende saisonale Schema (Brand im Winter), Sie können es aber jederzeit manuell ändern.
+- **Saisonales Farbschema (Paletten-Symbol):** Wechselt zwischen Sommer, Herbst und Brand (manualmode.at bzw. W4F je nach Marke). Im Winter wird automatisch **Brand** gewählt; bei nur einer Marken-Palette entfällt das Paletten-Symbol.
 
 </div>
 </details>
 `;
+};
 
-const de_chapter8 = (isNative: boolean) => `
+const de_chapter8 = (isNative: boolean, transcriptToolsSection: string | null) => `
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${deChapterLabel(coachingChapterNum(isNative, true) + 3)}: Transkript-Auswertung (Premium-Feature)</summary>
+<details id="${USER_GUIDE_ANCHORS.transcriptEval}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${deChapterLabel(transcriptEvalChapterNum(isNative))}: Transkript-Auswertung (Premium-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Transkript-Auswertung?
@@ -919,7 +1059,7 @@ Die Transkript-Auswertung hilft Ihnen, echte Gespräche – z.B. mit Kunden, Kol
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist ab der **Premium-Zugangsstufe** verfügbar und befindet sich in der Karte **Transkript-Tools** im Bereich **Management & Kommunikation**.
+Zugang und Ort in der App: siehe ${handbookSectionRef('de', 'transcriptTools', transcriptToolsSection)}. Unten beschreiben wir den Ablauf der Auswertung.
 
 ### Wie funktioniert es?
 
@@ -958,20 +1098,21 @@ Jede Empfehlung enthält:
 - **Gesprächseinstieg:** Ein konkreter Beispielsatz, mit dem Sie die erste Sitzung zu diesem Thema starten können (per Klick in die Zwischenablage kopierbar). **Vorteil:** Wenn Sie den kopierten Einstieg manuell in den Chat einfügen, kann der Coach zunächst Ihre offenen Ziele aus früheren Sitzungen ansprechen, bevor er auf das neue Thema eingeht.
 - **Direkt-Start:** Alternativ können Sie über den **Sitzungs-Button** direkt eine Coaching-Sitzung mit dem vorgeschlagenen Gesprächseinstieg starten. Der Coach überspringt dabei seine üblichen Einleitungsfragen und geht sofort auf Ihr Thema ein – offene Ziele werden in diesem Fall nicht vorab besprochen.
 
-**Verfügbarkeit auf einen Blick:** Die Empfehlungskarten zeigen Ihnen farblich an, ob Sie Zugang zum jeweiligen Coach haben:
+**Verfügbarkeit auf einen Blick:** Die Empfehlungskarten zeigen Ihnen farblich, ob Sie den empfohlenen Coach sofort nutzen können:
 - 🟢 **Verfügbar** – Sie können diesen Coach sofort nutzen
-- 🔒 **Premium erforderlich** – Dieser Coach erfordert eine Premium-Zugangsstufe
 - 🔒 **Klient erforderlich** – Dieser Coach erfordert eine Klienten-Zugangsstufe
 
-Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre Entwicklungsplanung dokumentieren können.
+Die Empfehlungen erscheinen auch im **PDF-Export**, sodass Sie Ihre persönliche Entwicklung planen können.
 
 ### Persönlichkeitsprofile & Personalisierung
 
-**Wenn Sie ein Persönlichkeitsprofil angelegt haben** (siehe ${deChapterLabel(profileChapterNum(isNative))}), nutzt die KI dieses automatisch bei der Auswertung. Aktivieren Sie dazu vor dem Upload die Option **"Persönlichkeitsprofil einbeziehen"** im Reflexionsfragebogen. Sie erhalten dann **persönlichkeitsbasierte Informationen**, die auf Ihren Kommunikationsstil und Ihre Persönlichkeitsmerkmale zugeschnitten sind. Die Auswertung zeigt Ihnen, wie Ihre typischen Muster in diesem Gespräch sichtbar wurden – und wo Sie gezielt ansetzen können.
+**Wenn Sie ein Persönlichkeitsprofil angelegt haben** (siehe ${deChapterLabel(profileChapterNum(isNative))}), kann die KI es in die Auswertung einbeziehen. Aktivieren Sie vor dem Upload **„Persönlichkeitsprofil einbeziehen“** im Reflexionsfragebogen.
+
+Sie erhalten persönlichkeitsbasierte Hinweise zu Ihrem Kommunikationsstil — und sehen, welche Muster in diesem Gespräch sichtbar wurden sowie wo Sie ansetzen können.
 
 ### Zusätzliche Funktionen
 
-- **PDF-Export** für Klienten
+- **PDF-Export** für Premium-Nutzer (Transkript-Auswertung)
 - **History-Ansicht** zum Überprüfen und Löschen vergangener Auswertungen
 
 ### Datenschutz
@@ -1010,11 +1151,11 @@ ${guideWarningBox('<p class="m-0"><strong>Wichtig:</strong> Sie sind dafür vera
 </details>
 `;
 
-const de_chapter9 = (isNative: boolean) => `
+const de_chapter9 = (isNative: boolean, transcriptToolsSection: string | null) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${deChapterLabel(coachingChapterNum(isNative, true) + 4)}: Audio-Transkription (Klienten-Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${deChapterLabel(audioTranscriptionChapterNum(isNative))}: Audio-Transkription (Klienten-Feature)</summary>
 <div style="padding: 16px;">
 
 ### Was ist die Audio-Transkription?
@@ -1023,7 +1164,7 @@ Die Audio-Transkription ermöglicht es Ihnen, **echte Gespräche direkt in der A
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist ab der **Klienten-Zugangsstufe** verfügbar und befindet sich in der Karte **Transkript-Tools** im Bereich **Management & Kommunikation** (Aufnahme/Upload).
+Zugang und Karte: siehe ${handbookSectionRef('de', 'transcriptTools', transcriptToolsSection)}. Zusätzlich benötigen Sie die **Klienten**-Stufe — nutzen Sie **Aufnahme/Upload** in den Transkript-Tools.
 
 ### Wie funktioniert es?
 
@@ -1031,7 +1172,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Einwilligung:</strong> Sie müsse
 <p class="m-0"><strong>KI-Anbieter:</strong> Die Audio-Transkription verwendet immer <strong>Google Gemini</strong> — auch wenn Sie Mistral als bevorzugten KI-Anbieter eingestellt haben. Glättung und Auswertung respektieren hingegen Ihre KI-Anbieter-Einstellung.</p>`)}
 
 **Schritt 1: Einwilligung**
-Bevor Sie beginnen, bestätigen Sie die Einwilligung aller Gesprächsteilnehmer in der App.
+Bestätigen Sie die Einwilligung aller Teilnehmer in der App (Details siehe Hinweis oben).
 
 **Schritt 2: Aufnehmen oder Hochladen**
 Sie haben zwei Möglichkeiten:
@@ -1047,11 +1188,7 @@ Nach der Aufnahme bzw. dem Upload wird die Audiodatei automatisch transkribiert.
 Nach der Transkription haben Sie folgende Möglichkeiten:
 - **Transkript glätten:** Die KI bereinigt das Transkript sprachlich (entfernt Füllwörter, korrigiert Grammatik, strukturiert Sprecherwechsel).
 - **Transkript herunterladen:** Speichern Sie das Roh- oder geglättete Transkript als Textdatei.
-- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (${deChapterLabel(coachingChapterNum(isNative, true) + 3)}) ein, um eine strukturierte Analyse zu erhalten.
-
-### KI-Anbieter-Hinweis
-
-Die **Transkription der Audiodatei** verwendet immer Google Gemini, da Mistral keine Audio-Eingabe unterstützt. Die nachfolgenden Schritte (**Glättung** und **Auswertung**) verwenden den KI-Anbieter, den Sie in Ihren Einstellungen festgelegt haben (bzw. die globale Einstellung, falls Sie keine persönliche Auswahl getroffen haben).
+- **Zur Auswertung übergeben:** Reichen Sie das Transkript direkt in die Transkript-Auswertung (${deChapterLabel(transcriptEvalChapterNum(isNative))}) ein, um eine strukturierte Analyse zu erhalten.
 
 ### Datenschutz
 
@@ -1070,32 +1207,89 @@ Die **Transkription der Audiodatei** verwendet immer Google Gemini, da Mistral k
 </details>
 `;
 
-const de_chapter10 = (isNative: boolean) => `
+const de_chapter9_pep = (isNative: boolean) => `
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${deChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach-Übung (Premium+, Trial & Klienten)</summary>
+<details id="${USER_GUIDE_ANCHORS.pep}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧩 PEP — Lösungsblockaden (Klienten-Feature)</summary>
+<div style="padding: 16px;">
+
+### Was sind PEP-Lösungsblockaden?
+
+**PEP** (**P**rozess- und **E**mbodiment fokussierte **P**sychologie) nach **Dr. Michael Bohne** ist ein therapeutisches und coaching-spezifisches Verfahren, das körperbezogene (embodimentfokussierte) Interventionen mit prozessorientierter Arbeit verbindet.
+
+**Lösungsblockaden** sind in PEP keine „Ergebnisse“ eines Durchlaufs, sondern **entwicklungshemmende Beziehungsmuster** (die sogenannten **Big Five**), die Lösungs- und Veränderungsprozesse blockieren können — auch wenn Sie sich bereits anstrengen. In der klassischen PEP-Arbeit werden sie **typischerweise erst in den Blick genommen, wenn embodimentfokussierte Schritte allein nicht ausreichen**, um spürbare Entlastung oder Bewegung zu erreichen; die Blockaden stehen der wirksamen Anwendung von Veränderungsarbeit eher **im Weg** als dass sie deren Abschlussprodukt wären.
+
+Die fünf Muster sind: **Selbstvorwurf**, **Fremdbeschuldigung**, **Erwartungshaltung**, **Altersregression** und **dysfunktionale Loyalitäten**.
+
+### Was macht die App?
+
+In **Meaningful Conversations** ersetzt die App **keine** vollständige PEP-Sitzung (kein Klopfen, keine KKT-Prozesse). Am **Sitzungs-Review** analysiert die KI Ihr **Gesprächstranskript** und markiert **mögliche** Big-Five-Muster mit kurzer Erklärung und Zitat — als **Reflexionshilfe** für Klient:innen im Rahmen des Coachings bei ${providerContact}.
+
+### Wer kann es nutzen?
+
+Nur **Klienten**-Nutzer (Zugang über ${providerContact}) sowie Admin/Developer-Testkonten. Premium, Premium+ und registrierte Standardnutzer sehen diesen Abschnitt **nicht**.
+
+${isNative ? `**Kontakt für Klienten-Zugang:** ${providerContact}` : ''}
+
+### Wo finden Sie es?
+
+Am Ende einer Coaching-Sitzung im **Sitzungs-Review**, Abschnitt **„Mögliche Lösungsblockaden“**. Die KI listet erkannte Muster mit Erklärung und einem Zitat aus dem Gespräch.
+
+### Wie nutzen Sie es?
+
+- Lesen Sie die Vorschläge als **Reflexionsimpuls**, nicht als Diagnose.
+- Besprechen Sie auffällige Blockaden mit Ihrem Coach bei ${providerContact}.
+- Der Abschnitt erscheint nur, wenn die Analyse Muster erkennt — sonst „Keine erkannt“.
+
+</div>
+</details>
+`;
+
+const de_chapter10 = (isNative: boolean, practiceTab: string | null) => `
+---
+
+<details id="${USER_GUIDE_ANCHORS.coachPractice}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${deChapterLabel(coachPracticeChapterNum(isNative))}: Coach-Übung (Premium+, Testphase & Klienten)</summary>
 <div style="padding: 16px;">
 
 ### Was ist Coach-Übung?
 
-Coach-Übung ist ein **Übungsmodus für angehende oder erfahrene Coaches**: Sie übernehmen die Rolle des Coaches, die KI spielt Ihren Klienten. Sie wählen eine Coaching-Methode, ein Szenario und einen Schwierigkeitsgrad — und führen danach ein Live-Gespräch. Am Ende erhalten Sie eine **strukturierte Auswertung** Ihrer Methodenführung mit konkreten Stärken, Entwicklungsfeldern und Übungsvorschlägen.
+Coach-Übung ist Ihr **Übungsraum für angehende und erfahrene Coaches**: Sie führen das Gespräch als Coach, die KI spielt Ihren Klienten. So trainieren Sie Methoden, Fragen und Haltung in einem geschützten Rahmen.
+
+Sie wählen Einstieg, Methode, Szenario und Schwierigkeit und erhalten am Ende eine **strukturierte Auswertung** mit Stärken, Entwicklungsfeldern und Übungsvorschlägen.
 
 ### Wer kann es nutzen?
 
-Dieses Feature ist verfügbar mit **Premium+**, während der **9-Tage-Testphase** nach Registrierung oder mit **Klienten**-Zugang. Es befindet sich im Tab **Coaching üben** im Coaching-Bereich (nicht bei den Transkript-Tools).
+Zugang und Tab: siehe ${practiceTab ? `Abschnitt **${practiceTab}**` : deChapterLabel(coachPracticeChapterNum(isNative))}.
 
-**Methodenumfang:** Premium+ und Trial: **8 Übungsmethoden**. Klienten: **12 Methoden** (zusätzlich Methoden der Klienten-Coaches Rob, Victor, Bekky und Dan).
+**Methodenumfang:** Premium+ und Testphase: **8 Übungsmethoden**. Klienten: **12 Methoden** (zusätzlich Methoden der Klienten-Coaches Rob, Victor, Bekky und Dan).
 
-${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Die Coaching-Methoden in der App sind generische, beschreibende Bezeichnungen für didaktische Übungszwecke. Sie stehen in keiner Verbindung zu und werden nicht unterstützt oder zertifiziert durch Inhaber von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter.</p>')}
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Kein Ersatz für Coaching-Ausbildung:</strong> Coach-Übung ist eine <strong>Ergänzung</strong> zum eigenständigen Üben — <strong>keinesfalls</strong> ein Ersatz für eine fundierte Coaching-Ausbildung oder anerkannte Zertifizierung.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li>Die KI simuliert einen Klienten; echte Gesprächssituationen sind komplexer und nicht vollständig abbildbar.</li>
+<li>Auswertungen sind Lernimpulse — keine offizielle Prüfung, keine Qualitätsgarantie und kein Nachweis von Coach-Kompetenz.</li>
+<li>Für echte Klientenarbeit gelten Ihre beruflichen Standards, Ethikrichtlinien und ggf. gesetzliche Vorgaben — unabhängig von dieser App.</li>
+</ul>`)}
 
-### Wie funktioniert es?
+### So richten Sie Ihre Übung ein
 
-**Schritt 1: Übung konfigurieren**
-- **Coaching-Methode:** Wählen Sie aus den Methoden der App-Coaches sowie aus zusätzlichen Übungsmethoden (z. B. Vier-Phasen-Coaching, zukunftsorientiertes Coaching, Ambivalenz-Coaching). Bei einigen Methoden können Sie **Methodendetails** einblenden, um sich an die Phasen und typischen Fragen zu erinnern.
-- **Klienten-Szenario:** Wählen Sie eine Situation, in der Ihr KI-Klient steckt (z. B. Karriereentscheidung, Konflikt im Team).
-- **Mit Anliegensklärung starten (neu):** Das Szenario bleibt verborgen — Sie üben reines Contracting und erhalten danach optional eine erste Methodensitzung (Methode oder Freispiel).
-- **Schwierigkeitsgrad:** Steuert, wie kooperativ oder herausfordernd sich der Klient verhält. Im Setup können Sie **„Level erklärt“** aufklappen:
+Oben finden Sie Links zu **Dein Fortschritt** und **Übungsverlauf**. Darunter wählen Sie **einen** der drei aufklappbaren Einstiege (in dieser Reihenfolge):
+
+**1. Mit Anliegensklärung starten**
+- Das Anliegen Ihres Klienten ist zunächst **verborgen**: Sie üben Contracting in Reinform (Begrüßung, Rahmen, Anliegensklärung).
+- Wählen Sie einen Klienten-Avatar, **Schwierigkeitsgrad** und optional **Live-Gespräch** (nur Sprache).
+- In der Auswertung sehen Sie das verborgene Anliegen; optional folgt eine **Methodensitzung** (Phase 2) — entweder unter Anwendung einer **definierten Methode** oder als **Improvisation** (ohne vorab definierten Ablauf).
+
+**2. Vom Szenario starten**
+- Wählen Sie zuerst ein **Coachee-Szenario** (Anliegen sichtbar), dann eine passende **Coaching-Methode**.
+- Methodendetails können Sie über das Info-Symbol einblenden (Phasen, typische Fragen).
+
+**3. Von der Methode starten**
+- Wählen Sie zuerst eine **Coaching-Methode**, dann ein passendes **Szenario** (mit Match-Hinweisen: besonders passend / alternative / neutral).
+
+**Gemeinsame Optionen** (unter Einstieg 2 oder 3, sobald einer der beiden Bereiche aufgeklappt ist — erscheinen **unterhalb** der Szenario-/Methoden-Auswahl auf dem Setup-Bildschirm):
+- **Schwierigkeitsgrad** — steuert, wie kooperativ oder herausfordernd sich der KI-Klient verhält. **„Level erklärt“** aufklappen:
 
 | Level | Verhalten des KI-Klienten |
 |-------|---------------------------|
@@ -1104,47 +1298,64 @@ ${guideWarningBox('<p class="m-0"><strong>Hinweis:</strong> Die Coaching-Methode
 | **Herausfordernd** | Stärkerer Widerstand/Themenwechsel; versteckte Agenda nur bei Vertrauen |
 | **Schwer** | Sehr starker Widerstand + Nebenstressoren; Agenda erst nach Trust-Building |
 
-**Hinweis:** Grenzfall-Training (Hinweise außerhalb des Coaching-Scope) erscheint nur in **Methodensitzungen** bzw. **Phase 2 nach Anliegensklärung** — nicht in der reinen Anliegensklärungs-Phase.
-- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in exakter Klientensprache bleiben“.
+**Hinweis:** Grenzfall-Training (Hinweise außerhalb des Coaching-Scope) erscheint in **Methodensitzungen** bzw. in **Phase 2 nach der Anliegensklärung**.
 
-**Schritt 2: Übungssitzung führen**
-- Sie sind der **Coach** — die KI antwortet als Klient. **Sie beginnen** das Gespräch; es gibt keine automatische Begrüßung durch die KI.
+- **Live-Gespräch (optional):** Reiner Sprachmodus — freischaltbar, sobald Sie **Herausfordernd** mit derselben Methode und demselben Szenario (bzw. demselben Klienten bei Anliegensklärung) abgeschlossen haben.
+- **Sitzungsfokus (optional):** Freitext, z. B. „Vertrag schließen“ oder „in exakter Klientensprache bleiben“.
+- **Übung starten** — der Chat beginnt **leer**; **Sie** eröffnen als Coach.
+
+### Unterbrochene Übungssession
+
+Wurde eine Practice-Sitzung im selben ${isNative ? 'App-Tab' : 'Browser-Tab'} unterbrochen, erscheint beim erneuten Öffnen des Setup-Bildschirms ein Dialog **„Übungssession fortsetzen?“** (Methode, Szenario, Nachrichtenanzahl). Der Entwurf liegt zunächst nur auf Ihrem Gerät und gelangt erst nach der **Auswertung** auf den Server.
+
+### Übungssitzung führen
+
+- Sie sind der **Coach** — die KI antwortet als Klient, und Sie eröffnen das Gespräch.
 - Die Oberfläche entspricht dem normalen Chat (Text, Spracheingabe, optional TTS).
 
-${guideInfoBox(`<p class="m-0 mb-2"><strong>Keine reguläre Coaching-Sitzung:</strong> Es gibt keinen Lebenskontext-Analyseprozess am Ende; Ihre Lebenskontext-Datei wird nicht aktualisiert.</p>
-<p class="m-0"><strong>Kein DPC/DPFL:</strong> Persönlichkeitsprofil und adaptiver Coaching-Modus gelten nur für Classic Coaching — nicht für Coaching üben. Die KI spielt ausschließlich den Klienten nach Szenario und Methode.</p>`)}
+${guideInfoBox(`<p class="m-0 mb-2"><strong>Eigener Übungsraum:</strong> Coach-Übung läuft getrennt von Ihren regulären Coaching-Sitzungen. Ihr Lebenskontext bleibt, wie er ist; am Ende erhalten Sie die Auswertung Ihrer Coach-Leistung.</p>
+<p class="m-0"><strong>Reine Rollenübung:</strong> Persönlichkeitsprofil und adaptiver Coaching-Modus (DPC/DPFL) gehören zum klassischen Coaching. In Coach-Übung spielt die KI den Klienten ganz nach Szenario und Methode.</p>`)}
 
-**Schritt 3: Sitzung beenden & Selbsteinschätzung**
-- Beenden Sie die Sitzung wie gewohnt über **Sitzung beenden**.
-- Optional bewerten Sie Ihre Leistung auf einer Skala von **1–10**, bevor die KI auswertet. Diese Selbsteinschätzung dient der Kalibrierung und kann übersprungen werden.
+### Sitzung beenden, Selbsteinschätzung & Auswertung
 
-**Schritt 4: Auswertung erhalten**
-Die KI analysiert das Transkript und bewertet Sie in fünf Dimensionen (jeweils **1–10**):
+1. **Sitzung beenden** — wie im normalen Chat.
+2. **Selbsteinschätzung (optional)** — Skala **1–10**, vor der KI-Auswertung; kann übersprungen werden.
+3. **Auswertung** — die KI analysiert das Transkript und bewertet Sie in fünf Dimensionen (jeweils **1–10**):
 - **Methoden-Treue** — Wie konsequent haben Sie die gewählte Methode angewendet?
 - **Wirksamkeit** — Wie hilfreich war Ihr Coaching für den Klienten?
 - **Klarheit** — Wie klar und strukturiert waren Ihre Fragen und Interventionen?
 - **Coachee-Autonomie** — Haben Sie die eigene Denk- und Lösungsarbeit des Klienten ermöglicht (ohne Ratschläge, eigene Vision oder vorgegebene Lösungen)?
 - **Klientenzufriedenheit** — Wie zufrieden wirkt der Klient am Ende?
 
-Zusätzlich bewertet die KI den **Session-Flow** (Contracting, Eröffnung, Abschluss — passend zur Methode): War der Gesamtablauf stimmig, wird das positiv hervorgehoben.
+Zusätzlich bewertet die KI den **Session-Flow** (Contracting, Eröffnung, Abschluss — passend zur Methode).
 
 Die **Gesamtbewertung (1–10)** priorisiert die **Methoden-Treue**. Volle **10/10** gibt es nur bei sehr starker Methodenanwendung (≥9) **und** stimmigem Session-Flow; bei optimaler Methode ohne vollständig stimmigen Ablauf liegt das Maximum bei **9/10**.
 
-Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden (z. B. Vier-Phasen, zukunftsorientiert, Ambivalenz) verweist die Übung auf einen **Live-Coach** derselben Methode — dort sehen Sie die Methode aus Klientensicht.
+Dazu erhalten Sie eine Zusammenfassung, abgedeckte Methodenphasen, Stärken, Entwicklungsbereiche und vorgeschlagene Übungen. Bei manchen Methoden verweist die Übung auf einen **Live-Coach** derselben Methode — nützlich, um die Methode aus Klientensicht kennenzulernen.
 
-**Schritt 5: Verlauf & Fortschritt**
-Über **Übungsverlauf** auf dem Setup-Bildschirm können Sie frühere Auswertungen erneut öffnen oder löschen. Auswertungen werden in Ihrem Konto gespeichert.
+### Verlauf & Fortschritt
 
-Über **Dein Fortschritt** sehen Sie zusätzlich Score-Verlauf, Kompetenzprofil, Meilensteine und eine empfohlene nächste Übung — ideal, um Entwicklung über mehrere Sessions hinweg zu vergleichen.
-
-**Ihr Feedback als Coach (aktuell):** Nach jeder Session erhalten Sie konkrete **Übungsvorschläge**; im Fortschritt werden **wiederkehrende Entwicklungsthemen** sichtbar, wenn dieselben Muster in mehreren Auswertungen auftauchen. Das ersetzt (noch) keine Anbindung an Ihr OCEAN-/Riemann-Profil — eine vertiefte Coaching-Stil-Signatur ist für spätere Versionen geplant.
+- **Übungsverlauf** — frühere Auswertungen erneut öffnen oder löschen; gespeichert in Ihrem Konto.
+- **Dein Fortschritt** — Score-Verlauf, Kompetenzprofil, Meilensteine und empfohlene nächste Übung über mehrere Sessions hinweg.
+- **Wiederkehrende Entwicklungsthemen** — wenn dieselben Muster in mehreren Auswertungen auftauchen. Das ersetzt (noch) keine Anbindung an Ihr OCEAN-/Riemann-Profil.
 
 ### Tipps für beste Ergebnisse
 
-- **Methode vorher lesen:** Nutzen Sie die Methodendetails, wenn Sie eine Methode zum ersten Mal üben.
-- **Klientenrolle ernst nehmen:** Stellen Sie offene Fragen und vermeiden Sie vorschnelle Lösungsvorschläge — der KI-Klient reagiert realistisch auf Ihren Stil.
-- **Schwierigkeit steigern:** Beginnen Sie mit „leicht“ und steigern Sie, wenn Sie sich sicher fühlen.
-- **Verlauf nutzen:** Vergleichen Sie Auswertungen über die Zeit, um Fortschritte sichtbar zu machen.
+- **Methode vorher lesen:** Nutzen Sie die Methodendetails beim ersten Üben einer Methode.
+- **Klientenrolle ernst nehmen:** Offene Fragen statt vorschneller Lösungen — der KI-Klient reagiert realistisch auf Ihren Stil.
+- **Schwierigkeit steigern:** Mit „leicht“ beginnen und schrittweise erhöhen.
+- **Verlauf nutzen:** Auswertungen über die Zeit vergleichen.
+
+### Hinweise & Disclaimer
+
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Methodenbezeichnungen:</strong> Die Coaching-Methoden in der App sind generische, beschreibende Bezeichnungen für didaktische Übungszwecke. Sie stehen in keiner Verbindung mit Inhabern von Marken, eingetragenen Methodennamen oder urheberrechtlich geschützten Coaching-Ansätzen Dritter und werden von diesen weder unterstützt noch zertifiziert.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Keine Therapie / keine klinische Anwendung:</strong> Coach-Übung dient der Reflexion und Skills-Übung — nicht der Behandlung psychischer Erkrankungen oder Krisenintervention.</li>
+<li><strong>Keine Supervision:</strong> Die App ersetzt keine professionelle Supervision oder Peer-Review durch qualifizierte Kolleg:innen.</li>
+<li><strong>Simulierter Klient:</strong> Allgemeine KI-Hinweise siehe ${deChapterLabel(2)}, Abschnitt 2.3. Der Übungs-Klient kann fehlerhaft antworten — nutzen Sie kritische Reflexion und menschliche Aufsicht in Ihrer Ausbildung.</li>
+<li><strong>Professionelle Grenzen:</strong> Sexuelle oder explizite Inhalte gegenüber dem Übungs-Klienten sind unzulässig; die Auswertung kritisiert Verstöße. Siehe auch ${deChapterLabel(2)}, Abschnitt 2.4.</li>
+<li><strong>Haftung:</strong> Sie tragen die Verantwortung dafür, wie Sie Erkenntnisse aus der Übung in echter Klientenarbeit anwenden (siehe auch Haftungsausschluss der App).</li>
+</ul>`)}
 
 </div>
 </details>
@@ -1157,108 +1368,122 @@ const en_markdown = (
     showChapter8: boolean,
     showChapter9: boolean,
     showChapter10: boolean,
-) => `<details>
+) => {
+    const coachingSub = computeCoachingSessionSubsections({
+        isNative,
+        isRegistered,
+        showTranscriptTools: showChapter8,
+        showPracticeTab: showChapter10,
+    });
+    const sessionReviewSub = computeSessionReviewSubsections({
+        isNative,
+        isRegistered,
+        showDpflBlock: isPremium,
+    });
+    const profileSub = computeProfileSubsections(isNative);
+    const gamSub = computeGamificationSubsections(isNative, isRegistered);
+    return `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📖 Introduction</summary>
 <div style="padding: 16px;">
 
 Welcome to ${brand.appName}! This guide will walk you through the app step-by-step. The core concept is your **Life Context** file—a private document that acts as your coach's memory.
 
-${guideInfoBox('<p class="m-0"><strong>No conversation journal needed:</strong> After each session, the app automatically proposes updates; you review them briefly and accept only what fits—or edit the text before saving. That keeps coaching continuous and contextual, without extra work.</p>')}
+${guideInfoBox('<p class="m-0"><strong>Your coach remembers your story:</strong> After each session, the app automatically proposes updates; you review them briefly and accept what fits — or edit the text before saving. That keeps your coaching continuous and personal, with minimal effort.</p>')}
+
+${isNative ? `${guideInfoBox('<p class="m-0"><strong>App updates:</strong> Install new versions from the <strong>Apple App Store</strong> (Settings → App Store → optional automatic updates).</p>')}` : ''}
 
 </div>
 </details>
 
 ---
 
-<details open>
+<details id="${USER_GUIDE_ANCHORS.ch1}" open>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📚 Chapter 1: Getting Started</summary>
 <div style="padding: 16px;">
 
-When you first open the app, you'll be guided through a brief onboarding process.
+A good start takes just a few minutes. Here you will find out how to get into the app, how your coach gets to know you, and how to pick up right where you left off at any time.
 
-### 1.0 Welcome Screen
+### 1.1 Your Opening Question: “What would you like to achieve today?”
 
-After login, the **Welcome Screen** appears briefly: logo, orbiting coach avatars, and a “Loading your session…” message while your data is prepared.
+After a short welcome, the app asks a single question. Your answer takes you within seconds to the right entry point — coach, coaching topic, or practice mode. Three cards are available:
 
-### 1.1 Intent Picker & Name
+- **Communication & Management** — for a conversation you want to prepare or understand better. Nobody and Sam are waiting there; with an account also Gloria, and with Premium the Transcript Tools.
+- **Coaching on my concern** (highlighted) — for the topic that is on your mind right now. With an account, you describe it in your own words and receive a coach recommendation; as a guest, you choose directly from Nobody, Max, and Ava.
+- **Practice as a coach** — for everyone who wants to train their own coaching skills. With Premium+, during the trial, or with Client access, you go straight to the practice setup; guests create an account first.
 
-On launch, the **Intent Picker** appears — a screen with **three cards** asking “What would you like to achieve today?”:
-- **Communication & management** — Opens the Management & Communication section (Nobody, Sam, Gloria, transcript tools)
-- **Coaching for my concern** (featured) — Focuses the topic search; coach sections stay collapsed
-- **Practice as a coach** — Goes straight to Coach Practice (Silver section, Practice tab); **skips Life Context screens**
+The app remembers your choice: on the coach selection, the matching section is already open. If you would rather not see the opening question, switch it off under **Menu → My Account**; the Management and Coaching sections are then open from the start on the coach selection.
 
-Your chosen intent determines which section is highlighted and expanded on the coach selection screen.
+**Your first visit:** The app asks for your name. With an account, it then guides you through the short personality test (OCEAN), so your coaches understand you better from the beginning. Guests reach the start screen after entering their name (§1.3).
 
-**Next, you'll be asked for your first name** (or a pseudonym). For guests, this creates a minimal Life Context template. For registered users, the name is integrated into the encrypted Life Context. Guests can skip this step.
+### 1.2 As a Guest or with an Account
 
-**Note:** Registered users can disable the Intent Picker under **My Account**.
+You can try the app as a guest first or create an account right away.
 
-### 1.2 Guest vs. Registered User
-- **Continue as Guest:** Perfect for trying the app. All your data is processed only locally on your device.
-- **Register/Login:** Create a free account to save your progress automatically. Your Life Context is stored securely in the cloud with end-to-end encryption.
+- **Start as a guest:** You get going immediately. Your name, Life Context, and progress stay on your device (${isNative ? 'in the app session' : 'in the browser tab'}). As a guest, you have 50 chat messages per week and your device's or browser's voices for read-aloud.
+- **Start with an account:** You begin with a **9-day Premium trial**. Your Life Context and profile are stored end-to-end encrypted on the server and are available on all your devices; server voices (web) are available as well.
 
-${guideWarningBox('<p class="m-0"><strong>Guest mode — please note:</strong> Without a download, your progress is lost. At the end of each session, download your Life Context file from the review screen to save it.</p>')}
+${guideInfoBox(`<p class="m-0"><strong>Tip for guests:</strong> At the end of every session, download your Life Context file (.md) in the session review. As a guest, your data lives only ${isNative ? 'in the running app session' : 'in the open browser tab'} — the downloaded file keeps it safe permanently, and with it you pick up next time exactly where you left off.</p>`)}
 
-**Language selection:** On the login/registration screen, you can switch between **German** and **English**. The language setting applies to the entire app.
+**Language:** On the sign-in and registration screen, you choose **German** or **English**. The language applies to the whole app.
 
-**Cross-platform:** Your user account works both in the iOS app and via web browser at **${brand.domainProduction}**. All data is synchronized automatically.
+${isNative ? '' : `**With you everywhere:** Your account works in the iOS app as well as in the web browser at **${brand.domainProduction}**. Your data is synchronized automatically.`}
 
-### 1.3 The Life Context Start Screen
+### 1.3 Your Life Context — Your Coach's Memory
 
-After auth and intent, you arrive at the **start screen** with **three action cards** and an upload area below:
+The better your coach knows you and your situation, the more precisely they can ask. That is what your **Life Context** is for: a private document that stays in your hands. On the start screen, three paths lead there:
 
-- **Continue with your Life Context** — Loads your saved context (returning users) or opens the file picker if no substantial file exists yet.
-- **Start a new conversation** (featured) — Starts the questionnaire to create or extend your context.
-- **Build with an interview** — Begins a guided interview with Gloria.
+- **Continue with your Life Context** — for everyone who already has one. You see it in the preview or upload your file (Markdown “.md” file by click or drag & drop).
+- **Start a new conversation** (highlighted) — the path for a fresh start. A short questionnaire guides you through the most important topics; if your context is already well filled, the editor opens instead.
+- **Build with an interview** — Gloria has a conversation with you. Your Life Context emerges from your answers, and at the end you receive a review with the result.
 
-**Upload a file:** Below the cards, you can upload a \`.md\` Life Context file by click or drag & drop. This is the typical method for guests continuing a previous session.
+In the questionnaire, only your name is required; country and state are optional. Guests see a short privacy notice the first time ${isNative ? 'in the app session' : 'in the tab'}. With **Generate File & Continue** you reach the coach selection.
 
-**Questionnaire (via “Start a new conversation”):** Fill in background, goals, and challenges. Only your name is required. Optionally add **Country / State** (e.g., “Austria – Vienna”) for local support resources. **Generate File & Continue** takes you to coach selection.
+Guests reach the start screen after entering their name and at any time via **Menu → Life Context**. Registered users see it after their first personality test or when they begin anew via **Start a New Session** (§1.5).
 
-**Interview with Gloria:** Gloria is **not** a coach; she asks the questionnaire topics in a natural conversation. At the end, she formats your answers into a Life Context file.
+### 1.4 Viewing and Editing Your Life Context
 
-### 1.4 Life Context Preview & Editing
+Here you stay in control of what your coach knows about you. When you choose a card or upload a file, the **preview** opens with the file name and formatted text. From there you can continue with:
 
-When you choose a card or upload a file, you enter **preview mode** with file name, Markdown preview, and actions:
+- **Start session** — to the coach selection, with the loaded context.
+- **Extend Life Context File** — if your context is still a template (e.g. only your name); the questionnaire helps you fill it.
+- **Edit Life Context File** — if your context is already filled; the Markdown editor opens.
+- **Extend with an Interview** — Gloria adds to your context in conversation.
 
-- **Start session** — Proceeds to coach selection with the loaded context.
-- **Extend Life Context File** — When your context is still a template (e.g., only your name). Opens the questionnaire.
-- **Edit Life Context File** — When your context is already enriched. Opens the **Markdown Editor**.
-- **Extend with an Interview** — Passes your context to Gloria in extension mode.
-
-**Back to start screen:** Use **Choose a different file** to return to the three cards.
+With **Choose a different file**, you return to the three cards.
 
 #### The Life Context Editor
-The editor allows you to directly edit your Life Context:
-- **Edit Mode:** Shows the raw Markdown text in a text field. Here you can freely add, change, or remove sections.
-- **Preview Mode:** Shows your Life Context formatted (headings, bold text, lists, etc.), just as the coach sees it.
-- **Toggle:** Use the "Edit" and "Preview" tabs above the text field to switch between modes.
-- **Downloads:** Two buttons below the editor allow you to export:
-  - **📥 .md** — Saves the Life Context as a Markdown file to your device.
-  - **📄 PDF** — Generates a formatted PDF document with your Life Context.
-- **Save & Return:** Applies your changes and returns to the start screen.
-- **Cancel:** Discards all changes.
+In the editor, you write freely: add, change, or remove sections.
+- **Edit** shows the text in the text field, **Preview** shows it formatted (headings, bold text, lists) — exactly as your coach sees it. Switch between the two using the tabs above the text field.
+- Below the editor, save your context to your device with **📥 .md** (Markdown file) or **📄 PDF** (formatted document).
+- **Save & Return** applies your changes: from the start screen you go to the coach selection, from the menu back to the screen you had open. **Cancel** discards the changes.
 
-#### Extending Your Life Context with Gloria
-**If you click "Extend with an Interview,"** your existing context is passed to Gloria. In extension mode, she behaves differently than during initial creation:
-- Gloria greets you **personally by name** and asks how much time you'd like to spend today.
-- She analyzes your existing context and identifies **gaps** — sections that are still empty or only sparsely filled.
-- Sections that are already detailed are **skipped**.
-- **If you specifically want to update an existing section**, Gloria respects that and helps you with it, rather than insisting on a fixed order.
-- At the end of the conversation, the new information is **merged with your existing context** — nothing is lost.
+#### Expanding Your Life Context with Gloria
+With **Extend with an Interview**, you continue your story together with Gloria. She greets you by name, asks how much time you have today, and spots the gaps in your existing context — sections that are still empty or only briefly described. Sections that are already detailed, she skips. If you want to update a specific area, Gloria follows your lead. At the end, the new information is merged with your existing context, so everything from before is kept.
 
-### 1.5 Starting a New Session (for Returning Users)
-If you are a registered user returning with a saved context, you will see the **Context Choice** screen.
+### 1.5 When You Come Back
 
-- **Continue with Saved Context:** Loads your last state and takes you to coach selection.
-- **Start a New Session:** Allows you to begin fresh with a blank context (great for exploring a completely new topic).
+You continue right where you left off: after signing in, the app briefly asks what you have in mind today (§1.1). Meanwhile, it decrypts your stored data with your password directly on your device and makes your Life Context available immediately. Then you choose your coach and get started. With Premium, the app occasionally reminds you that the Spiral Dynamics and Riemann-Thomann tests would round out your profile.
+
+**Viewing your context or starting fresh:** Via **Menu → Life Context** (or right after signing in, if you switched the opening question off), the “Welcome back” screen opens. There you see your context in the preview, can edit it, and decide:
+- **Continue with Saved Context** takes you to the coach selection.
+- **Start a New Session** begins with a fresh context. The app asks for confirmation and offers to archive your previous context; your saved context is replaced only at the next save. Afterwards you reach the start screen (§1.3).
+
+If there is an interrupted conversation, a hint to continue also appears here (§1.6).
+
+**A new beginning for today:** **Menu → Start Over** ends the current session, discards open conversation drafts, and takes you back to the opening question. Your Life Context stays unchanged.
+
+### 1.6 Interrupted? Simply Carry On
+
+As long as ${isNative ? 'your app session' : 'your browser tab'} stays open, the app offers to **resume an interrupted coaching conversation** — on the “Welcome back” screen, on the start screen, or in a dialog when you return. The draft stays on your device only; it reaches the server once you **end the session** and have it analyzed.
+
+You resume an interrupted **practice session (Coach Practice)** the same way, in the setup or in the chat. It also stays local until the evaluation.
 
 </div>
 </details>
 
 ---
 
-<details>
+<details id="${USER_GUIDE_ANCHORS.ch2}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔒 Chapter 2: Privacy & Security</summary>
 <div style="padding: 16px;">
 
@@ -1273,28 +1498,34 @@ Your privacy is critical. We use **End-to-End Encryption (E2EE)** for your Life 
 
 Via the menu (☰), you can access **Account Management** with the following options:
 
-- **Edit Profile:** Change your name and email address.
+- **Edit Profile:** Change your name and email address. Here you also switch the opening question “What would you like to achieve today?” on or off (My Account).
 - **Change Password:** Update your password. **Note:** Since your password generates the encryption key, your encrypted data (Life Context, Personality Profile) is automatically re-encrypted with the new key.
 - **Export Data (GDPR):** Download all your stored data -- as an HTML report or JSON file. The export includes: account data, gamification progress, Life Context, Personality Profile, feedback, redeemed codes, coach practice sessions, transcript evaluations, and usage statistics.
-- **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
+${isNative ? '' : `- **Redeem Code:** Enter an access code to upgrade your access tier (e.g., Premium or Client).
+`}
 - **Delete Account:** Permanently and irreversibly deletes your account and all associated data from our servers.
 
 ### 2.2 Access Tiers & Upgrade
 
-The app offers several access tiers with increasing functionality:
+Each tier opens up further possibilities. You decide how far you want to go — from trying things out to the full range of features.
 
-| Tier | Access | Coaches | Features |
+| Tier | How you get there | Your Coaches | What you gain |
 | :--- | :--- | :--- | :--- |
-| **Guest** | No registration | Nobody, Max, Ava | Basic features, local data |
-| **Registered** | Free account incl. **9-day Premium trial** | + Gloria, Sam, Gabrielle | Cloud storage (E2EE), OCEAN test, DPC mode, Gamification; during trial also Premium features and Coach Practice (8 methods) |
-| **Premium** | Paid upgrade (e.g. €9.90/month) | + Kenji, Chloe, Mike | Riemann-Thomann & Spiral Dynamics tests, DPFL mode, adaptive profile, Transcript evaluation |
-| **Premium+** | Premium incl. Coach Practice (e.g. €14.90/month) | same as Premium | + **Coach Practice** (8 practice methods) |
-| **Client** | Access code from ${brand.providerName} | + Rob, Victor | Audio transcription, **Coach Practice (12 methods)**, all features |
+| **Guest** | No registration | Nobody, Max, Ava (Gloria guides the Life Context interview on the start screen) | Try it right away: 50 messages per week, your data stays on your device |
+| **Registered** | 9-day Premium trial after signing up, then Registered subscription (prices in the Upgrade dialog) | + Gloria, Sam, Gabrielle | Encrypted storage across all your devices, personality test (OCEAN) with a personal signature, coaching that adapts to your profile (DPC), profile as PDF, progress and achievements, server voices (web); during the trial, also Premium features and Coach Practice (8 methods) |
+| **Premium** | ${isNative ? 'Upgrade in the app' : 'Upgrade (PayPal on the web, Apple In-App Purchase in the iOS app)'} | + Kenji, Chloe, Mike | Two further personality tests (Spiral Dynamics, Riemann-Thomann), coaching that refines your profile with every session (DPFL), transcript evaluation including PDF |
+| **Premium+** | Premium including practice access | same as Premium | Coach Practice for as long as your practice subscription is active (8 methods) |
+| **Client** | ${isNative ? `Contact: ${providerContact}` : `Access code from ${providerContact}`} | + Rob, Victor, Bekky, Dan | Audio transcription, PEP solution blockages, Coach Practice (12 methods), all features |
 
-**How to upgrade:**
-${isNative ? `- Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.` : `- **iOS App:** Directly in the app via native Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). Subscriptions are managed automatically through your Apple account.
-- **Web Browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium and Premium+ passes and individual coach unlocks via PayPal.`}
-- **Access Code:** Under **Account Management → "Redeem Code"** you can enter an access code.
+**How to unlock more:**
+${isNative ? `- Directly in the app via **Apple In-App Purchase** (Menu → **Upgrade**): Registered monthly or annual, Premium monthly or annual, Premium+ monthly, and coach unlocks (Kenji, Chloe). At the bottom of the screen you find **Restore Purchases**. You manage your subscriptions through your Apple account.` : `- **iOS app:** Directly in the app via Apple In-App Purchase. Choose **Premium** or **Premium+** (Premium including Coach Practice). You manage your subscriptions through your Apple account.
+- **Web browser:** Open the menu (☰) and select **"Upgrade"**. There you'll find Premium and Premium+ passes and individual coach unlocks via PayPal.
+- **Access code:** Under **Account Management → "Redeem Code"**, enter your access code.`}
+
+${isNative ? '' : `### Voice Output & Browsers (Web)
+
+For read-aloud (TTS), we recommend **Google Chrome** or **Apple Safari**: we tested server voices and playback in voice mode with these two browsers. In other browsers (e.g. Firefox or Edge), voice output may behave differently or fail.
+`}
 
 ### 2.3 AI Transparency (EU AI Act)
 
@@ -1307,6 +1538,20 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>AI transparency:</strong> All "co
 <li><strong>Data processing:</strong> Conversation content is sent to the configured AI service — details in the Privacy Policy.</li>
 </ul>`)}
 
+### 2.4 Boundaries, safety & intimacy topics
+
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Respectful use:</strong> Coaches are AI systems for reflection and coaching — not partners for erotic roleplay or explicit content. Sexual approaches <em>to the bot</em> are refused; the session may end.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Prompt manipulation:</strong> Requests to ignore instructions, reveal the system prompt, or “jailbreak” the role are not followed.</li>
+<li><strong>Partnership & intimacy as a client topic:</strong> When <em>you</em> raise closeness, distance, or talking with a partner as a life concern, coaches may respond professionally — without graphic sexual content or sex therapy. Clinical or trauma-related issues: referral to qualified human support.</li>
+<li><strong>The Connector:</strong> Personas are fictional conversation partners — not romantic or erotic counterparts. Harassment leads to boundaries or ending the conversation.</li>
+<li><strong>Coach Practice:</strong> Sexual boundary violations by trainees (e.g. explicit “exercises”) are unprofessional; the simulated client pushes back and evaluations criticize such behavior.</li>
+</ul>`)}
+
+### 2.5 Scheduled maintenance
+
+During announced maintenance windows, signed-in users and guests (except on login/register screens) see a **notice banner** below the header with start/end times in your display timezone (plus Europe/Vienna when different). **Upcoming** notices can be dismissed per browser; **active** maintenance stays visible.
+
 </div>
 </details>
 
@@ -1316,29 +1561,30 @@ ${isNative ? '' : `<details>
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📱 Chapter 3: Installing the App</summary>
 <div style="padding: 16px;">
 
-The ${brand.appName} app (MyCoach AI) is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for all platforms.
+The **${brand.appName}** app is available in two ways: as a **native iOS app** on the App Store, and as a **Progressive Web App (PWA)** for desktop and Android at [${brand.domainProduction}](${brand.appUrlProduction}).
 
 ### 3.1 Native iOS App (recommended for iPhone/iPad)
 
-The app is available as a native iOS app on the **Apple App Store**. Search for "${brand.appName}" or use the direct link on our website.
+The app is available as a native iOS app on the **Apple App Store**. Search for **${brand.iosAppStoreName}** or open [${brand.iosAppStoreName} on the App Store](${brand.appStoreUrl}).
 
 **Benefits of the native app:**
 - Optimized for iOS with native performance
 - In-App Purchases directly through your Apple account
 - High-quality Apple voice output (Enhanced/Premium voices)
 - Native speech recognition
+- **Updates:** Via the **App Store** (like other iOS apps); see also section 3.5 for web/PWA refresh.
 
 ### 3.2 PWA Installation on iOS (Alternative)
 
 If you prefer the web version:
-1. Open the app in **Safari** (important: must be Safari, Chrome won't work).
+1. Open [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Safari** (important: must be Safari, Chrome won't work).
 2. Tap the **Share icon** (the square with an arrow pointing up) in the bottom bar.
 3. Scroll down and tap **"Add to Home Screen"**.
 4. Give the app a name and tap **"Add"**.
 
 ### 3.3 Installation on Android
 
-1. Open the app in **Chrome** or another browser.
+1. Open [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Chrome** or another browser.
 2. Tap the **Menu icon** (three dots) in the top right.
 3. Select **"Add to Home Screen"** or **"Install App"**.
 4. Confirm with **"Add"** or **"Install"**.
@@ -1346,16 +1592,15 @@ If you prefer the web version:
 
 ### 3.4 Installation on Desktop (Windows/Mac/Linux)
 
-1. Open the app in **Chrome**, **Edge**, or another supported browser.
-2. Click the **Install icon** (⊕) in the address bar or the **Menu** (three dots).
+1. Open [${brand.appUrlProduction}](${brand.appUrlProduction}) in **Chrome**, **Edge**, or another supported browser.
+2. Click the **Install icon** ⊕ in the address bar or the **Menu** (three dots).
 3. Select **"Install"** or **"Install App"**.
 4. The app will be installed like a desktop application and can be opened from your Start menu/Dock.
 
-**Benefits of Installation:**
-- Faster access via your app icon
-- Full-screen view without browser chrome
-- Push notifications (if enabled)
-- Works partially offline
+**Benefits of installation (PWA / home screen):**
+- Faster launch via your app icon
+- Full-screen view without the browser toolbar
+- **Coaching sessions stay online** — AI replies and cloud features require an internet connection
 
 ### 3.5 Refresh App (Web & PWA)
 
@@ -1378,7 +1623,7 @@ After major updates, a cached version can briefly block the app (e.g. a **blank 
 
 This feature is exclusively available to registered users and enables a personalized coaching experience.
 
-### 4.1 Overview
+### ${profileSub.overview} Overview
 
 The Personality Profile is an encrypted document that captures your personality traits. It is used to:
 - Unlock **coaching modes** for personalized coaching with all coaches
@@ -1387,41 +1632,115 @@ The Personality Profile is an encrypted document that captures your personality 
 
 **Access:** Open the menu (☰) and select **"Personality Profile"**.
 
-### 4.2 The Personality Tests
+### ${profileSub.tests} The Personality Tests
 
-You can choose from three methods proven in coaching. Each illuminates a different aspect of your personality:
+You can choose from three methods proven in coaching. Each illuminates a different aspect of your personality. You can take additional tests at any time after the first one.
 
-**Spiral Dynamics -- "What Drives You" (Recommended)**
-Spiral Dynamics captures your value systems and inner driving forces across eight levels:
-- Two perspectives: **Self-oriented** (Autonomy & Self-actualization) and **Community-oriented** (Belonging & Connection)
-- 8 levels: Survival, Belonging, Power, Order, Achievement, Community, Integration, Holism
-- Result: Bar chart showing your scores (1-5) per level
-- Quick to complete (approx. 5 minutes)
-- Ideal as a first test for a broad understanding of your motivations
+---
+
+**OCEAN (Big Five) -- "Who You Are"**
+<span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Available for all registered users*</span>
+
+The OCEAN test is based on the **Big Five Inventory-2 (BFI-2)** — the most extensively researched personality model worldwide. It measures five core dimensions:
+
+- **Extraversion** — How much energy you draw from social interaction
+- **Agreeableness** — How cooperative and empathetic you are toward others
+- **Conscientiousness** — How structured and goal-oriented you work
+- **Negative Emotionality** — How you handle stress and emotional strain
+- **Openness** — How curious and creative you are
+
+You can choose between two variants:
+- **Quick test (BFI-2-XS):** 15 questions, ~2 minutes — covers the five main dimensions
+- **Extended test (BFI-2-S):** 30 questions, ~5 minutes — additionally covers 15 facets (e.g. sociability, assertiveness, trust, orderliness, creativity)
+
+📊 Result: Horizontal bars show your scores per dimension; with the extended test, also per facet.
+⏱ Duration: 2–5 minutes (depending on variant)
+💡 Ideal as a first step — a quick, evidence-based overview of your personality structure.
+
+*Based on: Soto, C. J., & John, O. P. (2017). Short and extra-short forms of the Big Five Inventory-2. Journal of Research in Personality, 68, 69-81.*
+
+<details>
+<summary>ℹ️ About the OCEAN Model</summary>
+<div style="padding: 12px 16px;">
+
+The **Big Five model** (also known as OCEAN) is the most scientifically validated personality model in modern psychology. It emerged from decades of empirical research known as the **lexical approach**.
+
+**Core idea:** If a personality trait truly matters to people, a word for it exists in everyday language. Researchers systematically analyzed thousands of trait-describing adjectives across languages and consistently found the same five overarching factors — regardless of culture, language, or era.
+
+**Key milestones:**
+- **1930s–1960s:** Gordon Allport, Raymond Cattell, and others collected and categorized personality-describing adjectives
+- **1961:** Ernest Tupes and Raymond Christal first identified five recurring factors through factor analysis
+- **1980s–1990s:** Lewis Goldberg coined "Big Five"; Paul Costa and Robert McCrae developed the NEO-PI-R
+- **2017:** Christopher Soto and Oliver John published the **BFI-2** — the version we use in this app
+
+**What the model can and cannot do:** The Big Five describe *tendencies*, not fixed types. The dimensions are relatively stable over time but can shift through formative life experiences.
+
+**Sources:**
+- Soto, C.J. & John, O.P. (2017). *Short and extra-short forms of the Big Five Inventory–2.* Journal of Research in Personality, 68, 69-81.
+- Goldberg, L.R. (1993). *The structure of phenotypic personality traits.* American Psychologist, 48(1), 26-34.
+
+</div>
+</details>
+
+---
+
+**Riemann-Thomann -- "How You Interact with Others"**
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Available from Premium*</span>
+
+The Riemann-Thomann model captures four basic drives that shape your behavior in relationships and teams:
+
+- **Proximity** — Need for connection, harmony, and belonging
+- **Distance** — Need for independence, objectivity, and personal space
+- **Permanence** — Need for stability, order, and reliability
+- **Change** — Need for novelty, flexibility, and new impulses
+
+The test distinguishes **work**, **private**, and **self-image** contexts and shows your **stress reaction pattern**.
+
+📊 Result: Riemann cross (quadrant diagram) with three colored points for the three contexts, plus your personal stress ranking.
+⏱ Duration: ~10 minutes
+💡 Especially valuable for understanding relationship dynamics at work or in private life.
+
+**Coaching Note:** When DPC or DPFL is activated, the coach uses your **self-image profile** as the basis for conversation adaptation. Reason: In coaching, you show up as "yourself" — not in a professional role or intimate relationship. Your self-image therefore provides the most authentic foundation for personalized coaching. DPFL refinement only adjusts the **self-image** context; Work and Private remain unchanged.
+
+<details>
+<summary>ℹ️ About the Riemann-Thomann Model</summary>
+<div style="padding: 12px 16px;">
+
+The **Riemann-Thomann model** combines depth-psychological insights with systemic counseling practice. It was developed by Swiss psychologist **Christoph Thomann**, building on psychoanalyst **Fritz Riemann**.
+
+**Origin:** Fritz Riemann described four existential core anxieties in *Grundformen der Angst* (1961). Christoph Thomann transformed these into a practical counseling model with two bipolar axes: **Proximity ↔ Distance** and **Permanence ↔ Change**.
+
+Everyone carries elements of all four drives — the individual mix creates the personal profile.
+
+**Stress behavior:** Under pressure, dominant drives tend to intensify. Recognizing these patterns is an important step toward self-regulation.
+
+**Sources:**
+- Riemann, F. (1961). *Grundformen der Angst.* Ernst Reinhardt Verlag.
+- Thomann, C. & Schulz von Thun, F. (1988). *Klärungshilfe 1.* Rowohlt.
+
+</div>
+</details>
+
+---
+
+**Spiral Dynamics -- "What Drives You"**
+<span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Available from Premium*</span>
+
+Spiral Dynamics maps your value systems and inner driving forces across eight levels — showing not only *what* matters to you, but *why* and how your values may evolve over time.
+
+Two perspectives: **Self-oriented** (autonomy, achievement) and **Community-oriented** (belonging, connection).
+
+Levels in overview: Survival, Belonging, Power, Order, Achievement, Community, Integration, Holism.
+
+📊 Result: Bar chart with your scores (1–5) per level.
+⏱ Duration: ~5 minutes
+💡 Ideal for making deeper motivations and value conflicts behind your decisions visible.
 
 <details>
 <summary>ℹ️ About the Spiral Dynamics Model</summary>
 <div style="padding: 12px 16px;">
 
-**Spiral Dynamics** is a model of human development that describes how value systems and worldviews unfold over the course of a lifetime -- and over the course of human history. It originated with American developmental psychologist **Clare W. Graves** and was popularized by **Don Edward Beck** and **Christopher Cowan** under the name "Spiral Dynamics."
-
-**Core idea:** People don't develop their value systems randomly. They emerge as responses to the life conditions they face. When conditions change, value systems can evolve -- in a predictable sequence that resembles a spiral: each new level integrates the previous ones and adds new capabilities.
-
-**Two Tiers:**
-- **1st Tier** (Beige through Green): Each level considers its own worldview to be the only correct one. An achievement-oriented person (Orange) may not understand why someone values tradition and order (Blue) so highly -- and vice versa.
-- **2nd Tier** (Yellow, Turquoise): These levels recognize the value of *all* previous levels. They understand that different situations require different value systems and can flexibly switch between perspectives.
-
-**The eight levels:**
-| Color | Core Theme | Self/Community |
-|---|---|---|
-| **Beige** | Survival, basic physiological needs | Self |
-| **Purple** | Belonging, rituals, tribal community | Community |
-| **Red** | Power, assertion, self-expression | Self |
-| **Blue** | Order, duty, morality, tradition | Community |
-| **Orange** | Achievement, success, rationality, innovation | Self |
-| **Green** | Community, equality, empathy, consensus | Community |
-| **Yellow** | Integration, systems thinking, flexibility | Self |
-| **Turquoise** | Holism, global consciousness | Community |
+**Spiral Dynamics** describes how value systems unfold over a lifetime. It originated with **Clare W. Graves** and was popularized by **Don Edward Beck** and **Christopher Cowan**.
 
 **Important note on measurement:** In this app, we use the **PVQ-21 (Portrait Values Questionnaire)** by Shalom Schwartz, whose results are mapped to Spiral Dynamics color levels.
 
@@ -1431,83 +1750,14 @@ ${guideWarningBox('<p class="m-0">The PVQ-21 measures value priorities — <stro
 - Graves, C.W. (1970). *Levels of Existence: An Open System Theory of Values.* Journal of Humanistic Psychology.
 - Beck, D.E. & Cowan, C.C. (1996). *Spiral Dynamics: Mastering Values, Leadership, and Change.* Blackwell Publishing.
 - Schwartz, S.H. (2003). *A Proposal for Measuring Value Orientations across Nations.* ESS Questionnaire Development Report.
-
-</div>
-</details>
-
-**OCEAN Test (Big Five):**
-OCEAN is an acronym for the five scientifically validated personality dimensions:
-- **O**penness - Curiosity and creativity
-- **C**onscientiousness - Organization and goal-orientation
-- **E**xtraversion - Sociability and energy
-- **A**greeableness - Cooperation and empathy
-- **N**euroticism / Emotional Stability - Stress resilience
-
-The OCEAN model is the most extensively researched personality model worldwide.
-- Quicker to complete (approx. 5 minutes)
-- Ideal for an initial overview of your personality structure
-
-<details>
-<summary>ℹ️ About the OCEAN Model</summary>
-<div style="padding: 12px 16px;">
-
-The **Big Five model** (also known as OCEAN) is the most scientifically validated personality model in modern psychology. It didn't emerge from a single theory but from decades of empirical research known as the **lexical approach**.
-
-**Core idea:** If a personality trait truly matters to people, a word for it exists in everyday language. Researchers systematically analyzed thousands of trait-describing adjectives across languages and consistently found the same five overarching factors -- regardless of culture, language, or era.
-
-**Key milestones:**
-- **1930s-1960s:** Gordon Allport, Raymond Cattell, and others collected and categorized personality-describing adjectives
-- **1961:** Ernest Tupes and Raymond Christal first identified five recurring factors through factor analysis
-- **1980s-1990s:** Lewis Goldberg coined "Big Five"; Paul Costa and Robert McCrae developed the NEO-PI-R, the first standardized Big Five questionnaire
-- **2017:** Christopher Soto and Oliver John published the **BFI-2** -- the most modern version, which we use in this app
-
-**Why exactly five factors?** Statistical analysis of large datasets consistently yields a five-factor solution. Fewer factors lose important nuances; more factors become unstable and culture-dependent. Five is the robust "sweet spot" of personality description.
-
-**What the model can do -- and what it can't:** The Big Five describe *tendencies*, not fixed types. Everyone has scores on all five dimensions. The model doesn't say *why* you are the way you are (genes, upbringing, and experience all play a role), but rather maps *how* you typically think, feel, and act. The dimensions are relatively stable over time but can shift through formative life experiences.
-
-**Sources:**
-- Soto, C.J. & John, O.P. (2017). *Short and extra-short forms of the Big Five Inventory–2.* Journal of Research in Personality, 68, 69-81.
-- Goldberg, L.R. (1993). *The structure of phenotypic personality traits.* American Psychologist, 48(1), 26-34.
-
-</div>
-</details>
-
-**Riemann-Thomann Test:**
-- Captures your basic drives: Proximity, Distance, Permanence, and Change
-- Distinguishes between professional, private context, and self-image
-- Shows your stress reaction pattern
-- More comprehensive and detailed (approx. 10 minutes)
-
-**Coaching Note:** When DPC or DPFL is activated, the coach uses your **self-image profile** as the basis for conversation adaptation. Reason: In coaching, you show up as "yourself" — not in a professional role or intimate relationship. Your self-image therefore provides the most authentic foundation for personalized coaching. DPFL refinement only adjusts the **self-image** context; Work and Private remain unchanged.
-
-<details>
-<summary>ℹ️ About the Riemann-Thomann Model</summary>
-<div style="padding: 12px 16px;">
-
-The **Riemann-Thomann model** combines depth-psychological insights with systemic counseling practice. It was developed by Swiss psychologist and communication consultant **Christoph Thomann**, building on the work of psychoanalyst **Fritz Riemann**.
-
-**Origin:** In his influential work *Grundformen der Angst* (Basic Forms of Anxiety, 1961), Fritz Riemann described four existential core anxieties that shape human experience: the fear of intimacy (loss of self), of individuation (isolation), of change (uncertainty), and of permanence (rigidity). Christoph Thomann transformed these depth-psychological polarities into a practical counseling model with two bipolar axes.
-
-**The Riemann Cross:** The four basic drives are arranged as two axes:
-- **Proximity ↔ Distance:** The tension between the desire for closeness and the need for independence
-- **Permanence ↔ Change:** The tension between the desire for stability and the need for novelty
-
-Everyone carries elements of all four drives -- the individual mix creates the personal profile. There is no "better" or "worse"; each position has its strengths and challenges.
-
-**What makes this model special:** Unlike many personality models, Riemann-Thomann explicitly accounts for the fact that people behave **differently depending on context**. At work, we often show different drives than in private life or in our self-perception. This differentiation makes the model particularly valuable for understanding relationship dynamics.
-
-**Stress behavior:** Under pressure, dominant drives tend to intensify -- a strongly proximity-oriented person may become even more clingy under stress, while a distance-oriented person may withdraw further. Recognizing these patterns is an important step toward self-regulation.
-
-**Sources:**
-- Riemann, F. (1961). *Grundformen der Angst.* Ernst Reinhardt Verlag.
-- Thomann, C. & Schulz von Thun, F. (1988). *Klärungshilfe 1.* Rowohlt.
+- [spiraldynamics-integral.de](https://spiraldynamics-integral.de/) — German-language SDi platform (CHE D·A·CH)
 
 </div>
 </details>
 
 **Note:** After completing your first test, you can take additional tests at any time to enrich your profile with additional perspectives.
 
-### 4.3 The Personality Signature
+### ${profileSub.signature} The Personality Signature
 
 After the test, you can answer two **"Golden Questions"**:
 - **Flow Experience:** A situation where you felt completely in your element
@@ -1523,13 +1773,12 @@ Based on your test results and these stories, our AI generates a unique **Person
 
 **PDF Export:** Use the **"Download as PDF"** button to export your complete personality profile -- including test results, signature, and facets -- as a PDF file.
 
-### 4.4 Coaching Modes
+### ${profileSub.coachingModes} Coaching Modes
 
 Having a personality profile alone does not change coaching. Only when you activate a **coaching mode** does your profile feed into sessions. You can switch modes at any time in your personality profile.
 
 **Off (Default):**
-- Classic coaching without personalization
-- Your profile is not used -- even if one exists
+- Classic coaching, independent of your profile -- even if one exists
 
 **DPC (Dynamic Personality Coaching):**
 <span style="white-space: nowrap">${isRegistered ? '✅' : '🔒'} *Available for all registered users*</span>
@@ -1542,11 +1791,12 @@ Having a personality profile alone does not change coaching. Only when you activ
 <span style="white-space: nowrap">${isPremium ? '✅' : '🔒'} *Available from Premium*</span>
 - Everything DPC offers, plus: your profile becomes **adaptive** and can be refined from the **second session** onwards
 - The coach suggests profile adjustments after the conversation -- a form of "external perspective" feedback that complements your "self-image"
-- After each session, a **Comfort Check** takes place: you rate how authentic you were. Profile adjustments are only suggested after at least two authentic sessions.
+- After each session, a **Comfort Check** takes place: you rate how authentically you behaved during the session. Profile adjustments are only suggested after at least two authentic sessions.
 - If you switch back to DPC or Off, collected refinements are preserved
 - Ideal for: Self-discovery & continuous growth
+- **Exception:** **Nobody** and **Sam** (Management & Communication) still use **DPC only** when your account is on DPFL — no Comfort Check or profile refinement after their sessions.
 
-${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personality test will overwrite all previous DPFL refinements. Creating or updating your <strong>Personality Signature</strong> (see 4.3) does not affect your refinements — on the contrary, regenerating the signature after a few DPFL sessions is especially useful.</p>')}
+${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personality test will overwrite all previous DPFL refinements. Creating or updating your <strong>Personality Signature</strong> (see section ' + profileSub.signature + ') does not affect your refinements — on the contrary, regenerating the signature after a few DPFL sessions is especially useful.</p>')}
 
 **Display:** The active coaching mode is shown in the **Coach Info Modal** (click on the coach's name in the chat).
 
@@ -1555,19 +1805,20 @@ ${guideWarningBox('<p class="m-0"><strong>Note:</strong> Starting a new personal
 
 ---
 
-` : ''}<details>
+` : ''}<details id="${USER_GUIDE_ANCHORS.coachingSession}">
 <summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">💬 ${enChapterLabel(coachingChapterNum(isNative, isRegistered))}: The Coaching Session</summary>
 <div style="padding: 16px;">
 
-### 5.1 Choosing Your Coach
-On the **Select a Coach** screen, you'll see a list of available coaches. Each coach has a unique approach suited for different situations. **Click on a coach card** to start your session immediately.
+### ${coachingSub.coachSelect} Choosing Your Coach
+
+Here you find the coach who fits what you have in mind today. The coach selection follows your answer to the opening question (see section 1.1): if you chose **Communication**, Management & Communication is already open. With **Coaching**, registered users use the **topic search** to find the right coach, and guests start in the **Coaching section**. If you chose **Practice as a coach**, you go straight to the practice setup when you have access.
+
+**Your Interviewer:**
+- **Gloria** -- Professional interviewer for structured conversations about ideas, projects, and workflows (Registered)
 
 **Your Guide:**
 - **Nobody** -- Your pragmatic sparring partner for management and communication topics
 - **Sam** -- Brief forward-focused coaching for work and everyday challenges (Registered)
-
-**Your Interviewer:**
-- **Gloria** -- Professional interviewer for structured conversations about ideas, projects, and workflows (Registered)
 
 **Your Coaches:**
 - **Gabrielle** -- Four-stage coaching from clarity to committed action (Registered)
@@ -1576,8 +1827,12 @@ On the **Select a Coach** screen, you'll see a list of available coaches. Each c
 - **Kenji** -- Stoic philosopher for resilience and inner strength (Premium)
 - **Chloe** -- Structured reflection for recognizing thought patterns (Premium)
 - **Mike** -- Ambivalence coaching for mixed feelings about change (Premium)
-- **Rob** -- Mental fitness and mindfulness against self-sabotage (Client)
+
+**Exclusive for clients** (${providerContact}):
+- **Rob** -- Mental fitness and mindfulness against self-sabotage (Client) 🔔
 - **Victor** -- Systemic coach for relationship patterns and response differentiation (Client)
+- **Bekky** -- Thought audit: structured review of stressful beliefs and perspective shifts (Client)
+- **Dan** -- Explore inner beliefs in your own language — without imported metaphors (Client)
 
 Some coaches are marked with a lock icon and require a premium or client subscription. Coaches with a 🔔 icon offer **guided meditation exercises** during the session.
 
@@ -1605,7 +1860,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 <summary>Sam -- Forward-Focused, Efficient, Future-Oriented (Registered)</summary>
 <div style="padding: 12px 16px;">
 
-**Core Idea:** Sam uses brief forward-focused coaching — preferred future, exceptions, and scaling — for work and everyday challenges when problem-talk is stuck.
+**Core Idea:** Sam uses brief forward-focused coaching — preferred future, exceptions, and scaling — for work and everyday challenges when the problem talk is stuck.
 
 **Ideal for:**
 - Work and everyday topics with a focus on the preferred future
@@ -1714,7 +1969,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Building inner calm and equanimity
 - Philosophical reflection on life questions
 
-**Special Feature:** Kenji offers **guided meditation exercises** (🔔). Simply ask him for a meditation -- he will guide you through a Stoic-inspired practice.
+**🔔 Meditation:** Stoic-inspired practices — just ask.
 
 **Example Situations:** "I worry about things I can't control." / "I need inner calm during a stressful period." / "I'd like to do a meditation."
 
@@ -1734,7 +1989,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Structured self-reflection with a clear framework
 - Tackling emotional challenges systematically
 
-**Special Feature:** Chloe offers **guided meditation exercises** (🔔), specifically designed for mindful self-reflection.
+**🔔 Meditation:** Focused on mindful self-reflection.
 
 **Example Situations:** "I always assume the worst and want to change that." / "I want to understand why I always react the same way in certain situations." / "I need a structured approach for my challenge."
 
@@ -1771,7 +2026,7 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Integrating mindfulness into daily life
 - Deep reflection on inner blockages
 
-**Special Feature:** Rob offers **guided meditation exercises** (🔔), focused on mental fitness and mindfulness.
+**🔔 Meditation:** Focused on mental fitness and mindfulness.
 
 **Example Situations:** "I sabotage myself and don't know why." / "I want to become mentally stronger." / "I'd like to do a mindfulness exercise."
 
@@ -1790,94 +2045,129 @@ Some coaches are marked with a lock icon and require a premium or client subscri
 - Reducing emotional reactivity in relationships
 - Recognizing your patterns in recurring conflicts
 - Differentiation of self -- developing a clear "I" within relationships
+- **Closeness, desire, and intimacy in partnership** (one partner reflecting — not couple or sex therapy in chat)
 
-**Example Situations:** "I always end up in the same conflicts at family gatherings." / "I want to understand why certain relationships trigger me so much." / "I want to learn to stay calmer in conflicts."
+**Example Situations:** "I always end up in the same conflicts at family gatherings." / "We function as a team but I miss connection — I'm afraid to bring it up." / "I want to learn to stay calmer in conflicts."
 
 **Access:** Client users
 </div>
 </details>
 
-${enTranscriptToolsSection(isNative, isRegistered, showChapter8)}
-${enPracticeTabSection(isNative, isRegistered, showChapter10)}
-### 5.4 Coach Recommendation (AI-Powered Search)
+<details>
+<summary>Bekky -- Analytical, Systematic, Neutral (Client)</summary>
+<div style="padding: 12px 16px;">
 
-Above the coach list, you'll find a search field that lets the AI recommend a suitable coach for you.
+**Core Idea:** Bekky deconstructs stressful beliefs through a structured **thought audit** — four review steps and perspective shifts for greater clarity and agency at work and in life.
 
-- **Describe your situation:** Type into the text field what you're looking for -- e.g. "I'm facing a difficult career decision" or "I want to work on my communication skills".
-- **Voice input:** You can also dictate your description using the **microphone icon** (speech-to-text).
-- **Get a recommendation:** Click the **send icon** (or press Cmd/Ctrl + Enter). The AI will analyze your description and recommend two coaches:
-  - **Primary recommendation:** The coach that best fits your situation -- with reasoning and a suggested conversation opener.
-  - **Alternative recommendation:** A second coach offering a complementary perspective.
-- **Start a session:** Click on a recommendation card to begin the session directly with the suggested conversation opener. The coach will skip the usual introductory questions and address your topic right away.
+**Ideal for:**
+- Concrete, stressful thoughts about a situation (not global self-labels)
+- Structured review of beliefs and alternative perspectives
+- When you prefer an analytical, step-by-step approach
 
-**Note:** This feature is only available to registered users. Recommendations are based solely on your description and the available coach profiles.
+**Special:** Direct entry into the audit. When appropriate, Bekky can refer you to Rob, Victor, or Dan.
 
-### 5.5 The Chat Interface
-- **Header:** At the top, you'll see the coach's name and avatar. **Clicking this area** opens a modal with detailed information about the coach's style and methodology. If you have a coaching mode (DPC/DPFL) activated, it will also be displayed here. On the right is the red **End Session** button.
-- **Text Mode (Default):**
-  - Type your message in the text area at the bottom.
-  - **Click the paper plane icon** to send your message.
-  - **Click the microphone icon** to use your ${isNative ? "device's" : "browser's"} speech-to-text feature and dictate your message.
-- **Voice Output (TTS) Controls:**
-  - **Click the Speaker icon** to toggle text-to-speech on or off.
-  - When enabled, you can control playback with the **Pause/Play** and **Repeat** icons.
-  - **Click the Gear icon** to open the **Voice Settings** modal. You have the following options:
-    - **Coach Signature Voice:** The best available voice for the coach's language and personality -- automatically selected.
-    - **Device Voices:** Voices generated directly on your device. **Advantage:** Instant response times and work offline.
-${isNative ? `  - **Note:** The iOS app exclusively uses high-quality Apple device voices (Enhanced/Premium). These offer excellent quality with instant response times.` : `    - **Server Voices:** *(Web browser only)* Professional voices generated on our server.
-  - **Note for iOS App:** The iOS app exclusively uses high-quality Apple device voices (Enhanced/Premium). These offer excellent quality with instant response times -- server voices are not available or needed here.`}
-- **Voice Mode:**
-  - **Click the Sound Wave icon** to switch to the pure voice mode, which is optimized for a more natural conversational experience.
-  - **Tap the large microphone icon** to start recording. Speak your message.
-  - **Tap the icon again (now a paper plane)** to stop recording and send your message. The coach's reply will play automatically.
-- **Text formatting:** Your Life Context file supports **Markdown formatting** (e.g. \*\*bold\*\*, \*italic\*, bullet lists, headings). See Menu (☰) → **"Formatting"** for details.
+**Example Situations:** "I'm convinced I'll fail in this situation." / "I want to systematically examine a stressful thought." / "I need clarity before I act."
+
+**Access:** Client users
+</div>
+</details>
+
+<details>
+<summary>Dan -- Client Exact Language, Non-Directive, Exploratory (Client)</summary>
+<div style="padding: 12px 16px;">
+
+**Core Idea:** Dan helps you explore and transform inner beliefs through **your own language and imagery** — Dan stays entirely with your words.
+
+**Ideal for:**
+- Exploring inner beliefs in your exact wording
+- When you prefer a non-directive, exploratory style
+- Deep reflection without imposed interpretations
+
+**Special:** Dan works strictly with your formulations. For matching other-directed beliefs, he may refer you to Bekky.
+
+**Example Situations:** "I want to understand what's behind my inner belief — in my own words." / "I need someone who won't give me ready-made images." / "I want to explore a belief without being interpreted."
+
+**Access:** Client users
+</div>
+</details>
+
+${enTranscriptToolsSection(isNative, coachingSub.transcriptTools)}
+${enPracticeTabSection(isNative, coachingSub.practiceTab)}
+### ${coachingSub.coachRecommendation} Coach Recommendation (AI-Powered Search)
+
+Not sure which coach fits today? Describe in a sentence or two what is on your mind — the AI suggests a suitable coach and explains why.
+
+You will find the search field above the coach list:
+
+- **Your topic in your own words:** e.g. "I'm facing a difficult career decision" or "I want to work on my communication skills". You can also dictate your description with the **microphone icon**.
+- **Two recommendations:** After you send it (send icon or Cmd/Ctrl + Enter), you get a **primary suggestion** with reasoning and a conversation opener, plus an **alternative** with a complementary perspective.
+- **Start right away:** One click on a recommendation card begins the session with the suggested opener, and your coach goes straight to your topic.
+
+The search is available to registered users. Recommendations are based on your description and the coach profiles.
+
+<h3 id="${USER_GUIDE_ANCHORS.chatInterface}">${coachingSub.chatInterface} The Chat Interface</h3>
+
+The chat is your conversation space: you write, speak, or have replies read aloud.
+
+- **Header:** Shows your coach's name and avatar. Tap it to learn more about their style and methodology; the active coaching mode (DPC/DPFL) appears here too. On the right, **End Session** closes the conversation.
+- **Writing and dictating:** Type your message at the bottom and send it with the **paper plane icon**. The **microphone icon** lets you dictate instead (speech-to-text on your ${isNative ? 'device' : 'device or browser'}).
+- **Listening (TTS):** The **speaker icon** has your coach read replies aloud. Pause/Play and Repeat are right in the chat; the **gear icon** opens **Voice Settings**:
+  - **Coach signature voice:** The app automatically picks the voice that best matches your coach's language and personality.
+  - **Device voices:** Voices on your device that respond instantly and work offline.
+${isNative ? `  - **iOS app:** The app uses high-quality Apple device voices (Enhanced/Premium) — excellent quality with instant response.` : `  - **Server voices:** Professional voices from our server (web browser).
+  - **iOS app:** The iOS app uses Apple device voices (Enhanced/Premium).
+  - **Browsers (web):** Voice output has been tested with Google Chrome and Apple Safari and works best there.
+  - **Guests (web):** Guests hear device or browser voices (see also §1.2).`}
+- **Voice mode:** The **sound wave icon** switches to a pure voice conversation. Tap the large microphone and speak; another tap (the icon becomes a paper plane) sends your message. Your coach's reply plays automatically.
+- **Formatting:** Your Life Context supports **Markdown** (e.g. \*\*bold\*\*, \*italic\*, lists, headings). You will find details in the menu (☰) under **"Formatting"**.
 
 </div>
 </details>
 
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${enChapterLabel(coachingChapterNum(isNative, isRegistered) + 1)}: After the Session - The Review Process</summary>
+${enConnectorChapter(isNative, isRegistered)}
+
+---
+
+<details id="${USER_GUIDE_ANCHORS.sessionReview}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🔍 ${enChapterLabel(sessionReviewChapterNum(isNative, isRegistered))}: After the Session — The Review Process</summary>
 <div style="padding: 16px;">
 
-### 6.1 The Analysis
-**When you click "End Session,"** an AI analyzes your conversation. You will see a loading screen titled **Analyzing Session...**. This process usually takes about 15-30 seconds.
+### ${sessionReviewSub.analysis} The Analysis
+**End Session** closes the conversation, and the AI analyzes it for you. This usually takes 15–30 seconds (**Analyzing Session...**).
 
-### 6.2 The Session Review Screen
-This is the most important screen for capturing your insights.
+### ${sessionReviewSub.reviewScreen} The Session Review Screen
+Here you capture what the conversation gave you: your insights, your next steps, and how your Life Context grows (titled **Session Review** / **Diskursanalyse** in the app).
 
-- **New Findings:** An AI-generated summary of your key takeaways from the session.
-- **Rate Your Session:** Use the stars to provide feedback. This helps us improve coach quality.
-- **Accomplished Goals:** ⭐ The AI automatically detects when you've achieved a goal from your Life Context. Accomplished goals are marked with ✅ and automatically removed from your Life Context when you accept the updates. This keeps your goal list current and focused.
-- **Completed Steps:** Next steps from previous sessions that you've completed are also detected and automatically removed from the list when you accept the updates.
-- **Actionable Next Steps:** A list of concrete tasks you committed to during the conversation.
-  - **Calendar Integration:** **Click the calendar icon** next to any individual step to export it as a .ics file and import it into your calendar app (Google Calendar, Outlook, Apple Calendar, etc.).
-  - **Export All:** **Click "Export All to Calendar"** to export all next steps at once.
-  - Calendar events are created by default at 9:00 AM on the deadline date and include a reminder 24 hours before.
-- **Proposed Context Updates:** The AI suggests changes to your Life Context file based on the conversation.
-  - **Toggle:** Use the checkboxes to select which changes you want to apply.
-  - **Change Action Type:** You can change whether a suggestion should **Append** to a section or **Replace** the entire section.
-  - **Change Target:** You can change the target headline for any suggestion, including creating new sections.
-- **Difference View:** This box shows you the exact changes (red for removed, green for added) that will be applied to your file.
-- **Final Context:** **Click "Show / Edit"** to see the full text of your new Life Context file and make any manual edits.
-- **Download Transcript & Summary:**
-  - **Download Transcript:** Saves the full chat history with timestamps as a \`.txt\` file.
-  - **Download Summary:** Saves the AI-generated summary and analysis as a text file.
-- **Saving & Continuing:**
+${guideInfoBox('<p class="m-0"><strong>Gloria Life Context interview:</strong> After the Gloria interview from the start screen, the review shows the generated Life Context file. Coaching analysis, goals, and DPFL steps belong to coaching sessions.</p>')}
 
-${guideWarningBox('<p class="m-0"><strong>Guest mode:</strong> Under "Download Context (Backup)", <strong>always</strong> save your updated .md file — otherwise progress is lost when you close the browser. Registered users can use this as an optional backup.</p>')}
+**What you will find here:**
 
-  - **Download Context (Backup):** Click here to save your updated \`.md\` file.
-  - **Continue with [Coach]:** Saves the changes and starts a new session with the same coach.
-  - **Switch Coach:** Saves the changes and takes you back to the coach selection screen.
-  - **(Registered Users Only) "Don't save text changes...":** If you check this box, your gamification progress will be saved, but the text changes to your Life Context will be discarded.
+- **New Findings:** The AI summarizes your key takeaways from the session.
+- **Your rating:** Use the stars to give feedback and help improve coach quality.
+- **Accomplished Goals:** ⭐ The AI recognizes when you have achieved a goal from your Life Context and marks it with ✅. When you accept the updates, the goal is removed from your Life Context — so your goal list stays current and focused.
+- **Completed Steps:** Next steps from earlier sessions that you have completed are recognized too and taken off the list when you accept the updates.
+- **Next Steps:** Concrete tasks you committed to during the conversation. The **calendar icon** adds a step as an .ics file to Google Calendar, Outlook, Apple Calendar, or another calendar app; **"Export All to Calendar"** does this for all steps at once. Events are created by default at 9:00 AM on the deadline date, with a reminder 24 hours before.
+- **Proposed Context Updates:** The AI suggests how your Life Context can reflect the conversation — and you decide. Use the checkboxes to choose the changes you want to apply. You set whether a suggestion **appends** to a section or **replaces** it, and you can adjust the target headline or create a new section.
+- **Difference View:** Shows exactly what changes in your file (red = removed, green = added).
+- **Final Context:** **"Show / Edit"** lets you read the full text of your new Life Context and adjust it as you like.
+- **Transcript & Summary:** **Download Transcript** saves the chat history with timestamps as a .txt file; **Download Summary** saves the AI summary and analysis.
 
-${isPremium ? `### 6.3 Authenticity Check & Profile Refinement (DPFL Mode)
+**And then?** Save and continue the way that suits you:
+
+${guideWarningBox(`<p class="m-0"><strong>Guests:</strong> See section <strong>1.2</strong> (${isNative ? 'app session' : 'tab session'}). Under "Download Context (Backup)", <strong>always</strong> save your .md file here so your progress is kept. Registered users may use this as an optional backup.</p>`)}
+
+- **Download Context (Backup):** Saves your updated .md file.
+- **Continue with [Coach]:** Saves the changes and starts a new session with the same coach.
+- **Switch Coach:** Saves the changes and takes you back to coach selection.
+- **Save progress only (registered users):** With the checkbox "Don't save text changes...", you keep your gamification progress and your Life Context stays unchanged.
+
+${isPremium ? `### ${sessionReviewSub.dpfl} Authenticity Check & Profile Refinement (DPFL Mode)
 
 If you have the **DPFL coaching mode** activated (see ${enChapterLabel(profileChapterNum(isNative))}), two additional steps appear after the session:
 
-- **Authenticity Check (Comfort Check):** You'll be asked how authentic you felt during the session (scale 1-5). Only sessions rated 3 or higher are used for profile refinement. This ensures your profile is only adjusted based on authentic interactions.
+- **Authenticity Check (Comfort Check):** You'll be asked how authentically you behaved during the session (scale 1-5). Only sessions rated 3 or higher are used for profile refinement. This ensures your profile is only adjusted based on authentic interactions.
 - **Profile Refinement:** Starting from the **second authentic session**, you'll see a suggestion to adjust your personality profile. You'll see:
   - An analysis of the keywords that led to the suggestions
   - Current vs. suggested values for your personality dimensions
@@ -1889,19 +2179,14 @@ If you have the **DPFL coaching mode** activated (see ${enChapterLabel(profileCh
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${enChapterLabel(coachingChapterNum(isNative, isRegistered) + 2)}: Understanding Your Progress (Gamification)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🏆 ${enChapterLabel(gamificationChapterNum(isNative, isRegistered))}: Understanding Your Progress (Gamification)</summary>
 <div style="padding: 16px;">
 
-The app uses game-like elements to motivate you to engage in regular self-reflection.
+### ${gamSub.intro} Overview
 
-### 7.1 The Gamification Bar
-At the top of the screen, you will see:
-- **Level:** Your overall progress.
-- **Streak:** The number of consecutive days you've completed a session.
-- **XP Bar:** Shows your progress to the next level.
-- **Trophy Icon:** **Click this** to view your **Achievements** page.
+The app uses game-like elements to motivate you to engage in regular self-reflection. Tap the **trophy icon** in the bar to open **Achievements**.
 
-### 7.2 How to Earn XP
+### ${gamSub.earnXp} How to Earn XP
 
 | Action | XP Awarded |
 | :--- | :--- |
@@ -1910,29 +2195,32 @@ At the top of the screen, you will see:
 | Accomplishing a pre-existing goal | 25 XP |
 | Formally concluding the session | 50 XP |
 
-### 7.3 Where is Progress Saved?
+**Qualification:** XP is awarded only from **5 messages** onward in a session. When **continuing** with the same coach, only **new** messages since the last review count (every message counts exactly once). Streaks require qualified sessions too.
+
+### ${gamSub.storage} Where is Progress Saved?
 
 | User Type | Achievement Storage Location | Persistence |
 | :--- | :--- | :--- |
 | **Registered** | On the server, tied to your account. | **Yes**, across all sessions and devices. |
-| **Guest** | In the \`.md\` file in a hidden comment. | **No**, only if you reuse the same file. |
+| **Guest** | In the \`.md\` file in a hidden comment. | As long as you reuse the same file. |
 
-### 7.4 Appearance & Color Scheme
+### ${gamSub.appearance} Appearance & Color Scheme
 
-In the Gamification Bar, you'll find two icons to customize the appearance:
+In the Gamification Bar, you'll find appearance controls:
 
 - **Light/Dark Mode (Moon/Sun Icon):** Switches between light and dark appearance. By default, the app switches automatically based on the time of day: **Dark mode** from 6:00 PM to 6:00 AM, **Light mode** from 6:00 AM to 6:00 PM. Manually toggling disables the automatic switching.
-- **Seasonal Color Scheme (Palette Icon):** Cycles between three color schemes: Summer, Autumn, and Brand (W4F/manualmode.at depending on active brand). The app automatically selects the matching seasonal scheme (Brand in winter), but you can change it manually at any time.
+- **Seasonal Color Scheme (Palette Icon):** Cycles summer, autumn, and brand (manualmode.at or W4F depending on brand). **Brand** is chosen automatically in winter; single-theme brands hide the palette icon.
 
 </div>
 </details>
 `;
+};
 
-const en_chapter8 = (isNative: boolean) => `
+const en_chapter8 = (isNative: boolean, transcriptToolsSection: string | null) => `
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${enChapterLabel(coachingChapterNum(isNative, true) + 3)}: Transcript Evaluation (Premium Feature)</summary>
+<details id="${USER_GUIDE_ANCHORS.transcriptEval}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">📄 ${enChapterLabel(transcriptEvalChapterNum(isNative))}: Transcript Evaluation (Premium Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Transcript Evaluation?
@@ -1941,7 +2229,7 @@ Transcript Evaluation helps you reflect on real conversations—e.g., with clien
 
 ### Who Can Use It?
 
-This feature is available from the **Premium access tier** and above, and is located in the **Transcript Tools** card in the **Management & Communication** section.
+Access and location in the app: see ${handbookSectionRef('en', 'transcriptTools', transcriptToolsSection)}. Below we describe the evaluation workflow.
 
 ### How Does It Work?
 
@@ -1980,20 +2268,21 @@ Each recommendation includes:
 - **Conversation Starter:** A concrete example prompt to kick off your first session on this topic (click to copy to clipboard). **Advantage:** If you paste the copied starter manually into the chat, the coach can first address your open goals from previous sessions before diving into the new topic.
 - **Direct Start:** Alternatively, you can use the **Session button** to directly launch a coaching session with the suggested conversation starter. The coach skips its usual introductory questions and immediately addresses your topic—open goals are not discussed beforehand in this case.
 
-**Availability at a Glance:** The recommendation cards use color coding to show whether you have access to each coach:
+**Availability at a Glance:** The recommendation cards use color coding to show whether you can use each recommended coach right away:
 - 🟢 **Available** – You can use this coach right away
-- 🔒 **Premium Required** – This coach requires a Premium access tier
 - 🔒 **Client Required** – This coach requires a Client access tier
 
-The recommendations also appear in the **PDF export**, so you can document your development planning.
+The recommendations also appear in the **PDF export**, so you can plan your personal development.
 
 ### Personality Profiles & Personalization
 
-**If you have a Personality Profile** (see ${enChapterLabel(profileChapterNum(isNative))}), the AI will automatically use it during the evaluation. To enable this, activate the **"Include Personality Profile"** option in the reflection questionnaire before uploading. You will then receive **personality-based insights** tailored to your communication style and personality traits. The evaluation shows how your typical patterns appeared in this conversation—and where you can target improvements.
+**If you have a Personality Profile** (see ${enChapterLabel(profileChapterNum(isNative))}), the AI can include it in the evaluation. Before uploading, enable **"Include Personality Profile"** in the reflection questionnaire.
+
+You receive personality-based insights on your communication style — and see which patterns showed up in this conversation and where to focus next.
 
 ### Additional Features
 
-- **PDF Export** for Clients
+- **PDF Export** for Premium users (transcript evaluation)
 - **History view** to review and delete past evaluations
 
 ### Privacy
@@ -2032,11 +2321,11 @@ ${guideWarningBox('<p class="m-0"><strong>Important:</strong> You are responsibl
 </details>
 `;
 
-const en_chapter9 = (isNative: boolean) => `
+const en_chapter9 = (isNative: boolean, transcriptToolsSection: string | null) => `
 ---
 
 <details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${enChapterLabel(coachingChapterNum(isNative, true) + 4)}: Audio Transcription (Client Feature)</summary>
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎙️ ${enChapterLabel(audioTranscriptionChapterNum(isNative))}: Audio Transcription (Client Feature)</summary>
 <div style="padding: 16px;">
 
 ### What is Audio Transcription?
@@ -2045,7 +2334,7 @@ Audio Transcription allows you to **record live conversations directly in the ap
 
 ### Who Can Use It?
 
-This feature is available from the **Client access tier** and is located in the **Transcript Tools** card in the **Management & Communication** section (record/upload).
+Access and card location: see ${handbookSectionRef('en', 'transcriptTools', transcriptToolsSection)}. You also need **Client** tier — use **record/upload** in Transcript Tools.
 
 ### How Does It Work?
 
@@ -2053,7 +2342,7 @@ ${guideWarningBox(`<p class="m-0 mb-2"><strong>Consent:</strong> You must confir
 <p class="m-0"><strong>AI provider:</strong> Audio transcription always uses <strong>Google Gemini</strong> — even if you have set Mistral as your preferred AI provider. Smoothing and evaluation respect your AI provider setting.</p>`)}
 
 **Step 1: Consent**
-Before you begin, confirm participant consent in the app.
+Confirm participant consent in the app (see the notice above).
 
 **Step 2: Record or Upload**
 You have two options:
@@ -2069,11 +2358,7 @@ After recording or uploading, the audio file is automatically transcribed. Depen
 After transcription, you have the following options:
 - **Smooth Transcript:** The AI cleans up the transcript linguistically (removes filler words, corrects grammar, structures speaker turns).
 - **Download Transcript:** Save the raw or smoothed transcript as a text file.
-- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (${enChapterLabel(coachingChapterNum(isNative, true) + 3)}) for a structured analysis.
-
-### AI Provider Note
-
-**Audio transcription** always uses Google Gemini, as Mistral does not support audio input. The subsequent steps (**smoothing** and **evaluation**) use the AI provider configured in your settings (or the global setting if you haven't made a personal choice).
+- **Submit for Evaluation:** Pass the transcript directly into the Transcript Evaluation (${enChapterLabel(transcriptEvalChapterNum(isNative))}) for a structured analysis.
 
 ### Privacy
 
@@ -2092,32 +2377,89 @@ After transcription, you have the following options:
 </details>
 `;
 
-const en_chapter10 = (isNative: boolean) => `
+const en_chapter9_pep = (isNative: boolean) => `
 ---
 
-<details>
-<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${enChapterLabel(coachingChapterNum(isNative, true) + 5)}: Coach Practice (Premium+, Trial & Client)</summary>
+<details id="${USER_GUIDE_ANCHORS.pep}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🧩 PEP — Solution Blockages (Client Feature)</summary>
+<div style="padding: 16px;">
+
+### What are PEP solution blockages?
+
+**PEP** (**P**rocess- and **E**mbodiment-**F**ocused **P**sychology) by **Dr. Michael Bohne** is a therapeutic and coaching approach that combines body-oriented (embodiment-focused) interventions with process-oriented work.
+
+**Solution blockages** in PEP are not the “output” of a session but **development-hindering relationship patterns** (the **Big Five**) that can block change — even when you are already trying hard. In classic PEP work they are **typically explored when embodiment-focused steps alone are not enough** to achieve noticeable relief or movement; blockages **get in the way** of effective change work rather than being its end product.
+
+The five patterns are: **self-reproach**, **blaming others**, **expectational attitudes**, **age regression**, and **dysfunctional loyalties**.
+
+### What does the app do?
+
+**Meaningful Conversations** does **not** replace a full PEP session (no tapping sequences, no KKT process). In **Session Review**, the AI analyzes your **conversation transcript** and flags **possible** Big Five patterns with a short explanation and quote — as a **reflection aid** for clients working with a coach at ${providerContact}.
+
+### Who can use it?
+
+**Client** users only (access via ${providerContact}), plus admin/developer test accounts. Premium, Premium+, and standard registered users do **not** see this section.
+
+${isNative ? `**Contact for client access:** ${providerContact}` : ''}
+
+### Where to find it
+
+At the end of a coaching session in **Session Review**, section **"Potential Solution Blockages"**. The AI lists identified patterns with an explanation and a quote from the conversation.
+
+### How to use it
+
+- Treat suggestions as **reflection prompts**, not a diagnosis.
+- Discuss notable blockages with your coach at ${providerContact}.
+- The section only highlights patterns when the analysis finds them — otherwise "None identified".
+
+</div>
+</details>
+`;
+
+const en_chapter10 = (isNative: boolean, practiceTab: string | null) => `
+---
+
+<details id="${USER_GUIDE_ANCHORS.coachPractice}">
+<summary style="font-size: 1.15rem; font-weight: 600; cursor: pointer; padding: 12px; background: var(--background-tertiary); border-radius: 8px; margin: 16px 0;">🎯 ${enChapterLabel(coachPracticeChapterNum(isNative))}: Coach Practice (Premium+, Trial & Client)</summary>
 <div style="padding: 16px;">
 
 ### What is Coach Practice?
 
-Coach Practice is a **training mode for aspiring or experienced coaches**: you play the coach and the AI plays your client. You choose a coaching method, a scenario, and a difficulty level — then conduct a live conversation. At the end, you receive a **structured evaluation** of your method application with concrete strengths, development areas, and suggested drills.
+Coach Practice is your **practice space for aspiring and experienced coaches**: you lead the conversation as coach; the AI plays your client. This is how you train methods, questions, and presence in a protected setting.
+
+You choose entry path, method, scenario, and difficulty, and at the end you receive a **structured evaluation** with strengths, development areas, and suggested drills.
 
 ### Who Can Use It?
 
-This feature is available with **Premium+**, during the **9-day trial** after registration, or with **Client** access. It is located in the **Coach Practice** tab in the Coaching section (not in Transcript Tools).
+Access and tab: see ${practiceTab ? `section **${practiceTab}**` : enChapterLabel(coachPracticeChapterNum(isNative))}.
 
 **Method scope:** Premium+ and trial: **8 practice methods**. Clients: **12 methods** (additionally methods from client coaches Rob, Victor, Bekky, and Dan).
 
-${guideWarningBox('<p class="m-0"><strong>Note:</strong> The coaching methods in the app are generic descriptive labels for educational practice purposes. They are not affiliated with, endorsed by, or certified by any owners of trademarks, registered method names, or copyrighted coaching approaches.</p>')}
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Not a substitute for coach training:</strong> Coach Practice is a <strong>supplement</strong> for self-directed practice — <strong>not</strong> a replacement for thorough coach training or recognized certification.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li>The AI simulates a client; real conversations are more complex and cannot be fully replicated.</li>
+<li>Evaluations are learning feedback — not official assessment, quality guarantee, or proof of coaching competence.</li>
+<li>For real client work, your professional standards, ethics, and applicable law apply — independent of this app.</li>
+</ul>`)}
 
-### How Does It Work?
+### How to set up your practice
 
-**Step 1: Configure your practice**
-- **Coaching method:** Choose from the app's coach methods plus additional practice methods (e.g. four-stage coaching, forward-focused coaching, ambivalence coaching). For some methods, you can expand **method details** to review phases and typical questions.
-- **Coachee scenario:** Pick a situation your AI client is facing (e.g. career decision, team conflict).
-- **Start with concern clarification (new):** The scenario stays hidden — you practice pure contracting, then optionally continue with a first method session (method or free play).
-- **Difficulty:** Controls how cooperative or challenging the client behaves. Tap **Level guide** in setup to expand:
+At the top you will find links to **Your progress** and **Practice history**. Below, choose **one** of three expandable entry paths (in this order):
+
+**1. Start with concern clarification**
+- Your client's concern is **hidden** at first: you practice contracting in its purest form (greeting, frame, clarifying the concern).
+- Choose a client avatar, **difficulty level**, and optionally **Live conversation** (voice only).
+- The evaluation reveals the hidden concern; optionally a **method session** (Phase 2) follows — either using a **defined method** or as **improvisation** (without a predefined structure).
+
+**2. Start from scenario**
+- First choose a **coachee scenario** (concern visible), then a matching **coaching method**.
+- Expand **method details** via the info icon (phases, typical questions).
+
+**3. Start from method**
+- First choose a **coaching method**, then a matching **scenario** (with match hints: especially suited / alternative / neutral).
+
+**Shared options** (below entry path 2 or 3, once either section is expanded — shown **below** the scenario/method selection on the setup screen):
+- **Difficulty** — controls how cooperative or challenging the AI client behaves. Expand **Level guide**:
 
 | Level | Client behavior |
 |-------|-----------------|
@@ -2126,53 +2468,70 @@ ${guideWarningBox('<p class="m-0"><strong>Note:</strong> The coaching methods in
 | **Challenging** | Stronger resistance/topic shifts; hidden agenda only with trust |
 | **Hard** | Very strong resistance + secondary stressors; agenda only after trust-building |
 
-**Note:** Scope-boundary training (out-of-scope clinical cues) appears only in **method sessions** or **Phase 2 after concern clarification** — not during pure concern-clarification practice.
-- **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in client exact language".
+**Note:** Scope-boundary training (out-of-scope clinical cues) appears in **method sessions** and in **Phase 2 after concern clarification**.
 
-**Step 2: Run the practice session**
-- You are the **coach** — the AI responds as the client. **You start** the conversation; there is no automatic greeting from the AI.
+- **Live conversation (optional):** Voice-only mode — unlocks after you complete **Challenging** with the same method and scenario (or the same client in concern clarification).
+- **Session focus (optional):** Free text, e.g. "Practice contracting" or "Stay in client exact language".
+- **Start practice** — the chat starts **empty**; **you** open as coach.
+
+### Resuming an interrupted practice session
+
+If a practice session was interrupted in the same ${isNative ? 'app tab' : 'browser tab'}, reopening the setup screen shows **“Resume practice session?”** (method, scenario, message count). The draft stays on your device at first and reaches the server only after the **evaluation**.
+
+### Run the practice session
+
+- You are the **coach** — the AI responds as the client, and you open the conversation.
 - The interface matches the regular chat (text, voice input, optional TTS).
 
-${guideInfoBox(`<p class="m-0 mb-2"><strong>Not a regular coaching session:</strong> There is no Life Context analysis at the end; your Life Context file is not updated.</p>
-<p class="m-0"><strong>No DPC/DPFL:</strong> Your personality profile and adaptive coaching mode apply to classic coaching only — not Coach Practice. The AI plays the client based on scenario and method prompts only.</p>`)}
+${guideInfoBox(`<p class="m-0 mb-2"><strong>Your own practice space:</strong> Coach Practice runs separately from your regular coaching sessions. Your Life Context stays as it is; at the end you receive the evaluation of your coaching performance.</p>
+<p class="m-0"><strong>Pure role practice:</strong> Your personality profile and adaptive coaching mode (DPC/DPFL) belong to classic coaching. In Coach Practice, the AI plays the client entirely according to scenario and method.</p>`)}
 
-**Step 3: End session & self-rating**
-- End the session as usual via **End Session**.
-- Optionally rate your performance on a **1–10** scale before the AI evaluates. This self-rating helps with calibration and can be skipped.
+### End session, self-rating & evaluation
 
-**Step 4: Receive your evaluation**
-The AI analyzes the transcript and scores you on five dimensions (each **1–10**):
+1. **End session** — as in the regular chat.
+2. **Self-rating (optional)** — **1–10** scale before AI evaluation; can be skipped.
+3. **Evaluation** — the AI analyzes the transcript and scores five dimensions (each **1–10**):
 - **Method compliance** — How consistently did you apply the chosen method?
 - **Effectiveness** — How helpful was your coaching for the client?
 - **Clarity** — How clear and structured were your questions and interventions?
 - **Coachee autonomy** — Did you facilitate the client's own thinking and solution-finding (without advice, imposed vision, or prescribed solutions)?
 - **Coachee satisfaction** — How satisfied does the client appear at the end?
 
-The AI also assesses **session flow** (contracting, opening, closing — appropriate to the method). When the overall flow was coherent, this is highlighted positively.
+The AI also assesses **session flow** (contracting, opening, closing — appropriate to the method).
 
 The **overall score (1–10)** prioritizes **method compliance**. A perfect **10/10** requires strong method application (≥9) **and** a coherent session flow; optimal method without a fully coherent flow is capped at **9/10**.
 
-You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods (e.g. four-stage, forward-focused, ambivalence), practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
+You also receive a summary, covered method stages, strengths, development areas, and suggested drills. For some methods, practice links to a **live coach** using the same method — useful for seeing the method from the client's side.
 
-**Step 5: History & progress**
-From **Practice history** on the setup screen, you can reopen or delete past evaluations. Evaluations are saved to your account.
+### History & progress
 
-From **Your progress**, you can also view score trends, a competency profile, milestones, and a recommended next drill — useful for comparing development across multiple sessions.
+- **Practice history** — reopen or delete past evaluations; saved to your account.
+- **Your progress** — score trends, competency profile, milestones, and recommended next drill across sessions.
+- **Recurring development themes** — when the same patterns appear across evaluations. This does not yet link to your OCEAN/Riemann profile.
 
-**Your feedback as coach (today):** After each session you get concrete **drill suggestions**; in progress, **recurring development themes** appear when the same patterns show up across evaluations. This does not yet link to your OCEAN/Riemann profile — a deeper coaching-style signature is planned for a future release.
+### Tips for best results
 
-### Tips for Best Results
-
-- **Review the method first:** Use the method details when practicing a method for the first time.
-- **Stay in the coach role:** Ask open questions and avoid jumping to solutions — the AI client responds realistically to your style.
+- **Review the method first:** Use method details when practicing a method for the first time.
+- **Stay in the coach role:** Open questions instead of jumping to solutions — the AI client responds realistically to your style.
 - **Increase difficulty gradually:** Start with "easy" and raise the level as you gain confidence.
-- **Use history:** Compare evaluations over time to track your progress.
+- **Use history:** Compare evaluations over time to track progress.
+
+### Notes & disclaimers
+
+${guideWarningBox(`<p class="m-0 mb-2"><strong>Method labels:</strong> Coaching methods in the app are generic descriptive labels for educational practice. They are not affiliated with, endorsed by, or certified by any owners of trademarks, registered method names, or copyrighted coaching approaches.</p>
+<ul class="list-disc list-outside pl-5 space-y-1 my-0">
+<li><strong>Not therapy / not clinical use:</strong> Coach Practice supports reflection and skill practice — not treatment of mental illness or crisis intervention.</li>
+<li><strong>Not supervision:</strong> The app does not replace professional supervision or peer review by qualified colleagues.</li>
+<li><strong>Simulated client:</strong> General AI transparency: see ${enChapterLabel(2)}, section 2.3. The practice client may respond incorrectly — use critical reflection and human oversight in your training.</li>
+<li><strong>Professional boundaries:</strong> Sexual or explicit content toward the practice client is unacceptable; evaluations criticize violations. See also ${enChapterLabel(2)}, section 2.4.</li>
+<li><strong>Liability:</strong> You are responsible for how you apply insights from practice in real client work (see also the app's disclaimer).</li>
+</ul>`)}
 
 </div>
 </details>
 `;
 
-const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
+const UserGuideView: React.FC<InfoViewProps> = ({ currentUser, focusAnchor, onFocusAnchorHandled }) => {
     const { t, language } = useLocalization();
 
     const practiceAccess = useMemo(() => resolvePracticeAccess(currentUser ?? null), [currentUser]);
@@ -2188,11 +2547,36 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
         const base = language === 'de'
             ? de_markdown(isRegistered, !!isPremiumUser, native, showChapter8, showChapter9, showChapter10)
             : en_markdown(isRegistered, !!isPremiumUser, native, showChapter8, showChapter9, showChapter10);
-        const ch8 = language === 'de' ? de_chapter8(native) : en_chapter8(native);
-        const ch9 = language === 'de' ? de_chapter9(native) : en_chapter9(native);
-        const ch10 = language === 'de' ? de_chapter10(native) : en_chapter10(native);
-        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 : '') + (showChapter10 ? ch10 : '');
+        const coachingSub = computeCoachingSessionSubsections({
+            isNative: native,
+            isRegistered,
+            showTranscriptTools: showChapter8,
+            showPracticeTab: showChapter10,
+        });
+        const ch8 = language === 'de'
+            ? de_chapter8(native, coachingSub.transcriptTools)
+            : en_chapter8(native, coachingSub.transcriptTools);
+        const ch9 = language === 'de'
+            ? de_chapter9(native, coachingSub.transcriptTools)
+            : en_chapter9(native, coachingSub.transcriptTools);
+        const ch9pep = language === 'de' ? de_chapter9_pep(native) : en_chapter9_pep(native);
+        const ch10 = language === 'de'
+            ? de_chapter10(native, coachingSub.practiceTab)
+            : en_chapter10(native, coachingSub.practiceTab);
+        return base + (showChapter8 ? ch8 : '') + (showChapter9 ? ch9 + ch9pep : '') + (showChapter10 ? ch10 : '');
     }, [language, isRegistered, isPremiumUser, showChapter8, showChapter9, showChapter10]);
+
+    React.useLayoutEffect(() => {
+        const anchor = focusAnchor ?? takePendingUserGuideAnchor();
+        if (!anchor) return;
+
+        const cancel = scrollUserGuideToAnchorWhenReady(anchor, {
+            onDone: (success) => {
+                if (success) onFocusAnchorHandled?.();
+            },
+        });
+        return cancel;
+    }, [focusAnchor, markdownContent, onFocusAnchorHandled]);
     
     return (
         <div className="w-full max-w-3xl mx-auto p-8 space-y-6 bg-background-secondary border border-border-primary rounded-card shadow-card-elevated mt-4 mb-10">
@@ -2205,14 +2589,27 @@ const UserGuideView: React.FC<InfoViewProps> = ({ currentUser }) => {
                     rehypePlugins={[rehypeRaw]}
                     components={{
                         h2: ({node, ...props}) => <h2 className="text-xl font-semibold text-content-primary mt-8 mb-4 not-prose" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2 not-prose" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-lg font-semibold text-content-primary mt-6 mb-2 not-prose scroll-mt-24" {...props} />,
                         table: ({node, ...props}) => <table className="w-full my-4 text-sm" {...props} />,
                         th: ({node, ...props}) => <th className="border border-border-secondary p-2 bg-background-tertiary" {...props} />,
                         td: ({node, ...props}) => <td className="border border-border-secondary p-2" {...props} />,
                         ul: ({node, ...props}) => <ul className="list-disc list-outside pl-5 space-y-1 my-2" {...props} />,
                         ol: ({node, ...props}) => <ol className="list-decimal list-outside pl-5 space-y-1 my-2" {...props} />,
-                        details: ({node, ...props}) => <details className="my-3 border border-border-secondary rounded-lg overflow-hidden" {...props} />,
-                        summary: ({node, ...props}) => <summary className="cursor-pointer px-4 py-3 bg-background-tertiary hover:bg-background-tertiary/80 font-medium text-content-primary select-none" {...props} />,
+                        div: ({node, style, ...props}) => {
+                            const padding = style && typeof style === 'object' ? style.padding : undefined;
+                            const isChapterBody = padding === '16px' || padding === 16;
+                            if (isChapterBody) {
+                                return <div className="px-4 pb-4 pt-2 [&>:first-child]:mt-0" {...props} />;
+                            }
+                            return <div style={style} {...props} />;
+                        },
+                        details: ({node, ...props}) => (
+                            <details
+                                className="my-3 border border-border-secondary rounded-lg overflow-hidden scroll-mt-24 [&>ul]:mx-4 [&>ul]:mb-4 [&>ul]:mt-2 [&>ol]:mx-4 [&>ol]:mb-4 [&>ol]:mt-2 [&>p]:mx-4"
+                                {...props}
+                            />
+                        ),
+                        summary: ({node, ...props}) => <summary className="cursor-pointer px-4 py-3 bg-background-tertiary hover:bg-background-tertiary/80 font-medium text-content-primary select-none !my-0" {...props} />,
                     }}
                 >
                     {markdownContent}

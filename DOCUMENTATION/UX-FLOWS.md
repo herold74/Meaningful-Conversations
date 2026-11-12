@@ -1,8 +1,8 @@
-# UX Flows — Meaningful Conversations v2.0.1
+# UX Flows — Meaningful Conversations v2.5.6
 
 Dieses Dokument beschreibt die User Experience fuer alle Benutzertypen als visuelle Flow-Diagramme.
 
-**Zuletzt aktualisiert:** Juli 2026 (Entry-screen 3-card hubs, build 35)
+**Zuletzt aktualisiert:** August 2026 (IntentPicker 3-card layout, bronze/silver/featured themes, Build 26)
 
 ---
 
@@ -419,7 +419,7 @@ UI-Texte aus `public/locales/de.json` / `en.json` (Kurzfassung):
 |:---|:---|:---|:---|
 | Kommunikation | Kommunikation & Management | Communication & management | Bronze (ausgeklappt) |
 | Coaching | Coaching zu meinem Anliegen | Coaching for my concern | TopicSearch (alle Pillen eingeklappt) |
-| Coach Practice | Als Coach üben | Practice as a coach | Silber / Practice-Tab (LC-Bypass) |
+| Als Coach üben | Als Coach üben | Practice as a coach | Silber / Practice-Tab (LC-Bypass) |
 
 Details und Laengenbeschreibungen: Keys `intent_*_desc` (bzw. `*_guest` fuer Gaeste).
 
@@ -569,6 +569,7 @@ flowchart LR
 | Zahlungen | In-App Purchase (`NativePaywall`, RevenueCat / StoreKit 2) | PayPal Direct Checkout |
 | Paywall-Pflichtfelder | Nutzungsbedingungen + Datenschutz verlinkt (Review 3.1.2) | — |
 | PayPal-Links | Ausgeblendet (Apple 3.1.1) | Sichtbar |
+| Upgrade-Code-Einlösung | Ausgeblendet (Apple 3.1.1) | Sichtbar |
 | TTS | Native iOS Stimmen | Server TTS (Piper, ab Registered) + Web Speech API Fallback |
 | STT | Native Speech Recognition | Web Speech API |
 | Safe Area | Dynamic Island / Notch beruecksichtigt | Standard-Padding |

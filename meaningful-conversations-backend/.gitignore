@@ -19,3 +19,4 @@ lerna-debug.log*
 # of local SQLite databases or other generated artifacts.
 /prisma/dev.db
 /prisma/dev.db-journal
+/generated/

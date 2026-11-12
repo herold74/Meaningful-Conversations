@@ -4,6 +4,14 @@ const prisma = require('../prismaClient.js');
 const authMiddleware = require('../middleware/auth.js');
 const profileRefinement = require('../services/profileRefinement.js');
 const aiProvider = require('../services/aiProviderService.js');
+const { trackApiUsage, checkDailyCostCap } = require('../services/apiUsageTracker.js');
+const { withTimeout, parseStructuredJsonResponse } = require('./gemini/shared.js');
+const {
+  validateConnectorPayload,
+  summarizeConnectorForPrompt,
+  formatConnectorPerspectiveBlock,
+  validateNarrativeConnectorConsistency,
+} = require('../services/narrativeConnectorIntegration.js');
 
 /**
  * POST /api/personality/save
@@ -23,7 +31,7 @@ router.post('/save', authMiddleware, async (req, res) => {
     const validMode = adaptationMode === 'adaptive' ? 'adaptive' : 'stable';
     
     // Validate and serialize completedLenses
-    const validLenses = ['sd', 'riemann', 'ocean'];
+    const validLenses = ['sd', 'riemann', 'ocean', 'connector'];
     const premiumOnlyLenses = ['sd', 'riemann'];
     let lensesJson = '[]';
     if (Array.isArray(completedLenses)) {
@@ -112,7 +120,9 @@ router.get('/profile', authMiddleware, async (req, res) => {
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
     }
-    
+
+    res.set('Cache-Control', 'private, no-store, no-cache, must-revalidate');
+    res.set('Pragma', 'no-cache');
     res.json(profile);
   } catch (error) {
     console.error('Error fetching profile:', error);
@@ -376,20 +386,27 @@ router.get('/adaptation-suggestions', authMiddleware, async (req, res) => {
  */
 router.post('/generate-narrative', authMiddleware, async (req, res) => {
   try {
-    const { quantitativeData, narratives, language } = req.body;
+    const { quantitativeData, narratives, language, connector } = req.body;
     
     // Validation
     if (!quantitativeData || !narratives || !narratives.flowStory || !narratives.frictionStory) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    
+
     const normalizedLang = language === 'en' ? 'en' : 'de';
+    const hasConnector = connector && validateConnectorPayload(connector);
+    if (connector != null && !hasConnector) {
+      return res.status(400).json({ error: 'Invalid connector evaluation payload.' });
+    }
+
+    const connectorBlock = formatConnectorPerspectiveBlock(normalizedLang, hasConnector ? connector : null);
     
     // Build the synthesis prompt
     const synthesisPrompt = NARRATIVE_SYNTHESIS_PROMPTS[normalizedLang]
       .replace('{{quantitativeData}}', JSON.stringify(quantitativeData, null, 2))
       .replace('{{flowStory}}', narratives.flowStory)
-      .replace('{{frictionStory}}', narratives.frictionStory);
+      .replace('{{frictionStory}}', narratives.frictionStory)
+      .replace('{{connectorPerspective}}', connectorBlock);
     
     
     // Respect user's AI region preference (GDPR)
@@ -400,12 +417,12 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
         userRegionPreference = narUser?.aiRegionPreference || 'optimal';
     }
 
-    // Call AI provider
+    // Call AI provider — slightly lower temperature when Connector informs synthesis
     const result = await aiProvider.generateContent({
       model: 'gemini-2.5-flash',
       contents: synthesisPrompt,
       config: {
-        temperature: 0.8,
+        temperature: hasConnector ? 0.7 : 0.8,
         maxOutputTokens: 4096,
         responseMimeType: 'application/json',
         systemInstruction: normalizedLang === 'de' 
@@ -438,11 +455,22 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
       console.error('[Narrative] Failed to parse AI response:', result.text);
       return res.status(500).json({ error: 'Failed to parse narrative profile' });
     }
+
+    const connectorConsistency = validateNarrativeConnectorConsistency(
+      narrativeProfile,
+      hasConnector ? connector : null,
+      normalizedLang,
+    );
+    if (!connectorConsistency.isConsistent) {
+      console.warn('[Narrative] Connector consistency issues:', connectorConsistency.issues);
+    }
     
     
     res.json({ 
       success: true, 
       narrativeProfile,
+      connectorConsistency,
+      connectorIncluded: !!hasConnector,
       model: result.model,
       provider: result.provider
     });
@@ -450,6 +478,350 @@ router.post('/generate-narrative', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error generating narrative profile:', error);
     res.status(500).json({ error: 'Failed to generate narrative profile' });
+  }
+});
+
+/**
+ * POST /api/personality/generate-external-perspective
+ * Opt-in: short bridge text between signature (self) and Connector (observed). Does NOT rewrite signature.
+ */
+router.post('/generate-external-perspective', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  const userId = req.userId;
+  try {
+    const { narrativeProfile, connector, language } = req.body;
+
+    if (!narrativeProfile?.operatingSystem || !connector) {
+      return res.status(400).json({ error: 'Missing narrativeProfile or connector.' });
+    }
+
+    if (!validateConnectorPayload(connector)) {
+      return res.status(400).json({ error: 'Invalid connector evaluation payload.' });
+    }
+
+    const costCheck = await checkDailyCostCap(userId);
+    if (!costCheck.allowed) {
+      return res.status(429).json({
+        error: 'Daily usage limit reached. Please try again tomorrow.',
+        errorCode: 'DAILY_COST_CAP',
+      });
+    }
+
+    const normalizedLang = language === 'en' ? 'en' : 'de';
+    const connectorSummary = summarizeConnectorForPrompt(connector);
+    const signatureExcerpt = buildSignatureExcerpt(narrativeProfile);
+
+    const prompt = EXTERNAL_PERSPECTIVE_PROMPTS[normalizedLang]
+      .replace('{{signatureExcerpt}}', JSON.stringify(signatureExcerpt, null, 2))
+      .replace('{{connectorSummary}}', JSON.stringify(connectorSummary, null, 2));
+
+    let userRegionPreference = 'optimal';
+    if (userId) {
+      const narUser = await prisma.user.findUnique({ where: { id: userId }, select: { aiRegionPreference: true } });
+      userRegionPreference = narUser?.aiRegionPreference || 'optimal';
+    }
+
+    const modelName = 'gemini-2.5-flash';
+    const systemInstruction = normalizedLang === 'de'
+      ? 'Antworte nur mit dem Brückentext (2–3 Sätze, maximal 80 Wörter, Anrede „Du“). Kein JSON, kein Markdown, keine Einleitung.'
+      : 'Respond with only the bridge paragraph (2–3 sentences, max 80 words, address "You"). No JSON, no Markdown, no preamble.';
+
+    const callLlm = (regionPreference, skipFallback = false) => withTimeout(
+      aiProvider.generateContent({
+        model: modelName,
+        contents: prompt,
+        config: {
+          temperature: 0.55,
+          maxOutputTokens: 4096,
+          systemInstruction,
+        },
+        userRegionPreference: regionPreference,
+        language: normalizedLang,
+        context: 'analysis',
+        skipFallback,
+      }),
+      90000,
+      'External perspective generation timed out',
+    );
+
+    let text = '';
+    let result;
+    const regionAttempts = userRegionPreference === 'optimal'
+      ? [{ region: 'us', skipFallback: true }, { region: 'optimal', skipFallback: false }]
+      : [{ region: userRegionPreference, skipFallback: true }];
+
+    for (const { region, skipFallback } of regionAttempts) {
+      try {
+        result = await callLlm(region, skipFallback);
+        text = normalizeExternalPerspectiveText(result.text);
+        if (text.length >= 20) break;
+        console.warn(`[ExternalPerspective] text too short (${text.length}) from ${region}, provider=${result.provider}`);
+      } catch (genErr) {
+        console.error(`[ExternalPerspective] generation error (${region}):`, genErr.message);
+        if (regionAttempts[regionAttempts.length - 1].region === region) {
+          throw genErr;
+        }
+      }
+    }
+
+    if (!text || text.length < 20) {
+      const finishReason = result?.rawResponse?.candidates?.[0]?.finishReason;
+      const thoughtsTokens = result?.rawResponse?.usageMetadata?.thoughtsTokenCount;
+      console.error('[ExternalPerspective] final text too short:', {
+        textPreview: (result?.text || '').substring(0, 200),
+        finishReason,
+        thoughtsTokens,
+        provider: result?.provider,
+      });
+      return res.status(500).json({ error: 'Generated text too short.' });
+    }
+    if (text.length > 600) {
+      return res.status(500).json({ error: 'Generated text too long.' });
+    }
+
+    const externalPerspectiveNote = {
+      text,
+      generatedAt: new Date().toISOString(),
+      generatedLanguage: normalizedLang,
+      connectorCompletedAt: connector.completedAt || connectorSummary.completedAt || null,
+    };
+
+    res.json({
+      success: true,
+      externalPerspectiveNote,
+      model: result.model,
+      provider: result.provider,
+    });
+
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/generate-external-perspective',
+      model: result.model || modelName,
+      botId: 'personality-external-perspective',
+      inputTokens: result.usage?.inputTokens || 0,
+      outputTokens: result.usage?.outputTokens || 0,
+      durationMs: Date.now() - startTime,
+      success: true,
+    });
+  } catch (error) {
+    console.error('Error generating external perspective:', error);
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/generate-external-perspective',
+      model: 'gemini-2.5-flash',
+      botId: 'personality-external-perspective',
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: Date.now() - startTime,
+      success: false,
+      errorMessage: error.message,
+    }).catch(() => {});
+    res.status(500).json({ error: 'Failed to generate external perspective' });
+  }
+});
+
+/**
+ * POST /api/personality/translate-external-perspective
+ * Translates a saved Fremdsicht note to the profile content language (short coaching text).
+ */
+router.post('/translate-external-perspective', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  const userId = req.userId;
+  try {
+    const { text, sourceLang, targetLang } = req.body;
+
+    if (!text || typeof text !== 'string' || text.trim().length < 10) {
+      return res.status(400).json({ error: 'Missing or invalid text.' });
+    }
+    if (text.length > 600) {
+      return res.status(400).json({ error: 'Text too long.' });
+    }
+
+    const normalizedSource = sourceLang === 'en' ? 'en' : 'de';
+    const normalizedTarget = targetLang === 'en' ? 'en' : 'de';
+    if (normalizedSource === normalizedTarget) {
+      return res.json({
+        success: true,
+        text: text.trim(),
+        generatedLanguage: normalizedTarget,
+      });
+    }
+
+    const costCheck = await checkDailyCostCap(userId);
+    if (!costCheck.allowed) {
+      return res.status(429).json({
+        error: 'Daily usage limit reached. Please try again tomorrow.',
+        errorCode: 'DAILY_COST_CAP',
+      });
+    }
+
+    const langNames = { de: 'German', en: 'English' };
+    const systemInstruction = normalizedTarget === 'de'
+      ? `Du bist professionelle:r Übersetzer:in für Coaching-Texte. Übersetze den folgenden ${langNames[normalizedSource]}-Text ins Deutsche. Behalte die informelle Anrede „Du“. Gib NUR den übersetzten Text zurück — kein Markdown, keine Einleitung.`
+      : `You are a professional translator for coaching copy. Translate the following ${langNames[normalizedSource]} text into English. Keep the informal "you" address. Return ONLY the translated text — no Markdown, no preamble.`;
+
+    const result = await withTimeout(
+      aiProvider.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: text.trim(),
+        config: {
+          temperature: 0.2,
+          maxOutputTokens: 1024,
+          systemInstruction,
+        },
+        userRegionPreference: 'optimal',
+        language: normalizedTarget,
+        context: 'chat',
+      }),
+      45000,
+      'External perspective translation timed out',
+    );
+
+    const translated = normalizeExternalPerspectiveText(result.text);
+    if (!translated || translated.length < 10) {
+      return res.status(500).json({ error: 'Translation too short.' });
+    }
+
+    res.json({
+      success: true,
+      text: translated,
+      generatedLanguage: normalizedTarget,
+    });
+
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/translate-external-perspective',
+      model: result.model || 'gemini-2.5-flash',
+      botId: 'personality-external-perspective-translate',
+      inputTokens: result.usage?.inputTokens || 0,
+      outputTokens: result.usage?.outputTokens || 0,
+      durationMs: Date.now() - startTime,
+      success: true,
+    });
+  } catch (error) {
+    console.error('Error translating external perspective:', error);
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/translate-external-perspective',
+      model: 'gemini-2.5-flash',
+      botId: 'personality-external-perspective-translate',
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: Date.now() - startTime,
+      success: false,
+      errorMessage: error.message,
+    }).catch(() => {});
+    res.status(500).json({ error: 'Failed to translate external perspective' });
+  }
+});
+
+const {
+  translateConnectorSignatureSchema,
+  pickTranslatableTexts,
+  buildTranslatePrompt,
+  CONNECTOR_DIMENSIONS: CONNECTOR_TRANSLATE_DIMS,
+} = require('../connector/translateConnectorSignature.js');
+
+/**
+ * POST /api/personality/translate-connector-signature
+ * Translates saved Connector text blocks to the UI / profile language (scores unchanged).
+ */
+router.post('/translate-connector-signature', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  const userId = req.userId;
+  try {
+    const { connector, sourceLang, targetLang } = req.body;
+    if (!connector || typeof connector !== 'object') {
+      return res.status(400).json({ error: 'Missing connector payload.' });
+    }
+
+    const normalizedSource = sourceLang === 'en' ? 'en' : 'de';
+    const normalizedTarget = targetLang === 'en' ? 'en' : 'de';
+    const payload = pickTranslatableTexts(connector);
+    if (!payload.summary?.trim() && payload.strengths.length === 0) {
+      return res.status(400).json({ error: 'Nothing to translate.' });
+    }
+
+    if (normalizedSource === normalizedTarget) {
+      return res.json({
+        success: true,
+        texts: payload,
+        contentLanguage: normalizedTarget,
+      });
+    }
+
+    const costCheck = await checkDailyCostCap(userId);
+    if (!costCheck.allowed) {
+      return res.status(429).json({
+        error: 'Daily usage limit reached. Please try again tomorrow.',
+        errorCode: 'DAILY_COST_CAP',
+      });
+    }
+
+    const prompt = buildTranslatePrompt(payload, normalizedSource, normalizedTarget);
+    const result = await withTimeout(
+      aiProvider.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          temperature: 0.2,
+          maxOutputTokens: 4096,
+          responseMimeType: 'application/json',
+          responseSchema: translateConnectorSignatureSchema,
+        },
+        userRegionPreference: 'optimal',
+        language: normalizedTarget,
+        context: 'analysis',
+      }),
+      60000,
+      'Connector signature translation timed out',
+    );
+
+    let translated;
+    try {
+      translated = parseStructuredJsonResponse(result.text, 'connector signature translation');
+    } catch (parseErr) {
+      console.error('[Personality] connector translate parse error:', parseErr.message);
+      return res.status(500).json({ error: 'Failed to parse translation response.' });
+    }
+
+    for (const dim of CONNECTOR_TRANSLATE_DIMS) {
+      if (!translated[dim]?.evidence) translated[dim] = { evidence: [] };
+    }
+    if (!Array.isArray(translated.strengths)) translated.strengths = [];
+    if (!Array.isArray(translated.growthAreas)) translated.growthAreas = [];
+    if (!Array.isArray(translated.perVignette)) translated.perVignette = payload.perVignette;
+
+    res.json({
+      success: true,
+      texts: translated,
+      contentLanguage: normalizedTarget,
+    });
+
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/translate-connector-signature',
+      model: result.model || 'gemini-2.5-flash',
+      botId: 'connector-signature-translate',
+      inputTokens: result.usage?.inputTokens || 0,
+      outputTokens: result.usage?.outputTokens || 0,
+      durationMs: Date.now() - startTime,
+      success: true,
+    });
+  } catch (error) {
+    console.error('Error translating connector signature:', error);
+    await trackApiUsage({
+      userId,
+      endpoint: '/api/personality/translate-connector-signature',
+      model: 'gemini-2.5-flash',
+      botId: 'connector-signature-translate',
+      inputTokens: 0,
+      outputTokens: 0,
+      durationMs: Date.now() - startTime,
+      success: false,
+      errorMessage: error.message,
+    }).catch(() => {});
+    res.status(500).json({ error: 'Failed to translate connection signature' });
   }
 });
 
@@ -597,6 +969,7 @@ REGELN:
 5. Auf Deutsch schreiben. Verwende "Du" als Anrede.
 6. Zeitlosigkeit: Das Profil soll in 2 Jahren noch relevant klingen. Vermeide Referenzen auf aktuelle Ereignisse.
 7. Kein Markdown: Verwende KEINE Markdown-Formatierung wie *kursiv*, **fett** oder andere Sonderzeichen. Nur reinen Text.
+8. BEOBACHTETE FREMSICHT (The Connector): Wenn der Block unten „Nicht vorhanden" ist, ignoriere ihn vollständig und erfinde keine Fremdsicht. Wenn Daten vorhanden sind: Gewichte sie als Impuls aus drei kurzen KI-Gesprächen — nicht gleichwertig mit validierten Tests. Rahme Spannungen zwischen Selbstbild und Beobachtung als 360°-Perspektive, nicht als „du liegst falsch". Blindspots dürfen durch Fremdsicht geschärft werden — weiterhin als Unwucht des Talents, nicht als Charakterschwäche. Keine Vignetten-Namen, keine wörtlichen Chat-Zitate, keine Bezüge auf die drei konkreten Gespräche.
 
 QUANTITATIVE DATEN (Testergebnisse):
 {{quantitativeData}}
@@ -606,6 +979,9 @@ FLOW-ERLEBNIS (Was energetisiert diese Person):
 
 KONFLIKT-ERLEBNIS (Was kostet Energie):
 {{frictionStory}}
+
+BEOBACHTETE FREMSICHT (The Connector — optional):
+{{connectorPerspective}}
 
 Erstelle ein JSON mit exakt dieser Struktur:
 {
@@ -636,6 +1012,7 @@ RULES:
 5. Write in English. Use "You" as the form of address.
 6. Timelessness: The profile should still be relevant in 2 years. Avoid references to current events.
 7. No Markdown: Do NOT use any Markdown formatting like *italic*, **bold** or other special characters. Plain text only.
+8. OBSERVED EXTERNAL VIEW (The Connector): If the block below says "Not available", ignore it entirely and do not invent an external view. When data is present: treat it as input from three short AI conversations — not equal weight to validated tests. Frame tensions between self-view and observation as a 360° perspective, not "you are wrong". Blindspots may be sharpened by the external view — still as imbalance of talents, not character flaws. No vignette names, no verbatim chat quotes, no references to the three specific conversations.
 
 QUANTITATIVE DATA (Test Results):
 {{quantitativeData}}
@@ -645,6 +1022,9 @@ FLOW EXPERIENCE (What energizes this person):
 
 CONFLICT EXPERIENCE (What drains energy):
 {{frictionStory}}
+
+OBSERVED EXTERNAL VIEW (The Connector — optional):
+{{connectorPerspective}}
 
 Create a JSON with exactly this structure:
 {
@@ -663,6 +1043,76 @@ Create a JSON with exactly this structure:
     { "title": "Second exercise", "recommendation": "Second recommendation" }
   ]
 }`
+};
+
+function normalizeExternalPerspectiveText(raw) {
+  let text = (raw || '').trim();
+  const fenceMatch = text.match(/^```(?:json)?\s*([\s\S]*?)```$/);
+  if (fenceMatch) {
+    text = fenceMatch[1].trim();
+  }
+  if (text.startsWith('{')) {
+    try {
+      const parsed = parseStructuredJsonResponse(text, 'external perspective');
+      if (typeof parsed.text === 'string' && parsed.text.trim()) {
+        return parsed.text.trim();
+      }
+    } catch {
+      // fall through to plain text
+    }
+  }
+  return text.replace(/^["']|["']$/g, '').trim();
+}
+
+function buildSignatureExcerpt(narrativeProfile) {
+  const os = typeof narrativeProfile.operatingSystem === 'string'
+    ? narrativeProfile.operatingSystem
+    : (narrativeProfile.operatingSystem?.core || narrativeProfile.operatingSystem?.dynamics || '');
+  return {
+    operatingSystem: String(os).slice(0, 500),
+    superpowerNames: (narrativeProfile.superpowers || []).map((s) => s.name).filter(Boolean),
+    blindspotNames: (narrativeProfile.blindspots || []).map((b) => b.name).filter(Boolean),
+  };
+}
+
+const EXTERNAL_PERSPECTIVE_PROMPTS = {
+  de: `Du schreibst einen kurzen Ergänzungstext (Fremdsicht) für ein Persönlichkeitsprofil.
+
+WICHTIG:
+- Die Signatur (Selbstbild) wird NICHT umgeschrieben — du lieferst nur einen separaten Brückentext.
+- Die Fremdsicht stammt aus "The Connector": beobachtetes Verhalten in drei kurzen KI-Gesprächen.
+- Rahme Spannungen zwischen Selbstbild und Beobachtung als 360°-Perspektive, nicht als Urteil.
+- Ton: würdevoll, neugierig, nicht beschämend. Kein Psychobabble.
+- Keine Vignetten-Namen, keine wörtlichen Chat-Zitate, kein Markdown.
+- Maximal 80 Wörter, 2–3 Sätze, Anrede "Du".
+- Auf Deutsch.
+
+SIGNATUR-AUSZUG (nur Kontext — nicht wiederholen):
+{{signatureExcerpt}}
+
+BEOBACHTETE FREMSICHT (The Connector):
+{{connectorSummary}}
+
+Antworte nur mit dem Brückentext — sonst nichts.`,
+
+  en: `You write a short complement (external perspective) for a personality profile.
+
+IMPORTANT:
+- Do NOT rewrite the signature (self-view) — only provide a separate bridge paragraph.
+- The external view comes from "The Connector": observed behavior in three short AI conversations.
+- Frame tensions between self-view and observation as a 360° perspective, not a verdict.
+- Tone: dignified, curious, never shaming. No psychobabble.
+- No vignette names, no verbatim chat quotes, no Markdown.
+- Maximum 80 words, 2–3 sentences, address "You".
+- In English.
+
+SIGNATURE EXCERPT (context only — do not repeat):
+{{signatureExcerpt}}
+
+OBSERVED EXTERNAL VIEW (The Connector):
+{{connectorSummary}}
+
+Respond with only the bridge paragraph — nothing else.`,
 };
 
 /**

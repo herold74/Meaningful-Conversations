@@ -15,6 +15,44 @@ import { XIcon } from './icons/XIcon';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 import * as userService from '../services/userService';
 
+/** Turn raw provider health errors (often long SDK strings) into short, readable copy. */
+function formatProviderHealthError(raw: string): { label: string; detail?: string } {
+    const trimmed = raw.trim();
+    if (!trimmed) return { label: 'Unknown error' };
+
+    const statusMatch = trimmed.match(/Status\s+(\d{3})/i);
+    const status = statusMatch ? parseInt(statusMatch[1], 10) : null;
+
+    const bodyMatch = trimmed.match(/Body:\s*(\{[\s\S]*\})\s*$/);
+    if (bodyMatch) {
+        try {
+            const body = JSON.parse(bodyMatch[1]) as { message?: string; type?: string };
+            if (body.message) {
+                if (status === 429 || body.type === 'rate_limited') {
+                    return { label: 'Rate limit exceeded', detail: body.message };
+                }
+                if (status === 503) {
+                    return { label: 'Service temporarily unavailable', detail: body.message };
+                }
+                return { label: body.message };
+            }
+        } catch {
+            // fall through
+        }
+    }
+
+    if (status === 429) return { label: 'Rate limit exceeded' };
+    if (status === 503) return { label: 'Service temporarily unavailable' };
+    if (/api key not configured/i.test(trimmed)) {
+        return { label: 'API key not configured' };
+    }
+
+    if (trimmed.length > 120) {
+        return { label: trimmed.slice(0, 117) + '…', detail: trimmed };
+    }
+    return { label: trimmed };
+}
+
 interface ApiUsageStats {
     totalCalls: number;
     successfulCalls: number;
@@ -337,7 +375,7 @@ export const ApiUsageView: React.FC = () => {
         <div className="space-y-6">
             {/* AI Provider Control Panel */}
             {providerConfig && (
-                <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-md">
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-md min-w-0 overflow-hidden">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
                         <div>
                             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -362,9 +400,9 @@ export const ApiUsageView: React.FC = () => {
                         )}
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0">
                         {/* Active Provider Card */}
-                        <div className={`p-4 rounded-lg border-2 ${
+                        <div className={`p-4 rounded-lg border-2 min-w-0 ${
                             providerConfig.activeProvider === 'google'
                                 ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-500'
                                 : 'bg-purple-100 dark:bg-purple-900/30 border-purple-500'
@@ -382,7 +420,7 @@ export const ApiUsageView: React.FC = () => {
                         </div>
                         
                         {/* Google Provider Status */}
-                        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 min-w-0 overflow-hidden">
                             <div className="flex items-center justify-between mb-2">
                                 <h4 className="font-bold text-gray-900 dark:text-gray-100">Google Gemini</h4>
                                 {providerConfig.providerHealth.google.available ? (
@@ -398,9 +436,17 @@ export const ApiUsageView: React.FC = () => {
                             }`}>
                                 {providerConfig.providerHealth.google.available ? 'Available' : 'Unavailable'}
                             </p>
-                            {providerConfig.providerHealth.google.error && (
-                                <p className="text-xs text-red-500 mt-1">{providerConfig.providerHealth.google.error}</p>
-                            )}
+                            {providerConfig.providerHealth.google.error && (() => {
+                                const err = formatProviderHealthError(providerConfig.providerHealth.google.error);
+                                return (
+                                    <p
+                                        className="text-xs text-red-500 mt-1 break-words leading-relaxed"
+                                        title={err.detail || providerConfig.providerHealth.google.error}
+                                    >
+                                        {err.label}
+                                    </p>
+                                );
+                            })()}
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                                 Today: {providerConfig.usageToday.google} requests
                             </p>
@@ -416,7 +462,7 @@ export const ApiUsageView: React.FC = () => {
                         </div>
                         
                         {/* Mistral Provider Status */}
-                        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 min-w-0 overflow-hidden">
                             <div className="flex items-center justify-between mb-2">
                                 <h4 className="font-bold text-gray-900 dark:text-gray-100">Mistral AI</h4>
                                 {providerConfig.providerHealth.mistral.available ? (
@@ -432,9 +478,17 @@ export const ApiUsageView: React.FC = () => {
                             }`}>
                                 {providerConfig.providerHealth.mistral.available ? 'Available' : 'Unavailable'}
                             </p>
-                            {providerConfig.providerHealth.mistral.error && (
-                                <p className="text-xs text-red-500 mt-1">{providerConfig.providerHealth.mistral.error}</p>
-                            )}
+                            {providerConfig.providerHealth.mistral.error && (() => {
+                                const err = formatProviderHealthError(providerConfig.providerHealth.mistral.error);
+                                return (
+                                    <p
+                                        className="text-xs text-red-500 mt-1 break-words leading-relaxed"
+                                        title={err.detail || providerConfig.providerHealth.mistral.error}
+                                    >
+                                        {err.label}
+                                    </p>
+                                );
+                            })()}
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                                 Today: {providerConfig.usageToday.mistral} requests
                             </p>

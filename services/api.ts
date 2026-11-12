@@ -1,5 +1,6 @@
-import { User } from '../types';
+import { User, ConnectorEvaluationResult } from '../types';
 import { brand } from '../config/brand';
+import { isNativeIOS } from '../utils/platformDetection';
 
 // Custom error class for API fetch errors.
 // This allows other parts of the app to inspect the error details.
@@ -100,25 +101,93 @@ export const getApiBaseUrl = (): string => {
     return '';
 };
 
+/** Which server environment the app talks to (for error copy / debugging). */
+export type ApiBackendTarget = 'staging' | 'production' | 'local' | 'custom';
+
+export const getApiBackendTarget = (): ApiBackendTarget => {
+    const base = getApiBaseUrl();
+    if (!base || base === '') {
+        const host = typeof window !== 'undefined' ? window.location.hostname : '';
+        if (host.includes(brand.domainStaging)) return 'staging';
+        if (host.includes(brand.domainProduction)) return 'production';
+        return 'custom';
+    }
+    if (base.includes(brand.domainStaging)) return 'staging';
+    if (base.includes(brand.domainProduction)) return 'production';
+    if (base.includes('localhost') || base.includes('127.0.0.1')) return 'local';
+    return 'custom';
+};
+
+/** Human-readable API host for support messages (no secrets). */
+export const getApiBackendLabel = (): string => {
+    const target = getApiBackendTarget();
+    if (target === 'staging') return brand.domainStaging;
+    if (target === 'production') return brand.domainProduction;
+    if (target === 'local') return 'localhost';
+    const base = getApiBaseUrl();
+    return base.replace(/^https?:\/\//, '') || 'api';
+};
+
 
 const SESSION_KEY = 'user_session';
+const SESSION_BACKEND_PIN_KEY = 'session_api_backend_target';
 
 interface Session {
     token: string;
     user: User;
 }
 
+function clearSessionBackendPin(): void {
+    try {
+        localStorage.removeItem(SESSION_BACKEND_PIN_KEY);
+    } catch {
+        /* ignore */
+    }
+}
+
+/** Drop session when the embedded API target changed (e.g. after Xcode sync prod ↔ staging). */
+function assertSessionBackendAlignment(): void {
+    try {
+        const sessionRaw = localStorage.getItem(SESSION_KEY);
+        if (!sessionRaw) return;
+
+        const pinned = localStorage.getItem(SESSION_BACKEND_PIN_KEY);
+        const current = getApiBackendTarget();
+        if (!pinned) {
+            localStorage.setItem(SESSION_BACKEND_PIN_KEY, current);
+            return;
+        }
+        if (pinned !== current) {
+            console.warn('[API] Session backend pin mismatch; clearing session.');
+            localStorage.removeItem(SESSION_KEY);
+            clearSessionBackendPin();
+        }
+    } catch {
+        /* ignore */
+    }
+}
+
+export const pinSessionBackendTarget = (): void => {
+    try {
+        localStorage.setItem(SESSION_BACKEND_PIN_KEY, getApiBackendTarget());
+    } catch {
+        /* ignore */
+    }
+};
+
 // --- Session Management ---
 
 export const setSession = (session: Session): void => {
     try {
         localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        pinSessionBackendTarget();
     } catch (error) {
         console.error("Could not save session:", error);
     }
 };
 
 export const getSession = (): Session | null => {
+    assertSessionBackendAlignment();
     try {
         const sessionStr = localStorage.getItem(SESSION_KEY);
         if (!sessionStr) {
@@ -135,6 +204,7 @@ export const getSession = (): Session | null => {
 export const clearSession = (): void => {
     try {
         localStorage.removeItem(SESSION_KEY);
+        clearSessionBackendPin();
     } catch (error) {
         console.error("Could not clear session:", error);
     }
@@ -154,6 +224,10 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     if (options.body && !(options.body instanceof FormData)) {
         headers.set('Content-Type', 'application/json');
     }
+
+    if (isNativeIOS()) {
+        headers.set('X-Client-Platform', 'ios');
+    }
     
     const config: RequestInit = {
         ...options,
@@ -168,7 +242,8 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     try {
         response = await fetch(finalUrl, config);
     } catch (error: any) {
-        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        const msg = error?.message || '';
+        if (error instanceof TypeError && (msg.includes('Failed to fetch') || msg.includes('Load failed'))) {
              throw new ApiError(
                 `Could not connect to the server at ${apiBaseUrl}.`, 
                 0, { error: 'Network Error' }, true, apiBaseUrl
@@ -220,7 +295,8 @@ export const getAuthHeaders = (): HeadersInit => {
 // Personality Profile API
 // ============================================================================
 
-const API_BASE_URL = getApiBaseUrl();
+/** Resolve API host per call (Capacitor must not freeze URL at module import). */
+const personalityApiUrl = (path: string) => `${getApiBaseUrl()}/api/personality${path}`;
 
 export const savePersonalityProfile = async (data: {
   testType?: string; // Legacy - optional
@@ -230,10 +306,11 @@ export const savePersonalityProfile = async (data: {
   encryptedData: string;
   adaptationMode?: 'adaptive' | 'stable';
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/save`, {
+  const response = await fetch(personalityApiUrl('/save'), {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    cache: 'no-store',
   });
   if (!response.ok) {
     throw new Error('Failed to save personality profile');
@@ -242,22 +319,60 @@ export const savePersonalityProfile = async (data: {
 };
 
 export const loadPersonalityProfile = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/profile`, {
-    headers: getAuthHeaders()
-  });
-  
+  const apiBaseUrl = getApiBaseUrl();
+  const url = `${personalityApiUrl('/profile')}?_=${Date.now()}`;
+  let response: Response;
+  try {
+    // Do not send Cache-Control/Pragma request headers: Capacitor cross-origin preflight
+    // only allows headers listed in Access-Control-Allow-Headers (see server.js CORS).
+    response = await fetch(url, {
+      headers: getAuthHeaders(),
+      cache: 'no-store',
+    });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : '';
+    if (error instanceof TypeError && (msg.includes('Failed to fetch') || msg.includes('Load failed'))) {
+      throw new ApiError(
+        `Could not connect to the server at ${apiBaseUrl}.`,
+        0,
+        { error: 'Network Error' },
+        true,
+        apiBaseUrl,
+      );
+    }
+    throw error;
+  }
+
   if (!response.ok) {
     if (response.status === 404) return null;
-    throw new Error('Failed to load personality profile');
+    const errorData = await response.json().catch(() => ({}));
+    throw new ApiError(
+      errorData.error || 'Failed to load personality profile',
+      response.status,
+      errorData,
+      false,
+      apiBaseUrl,
+    );
   }
-  
-  return response.json();
+
+  try {
+    return await response.json();
+  } catch (parseError) {
+    throw new ApiError(
+      'Invalid personality profile response',
+      response.status,
+      { parseError: String(parseError) },
+      false,
+      apiBaseUrl,
+    );
+  }
 };
 
 export const deletePersonalityProfile = async (): Promise<{ success: boolean; message: string }> => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/profile`, {
+  const response = await fetch(personalityApiUrl('/profile'), {
     method: 'DELETE',
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
+    cache: 'no-store',
   });
   
   if (!response.ok) {
@@ -286,7 +401,7 @@ export const submitSessionLog = async (data: {
   // Note: Transcript is NOT stored (GDPR compliance)
   // User can download transcript immediately after session
   
-  const response = await fetch(`${API_BASE_URL}/api/personality/session-log`, {
+  const response = await fetch(personalityApiUrl('/session-log'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
@@ -301,7 +416,7 @@ export const submitSessionLog = async (data: {
   
   // Submit comfort check
   if (!data.optedOut) {
-    const comfortResponse = await fetch(`${API_BASE_URL}/api/personality/comfort-check`, {
+    const comfortResponse = await fetch(personalityApiUrl('/comfort-check'), {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
@@ -320,8 +435,9 @@ export const submitSessionLog = async (data: {
 };
 
 export const getProfileRefinementSuggestions = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/adaptation-suggestions`, {
-    headers: getAuthHeaders()
+  const response = await fetch(personalityApiUrl('/adaptation-suggestions'), {
+    headers: getAuthHeaders(),
+    cache: 'no-store',
   });
   
   if (!response.ok) {
@@ -351,8 +467,9 @@ export const generateNarrativeProfile = async (data: {
   };
   narratives: { flowStory: string; frictionStory: string };
   language: string;
+  connector?: ConnectorEvaluationResult | null;
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/generate-narrative`, {
+  const response = await fetch(personalityApiUrl('/generate-narrative'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -364,12 +481,67 @@ export const generateNarrativeProfile = async (data: {
   return response.json();
 };
 
+export const generateExternalPerspectiveNote = async (data: {
+  narrativeProfile: {
+    operatingSystem: string;
+    superpowers?: { name: string }[];
+    blindspots?: { name: string }[];
+  };
+  connector: ConnectorEvaluationResult;
+  language: string;
+}) => {
+  const response = await fetch(personalityApiUrl('/generate-external-perspective'), {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to generate external perspective');
+  }
+  return response.json();
+};
+
+export const translateConnectorSignature = async (data: {
+  connector: Record<string, unknown>;
+  sourceLang: 'de' | 'en';
+  targetLang: 'de' | 'en';
+}) => {
+  const response = await fetch(personalityApiUrl('/translate-connector-signature'), {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to translate connection signature');
+  }
+  return response.json();
+};
+
+export const translateExternalPerspectiveNote = async (data: {
+  text: string;
+  sourceLang: 'de' | 'en';
+  targetLang: 'de' | 'en';
+}) => {
+  const response = await fetch(personalityApiUrl('/translate-external-perspective'), {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to translate external perspective');
+  }
+  return response.json();
+};
+
 export const logSessionBehavior = async (data: {
   sessionId: string;
   encryptedTranscript: string;
   frequencies: Record<string, number>;
 }) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/session-log`, {
+  const response = await fetch(personalityApiUrl('/session-log'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -381,7 +553,7 @@ export const logSessionBehavior = async (data: {
 };
 
 export const submitComfortCheck = async (sessionId: string, score: number, optOut?: boolean) => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/comfort-check`, {
+  const response = await fetch(personalityApiUrl('/comfort-check'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ sessionId, score, optOut })
@@ -393,7 +565,7 @@ export const submitComfortCheck = async (sessionId: string, score: number, optOu
 };
 
 export const getAdaptationSuggestions = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/adaptation-suggestions`, {
+  const response = await fetch(personalityApiUrl('/adaptation-suggestions'), {
     headers: getAuthHeaders()
   });
   if (!response.ok) {
@@ -466,7 +638,7 @@ export const previewProfileRefinement = async (data: {
   profileType: 'RIEMANN' | 'BIG5';
   language: string;
 }): Promise<RefinementPreviewResult> => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/preview-refinement`, {
+  const response = await fetch(personalityApiUrl('/preview-refinement'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)
@@ -500,7 +672,7 @@ export const testRefinementWithMockSessions = async (data: {
     comfortScore: number;
   }>;
 }): Promise<RefinementPreviewResult> => {
-  const response = await fetch(`${API_BASE_URL}/api/personality/test-refinement-mock`, {
+  const response = await fetch(personalityApiUrl('/test-refinement-mock'), {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(data)

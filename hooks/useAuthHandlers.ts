@@ -1,7 +1,7 @@
 import * as api from '../services/api';
 import * as userService from '../services/userService';
 import { deserializeGamificationState } from '../utils/gamificationSerializer';
-import { logInRevenueCat, isIAPAvailable, getAccessFromRevenueCat } from '../services/purchaseService';
+import { logInRevenueCat, initializePurchases, isIAPAvailable, getAccessFromRevenueCat } from '../services/purchaseService';
 import type { User, GamificationState, NavView } from '../types';
 
 interface UseAuthHandlersParams {
@@ -34,7 +34,7 @@ export function useAuthHandlers({
         setEncryptionKey(key);
         setView('welcome');
         if (isIAPAvailable()) {
-            logInRevenueCat(user.id);
+            void initializePurchases().then(() => logInRevenueCat(user.id));
         }
         try {
             const data = await userService.loadUserData(key);
@@ -77,6 +77,7 @@ export function useAuthHandlers({
         // Sync from RevenueCat: Backend fetches subscription status. Works from web AND iOS.
         // On iOS we also call logIn first so RevenueCat merges anonymous → our user ID.
         if (isIAPAvailable()) {
+            await initializePurchases();
             await logInRevenueCat(user.id);
             await new Promise(r => setTimeout(r, 500));
         }
@@ -119,8 +120,16 @@ export function useAuthHandlers({
             }
         }
 
-        // Fallback: RevenueCat may have data locally (under anonymous ID) before merge completes.
-        if (isIAPAvailable()) {
+        // Local RC cache fallback only when server sync is unavailable — not when login already
+        // returned accessExpired (server + RC API confirmed no access). Otherwise sandbox device
+        // entitlements bypass the paywall after an intentional demo reset.
+        const serverSaysExpired =
+            !user.isAdmin && !user.isDeveloper && !user.isPremium && !user.isClient
+            && user.accessExpiresAt != null
+            && new Date(user.accessExpiresAt) < new Date();
+        const syncUnavailable = syncResult === 'fatal';
+
+        if (!serverSaysExpired && syncUnavailable && isIAPAvailable()) {
           const rcAccess = await getAccessFromRevenueCat();
           if (rcAccess?.hasAccess) {
             const patched = { ...user };

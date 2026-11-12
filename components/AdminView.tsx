@@ -35,6 +35,8 @@ import NewsletterPanel from './NewsletterPanel';
 import TestRunner from './TestRunner';
 import TranscriptRatingsView from './TranscriptRatingsView';
 import AdminPracticeAnalyticsView from './AdminPracticeAnalyticsView';
+import AdminConnectorAnalyticsView from './AdminConnectorAnalyticsView';
+import AdminMaintenancePanel from './AdminMaintenancePanel';
 import { ClipboardCheckIcon } from './icons/ClipboardCheckIcon';
 
 interface AdminViewProps {
@@ -47,7 +49,7 @@ interface AdminViewProps {
     onTestRunnerOpened?: () => void;
 }
 
-type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage' | 'practice-analytics';
+type AdminTab = 'users' | 'codes' | 'tickets' | 'feedback' | 'runner' | 'api-usage' | 'practice-analytics' | 'connector-analytics';
 type CodeSortKeys = 'unlocks' | 'createdAt' | 'usage';
 type UserSortKeys = 'email' | 'createdAt' | 'roles' | 'profile' | 'loginCount' | 'xp' | 'lastLogin';
 
@@ -332,7 +334,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const [dynamicRunnerOptions, setDynamicRunnerOptions] = useState<{
         initialScenarioId?: string;
         autoStart?: boolean;
-        initialRunnerMode?: 'classic' | 'practice_lab';
+        initialRunnerMode?: 'classic' | 'practice_lab' | 'connector_lab';
     }>({});
     const [adminPersonalityProfile, setAdminPersonalityProfile] = useState<any>(null);
     useModalOpen(showMismatchWarning);
@@ -654,6 +656,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         if (botId === 'ACCESS_PASS_1Y') return t('admin_codes_unlock_access_pass');
         if (botId === 'ACCESS_PASS_3M') return t('admin_codes_unlock_access_pass_3m');
         if (botId === 'ACCESS_PASS_1M') return t('admin_codes_unlock_access_pass_1m');
+        if (botId === 'ACCESS_PASS_PLUS_1M') return t('admin_codes_unlock_access_pass_plus_1m');
         if (botId === 'premium') return t('admin_codes_unlock_premium');
         if (botId === 'client') return t('admin_codes_unlock_client');
         if (botId === 'big5') return t('admin_codes_unlock_big5');
@@ -716,6 +719,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
         runner: { icon: ActivityIcon, key: 'admin_runner_tab' },
         'api-usage': { icon: DollarIcon, key: 'admin_api_usage_tab' },
         'practice-analytics': { icon: ClipboardCheckIcon, key: 'admin_practice_analytics_tab' },
+        'connector-analytics': { icon: UsersIcon, key: 'admin_connector_analytics_tab' },
     };
 
     const sessionFeedback = useMemo(() => feedback.filter(item => item.rating !== null), [feedback]);
@@ -782,7 +786,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
     const renderTabs = () => (
         <div className="border-b border-gray-300 dark:border-gray-700 w-full min-w-0">
             <div className="flex w-full min-w-0">
-            {(['users', 'feedback', 'tickets', 'codes', ...(currentUser?.isDeveloper ? ['runner'] as AdminTab[] : []), 'practice-analytics', 'api-usage'] as AdminTab[]).map(tab => {
+            {(['users', 'feedback', 'tickets', 'codes', ...(currentUser?.isDeveloper ? ['runner'] as AdminTab[] : []), 'practice-analytics', 'connector-analytics', 'api-usage'] as AdminTab[]).map(tab => {
                 const { icon: Icon, key } = tabConfig[tab];
 
                 const hasOpenTickets = tab === 'tickets' && tickets.some(tk => tk.status === 'OPEN');
@@ -1070,6 +1074,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                             <option value="ACCESS_PASS_1M">{t('admin_codes_unlock_access_pass_1m')}</option>
                             <option value="ACCESS_PASS_3M">{t('admin_codes_unlock_access_pass_3m')}</option>
                             <option value="ACCESS_PASS_1Y">{t('admin_codes_unlock_access_pass')}</option>
+                            <option value="ACCESS_PASS_PLUS_1M">{t('admin_codes_unlock_access_pass_plus_1m')}</option>
                             <option disabled>— Features —</option>
                             <option value="big5">{t('admin_codes_unlock_big5')}</option>
                             <option disabled>— Coaches —</option>
@@ -1640,6 +1645,18 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                 />
 
                 <SimulatorToolCard
+                    icon="🔗"
+                    title={t('admin_connector_lab_title')}
+                    description={t('admin_connector_lab_desc')}
+                    note={t('admin_connector_lab_note')}
+                    actionLabel={t('admin_simulator_open')}
+                    onAction={() => {
+                        setDynamicRunnerOptions({ initialRunnerMode: 'connector_lab' });
+                        setShowDynamicTestRunner(true);
+                    }}
+                />
+
+                <SimulatorToolCard
                     icon="📋"
                     title={`${t('admin_runner_title')} ${t('admin_runner_static')}`}
                     description={t('admin_runner_desc')}
@@ -1776,6 +1793,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
             runner: currentUser?.isDeveloper ? renderTestRunner() : <p className="text-content-secondary">{t('admin_developer_required') || 'Developer access required.'}</p>,
             'api-usage': <ApiUsageView />,
             'practice-analytics': <AdminPracticeAnalyticsView />,
+            'connector-analytics': <AdminConnectorAnalyticsView />,
         };
 
         return <div className="p-2 sm:p-4 min-w-0 overflow-hidden">{views[activeTab]}</div>;
@@ -1812,6 +1830,7 @@ const AdminView: React.FC<AdminViewProps> = ({ currentUser, encryptionKey, onRun
                     </div>
                 )}
             </div>
+            <AdminMaintenancePanel />
             {renderTabs()}
             {renderContent()}
             {resetSuccessData && (

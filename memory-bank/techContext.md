@@ -15,8 +15,7 @@
 - **Mobile/Native:** Capacitor 8.x (iOS)
     - `@capacitor/core`: Native bridge
     - `@capacitor/ios`: iOS platform
-    - `@capacitor-community/native-audio`: Audio handling
-    - `@capacitor-community/speech-recognition`: Native speech recognition
+    - `@capacitor-community/speech-recognition`: listed dependency (STT uses custom `NativeSTT` in `ios/App`)
 - **PDF:** `@react-pdf/renderer` via `utils/pdfGeneratorReact.tsx`
 - **Animation:** Framer Motion (page transitions, micro-interactions, loader animations)
 - **Font:** Inter Variable (self-hosted in `public/fonts/`)
@@ -34,7 +33,7 @@
 - **Loader:** `BrandLoader` wrapper with lazy-loaded variants: `tetris`, `steering-wheel`, `dots`, `pulse`
 - **Override:** Set `VITE_BRAND_COLOR_1` to `_4`, `VITE_BRAND_ACCENT`, `VITE_BRAND_LOADER` in `.env`
 
-### iOS Audio Handling (v2.5.5)
+### iOS Audio Handling (v2.5.5+)
 - **Problem:** iOS switches to "playAndRecord" mode after microphone use, degrading TTS quality
 - **Fix 1 (Audio Session Reset):** Play silent WAV (16-bit null samples) immediately after mic stops
   - Forces iOS back to stereo/A2DP mode
@@ -42,7 +41,7 @@
 - **Fix 2 (MediaSession):** Activate/deactivate MediaSession around TTS playback
 - **TTS Mode:** iOS is forced to local Web Speech API (server TTS disabled due to autoplay restrictions)
 
-### Voice Mode Spinner (v2.5.5)
+### Voice Mode Spinner (v2.5.5+)
 - Single spinner implementation (bouncing dots)
 - Position: Bottom of screen near Play/Repeat buttons
 - States: `isLoading` (AI response) and `isLoadingAudio` (TTS loading)
@@ -52,13 +51,12 @@
 - **Platform:** iOS (Native App)
 - **IDE:** Xcode 16+
 - **Configuration:** `capacitor.config.ts`
-- **App Store:** iOS **2.5.0 (6) live** (AT/DE/CH); staging/production web **v2.5.5** (2026-08-05)
+- **App Store:** iOS **2.5.7 live** (AT/DE/CH); web **v2.6.0-b75** (Staging + Production). **2.6.0** ASC archive next — align `CURRENT_PROJECT_VERSION` with repo `BUILD_NUMBER`.
 - **Backend Target:** Production by default (`services/api.ts`), staging override via `?backend=staging`
 - **Native Plugins:**
   - `SplashScreen`: Launch screen control
   - `StatusBar`: Status bar styling
-  - `SpeechRecognition`: Native iOS speech recognition (avoids Safari limitations)
-  - `NativeAudio`: Audio session management
+  - **`NativeSTT` / `NativeTTS`**: Custom Capacitor plugins in `ios/App/App/` (voice STT/TTS + `AVAudioSession`)
   - `RevenueCat`: In-App Purchase (StoreKit 2)
 - **Compliance Pages (Nginx-served static HTML):**
   - `/privacy` → `public/privacy.html`
@@ -139,10 +137,12 @@
 
 #### Versionierung
 - **VERSION:** Semantische Version aus `package.json` (z.B. `2.0.1`)
-- **BUILD_NUMBER:** Fortlaufende Nummer in `BUILD_NUMBER` Datei (**aktuell: 35**, Staging 2026-07-24)
-- **Anzeige:** `Version 2.0.1 (Build 35)` im Burger-Menü via `VITE_BUILD_NUMBER`
-- **Service Worker:** Cache-Name enthält Version + Build (`meaningful-conversations-cache-v2.0.1-b35`)
-- **iOS:** `ios/App/CapApp-SPM/Package.swift` — Capacitor Swift PM **8.4.2** (synced 2026-07-24)
+- **BUILD_NUMBER:** Fortlaufende Nummer in `BUILD_NUMBER` Datei (**aktuell: 75**, Staging + Production 2026-11)
+- **Anzeige:** `Version 2.6.0 (Build 75)` im Burger-Menü via `VITE_BUILD_NUMBER`
+- **Service Worker:** Cache-Name enthält Version + Build (`meaningful-conversations-cache-v2.6.0-b75`)
+- **iOS:** `ios/App/CapApp-SPM/Package.swift` — Capacitor Swift PM **8.6.0** (exact in Package.swift)
+- **Stack-Updates:** Wellen und Tests — `PLANS/software-stack-update-plan.md`
+- **iOS plugin patches (2026-11-09 W2):** Vendor patches **removed** — `@capacitor/filesystem` 8.1.5 and `@revenuecat/purchases-capacitor` 13.8.0 ship the fixes upstream. `postinstall` still runs `patch-package` when present; `patches/` may be empty.
 
 **⚠️ KRITISCH: BUILD_NUMBER bei Versionswechsel zurücksetzen!**
 ```
@@ -169,7 +169,10 @@ make update-version  # Aktualisiert alle Dateien
 ```bash
 cd meaningful-conversations-backend
 npx prisma migrate dev --name beschreibender_name
+npx prisma generate   # Prisma 7: explicit after migrate
 ```
+
+**Prisma 7:** `prisma.config.ts`, `@prisma/adapter-mariadb`, Client in `generated/prisma` (`postinstall` / Docker build). CLI needs `DATABASE_URL` (or placeholder at generate-only).
 
 **Automatische Anwendung:** Backend-Container führt `prisma migrate deploy` beim Start aus.
 

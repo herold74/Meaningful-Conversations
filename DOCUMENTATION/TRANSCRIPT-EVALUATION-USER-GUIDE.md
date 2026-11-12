@@ -218,10 +218,20 @@ Das exportierte PDF enthält:
 
 ### Was passiert mit meinen Daten?
 
-- ✅ **Transkripte** werden zur Analyse an die AI (Google Gemini) gesendet, aber **nicht auf dem Server gespeichert**.
+- ✅ **Transkripte** werden zur Auswertung an einen KI-Anbieter gesendet (siehe **KI-Anbieter** unten), aber **nicht auf dem Server gespeichert**.
 - ✅ **Auswertungen** (Ergebnisse) werden in Ihrer persönlichen Datenbank gespeichert.
 - ✅ **Persönlichkeitsprofil** wird Ende-zu-Ende verschlüsselt übertragen.
 - ✅ **PDFs** werden lokal in Ihrem Browser generiert (keine Server-Speicherung).
+
+### KI-Anbieter (Transkript-Workflow)
+
+| Schritt | Anbieter | Hinweis |
+|--------|----------|---------|
+| **Audio-Transkription** | immer **Google Gemini** | Auch wenn Sie EU/Mistral als bevorzugten Anbieter gewählt haben |
+| **Transkript glätten** | Ihre **KI-Region-Einstellung** | Optimal → Admin-Standard; EU → Mistral (Paris); US → Google |
+| **Transkript-Auswertung** | Ihre **KI-Region-Einstellung** | Gleiche Logik wie Glättung; Mistral nutzt schema-validiertes JSON |
+
+Die Einstellung finden Sie unter **Profil → KI-Region** (`optimal`, `eu`, `us`). Details auch im Handbuch (Audio-Transkription) und in `tr_gemini_hint` in der App.
 
 ### Wer kann meine Auswertungen sehen?
 
@@ -331,11 +341,13 @@ Das exportierte PDF enthält:
 
 ## 🛠️ Technische Details (für Interessierte)
 
-- **AI-Modell**: Google Gemini 2.5 Pro
-- **Analyse-Framework**: Strukturierte JSON-Schema-basierte Auswertung
-- **Persönlichkeitsmodelle**: Riemann-Thomann, Big Five, Spiral Dynamics
-- **PDF-Generator**: @react-pdf/renderer (client-side)
-- **Verschlüsselung**: AES-256-GCM (Persönlichkeitsprofil)
+- **Analyse-Modell (Google):** Gemini 2.5 Pro (wenn Google-Route aktiv)
+- **Analyse-Modell (EU):** Mistral (z. B. mistral-medium-latest) mit `json_schema` strict mode
+- **Routing:** `aiRegionPreference` (Profil) + Admin-`AI_PROVIDER` bei „optimal“
+- **Analyse-Framework:** Strukturierte JSON-Schema-basierte Auswertung
+- **Persönlichkeitsmodelle:** Riemann-Thomann, Big Five, Spiral Dynamics
+- **PDF-Generator:** @react-pdf/renderer (client-side)
+- **Verschlüsselung:** AES-256-GCM (Persönlichkeitsprofil)
 
 ---
 

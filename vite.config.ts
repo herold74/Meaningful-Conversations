@@ -17,6 +17,9 @@ export default defineConfig(({ mode }) => {
   // loadEnv loads .env, .env.local, .env.[mode], .env.[mode].local
   // Needed so brand plugin gets VITE_BRAND_* from .env.local (e.g. cp brands/w4f.env .env.local)
   const env = loadEnv(mode, process.cwd(), '');
+  // Same mapping as Podman frontend build (deploy-manualmode.sh REVENUECAT_IOS_KEY build-arg)
+  const revenueCatIosKey =
+    process.env.VITE_REVENUECAT_IOS_KEY || env.REVENUECAT_IOS_KEY || '';
 
   return {
   plugins: [
@@ -27,6 +30,7 @@ export default defineConfig(({ mode }) => {
   define: {
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.VITE_APP_VERSION || pkg.version),
     'import.meta.env.VITE_BUILD_NUMBER': JSON.stringify(process.env.VITE_BUILD_NUMBER || buildNumber),
+    'import.meta.env.VITE_REVENUECAT_IOS_KEY': JSON.stringify(revenueCatIosKey),
   },
   publicDir: 'public', // Ensures public assets are copied to dist during build
   server: {

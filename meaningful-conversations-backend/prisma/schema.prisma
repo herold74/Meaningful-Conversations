@@ -1,10 +1,11 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  output       = "../generated/prisma"
+  engineType   = "library"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -298,4 +299,48 @@ model PracticeEvaluation {
   @@index([userId])
   @@index([createdAt])
   @@map("practice_evaluations")
+}
+
+/// Anonymized Connector run scores for GDPR-safe admin aggregates (no userId, no text).
+model ConnectorRunStat {
+  id                       String   @id @default(cuid())
+  runMode                  String   @default("assessment")
+  overallScore             Int?
+  empathy                  Int?
+  presence                 Int?
+  curiosity                Int?
+  nonJudgment              Int?
+  steadiness               Int?
+  vignetteIds              Json
+  endTypes                 Json
+  lengthPreset             String?
+  relationshipBucket       String?
+  developmentFieldsTouched Json?
+  language                 String   @default("de") @map("lang")
+  liveMode                 Boolean  @default(false)
+  createdAt                DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("connector_run_stats")
+}
+
+/// Scheduled maintenance windows (public notice + admin-managed).
+model MaintenanceWindow {
+  id         String    @id @default(cuid())
+  startsAt   DateTime
+  endsAt     DateTime
+  announceAt DateTime
+  titleDe    String    @db.VarChar(200)
+  titleEn    String    @db.VarChar(200)
+  bodyDe     String    @db.Text
+  bodyEn     String    @db.Text
+  createdBy  String?
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([announceAt])
+  @@index([startsAt])
+  @@index([archivedAt])
+  @@map("maintenance_windows")
 }

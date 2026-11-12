@@ -75,6 +75,21 @@ const SCENARIOS = [
     },
   },
   {
+    id: 'partnership-intimacy-distance',
+    coacheeName: { en: 'Sarah', de: 'Sarah' },
+    coacheeGender: 'female',
+    avatar: '/avatars/chloe.png',
+    concern: {
+      en: 'Feels emotionally distant from their partner after years together — they function as a team but miss closeness and are ashamed to bring it up.',
+      de: 'Fühlt sich nach vielen Jahren emotional von der Partnerin entfernt — sie funktionieren als Team, aber Nähe fehlt, und sie schämt sich, das anzusprechen.',
+    },
+    emotionalTone: { en: 'lonely, guilty, hesitant', de: 'einsam, schuldig, zögernd' },
+    hiddenAgenda: {
+      en: 'Believes if they ask for more intimacy they will be rejected or seen as needy.',
+      de: 'Glaubt, beim Wunsch nach mehr Nähe abgewiesen zu werden oder als bedürftig zu gelten.',
+    },
+  },
+  {
     id: 'overwhelm',
     coacheeName: { en: 'Thomas', de: 'Thomas' },
     coacheeGender: 'male',
