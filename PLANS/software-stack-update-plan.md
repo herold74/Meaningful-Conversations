@@ -271,3 +271,17 @@ Jede Welle: kurzer Eintrag in `memory-bank/activeContext.md` (Datum, Version, Er
 ---
 
 **Maintainer:** Projekt-Owner + Agent nach Freigabe pro Welle.
+
+---
+
+## 10. Freitagsroutine (SW-Stack-Mail)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Cron** | Root, `CRON_TZ=Europe/Vienna`, **Fr 20:00** → `/usr/local/bin/sw-stack-ops-report.sh` |
+| **Ops-Mail MC** | Täglich 07:30 Host/Backup — bleibt getrennt |
+| **Tracker** | `stack-package-tracker.json` — `qaEffort` (leicht/mittel/hoch), Risiko, Features, Abhängigkeiten (konkrete Tests) |
+| **npm** | Git-Shallow-Clone + Podman; Tabelle via `sw-stack-merge-table.jq`; Major → WARN |
+| **Doku** | `scripts/MONITORING-QUICK-REFERENCE.md` § Software-Stack |
+
+Manuell: `--dry-run`, `--skip-npm-scan` (ohne Container-Scan). Empfänger wie MC-Ops (`/root/.mc-ops-report.env`).
