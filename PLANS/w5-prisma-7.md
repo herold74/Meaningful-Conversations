@@ -1,6 +1,6 @@
 # W5 — Prisma ORM 7.10.1
 
-**Status:** Implementiert auf Branch (noch kein Staging-Deploy / keine neue Migration).
+**Status:** Gemerged `bc472147`, Staging-Backend deploy OK (2026-11-11).
 
 ## Pakete
 
@@ -24,8 +24,9 @@ Keine neuen SQL-Migrationen in W5 — nur Runtime/CLI-Upgrade. Staging: `prisma 
 ## Gates
 
 - [x] Backend Jest **862**
-- [ ] Staging Backend deploy + `/api/health`, Login, kurze Session
-- [ ] `prisma migrate status` im Staging-Container
+- [x] Staging Backend deploy + `/api/health` `database: connected`
+- [x] Login (User-Lookup) + `GET /api/ai-model-mapping` (AppConfig)
+- [x] `prisma migrate status` → 32 migrations, schema up to date (CLI 7.10.1 im Image)
 - [ ] Soak ~72h (Plan)
 
 ## Rollback

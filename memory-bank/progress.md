@@ -222,7 +222,8 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Repo `BUILD_NUMBER`:** **76**. **Staging:** v**2.6.0** Build **76** (W2 deploy 2026-11-09, `sw.js` b76). **Production:** Build **75** bis W2-Prod.
+- **Repo `BUILD_NUMBER`:** **78**. **Staging:** v**2.6.0** **b78** (W6 React 19). **Production:** **b77** (Prod-Pull W6 ausstehend).
+- [x] **SW-Stack Freitags-Mail (2026-11-12):** `sw-stack-ops-report.sh` Fr 20:00 — Tabelle Patches/Risiko/QA/Abhängigkeiten + `npm outdated` (siehe `scripts/MONITORING-QUICK-REFERENCE.md`)
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
 - [x] **Stack watchdog (2026-10-14):** `mc-stack-watchdog.timer` (~3 min) recreates wedged backends + refreshes nginx IPs; ops-report surfaces 502/unhealthy with HANDLUNG
