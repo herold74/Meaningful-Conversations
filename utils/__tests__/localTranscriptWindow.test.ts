@@ -1,4 +1,4 @@
-import { fitLocalTranscriptWindow, ON_DEVICE_CHARS_PER_TOKEN, ON_DEVICE_CONTEXT_TOKENS, ON_DEVICE_RESPONSE_TOKENS } from '../localTranscriptWindow';
+import { fitLocalTranscriptWindow, ON_DEVICE_CHARS_PER_TOKEN, ON_DEVICE_CONTEXT_TOKENS, ON_DEVICE_RESPONSE_TOKENS, canTranscribeRecordingLocally, LOCAL_TRANSCRIBE_MAX_SECONDS } from '../localTranscriptWindow';
 import { parseLocalTranscriptReview } from '../transcriptLocalEval';
 
 describe('local transcript window', () => {
@@ -22,6 +22,14 @@ describe('local transcript window', () => {
     expect(window.omittedChars).toBe(4);
     expect(window.omittedPreview).toBe('ENDE');
     expect(window.kept.endsWith('A')).toBe(true);
+  });
+
+  test('allows local transcription only up to one minute', () => {
+    expect(LOCAL_TRANSCRIBE_MAX_SECONDS).toBe(60);
+    expect(canTranscribeRecordingLocally(59)).toBe(true);
+    expect(canTranscribeRecordingLocally(60)).toBe(true);
+    expect(canTranscribeRecordingLocally(61)).toBe(false);
+    expect(canTranscribeRecordingLocally(null)).toBe(false);
   });
 
   test('parses the compact local review', () => {

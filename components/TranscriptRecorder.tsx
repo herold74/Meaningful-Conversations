@@ -1,10 +1,11 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { transcribeAudio, smoothTranscript } from '../services/geminiService';
 import { transcribeAudioOnDevice } from '../services/onDeviceTranscript';
 import { ApiError } from '../services/api';
 import { isFetchNetworkFailure } from '../utils/fetchNetworkError';
+import { ON_DEVICE_CONTEXT_TOKENS, LOCAL_TRANSCRIBE_MAX_SECONDS, canTranscribeRecordingLocally } from '../utils/localTranscriptWindow';
 import { downloadTextFile } from '../utils/fileDownload';
 import { Language } from '../types';
 import ReactMarkdown from 'react-markdown';
@@ -43,6 +44,39 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
     const [isTranscribing, setIsTranscribing] = useState(false);
     const [transcribeError, setTranscribeError] = useState<string | null>(null);
     const [onDeviceNote, setOnDeviceNote] = useState<string | null>(null);
+    const [offlineChoice, setOfflineChoice] = useState(false);
+    const [savedForLater, setSavedForLater] = useState(false);
+    const [mediaDuration, setMediaDuration] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (recorder.audioBlob) {
+            setMediaDuration(recorder.duration);
+            return;
+        }
+        if (!audioFile) {
+            setMediaDuration(null);
+            return;
+        }
+        const url = URL.createObjectURL(audioFile);
+        const audio = document.createElement('audio');
+        audio.preload = 'metadata';
+        let cancelled = false;
+        audio.onloadedmetadata = () => {
+            if (!cancelled) setMediaDuration(Number.isFinite(audio.duration) ? audio.duration : null);
+        };
+        audio.onerror = () => {
+            if (!cancelled) setMediaDuration(null);
+        };
+        audio.src = url;
+        return () => {
+            cancelled = true;
+            URL.revokeObjectURL(url);
+        };
+    }, [audioFile, recorder.audioBlob, recorder.duration]);
+
+    const localTranscriptionFits = canTranscribeRecordingLocally(
+        recorder.audioBlob ? recorder.duration : mediaDuration,
+    );
 
     // Transcript state
     const [transcript, setTranscript] = useState('');
@@ -131,58 +165,95 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
         return speakers;
     }, [language]);
 
-    const handleTranscribe = useCallback(async () => {
-        if (!audioSource) return;
+    const applyCloudTranscript = useCallback((text: string) => {
+        const speakers = parseSpeakersFromTranscript(text);
+        setOnDeviceNote(null);
+        setOfflineChoice(false);
+        setSavedForLater(false);
+        if (speakers.length > 0) {
+            setRawTranscript(text);
+            setDetectedSpeakers(speakers);
+            const initialMap: Record<string, string> = {};
+            speakers.forEach(s => { initialMap[s.label] = ''; });
+            setSpeakerMap(initialMap);
+            setStep('speakerMap');
+        } else {
+            setTranscript(text);
+            setStep('choice');
+        }
+    }, [parseSpeakersFromTranscript]);
 
+    const audioIsLongEnough = useCallback(() => {
         const MIN_AUDIO_BYTES = 10000;
         const MIN_RECORD_SECONDS = 3;
+        if (!audioSource) return false;
         if (audioSource.size < MIN_AUDIO_BYTES) {
             setTranscribeError(t('te_input_audio_too_short'));
-            return;
+            return false;
         }
         if (recorder.audioBlob && recorder.duration < MIN_RECORD_SECONDS) {
             setTranscribeError(t('te_input_audio_too_short'));
+            return false;
+        }
+        return true;
+    }, [audioSource, recorder.audioBlob, recorder.duration, t]);
+
+    const handleTranscribeOnDevice = useCallback(async () => {
+        if (!audioSource || !audioIsLongEnough() || !localTranscriptionFits) return;
+        setIsTranscribing(true);
+        setTranscribeError(null);
+        setOfflineChoice(false);
+        try {
+            const text = await transcribeAudioOnDevice(audioSource, language);
+            setTranscript(text);
+            setOnDeviceNote(t('te_record_ondevice'));
+            setSavedForLater(false);
+            setStep('choice');
+        } catch {
+            setOfflineChoice(true);
+            setTranscribeError(t('te_record_ondevice_failed'));
+        } finally {
+            setIsTranscribing(false);
+        }
+    }, [audioSource, audioIsLongEnough, language, localTranscriptionFits, t]);
+
+    const handleTranscribeLater = useCallback(() => {
+        setOfflineChoice(false);
+        setSavedForLater(true);
+        setTranscribeError(null);
+        setOnDeviceNote(null);
+    }, []);
+
+    const handleTranscribe = useCallback(async () => {
+        if (!audioSource || !audioIsLongEnough()) return;
+
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            setOfflineChoice(true);
+            setSavedForLater(false);
+            setTranscribeError(null);
             return;
         }
 
         setIsTranscribing(true);
         setTranscribeError(null);
+        setOfflineChoice(false);
 
         try {
             const result = await transcribeAudio(audioSource, language, speakerHint || undefined);
-            const speakers = parseSpeakersFromTranscript(result.transcript);
-            setOnDeviceNote(null);
-
-            if (speakers.length > 0) {
-                setRawTranscript(result.transcript);
-                setDetectedSpeakers(speakers);
-                const initialMap: Record<string, string> = {};
-                speakers.forEach(s => { initialMap[s.label] = ''; });
-                setSpeakerMap(initialMap);
-                setStep('speakerMap');
-            } else {
-                setTranscript(result.transcript);
-                setStep('choice');
-            }
-        } catch (err: any) {
+            applyCloudTranscript(result.transcript);
+        } catch (err: unknown) {
             const offline = (err instanceof ApiError && err.isNetworkError) || isFetchNetworkFailure(err);
             if (offline) {
-                try {
-                    const text = await transcribeAudioOnDevice(audioSource, language);
-                    setTranscript(text);
-                    setOnDeviceNote(t('te_record_ondevice'));
-                    setStep('choice');
-                    return;
-                } catch {
-                    setTranscribeError(t('te_record_ondevice_failed'));
-                    return;
-                }
+                setOfflineChoice(true);
+                setSavedForLater(false);
+                return;
             }
-            setTranscribeError(err.message || t('te_input_audio_error'));
+            const message = err instanceof Error ? err.message : '';
+            setTranscribeError(message || t('te_input_audio_error'));
         } finally {
             setIsTranscribing(false);
         }
-    }, [audioSource, language, speakerHint, parseSpeakersFromTranscript, t, recorder.audioBlob, recorder.duration]);
+    }, [audioSource, audioIsLongEnough, language, speakerHint, applyCloudTranscript, t]);
 
     const applySpeakerNames = useCallback(() => {
         let text = rawTranscript;
@@ -482,6 +553,9 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
             </button>
 
             <h2 className="text-2xl font-bold text-content-primary mb-2">{t('tr_title')}</h2>
+            <p className="text-sm text-content-secondary leading-relaxed mb-4">
+                {t('te_local_duration_hint', { minutes: LOCAL_TRANSCRIBE_MAX_SECONDS / 60 })}
+            </p>
             <p className="text-content-secondary mb-6">{t('tr_record_subtitle')}</p>
 
             {/* Mode buttons */}
@@ -678,6 +752,37 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                         </select>
                     </div>
 
+                    {offlineChoice ? (
+                        <div className="rounded-lg border border-accent-primary/30 bg-accent-primary/5 p-4 text-left space-y-3">
+                            <p className="text-sm font-semibold text-content-primary">{t('te_offline_choice_title')}</p>
+                            <p className="text-sm text-content-secondary leading-relaxed">
+                                {localTranscriptionFits
+                                    ? t('te_offline_choice_limits', {
+                                        minutes: LOCAL_TRANSCRIBE_MAX_SECONDS / 60,
+                                        tokens: ON_DEVICE_CONTEXT_TOKENS,
+                                    })
+                                    : t('te_offline_choice_too_long', { minutes: LOCAL_TRANSCRIBE_MAX_SECONDS / 60 })}
+                            </p>
+                            {localTranscriptionFits && (
+                            <button
+                                type="button"
+                                onClick={handleTranscribeOnDevice}
+                                disabled={isTranscribing}
+                                className="w-full py-3 rounded-lg font-semibold bg-accent-primary text-white"
+                            >
+                                {isTranscribing ? t('te_input_audio_transcribing') : t('te_offline_choice_local')}
+                            </button>
+                            )}
+                            <button
+                                type="button"
+                                onClick={handleTranscribeLater}
+                                disabled={isTranscribing}
+                                className="w-full py-3 rounded-lg font-semibold border border-border-primary text-content-primary"
+                            >
+                                {t('te_offline_choice_later')}
+                            </button>
+                        </div>
+                    ) : (
                     <button
                         onClick={handleTranscribe}
                         disabled={isTranscribing || (!!recorder.audioBlob && recorder.duration < 3) || (!!audioSource && audioSource.size < 10000)}
@@ -695,12 +800,16 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                                 <span className="text-sm leading-tight max-w-[170px]">{t('te_input_audio_transcribing')}</span>
                             </div>
                         ) : (
-                            t('te_input_audio_transcribe')
+                            savedForLater ? t('te_offline_choice_retry_online') : t('te_input_audio_transcribe')
                         )}
                     </button>
+                    )}
                 </div>
             )}
 
+            {savedForLater && !offlineChoice && (
+                <p className="mt-3 text-sm text-content-secondary text-center">{t('te_offline_saved')}</p>
+            )}
             {onDeviceNote && (
                 <p className="mt-3 text-sm text-content-secondary text-center">{onDeviceNote}</p>
             )}

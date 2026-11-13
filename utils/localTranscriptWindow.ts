@@ -7,6 +7,13 @@ export const ON_DEVICE_CONTEXT_TOKENS = 4096;
 export const ON_DEVICE_CHARS_PER_TOKEN = 3;
 export const ON_DEVICE_RESPONSE_TOKENS = 600;
 
+/** Apple's on-device speech recognizer transcribes about one minute. Longer recordings stay on the phone and go online. */
+export const LOCAL_TRANSCRIBE_MAX_SECONDS = 60;
+
+export function canTranscribeRecordingLocally(durationSeconds: number | null): boolean {
+  return durationSeconds !== null && durationSeconds > 0 && durationSeconds <= LOCAL_TRANSCRIBE_MAX_SECONDS;
+}
+
 export interface LocalTranscriptWindow {
   kept: string;
   keptChars: number;
