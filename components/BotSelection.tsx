@@ -494,6 +494,7 @@ const TranscriptToolsTile: React.FC<TranscriptToolsTileProps> = ({
                   : t('botSelection_client_required')}
             </p>
           )}
+          {!evalLocked && <LocalModelSwitch feature="transcript" />}
         </div>
       </div>
     </motion.div>

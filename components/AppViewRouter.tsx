@@ -3,6 +3,11 @@ import { Bot, Message, User, GamificationState, NavView, SessionAnalysis, Langua
 import * as api from '../services/api';
 import * as userService from '../services/userService';
 import * as geminiService from '../services/geminiService';
+import { ApiError } from '../services/api';
+import { isFetchNetworkFailure } from '../utils/fetchNetworkError';
+import { getLocalModelMode } from '../utils/localModelMode';
+import { isOnDeviceModelAvailable } from '../services/nativeLlmService';
+import { evaluateTranscriptLocally } from '../utils/transcriptLocalEval';
 import { serializeGamificationState } from '../utils/gamificationSerializer';
 import { generatePDF, generateSurveyPdfFilename } from '../utils/pdfGeneratorReact';
 import { decryptPersonalityProfile } from '../utils/personalityEncryption';
@@ -1110,7 +1115,21 @@ const AppViewRouter: React.FC<AppViewRouterProps> = (props) => {
               }
             } catch {}
           }
-          const result = await geminiService.evaluateTranscript(tePreAnswers, transcript, language, profile);
+          const runEvaluation = async () => {
+            if (getLocalModelMode('transcript') === 'local') {
+              return evaluateTranscriptLocally({ preAnswers: tePreAnswers, transcript, language });
+            }
+            try {
+              return await geminiService.evaluateTranscript(tePreAnswers, transcript, language, profile);
+            } catch (error) {
+              const offline = (error instanceof ApiError && error.isNetworkError) || isFetchNetworkFailure(error);
+              if (offline && await isOnDeviceModelAvailable(language)) {
+                return evaluateTranscriptLocally({ preAnswers: tePreAnswers, transcript, language });
+              }
+              throw error;
+            }
+          };
+          const result = await runEvaluation();
           setTeEvaluation({ ...result.evaluation, id: result.id });
           setTeStep('review');
         } catch (error) {

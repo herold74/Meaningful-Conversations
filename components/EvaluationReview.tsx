@@ -169,6 +169,16 @@ const EvaluationReview: React.FC<EvaluationReviewProps> = ({ evaluation, preAnsw
                     <span className="text-xl text-content-secondary font-normal">/{10}</span>
                 </div>
                 <p className="text-sm text-content-secondary mt-3 max-w-lg mx-auto">{evaluation.summary}</p>
+                {evaluation.localWindow && evaluation.localWindow.omittedChars > 0 && (
+                    <p className="text-sm text-content-primary mt-4 max-w-lg mx-auto text-left bg-background-primary/60 rounded-lg px-3 py-2">
+                        {t('te_local_omitted', {
+                            kept: evaluation.localWindow.keptChars,
+                            total: evaluation.localWindow.totalChars,
+                            omitted: evaluation.localWindow.omittedChars,
+                            preview: evaluation.localWindow.omittedPreview || '…',
+                        })}
+                    </p>
+                )}
             </div>
 
             {/* Goal Alignment */}

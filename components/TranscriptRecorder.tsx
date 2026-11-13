@@ -2,6 +2,9 @@ import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { useLocalization } from '../context/LocalizationContext';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { transcribeAudio, smoothTranscript } from '../services/geminiService';
+import { transcribeAudioOnDevice } from '../services/onDeviceTranscript';
+import { ApiError } from '../services/api';
+import { isFetchNetworkFailure } from '../utils/fetchNetworkError';
 import { downloadTextFile } from '../utils/fileDownload';
 import { Language } from '../types';
 import ReactMarkdown from 'react-markdown';
@@ -39,6 +42,7 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
     const [speakerHint, setSpeakerHint] = useState<number>(0);
     const [isTranscribing, setIsTranscribing] = useState(false);
     const [transcribeError, setTranscribeError] = useState<string | null>(null);
+    const [onDeviceNote, setOnDeviceNote] = useState<string | null>(null);
 
     // Transcript state
     const [transcript, setTranscript] = useState('');
@@ -147,6 +151,7 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
         try {
             const result = await transcribeAudio(audioSource, language, speakerHint || undefined);
             const speakers = parseSpeakersFromTranscript(result.transcript);
+            setOnDeviceNote(null);
 
             if (speakers.length > 0) {
                 setRawTranscript(result.transcript);
@@ -160,6 +165,19 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                 setStep('choice');
             }
         } catch (err: any) {
+            const offline = (err instanceof ApiError && err.isNetworkError) || isFetchNetworkFailure(err);
+            if (offline) {
+                try {
+                    const text = await transcribeAudioOnDevice(audioSource, language);
+                    setTranscript(text);
+                    setOnDeviceNote(t('te_record_ondevice'));
+                    setStep('choice');
+                    return;
+                } catch {
+                    setTranscribeError(t('te_record_ondevice_failed'));
+                    return;
+                }
+            }
             setTranscribeError(err.message || t('te_input_audio_error'));
         } finally {
             setIsTranscribing(false);
@@ -683,6 +701,9 @@ const TranscriptRecorder: React.FC<TranscriptRecorderProps> = ({ onBack, onSubmi
                 </div>
             )}
 
+            {onDeviceNote && (
+                <p className="mt-3 text-sm text-content-secondary text-center">{onDeviceNote}</p>
+            )}
             {transcribeError && (
                 <p className="mt-3 text-sm text-red-500 text-center">{transcribeError}</p>
             )}

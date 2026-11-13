@@ -1,4 +1,4 @@
-export type LocalModelFeature = 'sam' | 'connector';
+export type LocalModelFeature = 'sam' | 'connector' | 'transcript';
 export type LocalModelMode = 'local' | 'online';
 
 const KEY = 'mc_local_model_mode_v1';

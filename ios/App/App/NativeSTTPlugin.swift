@@ -13,7 +13,8 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "start", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "stop", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "isAvailable", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "requestPermission", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "requestPermission", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "transcribeFile", returnType: CAPPluginReturnPromise)
     ]
     
     // MARK: - Properties
@@ -99,6 +100,56 @@ public class NativeSTTPlugin: CAPPlugin, CAPBridgedPlugin {
         print("[NativeSTT] stop() called")
         stopRecognition()
         call.resolve()
+    }
+
+    /// On-device transcription of a recording. Used when the cloud transcribe call cannot run.
+    @objc func transcribeFile(_ call: CAPPluginCall) {
+        let rawPath = call.getString("path") ?? ""
+        let language = call.getString("language") ?? "de-DE"
+        let url: URL
+        if rawPath.hasPrefix("file:") {
+            guard let parsed = URL(string: rawPath) else {
+                call.reject("Invalid audio path")
+                return
+            }
+            url = parsed
+        } else {
+            url = URL(fileURLWithPath: rawPath)
+        }
+
+        SFSpeechRecognizer.requestAuthorization { status in
+            guard status == .authorized else {
+                call.reject("Speech recognition permission denied")
+                return
+            }
+            guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: language)), recognizer.isAvailable else {
+                call.reject("On-device speech recognition is unavailable")
+                return
+            }
+            guard recognizer.supportsOnDeviceRecognition else {
+                call.reject("On-device speech recognition is unavailable for this language")
+                return
+            }
+            let request = SFSpeechURLRecognitionRequest(url: url)
+            request.requiresOnDeviceRecognition = true
+            request.shouldReportPartialResults = true
+            let lock = NSLock()
+            var settled = false
+            recognizer.recognitionTask(with: request) { result, error in
+                lock.lock()
+                defer { lock.unlock() }
+                if settled { return }
+                if let result, result.isFinal {
+                    settled = true
+                    call.resolve(["text": result.bestTranscription.formattedString])
+                    return
+                }
+                if error != nil && result == nil {
+                    settled = true
+                    call.reject("On-device transcription failed")
+                }
+            }
+        }
     }
     
     // MARK: - Microphone Permission Helpers (iOS 17+ / legacy)

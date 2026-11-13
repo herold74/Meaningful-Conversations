@@ -240,6 +240,13 @@ export interface TranscriptEvaluationResult {
     botRecommendations?: BotRecommendation[];
     contextUpdates: ProposedUpdate[];
     overallScore: number; // 1-10
+    /** Set when the on-device model evaluated the transcript. The model reads from the start; the tail is what no longer fits. */
+    localWindow?: {
+        keptChars: number;
+        omittedChars: number;
+        totalChars: number;
+        omittedPreview: string;
+    };
     // User rating fields
     id?: string;
     userRating?: number | null;
