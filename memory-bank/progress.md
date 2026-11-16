@@ -244,8 +244,8 @@
     - [x] Apple Review compliance (Guideline 3.1.2c — EULA/Terms links)
     - [x] Static compliance pages (`privacy.html`, `support.html`, `terms.html`)
     - [x] Test account for Apple Review (`premium@manualmode.at` on production)
-    - [ ] App Store Connect IAP product setup (subscriptions + non-consumables)
-    - [ ] Apple Server Notifications URL in App Store Connect
+    - [x] App Store Connect IAP products (subscriptions + non-consumables) — live, RevenueCat-parity (Review 2.5.7+)
+    - [x] Apple Server Notifications URL in App Store Connect (Production + Sandbox)
 - [ ] **Android Integration:**
     - [ ] Project setup (Android Studio)
 
@@ -260,8 +260,8 @@
     - [x] Apple Server Notifications v2 (`/api/apple-iap/notification`)
     - [x] Frontend native paywall (`NativePaywall.tsx`)
     - [x] Restore Purchases functionality
-    - [ ] App Store Connect product setup (subscriptions + non-consumables)
-    - [ ] Apple Server Notifications URL in App Store Connect
+    - [x] App Store Connect product setup (siehe Mobile — live seit 2.5.7 / 2.6.0)
+    - [x] Apple Server Notifications URL (backend `/api/apple-iap/notification` angebunden)
 - [ ] **Registered Monthly Subscription:** 3.90 EUR/month (PayPal Subscriptions API)
 - [x] **Upgrade Discounts:** Loyalty pricing + bot credit in purchase.js (LOYALTY_PRICES, BOT_CREDIT)
 
@@ -276,10 +276,10 @@
 ## Pending / Roadmap
 - [x] **Software-Stack W1–W6:** abgeschlossen (Prod/Staging **2.6.0 b78**; Details `PLANS/software-stack-update-plan.md`, PRs #24–#30).
 - [x] **Express 5 + Vite 8:** #32 / #33 merged auf `main` — bei Auffälligkeiten Smoke/CI, kein weiterer Bulk-Merge ohne Test.
-- [ ] **2.7.0 / PR #31** (offline Sam & Connector): offen bis Konfliktfix + `npm run ci` + iOS-Gerätetest + Staging — **kein Merge ohne Regression**.
+- [ ] **3.0.0 / PR #31** (offline Sam & Connector, Major): offen bis Konfliktfix + `npm run ci` + iOS-Gerätetest + Staging — **kein Merge ohne Regression**. (Kein 2.7.0-Line-Release.)
 - [x] **Software-Stack W3:** `@google/genai` 2.32, `@mistralai` 2.7; Regression `PLANS/w3-regression-results.md`.
 - [x] **Krisen-Hilfsangebote region-aware** *(2026-08-23)*: Kuratierter Katalog AT/DE/CH/CA in `crisisResources.js` (keine LLM-Nummern). `crisisText.js` injiziert die Liste; AT nicht mehr als Default für alle Länder. Doku: `DOCUMENTATION/CRISIS-HELPLINES.md`. 3-Schritt-Protokoll (Verify → Region → Activate) unverändert.
-- [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
+- [x] **iOS IAP Products in ASC** — Setup abgeschlossen (Veröffentlichung 2.6.0); offen nur **neue Version 3.0.0** in ASC wenn PR #31 ready
 - [ ] **Android:** Capacitor project setup (Android Studio)
 - [ ] **Apple Watch Integration:** watchOS Companion-App (natives Swift/SwiftUI, WatchConnectivity). Kein Capacitor-Support auf watchOS — Watch-App muss nativ in Xcode gebaut werden.
   - **MVP (Einstieg):** watchOS Extension im bestehenden Xcode-Projekt anlegen; WatchConnectivity überträgt Daily Prompt + Streak-Daten vom iPhone zur Watch; Complication zeigt Streak + Tagesfrage auf dem Zifferblatt; APNs-Notification mit Coaching-Impuls.

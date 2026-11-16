@@ -4,11 +4,11 @@
 
 | Ebene | Stand |
 |--------|--------|
-| **Git `main`** | `7aeb85ad` — u. a. Vite 8 + Express 5 (#33, #32) |
+| **Git `main`** | `27ff0f66`+ — u. a. Vite 8 + Express 5 (#33, #32) |
 | **Production / Staging** | **v2.6.0 b78**, Health 200, DB connected (`mc-app` / `mc-beta`) |
-| **Lokal** | Änderungen **2.7.0 b1 + Deploy-Safeguards** in `git stash` (`local-2.7.0-and-deploy-safeguards`) — nicht auf `main` |
+| **Lokal** | Deploy-Safeguards (+ veralteter 2.7.0-Bump) im Stash `local-2.7.0-and-deploy-safeguards` — **nicht** mit PR #31 verwechseln |
 | **App Store iOS** | **2.6.0** live (AT/DE/CH) |
-| **2.7.0 Release** | Feature-Linie (offline Sam/Connector) in **PR #31** — **nicht mergen ohne Regressions-Gate** (siehe unten) |
+| **Release 3.0.0** | **PR #31** — offline Sam/Connector (Major); **nicht mergen ohne Regressions-Gate** |
 
 **Standing rule:** Kein Staging-Login / E2EE-Wartung ohne explizite Bitte. Prod-Deploy nur auf ausdrückliche Freigabe (Decision **#34** nach 13.11.-Outage).
 
@@ -18,7 +18,7 @@
 
 ## Production-Incident (2026-11-13) — Kurz
 
-2.7.0-Deploy: Registry **403**, Stack down → Rollback **2.6.0 b78**. Watchdog/Deploy-Härtungen in lokalem Stash (noch nicht committed). Montags Prod-Pull **aus**.
+Fehlgeschlagener Server-Deploy mit `VERSION=2.7.0` (Minor-Bump, **nicht** Release 3.0.0 / PR #31): Registry **403**, Stack down → Rollback **2.6.0 b78**. Watchdog/Deploy-Härtungen im Stash (noch nicht committed). Montags Prod-Pull **aus**.
 
 ---
 
@@ -41,14 +41,14 @@ Laufend: Freitags-SW-Mail + npm-Patches nach Plan (`PLANS/software-stack-update-
 
 ## Offene PRs (1)
 
-### #31 — Sam & Connector offline (iPhone, 2.7.0)
+### #31 — Release **3.0.0**: Sam & Connector offline (iPhone)
 
 - **Status:** OPEN, **Merge-Konflikte** zu `main` (`CONFLICTING`).
 - **Policy:** **Kein Merge ohne Regression** — Gate:
   1. Konflikte lösen (Worktree `mc-xcode-pr-31` / Branch `cursor/iphone-offline-sam-connector-db4d`).
   2. `npm run ci` (Frontend + Backend).
   3. Manuell: iOS-Gerät (Apple Intelligence EU), Login offline, Sam/Connector, LC-Sync, Connector-Save.
-  4. Staging-Deploy + Smoke; **kein Prod** bis Freigabe + Registry-Images für 2.7.0.
+  4. Staging-Deploy + Smoke; **kein Prod** bis Freigabe + Registry-Images für **3.0.0**.
 - PR bleibt offen, bis Gate grün — bewusst **nicht** blind mergen.
 
 Alle übrigen Stack-PRs (**#24–#30, #32–#33**) sind **merged**.
@@ -58,14 +58,14 @@ Alle übrigen Stack-PRs (**#24–#30, #32–#33**) sind **merged**.
 ## Active Tasks (priorisiert, Stand Nov 2026)
 
 ### Release & Infra
-- [ ] **PR #31** — Konflikt + Regression, dann Merge → Staging 2.7.0
-- [ ] **Registry / 2.7.0-Images** — vor jedem Prod-Versuch (Lesson 13.11.)
+- [ ] **PR #31 → 3.0.0** — Konflikt + Regression, dann Merge → Staging
+- [ ] **Registry / 3.0.0-Images** — vor jedem Prod-Versuch (Lesson 13.11.)
 - [ ] **Deploy-Safeguards** aus Stash reviewen, committen, Server sync (wenn gewünscht)
 - [ ] **W6 / Express 5 / Vite 8** — kurzer Smoke auf Staging/Prod nach Bedarf (kein neuer Stack-PR)
 
 ### App Store / Mobile
-- [ ] ASC: IAP-Produkte + Server-Notifications-URL
-- [ ] Xcode-Archive **2.7.0** erst nach #31 + Staging
+- [x] **ASC Basis (2.x live):** IAP-Produkte + Server-Notifications-URL — erledigt (Review/Launch 2.5.7 → **2.6.0** live AT/DE/CH); Doku `DOCUMENTATION/APP-STORE-CHECKLIST.md`
+- [ ] **ASC 3.0.0:** Metadaten, Screenshots, Build-Einreichung — erst nach PR #31 + Staging + Xcode-Archive **3.0.0**
 
 ### Backlog (Produkt, unverändert langfristig)
 - [ ] Legacy-Aliases (`DOCUMENTATION/LEGACY-ALIASES-REMOVAL.md`)

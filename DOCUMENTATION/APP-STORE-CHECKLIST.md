@@ -78,7 +78,7 @@
 - [ ] Monitor review status in App Store Connect
 - [ ] Prepare for potential rejection feedback
 - [ ] Deploy production backend if not already done
-- [ ] Set up Apple Server Notifications URL in App Store Connect for subscription events
+- [x] Apple Server Notifications URL in App Store Connect for subscription events (siehe Zeile „Production + Sandbox“ oben)
 
 ## Version History
 

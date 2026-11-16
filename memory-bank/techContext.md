@@ -51,7 +51,7 @@
 - **Platform:** iOS (Native App)
 - **IDE:** Xcode 16+
 - **Configuration:** `capacitor.config.ts`
-- **App Store:** iOS **2.6.0** live (AT/DE/CH). Web **2.6.0 b78** (Staging + Production). Nächstes Binary: **2.7.0** nach PR #31 + Regression.
+- **App Store:** iOS **2.6.0** live (AT/DE/CH). Web **2.6.0 b78** (Staging + Production). Nächstes App-Release: **3.0.0** (PR #31, offline Sam/Connector).
 - **Backend Target:** Production by default (`services/api.ts`), staging override via `?backend=staging`
 - **Native Plugins:**
   - `SplashScreen`: Launch screen control
