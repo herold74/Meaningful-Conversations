@@ -67,14 +67,25 @@ Alle übrigen Stack-PRs (**#24–#30, #32–#33**) sind **merged**.
 - [x] **ASC Basis (2.x live):** IAP-Produkte + Server-Notifications-URL — erledigt (Review/Launch 2.5.7 → **2.6.0** live AT/DE/CH); Doku `DOCUMENTATION/APP-STORE-CHECKLIST.md`
 - [ ] **ASC 3.0.0:** Metadaten, Screenshots, Build-Einreichung — erst nach PR #31 + Staging + Xcode-Archive **3.0.0**
 
-### Backlog (Produkt, unverändert langfristig)
+### Backlog Produkt (nur Doku — **keine App-Änderung** hier)
+
+**Coaching-Framework-Roadmap — erledigt (in der App live):**
+- [x] **Gedanken-Audit / „The Work“-Thema** → **Bekky** (`bekky-thought-audit`) — kein separater Work-Bot
+- [x] **Client exact language** → **Dan** (`dan-client-language`)
+- [x] **Victor, Rob, Mike** (+ Sam/Gabrielle registered) — siehe `progress.md` Core Features
+
+**Coaching-Framework — noch offen:**
+- [ ] NLP Meta-Modell-Linse (Overlay)
+- [ ] Logische Ebenen-Linse (Overlay)
+
+**Sonstiges Backlog:**
 - [ ] Legacy-Aliases (`DOCUMENTATION/LEGACY-ALIASES-REMOVAL.md`)
 - [ ] Console.log-Cleanup (TTS-DBG behalten)
 - [ ] W4F DNS + certbot
 - [ ] Android Capacitor
 - [ ] PayPal-Abo Web
 - [ ] WCAG-Audit
-- [ ] Roadmap: Linsen (NLP/Logische Ebenen), Practice-Feedback, Rolling Context, Presentation Evaluator, Micro Learnings — siehe `progress.md` (Dan/Victor/**Bekky = Gedanken-Audit**, Mike **live**)
+- [ ] Practice-Feedback / Dev-Feedback, Rolling Context, Presentation Evaluator, Micro Learnings — Details `progress.md` § Pending/Roadmap
 
 ---
 
