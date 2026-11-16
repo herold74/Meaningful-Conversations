@@ -260,7 +260,7 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Cron:** Scheduled Monday production pull **disabled** until release process is safe. **Reference:** `activeContext.md` incident 2026-11-13; hardened scripts may live in local stash until committed.
 
 ### 35. Agent skills & ops — not in public repo (2026-11-16)
-- **Decision:** Domain skills, rules, slash commands, hooks, and **`AGENTS.md`** stay **maintainer-local** (`.cursor/*` gitignored; **` .agents/`** gitignored). The public repo does **not** ship agent procedures or personal ops layout.
+- **Decision:** Domain skills, rules, slash commands, hooks, and **`AGENTS.md`** stay **maintainer-local** (`.cursor/*` gitignored; **`.agents/`** gitignored). The public repo does **not** ship agent procedures or personal ops layout.
 - **Moves:** Back up `.cursor/` (and optional `.agents/`) when changing machines — not via `git clone`.
 - **Optional (local only):** `scripts/sync-agent-skills.sh` may exist on a maintainer checkout to mirror `.cursor/skills` → `.agents/skills`; never committed.
 

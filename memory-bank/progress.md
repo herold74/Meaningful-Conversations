@@ -225,7 +225,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Repo:** v**2.6.0**, `BUILD_NUMBER` **78** auf `main`. **Staging + Production:** **2.6.0 b78** (W6 React 19, Health 200). **Nächstes Release:** **3.0.0** (PR #31).
+- **Repo:** v**2.6.0**, `BUILD_NUMBER` **78** auf `main`. **Staging + Production:** **2.6.0 b78** (W6 React 19, Health 200). **Nächstes Major (bei Gelegenheit):** **3.0.0** (PR #31 Feature-Branch).
 - [x] **SW-Stack Freitags-Mail (2026-11-12):** `sw-stack-ops-report.sh` Fr 20:00 — Tabelle Patches/Risiko/QA/Abhängigkeiten + `npm outdated` (siehe `scripts/MONITORING-QUICK-REFERENCE.md`)
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
@@ -279,7 +279,7 @@
 ## Pending / Roadmap
 - [x] **Software-Stack W1–W6:** abgeschlossen (Prod/Staging **2.6.0 b78**; Details `PLANS/software-stack-update-plan.md`, PRs #24–#30).
 - [x] **Express 5 + Vite 8:** #32 / #33 merged auf `main` — bei Auffälligkeiten Smoke/CI, kein weiterer Bulk-Merge ohne Test.
-- [ ] **3.0.0 / PR #31** (offline Sam & Connector, Major): offen bis Konfliktfix + `npm run ci` + iOS-Gerätetest + Staging — **kein Merge ohne Regression**. (Kein 2.7.0-Line-Release.)
+- [ ] **3.0.0 / PR #31** (offline Sam & Connector): Feature-Branch, Weiterarbeit ohne Zeitdruck; vor Merge Konfliktfix + CI + iOS-Gerätetest + Staging — **kein blind merge**. (Kein 2.7.0-Line-Release.)
 - [x] **Software-Stack W3:** `@google/genai` 2.32, `@mistralai` 2.7; Regression `PLANS/w3-regression-results.md`.
 - [x] **Krisen-Hilfsangebote region-aware** *(2026-08-23)*: Kuratierter Katalog AT/DE/CH/CA in `crisisResources.js` (keine LLM-Nummern). `crisisText.js` injiziert die Liste; AT nicht mehr als Default für alle Länder. Doku: `DOCUMENTATION/CRISIS-HELPLINES.md`. 3-Schritt-Protokoll (Verify → Region → Activate) unverändert.
 - [x] **iOS IAP Products in ASC** — Setup abgeschlossen (Veröffentlichung 2.6.0); offen nur **neue Version 3.0.0** in ASC wenn PR #31 ready
