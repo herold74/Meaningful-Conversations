@@ -93,7 +93,7 @@ Alle übrigen Stack-PRs (**#24–#30, #32–#33**) sind **merged**.
 
 - Stack-Plan: `PLANS/software-stack-update-plan.md`
 - W3 Regression: `PLANS/w3-regression-results.md`
-- Incident / #34: `memory-bank/systemPatterns.md`
+- Incident / #34, Skills-Mirror / #35: `memory-bank/systemPatterns.md` · `make sync-skills`
 
 **Archive:** ältere Handoffs → `memory-bank/archive/activeContext-2026-10.md`
 
