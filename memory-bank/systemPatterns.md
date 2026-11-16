@@ -259,12 +259,10 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Watchdog / deploy:** Do not `compose up` down the stack when target images are missing (403/404); prefer restoring `.accepted-release`. Deploy script must not tear down prod while images are absent. **Lesson:** failed `VERSION=2.7.0` deploy ≠ Release **3.0.0** (PR #31).
 - **Cron:** Scheduled Monday production pull **disabled** until release process is safe. **Reference:** `activeContext.md` incident 2026-11-13; hardened scripts may live in local stash until committed.
 
-### 35. Agent skills — local Cursor tree + versioned mirror (2026-11-16)
-- **Context:** `.cursor/*` is **gitignored** (maintainer-local); skills are edited there in Cursor. **Git tracks** **`.agents/skills/meaningful-conversations/`** as the shared canonical copy for clones, Codex, and CI.
-- **Workflow:** Edit **`.cursor/skills/meaningful-conversations/`** → run **`make sync-skills`** → commit the **`.agents/...`** changes. Never edit the mirror by hand without re-syncing from `.cursor`.
-- **Bootstrap:** On a fresh machine, `rsync` from mirror to `.cursor` once (or add `--from-mirror` to the sync script when needed).
-- **Drift check:** `./scripts/sync-agent-skills.sh --check` compares the two trees on disk.
-- **Scope:** Does not overwrite legacy `source-command-*` stubs under `.agents/skills/`.
+### 35. Agent skills & ops — not in public repo (2026-11-16)
+- **Decision:** Domain skills, rules, slash commands, hooks, and **`AGENTS.md`** stay **maintainer-local** (`.cursor/*` gitignored; **` .agents/`** gitignored). The public repo does **not** ship agent procedures or personal ops layout.
+- **Moves:** Back up `.cursor/` (and optional `.agents/`) when changing machines — not via `git clone`.
+- **Optional (local only):** `scripts/sync-agent-skills.sh` may exist on a maintainer checkout to mirror `.cursor/skills` → `.agents/skills`; never committed.
 
 ### 31. Xcode web sync — agent runs npm scripts (2026-10-29)
 - **Decision:** The maintainer does **not** deploy to Xcode manually (no “run `npx cap sync ios`” handoffs, no Merksatz checklists of npm commands in chat). When they ask to **deploy / sync to Xcode**, the **agent** runs the repo script and reports done + “Run in Xcode (scheme App)”.

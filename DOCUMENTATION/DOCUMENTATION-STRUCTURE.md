@@ -148,7 +148,7 @@ Located in `.cursor/skills/meaningful-conversations/`:
 Personality and PDF implementation notes live under `DOCUMENTATION/`, not the repo root. See Features above.
 
 ### Local-only ops docs
-These paths are gitignored so the public repo does not publish server runbooks: `MONITORING-GUIDE.md`, `DEPLOYMENT-CHECKLIST.md`, `DOCUMENTATION/MANUALMODE-DUAL-ENVIRONMENT.md`, `DOCUMENTATION/QUICK-START-MANUALMODE-SERVER.md`, `DOCUMENTATION/TTS-FINAL-STATUS.md`, and the other entries under “Operational & Infrastructure Documentation” in `.gitignore`. On a maintainer checkout they are still the working copies. Agent skills, when present, live in `.cursor/skills/` (source of truth). A `.agents/skills/` tree is a local mirror.
+These paths are gitignored so the public repo does not publish server runbooks: `MONITORING-GUIDE.md`, `DEPLOYMENT-CHECKLIST.md`, `DOCUMENTATION/MANUALMODE-DUAL-ENVIRONMENT.md`, `DOCUMENTATION/QUICK-START-MANUALMODE-SERVER.md`, `DOCUMENTATION/TTS-FINAL-STATUS.md`, and the other entries under “Operational & Infrastructure Documentation” in `.gitignore`. On a maintainer checkout they are still the working copies. Agent skills and ops (`.cursor/skills/`, optional `.agents/`, `AGENTS.md`) are maintainer-local and gitignored — not in the public repo (see `systemPatterns.md` Decision #35).
 
 ### Incident Reports
 - **INCIDENT-REPORTS/INCIDENT-REPORT-2025-12-15.md** - Recent incident
