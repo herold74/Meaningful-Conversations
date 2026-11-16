@@ -85,6 +85,10 @@ backups/
 .cursor/*
 !.cursor/environment.json
 AGENTS.md
+.agents/
+
+# Maintainer-only agent ops (optional local mirror sync; not published).
+scripts/sync-agent-skills.sh
 
 # OS generated files
 .DS_Store

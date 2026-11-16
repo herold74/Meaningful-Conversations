@@ -226,12 +226,6 @@ test: ## Run frontend + backend tests
 ci: ## Mirror pre-deploy-check (tests, typecheck, locales, build)
 	@npm run ci
 
-sync-skills: ## Mirror .cursor/skills → .agents/skills (meaningful-conversations)
-	@./scripts/sync-agent-skills.sh
-
-check-skills-mirror: ## Fail if .agents skills drift from .cursor (Decision #35)
-	@./scripts/sync-agent-skills.sh --check
-
 typecheck: ## Run TypeScript check (frontend)
 	@npm run typecheck
 
