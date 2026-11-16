@@ -6,8 +6,8 @@
 - **Languages:** TypeScript (Frontend), JavaScript (Backend)
 
 ## Frontend Stack
-- **Build Tool:** Vite 7.x
-- **Core:** React 18, TypeScript
+- **Build Tool:** Vite 8.x (PR #33)
+- **Core:** React 19 (W6 auf Server b78), TypeScript
 - **Styling:** Tailwind CSS, PostCSS
 - **Routing:** Hash-based routing (SPA)
 - **Crypto:** Native Web Crypto API (SubtleCrypto)
@@ -51,7 +51,7 @@
 - **Platform:** iOS (Native App)
 - **IDE:** Xcode 16+
 - **Configuration:** `capacitor.config.ts`
-- **App Store:** iOS **2.5.7 live** (AT/DE/CH); web **v2.6.0-b75** (Staging + Production). **2.6.0** ASC archive next — align `CURRENT_PROJECT_VERSION` with repo `BUILD_NUMBER`.
+- **App Store:** iOS **2.6.0** live (AT/DE/CH). Web **2.6.0 b78** (Staging + Production). Nächstes Binary: **2.7.0** nach PR #31 + Regression.
 - **Backend Target:** Production by default (`services/api.ts`), staging override via `?backend=staging`
 - **Native Plugins:**
   - `SplashScreen`: Launch screen control

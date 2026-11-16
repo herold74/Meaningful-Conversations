@@ -274,8 +274,10 @@
 - [x] **Content-based template detection** — line-by-line analysis instead of questionnaireAnswers state
 
 ## Pending / Roadmap
-- [x] **Software-Stack W2:** #27 merged; Staging b76.
-- [x] **Software-Stack W3:** #28 merged — `@google/genai` 2.32, `@mistralai` 2.7; Regression `PLANS/w3-regression-results.md`.
+- [x] **Software-Stack W1–W6:** abgeschlossen (Prod/Staging **2.6.0 b78**; Details `PLANS/software-stack-update-plan.md`, PRs #24–#30).
+- [x] **Express 5 + Vite 8:** #32 / #33 merged auf `main` — bei Auffälligkeiten Smoke/CI, kein weiterer Bulk-Merge ohne Test.
+- [ ] **2.7.0 / PR #31** (offline Sam & Connector): offen bis Konfliktfix + `npm run ci` + iOS-Gerätetest + Staging — **kein Merge ohne Regression**.
+- [x] **Software-Stack W3:** `@google/genai` 2.32, `@mistralai` 2.7; Regression `PLANS/w3-regression-results.md`.
 - [x] **Krisen-Hilfsangebote region-aware** *(2026-08-23)*: Kuratierter Katalog AT/DE/CH/CA in `crisisResources.js` (keine LLM-Nummern). `crisisText.js` injiziert die Liste; AT nicht mehr als Default für alle Länder. Doku: `DOCUMENTATION/CRISIS-HELPLINES.md`. 3-Schritt-Protokoll (Verify → Region → Activate) unverändert.
 - [ ] **iOS IAP Products:** Set up subscriptions + non-consumables in App Store Connect
 - [ ] **Android:** Capacitor project setup (Android Studio)
