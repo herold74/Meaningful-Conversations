@@ -4,8 +4,8 @@
 
 | Ebene | Stand |
 |--------|--------|
-| **Git `main`** | `fea935f7` u. a. Agent-Ops lokal (#35); Stack Vite 8 + Express 5 (#33, #32); App **2.6.0** / BUILD **78** |
-| **Production / Staging** | **v2.6.0 b78**, Health 200, DB connected (`mc-app` / `mc-beta`) |
+| **Git `main`** | `52959b14` build **79** sync; davor Doku/Agent-Ops; App **2.6.0** |
+| **Production / Staging** | **Staging v2.6.0 b79** (Express 5 / Vite 8 Rebuild 2026-11-16); **Prod v2.6.0 b78** bis expliziter Prod-Deploy |
 | **Lokal** | Deploy-Safeguards (+ veralteter 2.7.0-Bump) im Stash `local-2.7.0-and-deploy-safeguards` — **nicht** mit PR #31 verwechseln |
 | **App Store iOS** | **2.6.0** live (AT/DE/CH) |
 | **Release 3.0.0** | **PR #31** — Feature-Branch offline Sam/Connector (Major); **bei Gelegenheit** weiterbauen — Live bleibt **2.6.0** |
@@ -32,8 +32,8 @@ Fehlgeschlagener Server-Deploy mit `VERSION=2.7.0` (Minor-Bump, **nicht** Releas
 | W4 Apple Server Library | done | #29 |
 | W5 Prisma 7 | done | #30 |
 | W6 React 19 | done (Staging/Prod **b78**) | auf `main` |
-| Express 5 | merged, **Regression beobachten** | #32 |
-| Vite 8 | merged, **Regression beobachten** | #33 |
+| Express 5 | merged; **Staging b79 smoke OK** (lokal + deploy) | #32 |
+| Vite 8 | merged; **Staging b79 smoke OK** (lokal + deploy) | #33 |
 
 Laufend: Freitags-SW-Mail + npm-Patches nach Plan (`PLANS/software-stack-update-plan.md`), keine neue „Welle“ ohne Plan.
 
