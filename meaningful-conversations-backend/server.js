@@ -360,6 +360,8 @@ async function startServer() {
         app.set('trust proxy', 1);
         
         app.use(express.json({ limit: '1mb' }));
+        // Express 5 leaves req.body undefined when no body was parsed; keep handlers' destructuring safe.
+        app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
 
         // Security headers (fallback when not behind nginx)
         const helmet = require('helmet');
