@@ -25,7 +25,7 @@
     - [x] Gabrielle (Four-Stage — registered, kein Premium)
     - [x] Rob (Mental Fitness)
     - [x] Victor (Bowen-inspired systemic coaching — client tier)
-    - [x] Bekky (Thought audit — client tier; referral buttons + AUDIT_TASK merge into Session Review)
+    - [x] Bekky (**Gedanken-Audit** / Thought Audit — Client-Tier; entspricht produktseitig dem Roadmap-Thema „The Work“: belastende Überzeugungen strukturiert prüfen, Perspektivwechsel; REFERRAL + AUDIT_TASK in Session Review)
     - [x] Dan (client exact language — **client** tier; David-Grove-Stil im Bot `dan-client-language`, nicht separater Roadmap-Bot)
     - [x] Gloria Life Context (Onboarding interview)
     - [x] Gloria Interview (Structured topic interviews with summary + corrected transcript export)
@@ -303,7 +303,7 @@ Vier spezialisierte Frameworks als neue Features über das Jahr verteilt, um Reg
 
 ### New Bots (eigenständige Coaching-Stile)
 - [x] **client exact language (Dan)** — umgesetzt als Coach **Dan** (`dan-client-language`, Client-Tier). Separater „David-Grove-only“-Bot nicht nötig.
-- [ ] **The Work Bot** — Strukturiertes 4-Fragen-Protokoll (Byron Katie-Stil) — **noch nicht** in `bots.js`; bekannterweise anders als Bekky (Thought Audit).
+- [x] **„The Work“ / stressige Überzeugungen** — umgesetzt als **Bekky** (`bekky-thought-audit`, Gedanken-Audit). Kein separater „The Work“-Bot geplant (eigenes Vier-Schritte-Audit, nicht Byron-Katie-1:1).
 
 ### Coaching "Linsen" (Overlay-Modus für erfahrene User)
 - [ ] **NLP Meta-Modell Linse** — Erkennt Tilgungen („man"), Generalisierungen („immer/nie"), Verzerrungen („er macht mich wütend") in User-Aussagen. Hakt gezielt nach, um sprachliche Unschärfen aufzulösen. Kann als Layer auf jeden bestehenden Bot aktiviert werden. *(Client Feature)*
