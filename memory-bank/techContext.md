@@ -66,10 +66,10 @@
 ## Backend Stack
 - **Runtime:** Node.js v22.x
 - **Process Manager:** PM2 (Cluster Mode, 2 instances)
-- **Framework:** Express
-- **ORM:** Prisma
+- **Framework:** Express **5** (PR #32)
+- **ORM:** Prisma **7** (W5; MariaDB adapter, generated client)
 - **Database:** MariaDB 11.2
-- **AI:** Google Generative AI SDK (`@google/genai` **2.x**), Mistral AI SDK (`@mistralai/mistralai` **2.x ESM** — loaded via `await import()` in CJS backend)
+- **AI:** `@google/genai` **2.32+**, `@mistralai/mistralai` **2.7+** (W3; Mistral ESM via dynamic `import()` in CJS backend)
 - **Auth:** `jsonwebtoken`, `bcrypt`
 - **Email:** `node-mailjet`
 

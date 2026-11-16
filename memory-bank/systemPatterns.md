@@ -254,6 +254,11 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Build numbering:** Functional stack bumps can soak on staging at the current `BUILD_NUMBER`; increment **BUILD_NUMBER** (e.g. 75 → 76) on the production deploy that marks the wave complete.
 - **Reference:** `PLANS/software-stack-update-plan.md`.
 
+### 34. Production deploy gate after registry outage (2026-11-13)
+- **Decision:** **No production** container recycle without **explicit user approval** in the session. On outage, restore the last **accepted** frontend/backend image set on the server (`.accepted-release` after successful `/api/health`), not the branch version or a missing registry tag.
+- **Watchdog / deploy:** Do not `compose up` down the stack when target images are missing (403/404); prefer restoring `.accepted-release`. Deploy script must not tear down prod while images are absent. **Lesson:** failed `VERSION=2.7.0` deploy ≠ Release **3.0.0** (PR #31).
+- **Cron:** Scheduled Monday production pull **disabled** until release process is safe. **Reference:** `activeContext.md` incident 2026-11-13; hardened scripts may live in local stash until committed.
+
 ### 31. Xcode web sync — agent runs npm scripts (2026-10-29)
 - **Decision:** The maintainer does **not** deploy to Xcode manually (no “run `npx cap sync ios`” handoffs, no Merksatz checklists of npm commands in chat). When they ask to **deploy / sync to Xcode**, the **agent** runs the repo script and reports done + “Run in Xcode (scheme App)”.
 - **Scripts:** `npm run sync:ios-staging` (mc-beta API) · `npm run sync:ios-production` (mc-app API, default `npm run build`). Never suggest raw `npx cap sync ios` alone to the user.

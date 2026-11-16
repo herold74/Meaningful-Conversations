@@ -1,7 +1,7 @@
 # Progress Status
 
 ## Core Features
-- [x] **Frontend Base:** Vite + React 18, TypeScript, Tailwind CSS
+- [x] **Frontend Base:** Vite 8 + React 19 (W6 b78), TypeScript, Tailwind CSS
 - [x] **Backend Base:** Express + Prisma + MariaDB
 - [x] **User Authentication:** Registration, Login, Email Verification, Password Reset
 - [x] **Life Context Management:**
@@ -225,7 +225,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Repo `BUILD_NUMBER`:** **78**. **Staging:** v**2.6.0** **b78** (W6 React 19). **Production:** **b77** (Prod-Pull W6 ausstehend).
+- **Repo:** v**2.6.0**, `BUILD_NUMBER` **78** auf `main`. **Staging + Production:** **2.6.0 b78** (W6 React 19, Health 200). **Nächstes Release:** **3.0.0** (PR #31).
 - [x] **SW-Stack Freitags-Mail (2026-11-12):** `sw-stack-ops-report.sh` Fr 20:00 — Tabelle Patches/Risiko/QA/Abhängigkeiten + `npm outdated` (siehe `scripts/MONITORING-QUICK-REFERENCE.md`)
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment

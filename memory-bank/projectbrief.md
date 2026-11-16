@@ -12,7 +12,7 @@
 
 ### 1. AI Coaching & Personal Growth
 - **Goal:** Provide continuous, personalized guidance for self-reflection and problem-solving.
-- **Mechanism:** Specialized coaching personas (Max, Ava, Rob, etc.) use the "Life Context" file to maintain long-term memory and adapt to the user's personality profile (OCEAN, Riemann-Thomann).
+- **Mechanism:** Specialized coaching personas (Sam, Gabrielle, Max, Ava, Kenji, Chloe, Mike, Rob, Victor, Bekky, Dan, …) use the "Life Context" file to maintain long-term memory and adapt to the user's personality profile (OCEAN, Riemann-Thomann). **Bekky** = strukturiertes Gedanken-Audit (produktseitig Abdeckung „stressige Überzeugungen“).
 
 ### 2. Structured Interviewing (Gloria Interview)
 - **Goal:** Help users structure raw ideas, project concepts, or decisions without offering advice.
@@ -32,6 +32,7 @@
 - **Guest Mode:** Full functionality without server-side storage for maximum privacy.
 
 ## Tech Stack High-Level
-- **Frontend:** React (Vite), TypeScript, Tailwind CSS.
-- **Backend:** Node.js, Express, Prisma, MySQL.
-- **AI:** Google Gemini API (primary), Mistral AI (secondary, EU-based).
+- **Frontend:** React 19, Vite 8, TypeScript, Tailwind CSS, Capacitor (iOS).
+- **Backend:** Node.js 22, Express 5, Prisma 7, MariaDB.
+- **AI:** Google GenAI + Mistral SDK (Classic/Practice); Piper TTS container.
+- **Release line:** Live **2.6.0** (web b78); nächstes Major **3.0.0** in PR #31.

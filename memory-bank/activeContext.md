@@ -4,7 +4,7 @@
 
 | Ebene | Stand |
 |--------|--------|
-| **Git `main`** | `27ff0f66`+ — u. a. Vite 8 + Express 5 (#33, #32) |
+| **Git `main`** | `ac60a1af` — Doku/Backlog; Stack Vite 8 + Express 5 (#33, #32); App-Version im Repo **2.6.0** / BUILD **78** |
 | **Production / Staging** | **v2.6.0 b78**, Health 200, DB connected (`mc-app` / `mc-beta`) |
 | **Lokal** | Deploy-Safeguards (+ veralteter 2.7.0-Bump) im Stash `local-2.7.0-and-deploy-safeguards` — **nicht** mit PR #31 verwechseln |
 | **App Store iOS** | **2.6.0** live (AT/DE/CH) |
@@ -96,3 +96,5 @@ Alle übrigen Stack-PRs (**#24–#30, #32–#33**) sind **merged**.
 - Incident / #34: `memory-bank/systemPatterns.md`
 
 **Archive:** ältere Handoffs → `memory-bank/archive/activeContext-2026-10.md`
+
+**Memory Bank:** Vollständiger Pass **2026-11-16** (`projectbrief` … `progress`) — nur Doku, keine App.

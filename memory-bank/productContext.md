@@ -12,7 +12,7 @@ Meaningful Conversations bridges this gap by creating a "living" document of the
 The user journey is circular and iterative:
 1.  **Context Creation:** Create a Life Context via questionnaire or upload an existing one.
 2.  **Personality Profile (Optional):** Complete surveys (Riemann-Thomann, Big Five, Spiral Dynamics) for adaptive coaching.
-3.  **Coach Selection:** Choose from 14 coaches (Nobody, Max, Ava, Kenji, Chloe, Rob, Victor, Bekky, Dan, Gloria variants, etc.) plus **Coach Practice** lab.
+3.  **Coach Selection:** Classic coaches (Nobody, Sam, Gabrielle, Max, Ava, Kenji, Chloe, Mike, Rob, Victor, Bekky, Dan, Gloria …) plus **Connector**, **Coach Practice**, Transcript-Eval — Tier: guest / registered / premium / client (siehe `bots.js`).
 4.  **Conversation:** Voice or text dialogue. AI uses Life Context and personality profile for personalized guidance.
 5.  **Analysis & Review:** AI generates summary, proposes Life Context updates, and optionally refines personality profile (DPFL mode).
 6.  **Commit:** Review and accept changes, export calendar items for action steps.
@@ -22,7 +22,7 @@ The user journey is circular and iterative:
 - **Registered Users:** Data is stored but **End-to-End Encrypted (E2EE)**. The server host cannot read the user's Life Context. Decryption happens only on the client side.
 
 ## Distribution
-- **iOS App Store:** **2.5.7 live** (AT/DE/CH). **Next:** **2.6.0** archive/submit — `CURRENT_PROJECT_VERSION` = Repo-`BUILD_NUMBER` vor Upload. English metadata: **English (Canada)**.
+- **iOS App Store:** **2.6.0** live (AT/DE/CH), IAP + Server Notifications in ASC. **Nächstes Binary:** **3.0.0** (PR #31, offline Sam/Connector — nicht mit fehlgeschlagenem Server-2.7.0 verwechseln). English metadata: **English (Canada)**.
 - **PWA:** Available at https://mc-app.manualmode.at for all platforms.
 - **Cross-platform:** User accounts work on both iOS app and web browser, data syncs automatically.
 
