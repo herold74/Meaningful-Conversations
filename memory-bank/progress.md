@@ -18,12 +18,15 @@
     - [x] Nobody (GPS-Framework, efficient problem-solving)
     - [x] Max (Ambitious, goal-oriented)
     - [x] Ava (Strategic thinking, decision-making)
-    - [x] Kenji (Stoic philosophy, resilience)
-    - [x] Chloe (Structured Reflection)
+    - [x] Kenji (Stoic philosophy, resilience — premium)
+    - [x] Chloe (Structured Reflection — premium)
+    - [x] Mike (Ambivalenz-Coaching — premium; `bots/newCoaches.js`)
+    - [x] Sam (Forward-Focused — registered, kein Premium)
+    - [x] Gabrielle (Four-Stage — registered, kein Premium)
     - [x] Rob (Mental Fitness)
     - [x] Victor (Bowen-inspired systemic coaching — client tier)
     - [x] Bekky (Thought audit — client tier; referral buttons + AUDIT_TASK merge into Session Review)
-    - [x] Dan (client exact language — premium tier)
+    - [x] Dan (client exact language — **client** tier; David-Grove-Stil im Bot `dan-client-language`, nicht separater Roadmap-Bot)
     - [x] Gloria Life Context (Onboarding interview)
     - [x] Gloria Interview (Structured topic interviews with summary + corrected transcript export)
 - [x] **Data Privacy:**
@@ -299,8 +302,8 @@
 Vier spezialisierte Frameworks als neue Features über das Jahr verteilt, um Registered/Premium/Client-Nutzer mit kontinuierlichem Mehrwert zu versorgen:
 
 ### New Bots (eigenständige Coaching-Stile)
-- [ ] **client exact language Bot** (David Grove) — Arbeitet ausschließlich mit den exakten Metaphern und Symbolen des Klienten. Keine Interpretation, keine eigenen Annahmen. Spezifische Fragetechnik: „Was für ein X ist dieses X?", „Gibt es noch etwas über X?" Ziel: Architektur der inneren Bilderlandschaft verstehen. *(Premium Feature)*
-- [ ] **The Work Bot** — Strukturiertes 4-Fragen-Protokoll zur Untersuchung stressiger Gedanken: 1) Ist das wahr? 2) Absolut sicher? 3) Wie reagierst du mit diesem Gedanken? 4) Wer wärst du ohne ihn? + Umkehrung. Ziel: Identifikation mit destruktiven Gedankenmustern auflösen. *(Premium Feature)*
+- [x] **client exact language (Dan)** — umgesetzt als Coach **Dan** (`dan-client-language`, Client-Tier). Separater „David-Grove-only“-Bot nicht nötig.
+- [ ] **The Work Bot** — Strukturiertes 4-Fragen-Protokoll (Byron Katie-Stil) — **noch nicht** in `bots.js`; bekannterweise anders als Bekky (Thought Audit).
 
 ### Coaching "Linsen" (Overlay-Modus für erfahrene User)
 - [ ] **NLP Meta-Modell Linse** — Erkennt Tilgungen („man"), Generalisierungen („immer/nie"), Verzerrungen („er macht mich wütend") in User-Aussagen. Hakt gezielt nach, um sprachliche Unschärfen aufzulösen. Kann als Layer auf jeden bestehenden Bot aktiviert werden. *(Client Feature)*

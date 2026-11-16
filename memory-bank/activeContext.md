@@ -74,7 +74,7 @@ Alle übrigen Stack-PRs (**#24–#30, #32–#33**) sind **merged**.
 - [ ] Android Capacitor
 - [ ] PayPal-Abo Web
 - [ ] WCAG-Audit
-- [ ] Roadmap: Coaching-Bots/Linsen, Practice-Feedback, Rolling Context, Presentation Evaluator, Micro Learnings — siehe `progress.md`
+- [ ] Roadmap: **The Work Bot**, Linsen (NLP/Logische Ebenen), Practice-Feedback, Rolling Context, Presentation Evaluator, Micro Learnings — siehe `progress.md` (Dan/Victor/Bekky/Mike **live**)
 
 ---
 
