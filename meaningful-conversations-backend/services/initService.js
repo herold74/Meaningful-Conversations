@@ -12,7 +12,8 @@ async function ensureDefaultConfig() {
     await ensureAIProviderRow();
     // Ensure AI_MODEL_MAPPING has the correct multi-provider structure
     await ensureModelMappingStructure();
-    
+    await ensureMistralChatUsesMediumNotLarge();
+
     console.log('✓ Application configuration is up-to-date');
   } catch (error) {
     console.error('❌ Error ensuring default configuration:', error);
@@ -133,6 +134,35 @@ async function ensureModelMappingStructure() {
   } else {
     console.log('  ✓ AI_MODEL_MAPPING structure is current');
   }
+}
+
+/**
+ * Mistral Large is reserved for analysis; chat should use Medium (latency/cost).
+ */
+async function ensureMistralChatUsesMediumNotLarge() {
+  const config = await prisma.appConfig.findUnique({
+    where: { key: 'AI_MODEL_MAPPING' },
+  });
+  if (!config?.value) return;
+
+  let mapping;
+  try {
+    mapping = JSON.parse(config.value);
+  } catch {
+    return;
+  }
+
+  if (mapping.mistral?.chat !== 'mistral-large-latest') return;
+
+  mapping.mistral.chat = 'mistral-medium-latest';
+  await prisma.appConfig.update({
+    where: { key: 'AI_MODEL_MAPPING' },
+    data: {
+      value: JSON.stringify(mapping),
+      updatedBy: 'system-init-mistral-chat-medium',
+    },
+  });
+  console.log('  → AI_MODEL_MAPPING: mistral chat → mistral-medium-latest');
 }
 
 module.exports = {
