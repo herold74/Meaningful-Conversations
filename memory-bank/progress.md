@@ -225,7 +225,7 @@
 ## Infrastructure
 - [x] **Containerization:** Podman with compose
 - [x] **Dual Environment:** Staging + Production
-- **Repo:** v**2.7.0**, `BUILD_NUMBER` **1** auf `main` (2026-11-17 — Local/Staging-Train). **Staging:** 2.7.0 nach `-c app` Deploy. **Production:** **2.6.0 b78** (unverändert). **3.0.0:** PR #31 feature branch (nicht 2.7.0).
+- **Repo:** v**2.7.0**, `BUILD_NUMBER` **2** auf `main` (2026-11-17). **Staging:** **2.7.0 b2** live auf mc-beta. **Production:** **2.6.0 b78** (unverändert). **3.0.0:** PR #31 feature branch (unabhängig von 2.7.0).
 - [x] **SW-Stack Freitags-Mail (2026-11-12):** `sw-stack-ops-report.sh` Fr 20:00 — Tabelle Patches/Risiko/QA/Abhängigkeiten + `npm outdated` (siehe `scripts/MONITORING-QUICK-REFERENCE.md`)
 - [x] **TTS Container:** Separate Piper service
 - [x] **Nginx Reverse Proxy:** Auto-configured per environment
