@@ -10,6 +10,21 @@ const { StrategyMerger } = require('./dpcStrategyMerger');
  * Generates adaptive system prompts based on user's personality profile
  */
 
+/** Keep DPC injection compact — full coaching rules live in bot prompts + Mistral output rules. */
+const DPC_MAX_BLINDSPOTS = 2;
+const DPC_MAX_NARRATIVE_ITEMS = 2;
+const DPC_MAX_GROWTH_ITEMS = 2;
+const DPC_MAX_DESCRIPTION_CHARS = 100;
+const DPC_MAX_CONFLICT_LINES = 2;
+const DPC_EXAMPLE_CHALLENGES_PER_BLINDSPOT = 1;
+
+function truncateForDpc(text, max = DPC_MAX_DESCRIPTION_CHARS) {
+  if (!text || typeof text !== 'string') return '';
+  const trimmed = text.trim();
+  if (trimmed.length <= max) return trimmed;
+  return `${trimmed.slice(0, max - 1).trimEnd()}…`;
+}
+
 // Strategies are now imported from dpcStrategies.js
 /* OLD CODE - Moved to dpcStrategies.js
 const RIEMANN_STRATEGIES = {
@@ -970,12 +985,14 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
   let adaptivePrompt = t.header;
   adaptivePrompt += t.intro;
 
-  // Add conflict resolution info if conflicts were detected
   if (mergeResult.conflicts && mergeResult.conflicts.length > 0) {
     adaptivePrompt += t.conflictsHeader;
-    mergeResult.conflicts.forEach(conflict => {
+    mergeResult.conflicts.slice(0, DPC_MAX_CONFLICT_LINES).forEach(conflict => {
       adaptivePrompt += `- Kept: ${conflict.kept}, Excluded: ${conflict.excluded} (${conflict.reason})\n`;
     });
+    if (mergeResult.conflicts.length > DPC_MAX_CONFLICT_LINES) {
+      adaptivePrompt += `- … +${mergeResult.conflicts.length - DPC_MAX_CONFLICT_LINES} more\n`;
+    }
     adaptivePrompt += '\n';
   }
 
@@ -994,10 +1011,11 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
     adaptivePrompt += '\n';
   }
 
-  // Add blindspots from merged result
-  if (mergeResult.blindspots && mergeResult.blindspots.length > 0) {
+  const blindspotsForPrompt = (mergeResult.blindspots || []).slice(0, DPC_MAX_BLINDSPOTS);
+
+  if (blindspotsForPrompt.length > 0) {
     adaptivePrompt += t.blindspotHeader;
-    mergeResult.blindspots.forEach((blindspot, index) => {
+    blindspotsForPrompt.forEach((blindspot, index) => {
       adaptivePrompt += `${index + 1}. ${t.weakness}: ${blindspot.blindspot}\n`;
       adaptivePrompt += `   ${t.challenge}: ${blindspot.challenge}\n`;
       
@@ -1014,20 +1032,20 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
       
       if (examples && examples.length > 0) {
         adaptivePrompt += `   ${t.exampleChallenges}:\n`;
-        examples.slice(0, 2).forEach(ex => {
+        examples.slice(0, DPC_EXAMPLE_CHALLENGES_PER_BLINDSPOT).forEach(ex => {
           adaptivePrompt += `   • "${ex}"\n`;
         });
       }
       adaptivePrompt += '\n';
     });
-    
+
     // Option A+: Kontext-Mapping for AVA (contextual blindspot selection)
-    if (botId === 'ava-strategic' && mergeResult.blindspots.length > 1) {
+    if (botId === 'ava-strategic' && blindspotsForPrompt.length > 1) {
       adaptivePrompt += language === 'de'
         ? '\n**BLINDSPOT-KONTEXT-MATCHING:**\n'
         : '\n**BLINDSPOT CONTEXT-MATCHING:**\n';
       
-      mergeResult.blindspots.forEach((bs, idx) => {
+      blindspotsForPrompt.forEach((bs, idx) => {
         let contexts = [];
         
         // Riemann-specific contexts
@@ -1111,14 +1129,17 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
       adaptivePrompt += '\n';
     }
     
-    // Use AVA-specific challenge guidance if bot is AVA, otherwise use standard
     if (botId === 'ava-strategic') {
       adaptivePrompt += t.challengeGuidanceAva || t.challengeGuidance;
     } else {
-      adaptivePrompt += t.challengeGuidance;
+      adaptivePrompt += language === 'de'
+        ? '\nNutze die Blindspots proaktiv: eine konkrete Frage pro Nachricht, kein Vortrag.\n'
+        : '\nUse blind spots proactively: one concrete question per message, no lecturing.\n';
     }
-    
-    adaptivePrompt += t.important;
+
+    adaptivePrompt += language === 'de'
+      ? 'Keine Modell-/Methodennamen oder Strategie-Meta im Klienten-Output.\n\n'
+      : 'No model/method names or strategy meta in client-facing output.\n\n';
   }
 
   // Add narrative profile with consistency note if needed
@@ -1128,74 +1149,34 @@ These instructions rely on you analyzing the ENTIRE Conversation History:
     }
     
     adaptivePrompt += t.signatureHeader;
-    
+
     if (narrativeProfile.operatingSystem) {
-      adaptivePrompt += `- ${t.core}: ${narrativeProfile.operatingSystem}\n`;
+      adaptivePrompt += `- ${t.core}: ${truncateForDpc(narrativeProfile.operatingSystem, 160)}\n`;
     }
-    
+
     if (narrativeProfile.superpowers && narrativeProfile.superpowers.length > 0) {
-      const superpowerNames = narrativeProfile.superpowers.map(s => s.name).join(', ');
-      adaptivePrompt += `- ${t.superpowers}: ${superpowerNames}\n`;
-      narrativeProfile.superpowers.forEach(s => {
-        adaptivePrompt += `  • ${s.name}: ${s.description}\n`;
+      const shown = narrativeProfile.superpowers.slice(0, DPC_MAX_NARRATIVE_ITEMS);
+      adaptivePrompt += `- ${t.superpowers}: ${shown.map(s => s.name).join(', ')}\n`;
+      shown.forEach(s => {
+        adaptivePrompt += `  • ${s.name}: ${truncateForDpc(s.description)}\n`;
       });
     }
-    
+
     if (narrativeProfile.blindspots && narrativeProfile.blindspots.length > 0) {
-      const blindspotNames = narrativeProfile.blindspots.map(b => b.name).join(', ');
-      adaptivePrompt += `- ${t.blindspots}: ${blindspotNames}\n`;
-      narrativeProfile.blindspots.forEach(b => {
-        adaptivePrompt += `  • ${b.name}: ${b.description}\n`;
+      const shown = narrativeProfile.blindspots.slice(0, DPC_MAX_NARRATIVE_ITEMS);
+      adaptivePrompt += `- ${t.blindspots}: ${shown.map(b => b.name).join(', ')}\n`;
+      shown.forEach(b => {
+        adaptivePrompt += `  • ${b.name}: ${truncateForDpc(b.description)}\n`;
       });
     }
-    
+
     if (narrativeProfile.growthOpportunities && narrativeProfile.growthOpportunities.length > 0) {
-      const growthNames = narrativeProfile.growthOpportunities.map(g => g.name).join(', ');
-      adaptivePrompt += `- ${t.growth}: ${growthNames}\n`;
+      narrativeProfile.growthOpportunities.slice(0, DPC_MAX_GROWTH_ITEMS).forEach(g => {
+        const title = g.title || g.name || 'Growth';
+        adaptivePrompt += `  • ${title}: ${truncateForDpc(g.recommendation || g.description || '')}\n`;
+      });
     }
-    
-    adaptivePrompt += '\n' + t.signatureNote;
   }
-
-  // Add formatting instructions (same as before)
-  adaptivePrompt += `**Wichtige Formatierungs-Regeln:**
-
-VERBOTEN:
-- Labels wie "Blindspot-Challenge", "Challenge-Strategie", "Reflexionsfrage"
-- Persönlichkeits-Kategorien (Riemann, OCEAN, Spiral Dynamics, orange, blue, etc.)
-- Dokumenten-Struktur: KEINE "**Überschriften:**" wie "**Zwei Fragen:**"
-- Meta-Kommentare in Klammern: KEINE "*(Hinweis: Ich spüre hier...)*"
-- Aktionsbeschreibungen: KEINE "*Atmet tief ein*", "*Lehnt sich vor*", "*Nickt verständnisvoll*"
-- Rollenspielerische Beschreibungen: Schreibe wie ein Mensch spricht, nicht wie ein Theater-Skript
-- Nummerierte Listen mit Überschriften
-- Trennlinien (---) zwischen Abschnitten
-- Ankündigungen wie "Lass mich dir zwei Fragen stellen:" - stelle sie einfach!
-- Ganze Sätze fett markieren: KEINE "**Dein Ziel ist Klarheit**" - nur einzelne Wörter!
-- Bestätigungen vorwegnehmen: NICHT "Verstanden. Dein Ziel ist also..."
-- Paraphrasieren ohne Rückfrage: NICHT annehmen, dass du richtig verstanden hast
-
-ERLAUBT:
-- Fettdruck für *einzelne wichtige Wörter* zur Betonung (z.B. "Was *genau* hält dich zurück?")
-- Kursiv für Zitate oder innere Gedanken
-- Natürliche Aufzählungen ohne Überschriften
-- Rückfragen zum Verständnis: "Habe ich das richtig verstanden?" oder "Ist das der Kern?"
-
-STIL:
-Schreibe wie ein echter Mensch im Gespräch spricht - fließend, ohne sichtbare Struktur.
-FALSCH: "Ich verstehe. Dein Ziel für heute ist also **Klarheit über deine eigene Stimme zu gewinnen**."
-RICHTIG: "Wenn ich dich richtig verstehe, geht es weniger um die Entscheidung selbst als darum, deine *eigene* Stimme wiederzufinden. Ist das der Kern?"
-
-`;
-
-  adaptivePrompt += `Adapt ALL your responses to these preferences. Keep your responses NATURAL and CONVERSATIONAL.
-
-⚠️ FIRST MESSAGE - STRICT RULES (overrides everything else):
-If this is the FIRST message of a session and you're asking about "Next Steps":
-- NO PRAISING progress you haven't heard about yet ("congratulations", "impressed", etc.)
-- Ask ONLY ONE simple question (e.g., "How did it go?")
-- NO offering alternatives ("if you'd rather...", "in case you want something else...")
-- NO detailed follow-up questions about specific aspects
-- STOP after the one question. Wait for the response.`;
 
   return adaptivePrompt;
 }
