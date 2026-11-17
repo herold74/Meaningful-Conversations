@@ -26,6 +26,7 @@ const {
   isFirstConnectorHandoffTurn,
 } = require('../../utils/connectorHandoffContext.js');
 const { isDeveloperTestMode } = require('../../utils/testMode.js');
+const { detectStressInMessage } = require('../../services/stressSignals.js');
 
 // POST /api/gemini/chat/send-message
 router.post('/chat/send-message', optionalAuthMiddleware, async (req, res) => {
@@ -609,16 +610,7 @@ Help the user EXTEND and ENRICH their existing Life Context.
                     };
                 }
 
-                const stressKeywords = [
-                    'stress', 'überfordert', 'angst', 'traurig', 'hoffnungslos',
-                    'verzweifelt', 'erschöpft', 'deprimiert', 'ausgebrannt', 'hilflos',
-                    'panik', 'einsam', 'mutlos', 'leer', 'verloren',
-                    'overwhelmed', 'overwhelming', 'anxious', 'sad', 'hopeless', 'hopelessness',
-                    'depressed', 'desperate', 'exhausted', 'burnt out', 'burnout', 'helpless',
-                    'panic', 'lonely', 'discouraged', 'empty', 'lost', 'frustrated', 'frustrating'
-                ];
-                const lowerMessage = messageToAnalyze.toLowerCase();
-                testTelemetry.stressKeywordsDetected = stressKeywords.some(k => lowerMessage.includes(k));
+                testTelemetry.stressKeywordsDetected = detectStressInMessage(messageToAnalyze, lang);
 
                 // Console telemetry for automated test evaluation
                 const rCount = allDetectedKeywords.riemann.length;
