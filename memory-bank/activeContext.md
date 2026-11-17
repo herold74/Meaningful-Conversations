@@ -4,8 +4,8 @@
 
 | Ebene | Stand |
 |--------|--------|
-| **Git `main`** | Version **2.7.0** build **1** (Minor-Bump Local/Staging-Train); zuletzt DPFL **stressSignals** (`34355ad9`) |
-| **Production / Staging** | **Staging → 2.7.0** (vollständiger `-c app` Deploy nach Bump); **Prod / App Store → 2.6.0** bis expliziter Prod-Release |
+| **Git `main`** | **2.7.0** — `f363af89` Bump + ggf. deploy build-sync; DPFL **stressSignals** (`34355ad9`) |
+| **Production / Staging** | **Staging v2.7.0** (vollständiger `-c app` Deploy 2026-11-17, Rollback-Pfad **2.6.0** gespeichert); **Prod / App Store → 2.6.0** |
 | **Lokal** | Dev + Commits auf **2.7.0**; Deploy-Safeguards weiter im Stash `local-2.7.0-and-deploy-safeguards` |
 | **App Store iOS** | **2.6.0** live (AT/DE/CH) — unverändert bis neues Binary |
 | **Release 3.0.0** | **PR #31** — separater Feature-Branch (offline Sam/Connector); **unabhängig** vom 2.7.0-Train auf `main` |
