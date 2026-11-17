@@ -532,6 +532,57 @@ if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "tts" ]]
     ensure_remote_tts_version_tag
 fi
 
+# Decision #34: do not tear down the stack without the target image(s) locally.
+image_exists_for_role() {
+    local role=$1
+    local img="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-${role}:$VERSION"
+    if podman image exists "$img" 2>/dev/null; then
+        echo "OK $img"
+        return 0
+    fi
+    echo "ERROR: $img is not on this server."
+    return 1
+}
+
+require_images_before_recycle() {
+    local missing=0
+    case "$COMPONENT" in
+        all|app)
+            image_exists_for_role backend || missing=1
+            image_exists_for_role frontend || missing=1
+            ;;
+        backend)
+            image_exists_for_role backend || missing=1
+            ;;
+        frontend)
+            image_exists_for_role frontend || missing=1
+            ;;
+        tts)
+            local tts_img="$REGISTRY_URL/$REGISTRY_IMAGE_PREFIX/meaningful-conversations-tts:$VERSION"
+            if podman image exists "$tts_img" 2>/dev/null; then
+                echo "OK $tts_img"
+            else
+                echo "ERROR: $tts_img is not on this server."
+                missing=1
+            fi
+            ;;
+        *)
+            image_exists_for_role backend || missing=1
+            image_exists_for_role frontend || missing=1
+            ;;
+    esac
+    if [[ "$missing" -ne 0 ]]; then
+        echo "ERROR: Refusing to recycle containers — missing image(s) for VERSION=$VERSION."
+        exit 1
+    fi
+}
+
+require_images_before_recycle
+
+echo "App images for $VERSION verified. Applying VERSION in .env..."
+sed -i '/^VERSION=/d' .env
+echo "VERSION=$VERSION" >> .env
+
 # Save current version for rollback (before stopping anything)
 # .previous-version is written by deploy script from the server's prior .env before VERSION bump.
 PREV_VERSION=""
@@ -545,13 +596,26 @@ else
     echo "No previous version to save (first deploy or same version)"
 fi
 
-# Stop existing containers
-echo "Stopping existing containers..."
-podman-compose -f "$COMPOSE_FILE" down 2>/dev/null || true
-
-# Start services
-echo "Starting services with $COMPOSE_FILE..."
-podman-compose -f "$COMPOSE_FILE" up -d
+# Full-stack recycle only for -c app / -c all (avoids MariaDB/IP drift on partial deploys)
+if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" ]]; then
+    echo "Recycling full stack (compose down + up -d)..."
+    podman-compose -f "$COMPOSE_FILE" down 2>/dev/null || true
+    echo "Starting services with $COMPOSE_FILE..."
+    podman-compose -f "$COMPOSE_FILE" up -d
+elif [[ "$COMPONENT" == "backend" ]]; then
+    echo "Partial deploy: force-recreate backend only (MariaDB, frontend, TTS stay up)..."
+    podman-compose -f "$COMPOSE_FILE" up -d --force-recreate backend
+elif [[ "$COMPONENT" == "frontend" ]]; then
+    echo "Partial deploy: force-recreate frontend only..."
+    podman-compose -f "$COMPOSE_FILE" up -d --force-recreate frontend
+elif [[ "$COMPONENT" == "tts" ]]; then
+    echo "Partial deploy: force-recreate tts only..."
+    podman-compose -f "$COMPOSE_FILE" up -d --force-recreate tts
+else
+    echo "Recycling full stack (unknown component $COMPONENT)..."
+    podman-compose -f "$COMPOSE_FILE" down 2>/dev/null || true
+    podman-compose -f "$COMPOSE_FILE" up -d
+fi
 
 get_container_ip() {
     local container_name=$1
@@ -675,6 +739,26 @@ if [[ "$COMPONENT" == "all" || "$COMPONENT" == "app" || "$COMPONENT" == "backend
     fi
 fi
 
+if [[ "$ENVIRONMENT" == "production" ]]; then
+    FE_NAME=$(podman inspect "meaningful-conversations-frontend-${ENVIRONMENT}" --format '{{.ImageName}}' 2>/dev/null || true)
+    BE_NAME=$(podman inspect "meaningful-conversations-backend-${ENVIRONMENT}" --format '{{.ImageName}}' 2>/dev/null || true)
+    FE_ID=$(podman inspect "meaningful-conversations-frontend-${ENVIRONMENT}" --format '{{.Image}}' 2>/dev/null || true)
+    BE_ID=$(podman inspect "meaningful-conversations-backend-${ENVIRONMENT}" --format '{{.Image}}' 2>/dev/null || true)
+    if [[ -n "$FE_ID" && -n "$BE_ID" ]]; then
+        cat > .accepted-release << EOF
+VERSION=$VERSION
+FRONTEND_IMAGE=$FE_NAME
+FRONTEND_ID=$FE_ID
+BACKEND_IMAGE=$BE_NAME
+BACKEND_ID=$BE_ID
+ACCEPTED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+EOF
+        echo "Recorded accepted production release $VERSION"
+    else
+        echo "WARNING: could not record .accepted-release"
+    fi
+fi
+
 echo "Deployment complete for $ENVIRONMENT!"
 REMOTE_SCRIPT
 
@@ -721,10 +805,15 @@ REMOTE_SCRIPT
         # Preserve previous VERSION for rollback + TTS re-tag fallback before overwriting .env
         ssh "$REMOTE_HOST" "cd $REMOTE_ENV_DIR && [ -f .env ] && grep -m1 '^VERSION=' .env | cut -d'=' -f2 > .previous-version 2>/dev/null || true"
         scp "$ENV_FILE" "$REMOTE_HOST:$REMOTE_ENV_DIR/.env"
-        # IMPORTANT: Ensure VERSION is always set correctly from package.json
-        # This prevents any stale VERSION values in .env files from causing issues
-        ssh "$REMOTE_HOST" "cd $REMOTE_ENV_DIR && sed -i '/^VERSION=/d' .env && echo 'VERSION=$VERSION' >> .env"
-        echo -e "${GREEN}✓ VERSION set to $VERSION on server${NC}"
+        # Staging: VERSION in .env can match the deploy target immediately.
+        # Production: remote-deploy.sh sets VERSION only after image checks (Decision #34).
+        if [[ "$ENVIRONMENT" == "production" ]]; then
+            ssh "$REMOTE_HOST" "cd $REMOTE_ENV_DIR && prev=\$(tr -d '\r\n' < .previous-version 2>/dev/null || true); sed -i '/^VERSION=/d' .env; if [ -n \"\$prev\" ]; then echo \"VERSION=\$prev\" >> .env; echo \"VERSION held at \$prev until $VERSION images exist on server\"; else echo \"VERSION=$VERSION\" >> .env; fi"
+            echo -e "${GREEN}✓ .env transferred; production VERSION held until remote image gate passes${NC}"
+        else
+            ssh "$REMOTE_HOST" "cd $REMOTE_ENV_DIR && sed -i '/^VERSION=/d' .env && echo 'VERSION=$VERSION' >> .env"
+            echo -e "${GREEN}✓ VERSION set to $VERSION on server${NC}"
+        fi
     else
         echo -e "${YELLOW}⚠ Warning: $ENV_FILE not found. Using template.${NC}"
         echo -e "${YELLOW}   Create $ENV_FILE from env.$ENVIRONMENT.template before deploying!${NC}"

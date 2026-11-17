@@ -259,6 +259,12 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Watchdog / deploy:** Do not `compose up` down the stack when target images are missing (403/404); prefer restoring `.accepted-release`. Deploy script must not tear down prod while images are absent. **Lesson:** failed `VERSION=2.7.0` deploy ≠ Release **3.0.0** (PR #31).
 - **Cron:** Scheduled Monday production pull **disabled** until release process is safe. **Reference:** `activeContext.md` incident 2026-11-13; hardened scripts may live in local stash until committed.
 
+### 37. Partial staging deploys without full stack down (2026-11-17)
+- **Decision:** Remote `-c backend` / `-c frontend` / `-c tts` use **`podman-compose up -d --force-recreate <service>`** only — **no** `compose down` for the whole stack (MariaDB/frontend/TTS stay up → fewer nginx IP drifts and regression 502s).
+- **Full recycle:** `-c app` / `-c all` still `down` + `up -d`.
+- **Gate:** `require_images_before_recycle` refuses recycle if the target image tag is missing locally (Decision **#34**). Production keeps VERSION in `.env` until the remote gate passes; staging sets VERSION up front.
+- **Reference:** `deploy-manualmode.sh` remote script; `mc-stack-watchdog.sh` for nginx mismatch self-heal.
+
 ### 36. Version train 2.7.0 — local + staging only (2026-11-17)
 - **Decision:** **`main` product version 2.7.0** (from `BUILD_NUMBER` reset **1**) is the canonical train for **local dev** and **staging** deploys. **Production / App Store** stay on **2.6.0** until an explicit production release. **3.0.0** (PR #31 offline Sam/Connector) is a **separate feature branch** — not part of the 2.7.0 improvement line on `main`.
 - **Lesson:** The 2026-11-13 **`VERSION=2.7.0` outage** was a **registry/image** failure without full `-c app` parity — not a veto on 2.7.0 as a version label. First 2.7.0 staging deploy must be **`-c app`** (frontend + backend + TTS re-tag).
