@@ -1,11 +1,11 @@
 # Active Context
 
-## Current Status (2026-11-16)
+## Current Status (2026-11-17)
 
 | Ebene | Stand |
 |--------|--------|
-| **Git `main`** | `52959b14` build **79** sync; davor Doku/Agent-Ops; App **2.6.0** |
-| **Production / Staging** | **Staging v2.6.0 b79** (Express 5 / Vite 8 Rebuild 2026-11-16); **Prod v2.6.0 b78** bis expliziter Prod-Deploy |
+| **Git `main`** | `34355ad9` — DPFL **stressSignals** + DPC compact/Medium (`30d74009`); build **80**; App **2.6.0** |
+| **Production / Staging** | **Staging v2.6.0 b80** — Backend-Only-Deploy `34355ad9` (2026-11-17, Image `0e3ea4153077`); **Prod v2.6.0 b78** bis expliziter Prod-Deploy |
 | **Lokal** | Deploy-Safeguards (+ veralteter 2.7.0-Bump) im Stash `local-2.7.0-and-deploy-safeguards` — **nicht** mit PR #31 verwechseln |
 | **App Store iOS** | **2.6.0** live (AT/DE/CH) |
 | **Release 3.0.0** | **PR #31** — Feature-Branch offline Sam/Connector (Major); **bei Gelegenheit** weiterbauen — Live bleibt **2.6.0** |
