@@ -259,6 +259,11 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Watchdog / deploy:** Do not `compose up` down the stack when target images are missing (403/404); prefer restoring `.accepted-release`. Deploy script must not tear down prod while images are absent. **Lesson:** failed `VERSION=2.7.0` deploy ≠ Release **3.0.0** (PR #31).
 - **Cron:** Scheduled Monday production pull **disabled** until release process is safe. **Reference:** `activeContext.md` incident 2026-11-13; hardened scripts may live in local stash until committed.
 
+### 36. Version train 2.7.0 — local + staging only (2026-11-17)
+- **Decision:** **`main` product version 2.7.0** (from `BUILD_NUMBER` reset **1**) is the canonical train for **local dev** and **staging** deploys. **Production / App Store** stay on **2.6.0** until an explicit production release. **3.0.0** (PR #31 offline Sam/Connector) is a **separate feature branch** — not part of the 2.7.0 improvement line on `main`.
+- **Lesson:** The 2026-11-13 **`VERSION=2.7.0` outage** was a **registry/image** failure without full `-c app` parity — not a veto on 2.7.0 as a version label. First 2.7.0 staging deploy must be **`-c app`** (frontend + backend + TTS re-tag).
+- **Reference:** `activeContext.md`; deployment skill version table.
+
 ### 35. Agent skills & ops — not in public repo (2026-11-16)
 - **Decision:** Domain skills, rules, slash commands, hooks, and **`AGENTS.md`** stay **maintainer-local** (`.cursor/*` gitignored; **`.agents/`** gitignored). The public repo does **not** ship agent procedures or personal ops layout.
 - **Moves:** Back up `.cursor/` (and optional `.agents/`) when changing machines — not via `git clone`.

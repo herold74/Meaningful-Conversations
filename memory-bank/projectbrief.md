@@ -35,4 +35,4 @@
 - **Frontend:** React 19, Vite 8, TypeScript, Tailwind CSS, Capacitor (iOS).
 - **Backend:** Node.js 22, Express 5, Prisma 7, MariaDB.
 - **AI:** Google GenAI + Mistral SDK (Classic/Practice); Piper TTS container.
-- **Release line:** Live **2.6.0** (web b78); nächstes Major **3.0.0** in PR #31.
+- **Release line:** **Staging + local `main` → 2.7.0** (ab 2026-11-17). **Production / iOS live → 2.6.0** until explicit prod release. **3.0.0** = PR #31 feature branch (separate from 2.7.0 line).

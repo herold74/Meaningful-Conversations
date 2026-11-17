@@ -4,11 +4,11 @@
 
 | Ebene | Stand |
 |--------|--------|
-| **Git `main`** | `34355ad9` — DPFL **stressSignals** + DPC compact/Medium (`30d74009`); build **80**; App **2.6.0** |
-| **Production / Staging** | **Staging v2.6.0 b80** — Backend-Only-Deploy `34355ad9` (2026-11-17, Image `0e3ea4153077`); **Prod v2.6.0 b78** bis expliziter Prod-Deploy |
-| **Lokal** | Deploy-Safeguards (+ veralteter 2.7.0-Bump) im Stash `local-2.7.0-and-deploy-safeguards` — **nicht** mit PR #31 verwechseln |
-| **App Store iOS** | **2.6.0** live (AT/DE/CH) |
-| **Release 3.0.0** | **PR #31** — Feature-Branch offline Sam/Connector (Major); **bei Gelegenheit** weiterbauen — Live bleibt **2.6.0** |
+| **Git `main`** | Version **2.7.0** build **1** (Minor-Bump Local/Staging-Train); zuletzt DPFL **stressSignals** (`34355ad9`) |
+| **Production / Staging** | **Staging → 2.7.0** (vollständiger `-c app` Deploy nach Bump); **Prod / App Store → 2.6.0** bis expliziter Prod-Release |
+| **Lokal** | Dev + Commits auf **2.7.0**; Deploy-Safeguards weiter im Stash `local-2.7.0-and-deploy-safeguards` |
+| **App Store iOS** | **2.6.0** live (AT/DE/CH) — unverändert bis neues Binary |
+| **Release 3.0.0** | **PR #31** — separater Feature-Branch (offline Sam/Connector); **unabhängig** vom 2.7.0-Train auf `main` |
 
 **Standing rule:** Kein Staging-Login / E2EE-Wartung ohne explizite Bitte. Prod-Deploy nur auf ausdrückliche Freigabe (Decision **#34** nach 13.11.-Outage).
 

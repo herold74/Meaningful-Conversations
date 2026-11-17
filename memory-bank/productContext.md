@@ -22,7 +22,7 @@ The user journey is circular and iterative:
 - **Registered Users:** Data is stored but **End-to-End Encrypted (E2EE)**. The server host cannot read the user's Life Context. Decryption happens only on the client side.
 
 ## Distribution
-- **iOS App Store:** **2.6.0** live (AT/DE/CH), IAP + Server Notifications in ASC. **Nächstes Binary:** **3.0.0** (PR #31, offline Sam/Connector — nicht mit fehlgeschlagenem Server-2.7.0 verwechseln). English metadata: **English (Canada)**.
+- **iOS App Store:** **2.6.0** live (AT/DE/CH), IAP + Server Notifications in ASC. **Web staging/local:** **2.7.0** train on `main` (2026-11-17). **Nächstes Binary Major:** **3.0.0** (PR #31, offline Sam/Connector — eigenes Branch, nicht 2.7.0). English metadata: **English (Canada)**.
 - **PWA:** Available at https://mc-app.manualmode.at for all platforms.
 - **Cross-platform:** User accounts work on both iOS app and web browser, data syncs automatically.
 
