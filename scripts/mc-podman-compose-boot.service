@@ -7,6 +7,10 @@ After=network-online.target podman-boot-all.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
+# Boot waits for backend /api/health (up to 3 min per env) before nginx.
+# Default TimeoutStartSec is 90s and would kill that wait (watchdog incident, Oct 2026).
+TimeoutStartSec=900
+TimeoutStopSec=120
 ExecStart=/usr/local/bin/podman-compose-boot.sh
 
 [Install]
