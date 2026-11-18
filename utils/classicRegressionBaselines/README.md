@@ -127,6 +127,20 @@ Defaults: `developer@manualmode.at` / `local-dev-seed-password`. Staging: set `M
 
 **Do not run two baseline captures in parallel.**
 
+## Cost controls (Mistral / staging)
+
+| Flag / env | Effect |
+|------------|--------|
+| *(default)* | **No coachee sim** — dynamic turns use scripted locale follow-ups (`dynamicFollowupKeys` in `scenarioSuite.mjs`) |
+| `--with-coachee-sim` | Extra `simulate-coachee` LLM call per dynamic turn (UI-parity transcripts) |
+| `--dry-run` | Estimate chat / coachee / session calls per scenario; no API |
+| `--ping-one` | With dry-run or alone after dry-run path: login + optional forced region only |
+| `CLASSIC_REGRESSION_FLAKE_RETRIES` | Default **1** (`--flake-retries N`) for flake-only auto-check retests |
+
+```bash
+npm run classic-regression -- baseline --provider mistral --suite regression --dry-run --api https://mc-beta.example
+```
+
 ## Excluded scenarios (manual UI only)
 
 - `session_comfort_check_flow`

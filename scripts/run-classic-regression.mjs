@@ -4,6 +4,7 @@
  *
  * Usage:
  *   node scripts/run-classic-regression.mjs baseline --provider gemini|mistral [--run-id LABEL] [--reference] [--suite smoke|regression|full] [--api URL] [--language en|de]
+ *   Cost / planning: [--dry-run] [--ping-one] (auth+region only), [--with-coachee-sim] (default off), [--flake-retries N] (default 1, env CLASSIC_REGRESSION_FLAKE_RETRIES)
  *     Default: saves to runs/{timestamp}-{provider}[-label]/ (each run is unique).
  *     --reference: update canonical reference at local-{provider}/ instead.
  *   node scripts/run-classic-regression.mjs compare-offline --baseline-provider gemini|mistral --current-provider gemini|mistral [--current-run RUN_ID|--current-dir DIR] [--suite …] [--language en|de]
@@ -20,7 +21,11 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { REGRESSION_SUITES, SCENARIO_DEFS, getScenarioDef } from './classicRegression/scenarioSuite.mjs';
+import {
+  REGRESSION_SUITES,
+  getScenarioDef,
+  estimateScenarioApiCalls,
+} from './classicRegression/scenarioSuite.mjs';
 import { loadLocale, makeTranslator, runClassicScenario } from './classicRegression/runSession.mjs';
 import {
   referenceDir,
@@ -93,6 +98,10 @@ function parseArgs(argv) {
     runIdLabel: null,
     scenarios: null,
     suite: 'regression',
+    dryRun: false,
+    pingOne: false,
+    withCoacheeSim: false,
+    flakeRetries: null,
   };
 
   if (!args.command || !['baseline', 'compare', 'compare-offline'].includes(args.command)) {
@@ -118,10 +127,19 @@ function parseArgs(argv) {
     else if (argv[i] === '--suite' && argv[i + 1]) args.suite = argv[++i];
     else if (argv[i] === '--allow-cross-provider') args.allowCrossProvider = true;
     else if (argv[i] === '--scenarios' && argv[i + 1]) args.scenarios = argv[++i].split(',').map((s) => s.trim()).filter(Boolean);
+    else if (argv[i] === '--dry-run') args.dryRun = true;
+    else if (argv[i] === '--ping-one') args.pingOne = true;
+    else if (argv[i] === '--with-coachee-sim') args.withCoacheeSim = true;
+    else if (argv[i] === '--flake-retries' && argv[i + 1]) args.flakeRetries = Number(argv[++i]);
     else {
       console.error(`Unknown argument: ${argv[i]}`);
       process.exit(1);
     }
+  }
+
+  const envFlake = Number(process.env.CLASSIC_REGRESSION_FLAKE_RETRIES ?? 1);
+  if (args.flakeRetries == null || Number.isNaN(args.flakeRetries)) {
+    args.flakeRetries = Number.isFinite(envFlake) && envFlake >= 0 ? envFlake : 1;
   }
 
   if (!REGRESSION_SUITES[args.suite]) {
@@ -144,17 +162,22 @@ function parseArgs(argv) {
     args.baselineProvider = assertProvider(args.baselineProvider, '--baseline-provider');
     args.currentProvider = assertProvider(args.currentProvider, '--current-provider');
     args.baselineDir = args.baselineDir || defaultReferenceDir(args.baselineProvider, args.language);
-    requireSameProviderCurrentRun(
-      BASELINES_ROOT,
-      args.baselineProvider,
-      args.currentProvider,
-      args.currentDir,
-      args.currentRun,
-    );
-    args.currentDir = resolveCompareCurrentDir(BASELINES_ROOT, args.baselineProvider, args.currentProvider, {
-      currentDir: args.currentDir,
-      currentRun: args.currentRun,
-    });
+    if (args.dryRun) {
+      args.currentDir = args.currentDir
+        || (args.currentRun ? `(run: ${args.currentRun})` : '(set --current-run or --current-dir for real compare)');
+    } else {
+      requireSameProviderCurrentRun(
+        BASELINES_ROOT,
+        args.baselineProvider,
+        args.currentProvider,
+        args.currentDir,
+        args.currentRun,
+      );
+      args.currentDir = resolveCompareCurrentDir(BASELINES_ROOT, args.baselineProvider, args.currentProvider, {
+        currentDir: args.currentDir,
+        currentRun: args.currentRun,
+      });
+    }
   } else {
     args.baselineProvider = assertProvider(args.baselineProvider, '--baseline-provider');
     args.currentProvider = assertProvider(args.currentProvider, '--current-provider');
@@ -181,6 +204,60 @@ function parseArgs(argv) {
 
 function snapshotFilename(scenarioId, language, provider) {
   return `${scenarioId}-classic-${language}-${provider}.json`;
+}
+
+function printDryRunPlan(args) {
+  const mode = args.withCoacheeSim ? 'simulate-coachee (extra LLM per dynamic turn)' : 'no-sim (scripted locale follow-ups)';
+  console.log(`\nDry run — command: ${args.command} | suite: ${args.suite} | language: ${args.language}`);
+  console.log(`API: ${args.api} | coachee: ${mode} | flake retries: ${args.flakeRetries}`);
+  if (args.command === 'compare-offline') {
+    console.log(`Baseline dir: ${args.baselineDir}`);
+    console.log(`Current dir:  ${args.currentDir}`);
+    console.log('\nNo live API calls (compare-offline). Use --ping-one with baseline/compare to verify auth/region only.');
+    return;
+  }
+
+  let totalChat = 0;
+  let totalCoachee = 0;
+  let totalSession = 0;
+  let totalPrimary = 0;
+
+  console.log('\nScenario                                      chat  dyn  coachee  session  total');
+  for (const scenarioId of args.scenarioIds) {
+    const def = getScenarioDef(scenarioId);
+    const est = estimateScenarioApiCalls(def, { withCoacheeSim: args.withCoacheeSim });
+    totalChat += est.chatTurns;
+    totalCoachee += est.coacheeSimCalls;
+    totalSession += est.sessionAnalyzeCalls;
+    totalPrimary += est.primaryLlmCalls;
+    const idPad = scenarioId.padEnd(44);
+    console.log(
+      `  ${idPad} ${String(est.chatTurns).padStart(4)}  ${String(est.dynamicTurns).padStart(3)}  ${String(est.coacheeSimCalls).padStart(7)}  ${String(est.sessionAnalyzeCalls).padStart(7)}  ${String(est.primaryLlmCalls).padStart(5)}`,
+    );
+  }
+  const flakeOverheadNote = args.flakeRetries > 0
+    ? ` (up to +${args.flakeRetries}× per scenario on flake-only fails)`
+  : '';
+  console.log(
+    `\nEstimated primary LLM/API calls: ${totalPrimary} (chat ${totalChat}, coachee-sim ${totalCoachee}, session analyze ${totalSession})${flakeOverheadNote}`,
+  );
+  console.log('Remove --dry-run to execute. Optional: --ping-one for login + region check only (no chat).');
+}
+
+async function pingOne(apiBase, token, provider) {
+  const res = await fetch(`${apiBase}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const me = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(me.error || `auth/me failed (${res.status})`);
+  console.log(`ping-one: authenticated as ${me.email || me.user?.email || '(unknown)'}`);
+  if (provider) {
+    const region = regionForProvider(provider);
+    await setAiRegion(apiBase, token, region);
+    const mapping = await fetchModelMapping(apiBase, token);
+    console.log(`ping-one: forced region "${region}" | live provider expectation: ${expectedLiveProvider(provider)}`);
+    if (mapping) console.log(`ping-one: model mapping keys: ${Object.keys(mapping).slice(0, 4).join(', ')}${Object.keys(mapping).length > 4 ? '…' : ''}`);
+  }
 }
 
 async function login(apiBase, email, password, retries = 5) {
@@ -381,7 +458,8 @@ function verifyBaselineIntegrity(outDir, manifest) {
   }
 }
 
-async function runScenario(apiBase, token, scenarioId, language, t, cliProvider) {
+async function runScenario(apiBase, token, scenarioId, language, t, cliProvider, runOptions = {}) {
+  const { withCoacheeSim = false, flakeRetries = 1 } = runOptions;
   const def = getScenarioDef(scenarioId);
   console.log(`\n▶ ${scenarioId} (${def.category}, bot: ${def.botId})`);
   let runResult = await runClassicScenario(apiBase, token, def, {
@@ -389,13 +467,14 @@ async function runScenario(apiBase, token, scenarioId, language, t, cliProvider)
     t,
     turnDelayMs: TURN_DELAY_MS,
     onProgress: (msg) => console.log(msg),
+    withCoacheeSim,
   });
 
   assertScenarioProviders(scenarioId, runResult.responses, cliProvider);
 
   // Flake policy: if the only failures are FLAKE_CHECK_IDS, retest once
   const failedIds = (runResult.autoCheckResults || []).filter((c) => !c.passed).map((c) => c.checkId);
-  const maxFlakeRetries = Number(process.env.CLASSIC_REGRESSION_FLAKE_RETRIES || 2);
+  const maxFlakeRetries = flakeRetries;
   let flakeAttempt = 0;
   while (flakeAttempt < maxFlakeRetries) {
     const failedIdsLoop = (runResult.autoCheckResults || []).filter((c) => !c.passed).map((c) => c.checkId);
@@ -408,6 +487,7 @@ async function runScenario(apiBase, token, scenarioId, language, t, cliProvider)
       t,
       turnDelayMs: TURN_DELAY_MS,
       onProgress: (msg) => console.log(msg),
+      withCoacheeSim,
     });
     assertScenarioProviders(scenarioId, retry.responses, cliProvider);
     if (retry.checksSummary.allPass || retry.checksSummary.passed >= runResult.checksSummary.passed) {
@@ -478,7 +558,10 @@ async function runBaseline(args, token) {
       console.log(`  … pacing ${scenarioDelayMs}ms (avoid provider rate limits)…`);
       await new Promise((r) => setTimeout(r, scenarioDelayMs));
     }
-    const runResult = await runScenario(args.api, token, scenarioId, args.language, t, args.provider);
+    const runResult = await runScenario(args.api, token, scenarioId, args.language, t, args.provider, {
+      withCoacheeSim: args.withCoacheeSim,
+      flakeRetries: args.flakeRetries,
+    });
     const snapshot = buildSnapshot(scenarioId, args.language, args.provider, runResult, {
       apiBase: args.api,
       suite: args.suite,
@@ -711,15 +794,28 @@ function runCompareOffline(args, { regression = false } = {}) {
 
 async function main() {
   const args = parseArgs(process.argv);
+
+  if (args.dryRun) {
+    printDryRunPlan(args);
+    if (args.pingOne && args.command !== 'compare-offline') {
+      const provider = args.command === 'baseline' ? args.provider : args.currentProvider;
+      const token = await login(args.api, DEFAULT_EMAIL, DEFAULT_PASSWORD);
+      await pingOne(args.api, token, provider);
+    }
+    return;
+  }
+
   if (args.command === 'baseline') {
     console.log(`API: ${args.api} | language: ${args.language} | provider: ${args.provider} | suite: ${args.suite} | command: baseline`);
     console.log(`Scenarios (${args.scenarioIds.length}): ${args.scenarioIds.join(', ')}`);
+    console.log(`Coachee sim: ${args.withCoacheeSim ? 'on' : 'off (scripted follow-ups)'} | flake retries: ${args.flakeRetries}`);
   } else if (args.command === 'compare-offline') {
     console.log(`language: ${args.language} | suite: ${args.suite} | ${args.baselineProvider} → ${args.currentProvider} | command: compare-offline`);
     runCompareOffline(args);
     return;
   } else {
     console.log(`API: ${args.api} | language: ${args.language} | suite: ${args.suite} | ${args.baselineProvider} → ${args.currentProvider} | command: compare`);
+    console.log(`Coachee sim: ${args.withCoacheeSim ? 'on' : 'off (scripted follow-ups)'} | flake retries: ${args.flakeRetries}`);
   }
 
   const token = await login(args.api, DEFAULT_EMAIL, DEFAULT_PASSWORD);

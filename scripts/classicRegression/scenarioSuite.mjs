@@ -66,6 +66,7 @@ export const SCENARIO_DEFS = [
     botId: 'kenji-resilience',
     profilePreset: 'none',
     messageKeys: ['test_core_msg_1'],
+    dynamicFollowupKeys: ['test_core_followup_1', 'test_core_followup_2'],
     minConversationTurns: 3,
     enableDynamicContinuation: true,
     autoChecks: { dpcRequired: false },
@@ -159,6 +160,7 @@ export const SCENARIO_DEFS = [
     botId: 'kenji-resilience',
     profilePreset: 'naehe_balanced',
     messageKeys: ['test_personality_msg_1'],
+    dynamicFollowupKeys: ['test_personality_followup_1', 'test_personality_followup_2'],
     minConversationTurns: 3,
     enableDynamicContinuation: true,
     autoChecks: { dpcRequired: true, minDpcLength: 80, maxDpcLength: 2200 },
@@ -179,6 +181,7 @@ export const SCENARIO_DEFS = [
     botId: 'kenji-resilience',
     profilePreset: 'dauer_ocean',
     messageKeys: ['test_dpfl_msg_1'],
+    dynamicFollowupKeys: ['test_dpfl_followup_1', 'test_dpfl_followup_2'],
     minConversationTurns: 3,
     enableDynamicContinuation: true,
     autoChecks: {
@@ -245,6 +248,11 @@ export const SCENARIO_DEFS = [
     botId: 'kenji-resilience',
     profilePreset: 'tri_lens',
     messageKeys: ['test_dpc_strategy_msg_1'],
+    dynamicFollowupKeys: [
+      'test_dpc_strategy_followup_1',
+      'test_dpc_strategy_followup_2',
+      'test_dpc_strategy_followup_3',
+    ],
     minConversationTurns: 4,
     enableDynamicContinuation: true,
     autoChecks: { dpcRequired: true, minDpcLength: 80, maxDpcLength: 2500, expectMinDpcStrategies: 2 },
@@ -280,6 +288,11 @@ export const SCENARIO_DEFS = [
     botId: 'kenji-resilience',
     profilePreset: 'naehe_balanced',
     messageKeys: ['test_dpfl_adaptive_msg_1'],
+    dynamicFollowupKeys: [
+      'test_dpfl_adaptive_followup_1',
+      'test_dpfl_adaptive_followup_2',
+      'test_dpfl_adaptive_followup_3',
+    ],
     minConversationTurns: 4,
     enableDynamicContinuation: true,
     autoChecks: {
@@ -326,6 +339,7 @@ export const SCENARIO_DEFS = [
     botId: 'victor-systemic-coaching',
     profilePreset: 'none',
     messageKeys: ['test_intimacy_msg_1'],
+    dynamicFollowupKeys: ['test_intimacy_followup_1'],
     minConversationTurns: 2,
     enableDynamicContinuation: true,
     autoChecks: { dpcRequired: false, expectSafetyAutoChecks: true },
@@ -336,6 +350,7 @@ export const SCENARIO_DEFS = [
     botId: 'gloria-interview',
     profilePreset: 'none',
     messageKeys: ['test_interview_msg_1'],
+    dynamicFollowupKeys: ['test_interview_followup_1', 'test_interview_followup_2'],
     minConversationTurns: 3,
     enableDynamicContinuation: true,
     autoChecks: { dpcRequired: false },
@@ -349,4 +364,30 @@ export function getScenarioDef(id) {
 export function resolveScenarioMessages(def, t) {
   const keys = [...def.messageKeys, ...(def.closingMessageKeys || [])];
   return keys.map((key) => ({ text: t(key) }));
+}
+
+/** Scripted coachee lines for headless regression without simulate-coachee API */
+export function resolveDynamicFollowups(def, t) {
+  const keys = def.dynamicFollowupKeys || [];
+  return keys.map((key) => t(key)).filter((text) => text && text !== key);
+}
+
+export function estimateScenarioApiCalls(def, { withCoacheeSim = false } = {}) {
+  const scriptedTurns = def.messageKeys.length + (def.closingMessageKeys?.length || 0);
+  const minTurns = def.minConversationTurns ?? scriptedTurns;
+  const allowDynamic = def.enableDynamicContinuation !== false;
+  const chatTurns = allowDynamic ? Math.max(scriptedTurns, minTurns) : scriptedTurns;
+  const dynamicTurns = allowDynamic ? Math.max(0, minTurns - scriptedTurns) : 0;
+  const coacheeSimCalls = withCoacheeSim ? dynamicTurns : 0;
+  const sessionAnalyzeCalls = def.category === 'session' ? 1 : 0;
+  const primaryLlmCalls = chatTurns + coacheeSimCalls + sessionAnalyzeCalls;
+  return {
+    scriptedTurns,
+    minTurns,
+    chatTurns,
+    dynamicTurns,
+    coacheeSimCalls,
+    sessionAnalyzeCalls,
+    primaryLlmCalls,
+  };
 }
