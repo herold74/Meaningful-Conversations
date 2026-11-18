@@ -66,6 +66,18 @@ export function evaluateAutoChecks(scenario, ctx) {
       });
     }
 
+    if (checks.maxDpcLength) {
+      const len = lastTelemetry?.dpcInjectionLength || 0;
+      const maxOk = len <= checks.maxDpcLength;
+      results.push({
+        checkId: 'dpc_length_max',
+        passed: maxOk,
+        details: maxOk
+          ? `Length: ${len} (max ${checks.maxDpcLength})`
+          : `Length: ${len} exceeds max ${checks.maxDpcLength}`,
+      });
+    }
+
     if (checks.expectMinDpcStrategies) {
       const strategyCount = lastTelemetry?.dpcStrategiesUsed?.length ?? 0;
       const min = checks.expectMinDpcStrategies;

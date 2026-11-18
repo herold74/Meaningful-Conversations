@@ -119,6 +119,8 @@ Each snapshot includes transcript (with per-turn `provider` / `model`), dominant
 
 Offline compare classifies **STRUCTURAL** vs **FLAKE** (`session_updates`, retested once during capture) vs telemetry **NOISE**, and prints transcript samples.
 
+**DPC:** Live capture checks `dpc_length` (min) and `dpc_length_max` (band) on DPC scenarios in the regression suite. Offline compare treats `dpcInjectionLength` as noise only when **both** manifests share a comparable environment fingerprint (same `packageVersion` + chat model mapping); otherwise |Δ| ≥ 500 is **structural DPC drift**.
+
 ## Auth & rate limits
 
 Defaults: `developer@manualmode.at` / `local-dev-seed-password`. Staging: set `MC_DEV_EMAIL` / `MC_DEV_PASSWORD`. Turn delay: `CLASSIC_REGRESSION_TURN_DELAY_MS=3000`.

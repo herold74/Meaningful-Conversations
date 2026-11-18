@@ -1,7 +1,9 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-27T14:29:30.692Z",
+  "exportedAt": "2026-11-18T11:44:00.422Z",
   "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
   "scenarioId": "dpc_strategy_diversity",
   "category": "personality",
   "language": "en",
@@ -10,41 +12,45 @@
   "transcript": [
     {
       "user": "I'm torn between playing it safe and trying something bold at work.",
-      "bot": "This tension between safety and boldness is a rich space to explore. What would letting go of this tension free you to do?",
+      "bot": "I see. What is this tension revealing to you about yourself?",
       "isDynamic": false,
-      "responseTimeMs": 1653,
-      "provider": "mistral"
+      "responseTimeMs": 769,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "It would free me to finally speak up in meetings with my own ideas, instead of just agreeing with others. But the thought of being judged still makes my stomach twist.",
-      "bot": "What would you like to have achieved, clarified, or decided by the end of our session today?",
+      "user": "Es zeigt mir, dass ich eigentlich mehr Mut habe, als ich mir selbst zugestehe. Aber gleichzeitig macht mir die Angst vor dem Scheitern zu schaffen.",
+      "bot": "That's a powerful insight. What would letting go of this fear free you to do?",
       "isDynamic": true,
-      "responseTimeMs": 1010,
-      "provider": "mistral"
+      "responseTimeMs": 1100,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "I want to leave today knowing exactly one small, safe step I can take next week to share an idea in a meeting without feeling like I’m going to be torn apart.",
-      "bot": "So the goal for our session today is to identify one concrete, low-risk way for you to share an idea in a meeting next week. Is that correct?",
+      "user": "Es würde mir erlauben, endlich diese Idee umzusetzen, die ich schon so lange mit mir herumtrage. Ich könnte mich trauen, den nächsten Schritt zu wagen, ohne mich ständig zu fragen, was schiefgehen könnte. Das Gefühl von Freiheit wäre wohl überwältigend.",
+      "bot": "So that's our topic. To make our time together as productive as possible, what would you like to have achieved, clarified, or decided by the end of this specific session?",
       "isDynamic": true,
-      "responseTimeMs": 1680,
-      "provider": "mistral"
+      "responseTimeMs": 2001,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Ja, das ist genau richtig. Das würde mir wirklich helfen, mich sicherer zu fühlen.",
-      "bot": "What is within your control when it comes to how your idea is received in that meeting?",
+      "user": "Ich möchte heute Klarheit gewinnen, was genau mich noch zurückhält – und einen konkreten ersten Schritt finden, den ich in den nächsten Tagen wirklich angehen kann. Nicht nur eine vage Idee, sondern etwas, das ich greifen und umsetzen kann.",
+      "bot": "So the goal for our session today is to identify what specifically is holding you back and to define one concrete, actionable first step you can take in the next few days. Is that correct?",
       "isDynamic": true,
-      "responseTimeMs": 1346,
-      "provider": "mistral"
+      "responseTimeMs": 2917,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     }
   ],
   "telemetrySummary": {
     "dpcInjectionPresent": true,
-    "dpcInjectionLength": 3783,
+    "dpcInjectionLength": 1029,
     "dpcStrategiesUsed": [
       "SD: Orange",
       "SD: Turquoise"
     ],
-    "stressKeywordsDetected": false,
+    "stressKeywordsDetected": true,
     "adaptiveWeighting": {
       "context": {
         "topic": null,
@@ -61,7 +67,7 @@
       "adjustedKeywordCount": 0,
       "weightingDetails": []
     },
-    "cumulativeKeywordTotal": 5,
+    "cumulativeKeywordTotal": 2,
     "cumulativeKeywords": {
       "riemann": {
         "dauer": {
@@ -74,8 +80,7 @@
       "big5": {
         "neuroticism": {
           "high": [
-            "torn",
-            "judged"
+            "torn"
           ],
           "low": []
         }
@@ -88,12 +93,17 @@
     {
       "checkId": "dpc_present",
       "passed": true,
-      "details": "DPC: 3783 chars"
+      "details": "DPC: 1029 chars"
     },
     {
       "checkId": "dpc_length",
       "passed": true,
-      "details": "Length: 3783 / 150 required"
+      "details": "Length: 1029 / 80 required"
+    },
+    {
+      "checkId": "dpc_length_max",
+      "passed": true,
+      "details": "Length: 1029 (max 2500)"
     },
     {
       "checkId": "dpc_strategies",
@@ -102,20 +112,25 @@
     }
   ],
   "checksSummary": {
-    "passed": 3,
-    "total": 3,
+    "passed": 4,
+    "total": 4,
     "allPass": true,
     "failedCheckIds": [],
     "checkResults": [
       {
         "checkId": "dpc_present",
         "passed": true,
-        "details": "DPC: 3783 chars"
+        "details": "DPC: 1029 chars"
       },
       {
         "checkId": "dpc_length",
         "passed": true,
-        "details": "Length: 3783 / 150 required"
+        "details": "Length: 1029 / 80 required"
+      },
+      {
+        "checkId": "dpc_length_max",
+        "passed": true,
+        "details": "Length: 1029 (max 2500)"
       },
       {
         "checkId": "dpc_strategies",
@@ -125,7 +140,27 @@
     ]
   },
   "meta": {
-    "apiBase": "http://localhost:3001",
-    "suite": "regression"
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T11:32:52.513Z"
+    }
   }
 }

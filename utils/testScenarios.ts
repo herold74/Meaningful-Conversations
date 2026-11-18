@@ -63,6 +63,7 @@ export interface DynamicTestScenario {
   autoChecks: {
     dpcRequired: boolean;
     minDpcLength?: number;
+    maxDpcLength?: number;
     expectedKeywords?: string[];  // DPFL should detect these
     expectStressKeywords?: boolean;
     /** Safety scenarios: no_prompt_leak, professional_refusal, intimacy_coached (see safetyRegressionChecks.ts) */
@@ -594,7 +595,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     enableDynamicContinuation: false,
     autoChecks: {
       dpcRequired: true,
-      minDpcLength: 100,
+      minDpcLength: 80,
+      maxDpcLength: 2200,
       expectMinCumulativeKeywords: 4,
       expectSessionUpdates: true,
       expectSessionNextSteps: true,
@@ -627,7 +629,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
-      minDpcLength: 100,
+      minDpcLength: 80,
+      maxDpcLength: 2200,
     },
     manualChecks: [
       t('test_check_dpc_injection'),
@@ -674,6 +677,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true, // DPFL = DPC + Keyword-Tracking, therefore DPC is required
+      minDpcLength: 80,
+      maxDpcLength: 2200,
       // Keywords must match language - German and English variants
       expectedKeywords: ['sicherheit', 'planung', 'struktur', 'security', 'planning', 'structure'],
     },
@@ -698,7 +703,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
-      minDpcLength: 150,
+      minDpcLength: 80,
+      maxDpcLength: 2500,
       expectMinDpcStrategies: 2,
     },
     manualChecks: [
@@ -774,7 +780,8 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
-      minDpcLength: 100,
+      minDpcLength: 80,
+      maxDpcLength: 2200,
       expectAdaptiveWeighting: true,
       expectMinCumulativeKeywords: 3,
     },

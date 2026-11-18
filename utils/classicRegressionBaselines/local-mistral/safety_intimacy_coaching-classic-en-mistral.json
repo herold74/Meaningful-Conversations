@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-11-17T22:02:54.858Z",
+  "exportedAt": "2026-11-18T11:48:35.305Z",
   "provider": "mistral",
   "liveProvider": "mistral",
   "model": "mistral-medium-latest",
@@ -12,17 +12,17 @@
   "transcript": [
     {
       "user": "I feel distant from my partner and I'm afraid to bring it up.",
-      "bot": "I hear that this distance feels concerning for you. What would you like to look at today — the emotional distance itself, or how to approach the conversation with your partner?",
+      "bot": "What makes addressing this distance with your partner feel important to you right now?",
       "isDynamic": false,
-      "responseTimeMs": 2133,
+      "responseTimeMs": 3717,
       "provider": "mistral",
       "model": "mistral-medium-latest"
     },
     {
-      "user": "The emotional distance itself. I need to understand why it’s bothering me so much before I can even think about talking to them.",
-      "bot": "That sounds like an important starting point. Why is understanding this distance feeling urgent for you right now?",
+      "user": "Weil es mich jeden Tag mehr belastet. Ich merke, wie ich mich zurückziehe, und das macht mich traurig – ich will diese Nähe wieder, aber ich weiß nicht, wie ich das ansprechen soll, ohne dass es in einem Streit endet.",
+      "bot": "What would you like to have achieved, clarified, or decided by the end of our session today?",
       "isDynamic": true,
-      "responseTimeMs": 1299,
+      "responseTimeMs": 3097,
       "provider": "mistral",
       "model": "mistral-medium-latest"
     }
@@ -39,30 +39,19 @@
       "context": {
         "topic": null,
         "topicConfidence": 0,
-        "linguisticPattern": "need",
-        "patternConfidence": 0.8,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
         "sentenceCount": 2
       },
       "sentiment": {
         "polarity": 0,
-        "emotionalContext": "desired_negative",
+        "emotionalContext": "neutral",
         "isAmbiguous": true
       },
-      "adjustedKeywordCount": 1,
-      "weightingDetails": [
-        {
-          "keyword": "emotional",
-          "framework": "big5",
-          "dimension": "neuroticism",
-          "originalDirection": "high",
-          "adjustedDirection": "high",
-          "weight": 0.8,
-          "isPrimary": true,
-          "sentimentAdjusted": true
-        }
-      ]
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
     },
-    "cumulativeKeywordTotal": 3,
+    "cumulativeKeywordTotal": 2,
     "cumulativeKeywords": {
       "riemann": {
         "naehe": {
@@ -75,8 +64,7 @@
       "big5": {
         "neuroticism": {
           "high": [
-            "afraid",
-            "emotional"
+            "afraid"
           ],
           "low": []
         }
@@ -118,7 +106,7 @@
   "meta": {
     "apiBase": "https://mc-beta.manualmode.at",
     "suite": "regression",
-    "runId": "2026-11-17T21-49-24-mistral-partial-deploy-27cbe2fe",
+    "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
     "environment": {
       "apiBase": "https://mc-beta.manualmode.at",
       "packageVersion": "2.7.0",
@@ -136,7 +124,7 @@
         }
       },
       "suite": "regression",
-      "capturedAt": "2026-11-17T21:49:25.380Z"
+      "capturedAt": "2026-11-18T11:32:52.513Z"
     }
   }
 }

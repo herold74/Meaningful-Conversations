@@ -882,6 +882,18 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
           });
         }
 
+        if (selectedScenario.autoChecks.maxDpcLength) {
+          const len = lastTelemetry?.dpcInjectionLength || 0;
+          const maxOk = len <= selectedScenario.autoChecks.maxDpcLength;
+          autoCheckResults.push({
+            checkId: 'dpc_length_max',
+            passed: maxOk,
+            details: maxOk
+              ? `Length: ${len} (max ${selectedScenario.autoChecks.maxDpcLength})`
+              : `Length: ${len} exceeds max ${selectedScenario.autoChecks.maxDpcLength}`,
+          });
+        }
+
         if (selectedScenario.autoChecks.expectMinDpcStrategies) {
           const strategyCount = lastTelemetry?.dpcStrategiesUsed?.length ?? 0;
           const min = selectedScenario.autoChecks.expectMinDpcStrategies;

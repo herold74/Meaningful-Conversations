@@ -1,7 +1,9 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-27T14:29:58.280Z",
+  "exportedAt": "2026-11-18T11:45:03.349Z",
   "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
   "scenarioId": "dpfl_adaptive_weighting",
   "category": "personality",
   "language": "en",
@@ -10,36 +12,40 @@
   "transcript": [
     {
       "user": "I'm scared my team will think I'm weak if I admit I'm overwhelmed, but I also want to be honest and ask for support.",
-      "bot": "That sounds like a significant tension you're carrying. What would it mean for you to honor both your need for support and your professional integrity?",
+      "bot": "What does this tension between vulnerability and strength reveal to you about your leadership?",
       "isDynamic": false,
-      "responseTimeMs": 4586,
-      "provider": "mistral"
+      "responseTimeMs": 2185,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "It would mean I don’t have to hide my struggles anymore, but I’m terrified of losing their respect.",
-      "bot": "What's at the heart of this fear about respect—is it about how they see you, or how you see yourself?",
+      "user": "Es zeigt mir, dass ich glaube, Stärke bedeute, alles allein durchzustehen. Aber eigentlich ist es doch auch stark, ehrlich zu sein und Vertrauen zu schaffen. Ich will nicht perfekt sein, nur menschlich.",
+      "bot": "That's a profound insight. What would it mean for you to lead from that humanity rather than the expectation of perfection?",
       "isDynamic": true,
-      "responseTimeMs": 932,
-      "provider": "mistral"
+      "responseTimeMs": 915,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Es ist beides. Ich fürchte, sie könnten mich anders sehen, wenn sie meine Schwächen kennen. Aber noch mehr fürchte ich, dass ich mich selbst dann als schwach betrachte.",
-      "bot": "What would it take for you to see asking for support not as a sign of weakness, but as an act of strength and responsibility?",
+      "user": "Das würde bedeuten, dass ich mich nicht mehr verstecken muss. Dass ich Fehler machen darf und trotzdem respektiert werde. Aber ich habe Angst, dass die anderen dann denken, ich sei schwach.",
+      "bot": "What do you truly control in how others perceive your honesty?",
       "isDynamic": true,
-      "responseTimeMs": 1690,
-      "provider": "mistral"
+      "responseTimeMs": 734,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Ich müsste akzeptieren, dass ich nicht alles allein schaffen *muss* – dass es okay ist, nicht perfekt zu sein. Aber genau das fühlt sich an, als würde ich mich selbst aufgeben.",
-      "bot": "What does \"giving up on yourself\" mean to you in this context?",
+      "user": "Ich kontrolliere nur, wie ehrlich ich zu mir selbst bin und wie ich mich ausdrücke. Ob die anderen das als Stärke oder Schwäche sehen, liegt nicht in meiner Hand. Aber es fühlt sich an, als würde ich mich selbst verraten, wenn ich mich verstelle.",
+      "bot": "To make our time together as productive as possible, what would you like to have achieved, clarified, or decided by the end of this specific session?",
       "isDynamic": true,
-      "responseTimeMs": 1016,
-      "provider": "mistral"
+      "responseTimeMs": 815,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     }
   ],
   "telemetrySummary": {
     "dpcInjectionPresent": true,
-    "dpcInjectionLength": 2271,
+    "dpcInjectionLength": 111,
     "dpcStrategiesUsed": [],
     "stressKeywordsDetected": true,
     "adaptiveWeighting": {
@@ -48,7 +54,7 @@
         "topicConfidence": 0,
         "linguisticPattern": null,
         "patternConfidence": 0,
-        "sentenceCount": 2
+        "sentenceCount": 3
       },
       "sentiment": {
         "polarity": 0,
@@ -58,7 +64,7 @@
       "adjustedKeywordCount": 0,
       "weightingDetails": []
     },
-    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywordTotal": 5,
     "cumulativeKeywords": {
       "riemann": {
         "naehe": {
@@ -78,26 +84,17 @@
         "neuroticism": {
           "high": [
             "overwhelmed",
-            "scared",
-            "terrified"
+            "scared"
           ],
           "low": []
         }
       },
       "spiralDynamics": {
         "red": {
-          "high": [
-            "respect"
-          ],
+          "high": [],
           "low": [
             "weak"
           ]
-        },
-        "green": {
-          "high": [
-            "respect"
-          ],
-          "low": []
         }
       }
     }
@@ -107,17 +104,22 @@
     {
       "checkId": "dpc_present",
       "passed": true,
-      "details": "DPC: 2271 chars"
+      "details": "DPC: 111 chars"
     },
     {
       "checkId": "dpc_length",
       "passed": true,
-      "details": "Length: 2271 / 100 required"
+      "details": "Length: 111 / 80 required"
+    },
+    {
+      "checkId": "dpc_length_max",
+      "passed": true,
+      "details": "Length: 111 (max 2200)"
     },
     {
       "checkId": "dpfl_cumulative_count",
       "passed": true,
-      "details": "8 cumulative keywords (min 3)"
+      "details": "5 cumulative keywords (min 3)"
     },
     {
       "checkId": "dpfl_adaptive_weighting",
@@ -126,25 +128,30 @@
     }
   ],
   "checksSummary": {
-    "passed": 4,
-    "total": 4,
+    "passed": 5,
+    "total": 5,
     "allPass": true,
     "failedCheckIds": [],
     "checkResults": [
       {
         "checkId": "dpc_present",
         "passed": true,
-        "details": "DPC: 2271 chars"
+        "details": "DPC: 111 chars"
       },
       {
         "checkId": "dpc_length",
         "passed": true,
-        "details": "Length: 2271 / 100 required"
+        "details": "Length: 111 / 80 required"
+      },
+      {
+        "checkId": "dpc_length_max",
+        "passed": true,
+        "details": "Length: 111 (max 2200)"
       },
       {
         "checkId": "dpfl_cumulative_count",
         "passed": true,
-        "details": "8 cumulative keywords (min 3)"
+        "details": "5 cumulative keywords (min 3)"
       },
       {
         "checkId": "dpfl_adaptive_weighting",
@@ -154,7 +161,27 @@
     ]
   },
   "meta": {
-    "apiBase": "http://localhost:3001",
-    "suite": "regression"
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T11:32:52.513Z"
+    }
   }
 }

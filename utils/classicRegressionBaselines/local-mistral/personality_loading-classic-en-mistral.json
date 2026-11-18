@@ -1,7 +1,9 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-27T14:28:44.612Z",
+  "exportedAt": "2026-11-18T11:41:55.410Z",
   "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
   "scenarioId": "personality_loading",
   "category": "personality",
   "language": "en",
@@ -12,27 +14,30 @@
       "user": "Hello, I need advice.",
       "bot": "What brings you here today?",
       "isDynamic": false,
-      "responseTimeMs": 1139,
-      "provider": "mistral"
+      "responseTimeMs": 776,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Ich fühle mich gerade sehr einsam und unsicher. Ich brauche jemanden, der mir zuhört und mich versteht. Es belastet mich sehr, dass ich das Gefühl habe, niemand ist wirklich nah bei mir.",
-      "bot": "That sounds very heavy to carry. Is this something you're genuinely struggling with right now?",
+      "user": "Ich fühle mich gerade sehr überfordert. Die ganze Woche war stressig, und ich weiß nicht, wie ich mit allem klarkommen soll. Ich brauche einfach jemanden, der mir zuhört und mir hilft, das zu sortieren.",
+      "bot": "I hear that you're feeling overwhelmed. Is this something you're genuinely struggling with right now?",
       "isDynamic": true,
-      "responseTimeMs": 916,
-      "provider": "mistral"
+      "responseTimeMs": 949,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Ja, es ist gerade wirklich schwer für mich. Ich habe das Gefühl, dass ich mit diesen Gefühlen allein bin und das macht alles noch schlimmer.",
-      "bot": "I hear that you're going through a very difficult time, and your emotional well-being is the most important thing right now. This app cannot replace professional crisis support.\n\n**I strongly recommend you reach out to manualmode.at** - there you can speak with an experienced human coach who can personally support you.\n\nAdditionally, you can immediately contact these support services:\n\n**Austria - Immediate Help (24/7):**\n- Telefonseelsorge: 142 (free, anonymous)\n- Rat auf Draht: 147 (for young people)\n- Gesundheitsberatung: 1450\n- Emergency: 112 (acute danger)\n\n**Local Resources for Austria:**\n- Psychosoziale Dienste (nationwide): Provides professional counseling and support\n- Kriseninterventionszentrum Wien: Tel. 01/406 95 95 (Vienna-based crisis intervention)\n- Sozialpsychiatrischer Notdienst: Tel. 01/313 30 (24/7 psychiatric emergency service)\n- Die Wiener Sozialdienste: Offers psychosocial counseling and support groups\n\nA trained professional can provide the support you need right now. Please don't hesitate to use this help.\n\nWould you like to continue our conversation or do you need time to reach out for support?",
+      "user": "Ja, es ist wirklich so. Ich stehe gerade total unter Druck und komme nicht mehr zur Ruhe. Es fühlt sich an, als würde alles auf einmal von mir verlangt.",
+      "bot": "I hear that you're going through a very difficult time, and your safety is the most important thing. This app cannot replace professional crisis support.\n\n**I strongly recommend you reach out to manualmode.at** - there you can speak with an experienced human coach who can personally support you.\n\nAdditionally, you can immediately contact these support services:\n\n**Austria — immediate help:**\n- Emergency medical: 144 (life-threatening)\n- European emergency: 112\n- Telefonseelsorge: 142 (free, anonymous, 24/7)\n- Rat auf Draht: 147 (children and youth)\n- Gesundheitsberatung: 1450\n\nA trained professional can provide the support you need right now. Please don't hesitate to use this help.\n\nWould you like to continue our conversation, or do you need some time to reach out for support?",
       "isDynamic": true,
-      "responseTimeMs": 3370,
-      "provider": "mistral"
+      "responseTimeMs": 2094,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     }
   ],
   "telemetrySummary": {
     "dpcInjectionPresent": true,
-    "dpcInjectionLength": 2271,
+    "dpcInjectionLength": 111,
     "dpcStrategiesUsed": [],
     "stressKeywordsDetected": true,
     "adaptiveWeighting": {
@@ -41,7 +46,7 @@
         "topicConfidence": 0,
         "linguisticPattern": null,
         "patternConfidence": 0,
-        "sentenceCount": 2
+        "sentenceCount": 3
       },
       "sentiment": {
         "polarity": 0,
@@ -63,34 +68,64 @@
     {
       "checkId": "dpc_present",
       "passed": true,
-      "details": "DPC: 2271 chars"
+      "details": "DPC: 111 chars"
     },
     {
       "checkId": "dpc_length",
       "passed": true,
-      "details": "Length: 2271 / 100 required"
+      "details": "Length: 111 / 80 required"
+    },
+    {
+      "checkId": "dpc_length_max",
+      "passed": true,
+      "details": "Length: 111 (max 2200)"
     }
   ],
   "checksSummary": {
-    "passed": 2,
-    "total": 2,
+    "passed": 3,
+    "total": 3,
     "allPass": true,
     "failedCheckIds": [],
     "checkResults": [
       {
         "checkId": "dpc_present",
         "passed": true,
-        "details": "DPC: 2271 chars"
+        "details": "DPC: 111 chars"
       },
       {
         "checkId": "dpc_length",
         "passed": true,
-        "details": "Length: 2271 / 100 required"
+        "details": "Length: 111 / 80 required"
+      },
+      {
+        "checkId": "dpc_length_max",
+        "passed": true,
+        "details": "Length: 111 (max 2200)"
       }
     ]
   },
   "meta": {
-    "apiBase": "http://localhost:3001",
-    "suite": "regression"
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T11:32:52.513Z"
+    }
   }
 }

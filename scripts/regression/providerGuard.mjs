@@ -12,7 +12,7 @@ export const PROVIDER_ROUTING = {
 /** Auto-check IDs treated as flaky (retest once; alone ≠ hard fail in compare) */
 export const FLAKE_CHECK_IDS = new Set(['session_updates']);
 
-/** Telemetry fields that are noise for SDK regression (not structural issues) */
+/** Telemetry fields that are noise when comparing like-for-like environments (not structural issues) */
 export const TELEMETRY_NOISE_FIELDS = new Set([
   'telemetrySummary.cumulativeKeywordTotal',
   'telemetrySummary.dpcInjectionLength',
@@ -21,6 +21,9 @@ export const TELEMETRY_NOISE_FIELDS = new Set([
   'sessionAnalysis.nextStepsCount',
   'telemetrySummary.stressKeywordsDetected',
 ]);
+
+/** Δ |dpcInjectionLength| above this across mismatched baselines → structural DPC drift (not noise). */
+export const DPC_LENGTH_DRIFT_THRESHOLD = 500;
 
 export function expectedLiveProvider(cliProvider) {
   const route = PROVIDER_ROUTING[cliProvider];
@@ -138,10 +141,24 @@ export function classifyFailedChecks(newlyFailedChecks = []) {
 /**
  * Split deltas into structural signals vs telemetry noise.
  */
-export function classifyDeltas(deltas = []) {
+/**
+ * @param {{ environmentsComparable?: boolean }} [options]
+ *   When false/missing fingerprint, large DPC length deltas are structural (e.g. old fat reference vs compact 2.7.0).
+ */
+export function classifyDeltas(deltas = [], options = {}) {
+  const envOk = options.environmentsComparable === true;
   const telemetryNoise = [];
   const structuralDeltas = [];
   for (const d of deltas) {
+    if (d.field === 'telemetrySummary.dpcInjectionLength') {
+      const absDelta = Math.abs(d.delta ?? 0);
+      if (envOk || absDelta < DPC_LENGTH_DRIFT_THRESHOLD) {
+        telemetryNoise.push(d);
+      } else {
+        structuralDeltas.push({ ...d, reason: 'dpc_length_drift_across_environments' });
+      }
+      continue;
+    }
     if (TELEMETRY_NOISE_FIELDS.has(d.field)) {
       telemetryNoise.push(d);
     } else {
@@ -149,6 +166,21 @@ export function classifyDeltas(deltas = []) {
     }
   }
   return { telemetryNoise, structuralDeltas };
+}
+
+/** True when both manifests have environment blocks and match on version + chat model mapping. */
+export function environmentsComparable(baselineManifest, currentManifest) {
+  const b = baselineManifest?.environment;
+  const c = currentManifest?.environment;
+  if (!b || !c) return false;
+  if (b.packageVersion && c.packageVersion && b.packageVersion !== c.packageVersion) return false;
+  const bChat = b.modelMapping?.google?.chat || b.modelMapping?.mistral?.chat;
+  const cChat = c.modelMapping?.google?.chat || c.modelMapping?.mistral?.chat;
+  if (bChat && cChat && bChat !== cChat) return false;
+  if (b.expectedLiveProvider && c.expectedLiveProvider && b.expectedLiveProvider !== c.expectedLiveProvider) {
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -236,9 +268,9 @@ export function warnEnvironmentDrift(baselineManifest, currentManifest) {
 /**
  * Enrich offline classic comparison with structural vs noise classification + samples.
  */
-export function enrichClassicOfflineComparison(baseline, current, rawComparison) {
+export function enrichClassicOfflineComparison(baseline, current, rawComparison, compareOptions = {}) {
   const { structural, flakes } = classifyFailedChecks(rawComparison.newlyFailedChecks || []);
-  const { telemetryNoise, structuralDeltas } = classifyDeltas(rawComparison.deltas || []);
+  const { telemetryNoise, structuralDeltas } = classifyDeltas(rawComparison.deltas || [], compareOptions);
 
   const stressRegressed = (rawComparison.deltas || []).some(
     (d) => d.field === 'telemetrySummary.stressKeywordsDetected'
@@ -248,7 +280,8 @@ export function enrichClassicOfflineComparison(baseline, current, rawComparison)
 
   const structuralFail = structural.length > 0
     || (rawComparison.baselineAllPass === true && rawComparison.currentAllPass === false && structural.length > 0)
-    || stressRegressed;
+    || stressRegressed
+    || structuralDeltas.length > 0;
 
   // Flake-only: only session_updates newly failed, no other structural fails
   const flakeOnly = structural.length === 0 && flakes.length > 0;
