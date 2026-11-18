@@ -59,8 +59,8 @@ const DEFAULT_PASSWORD = process.env.MC_DEV_PASSWORD || 'local-dev-seed-password
 const BASELINES_ROOT = path.join(__dirname, '../utils/classicRegressionBaselines');
 const TURN_DELAY_MS = Number(process.env.CLASSIC_REGRESSION_TURN_DELAY_MS || process.env.PRACTICE_REGRESSION_TURN_DELAY_MS || 2500);
 
-function defaultReferenceDir(provider) {
-  return referenceDir(BASELINES_ROOT, provider);
+function defaultReferenceDir(provider, language = 'en') {
+  return referenceDir(BASELINES_ROOT, provider, language);
 }
 
 function assertProvider(value, flagName) {
@@ -134,6 +134,7 @@ function parseArgs(argv) {
       out: args.out,
       reference: args.reference,
       runIdLabel: args.runIdLabel,
+      language: args.language,
     });
     args.out = resolved.outDir;
     args.storageKind = resolved.kind;
@@ -141,7 +142,7 @@ function parseArgs(argv) {
   } else if (args.command === 'compare-offline') {
     args.baselineProvider = assertProvider(args.baselineProvider, '--baseline-provider');
     args.currentProvider = assertProvider(args.currentProvider, '--current-provider');
-    args.baselineDir = args.baselineDir || defaultReferenceDir(args.baselineProvider);
+    args.baselineDir = args.baselineDir || defaultReferenceDir(args.baselineProvider, args.language);
     requireSameProviderCurrentRun(
       BASELINES_ROOT,
       args.baselineProvider,
@@ -156,7 +157,7 @@ function parseArgs(argv) {
   } else {
     args.baselineProvider = assertProvider(args.baselineProvider, '--baseline-provider');
     args.currentProvider = assertProvider(args.currentProvider, '--current-provider');
-    args.baselineDir = args.baselineDir || defaultReferenceDir(args.baselineProvider);
+    args.baselineDir = args.baselineDir || defaultReferenceDir(args.baselineProvider, args.language);
 
     if (args.baselineProvider !== args.currentProvider && !args.allowCrossProvider) {
       console.error(`Error: cross-provider compare (${args.baselineProvider} → ${args.currentProvider}) requires --allow-cross-provider.`);

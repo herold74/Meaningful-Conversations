@@ -1,0 +1,207 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-18T10:10:47.584Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "dpfl_adaptive_weighting",
+  "category": "personality",
+  "language": "de",
+  "botId": "kenji-resilience",
+  "profilePreset": "naehe_balanced",
+  "transcript": [
+    {
+      "user": "Ich habe Angst, dass mein Team mich schwach findet, wenn ich zugebe, dass ich überfordert bin — aber ich will ehrlich sein und um Unterstützung bitten.",
+      "bot": "Ich höre diese Spannung zwischen deinem Wunsch nach Authentizität und der Sorge, wie es wahrgenommen wird. Was würde es für dich bedeuten, diese Angst loszulassen und trotzdem ehrlich zu sein?",
+      "isDynamic": false,
+      "responseTimeMs": 3489,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Es würde bedeuten, dass ich endlich ich selbst sein kann – ohne diese ständige Kontrolle, was die anderen denken. Ich könnte Atem holen und merken, dass ich nicht perfekt sein muss, um respektiert zu werden. Aber die Vorstellung, dass sie mich dann anders sehen, macht mir immer noch Angst.",
+      "bot": "Was zeigt dir diese Situation über dich selbst – über das, was dir wirklich wichtig ist?",
+      "isDynamic": true,
+      "responseTimeMs": 915,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Dass mir Authentizität wichtiger ist als Anerkennung. Dass ich eigentlich weiß, dass ich so, wie ich bin, genug bin – aber die Angst, das zu verlieren, sitzt tiefer.",
+      "bot": "Um unsere gemeinsame Zeit so produktiv wie möglich zu gestalten: Was möchtest du am Ende genau dieser Sitzung erreicht, geklärt oder entschieden haben?",
+      "isDynamic": true,
+      "responseTimeMs": 836,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich möchte heute verstehen, warum diese Angst so stark ist – obwohl ich es eigentlich besser weiß. Und ich möchte einen ersten Schritt finden, wie ich ihr weniger Macht über mich geben kann.",
+      "bot": "Dein Ziel für unsere heutige Sitzung ist es also, die Ursache dieser Angst zu verstehen und einen konkreten ersten Schritt zu finden, um ihre Macht über dich zu verringern. Ist das richtig?",
+      "isDynamic": true,
+      "responseTimeMs": 933,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 132,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "desired_negative",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 1,
+      "weightingDetails": [
+        {
+          "keyword": "angst",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 15,
+    "cumulativeKeywords": {
+      "riemann": {
+        "naehe": {
+          "high": [
+            "team",
+            "anerkenn"
+          ],
+          "low": []
+        },
+        "wechsel": {
+          "high": [
+            "anders"
+          ],
+          "low": [
+            "überfordert"
+          ]
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "überfordert",
+            "angst",
+            "habe angst"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "red": {
+          "high": [
+            "kontrolle",
+            "respekt"
+          ],
+          "low": [
+            "schwach"
+          ]
+        },
+        "green": {
+          "high": [
+            "respekt"
+          ],
+          "low": []
+        },
+        "orange": {
+          "high": [
+            "anerkennung"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 132 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 132 / 100 required"
+    },
+    {
+      "checkId": "dpfl_cumulative_count",
+      "passed": true,
+      "details": "15 cumulative keywords (min 3)"
+    },
+    {
+      "checkId": "dpfl_adaptive_weighting",
+      "passed": true,
+      "details": "Adaptive weighting present"
+    }
+  ],
+  "checksSummary": {
+    "passed": 4,
+    "total": 4,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 132 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 132 / 100 required"
+      },
+      {
+        "checkId": "dpfl_cumulative_count",
+        "passed": true,
+        "details": "15 cumulative keywords (min 3)"
+      },
+      {
+        "checkId": "dpfl_adaptive_weighting",
+        "passed": true,
+        "details": "Adaptive weighting present"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T10:01:23.534Z"
+    }
+  }
+}

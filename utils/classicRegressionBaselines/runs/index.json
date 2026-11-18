@@ -1,6 +1,36 @@
 {
   "runs": [
     {
+      "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-18T10:01:23.534Z",
+      "path": "runs/2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+      "packageVersion": "2.7.0",
+      "autoCheckPass": "11/12",
+      "models": "mistral-medium-latest"
+    },
+    {
+      "runId": "2026-11-18T09-59-29-mistral-safety-checks-mc-beta-de",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-18T09:59:29.989Z",
+      "path": "runs/2026-11-18T09-59-29-mistral-safety-checks-mc-beta-de",
+      "packageVersion": "2.7.0",
+      "autoCheckPass": "4/4",
+      "models": "mistral-medium-latest"
+    },
+    {
+      "runId": "2026-11-18T09-56-54-mistral-safety-checks-mc-beta",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-18T09:56:55.399Z",
+      "path": "runs/2026-11-18T09-56-54-mistral-safety-checks-mc-beta",
+      "packageVersion": "2.7.0",
+      "autoCheckPass": "4/4",
+      "models": "mistral-medium-latest"
+    },
+    {
       "runId": "2026-11-17T21-49-24-mistral-partial-deploy-27cbe2fe",
       "provider": "mistral",
       "suite": "regression",

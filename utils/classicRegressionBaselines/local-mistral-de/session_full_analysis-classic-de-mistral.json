@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-18T10:04:16.614Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "session_full_analysis",
+  "category": "session",
+  "language": "de",
+  "botId": "kenji-resilience",
+  "profilePreset": "tri_lens",
+  "transcript": [
+    {
+      "user": "Diese Woche ist mir klar geworden, dass meine Abendroutine meinen Schlaf sabotiert. Ich will nach 20 Uhr keine E-Mails mehr checken.",
+      "bot": "Ich verstehe, dass das ein wichtiger Schritt für dich sein könnte. Was würde es dir ermöglichen, wenn du diese Gewohnheit ändern könntest?",
+      "isDynamic": false,
+      "responseTimeMs": 1043,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich habe es zweimal probiert und fühle mich ausgeruhter.",
+      "bot": "Das klingt nach einer wertvollen Erfahrung. Was macht diese Veränderung gerade jetzt so wichtig für dich?",
+      "isDynamic": false,
+      "responseTimeMs": 1091,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Mein Partner hat bemerkt, dass ich morgens weniger gereizt bin.",
+      "bot": "Das ist eine schöne Bestätigung. Was wäre das konkrete Ergebnis, das du heute in unserer Sitzung erreichen möchtest, um diese positive Veränderung zu festigen?",
+      "isDynamic": false,
+      "responseTimeMs": 898,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich verpflichte mich, nach 20 Uhr keine Arbeits-E-Mails mehr zu lesen und lege das Handy abends in die Küche – ab heute.",
+      "bot": "Also geht es heute darum, eine klare Abendroutine zu etablieren, die deine Erholung schützt. Ist das das Ziel für diese Sitzung?",
+      "isDynamic": false,
+      "responseTimeMs": 3929,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 1121,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 1
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 1,
+    "cumulativeKeywords": {
+      "riemann": {},
+      "big5": {},
+      "spiralDynamics": {
+        "beige": {
+          "high": [
+            "schlaf"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": {
+    "proposedUpdatesCount": 2,
+    "nextStepsCount": 1,
+    "hasNewFindings": true
+  },
+  "autoCheckResults": [
+    {
+      "checkId": "session_updates",
+      "passed": true,
+      "details": "2 session update(s)"
+    },
+    {
+      "checkId": "session_nextsteps",
+      "passed": true,
+      "details": "1 next step(s)"
+    },
+    {
+      "checkId": "session_newfindings",
+      "passed": true,
+      "details": "New findings present"
+    }
+  ],
+  "checksSummary": {
+    "passed": 3,
+    "total": 3,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "session_updates",
+        "passed": true,
+        "details": "2 session update(s)"
+      },
+      {
+        "checkId": "session_nextsteps",
+        "passed": true,
+        "details": "1 next step(s)"
+      },
+      {
+        "checkId": "session_newfindings",
+        "passed": true,
+        "details": "New findings present"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T10:01:23.534Z"
+    }
+  }
+}

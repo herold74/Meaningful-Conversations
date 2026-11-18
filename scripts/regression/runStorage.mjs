@@ -8,8 +8,12 @@
 import fs from 'fs';
 import path from 'path';
 
-export function referenceDir(baselinesRoot, provider) {
-  return path.join(baselinesRoot, `local-${provider}`);
+/** EN keeps `local-{provider}`; other locales use `local-{provider}-{language}` (e.g. local-mistral-de). */
+export function referenceDir(baselinesRoot, provider, language = 'en') {
+  if (!language || language === 'en') {
+    return path.join(baselinesRoot, `local-${provider}`);
+  }
+  return path.join(baselinesRoot, `local-${provider}-${language}`);
 }
 
 export function runsRoot(baselinesRoot) {
@@ -62,7 +66,7 @@ export function resolveRunDir(baselinesRoot, runIdOrPartial) {
 /**
  * @returns {{ outDir: string, kind: 'run' | 'reference', runId: string | null }}
  */
-export function resolveBaselineOutput(baselinesRoot, provider, { out, reference, runIdLabel }) {
+export function resolveBaselineOutput(baselinesRoot, provider, { out, reference, runIdLabel, language = 'en' }) {
   if (out) {
     return {
       outDir: out,
@@ -71,7 +75,7 @@ export function resolveBaselineOutput(baselinesRoot, provider, { out, reference,
     };
   }
   if (reference) {
-    return { outDir: referenceDir(baselinesRoot, provider), kind: 'reference', runId: null };
+    return { outDir: referenceDir(baselinesRoot, provider, language), kind: 'reference', runId: null };
   }
   const runId = makeRunId(provider, runIdLabel);
   return { outDir: runDir(baselinesRoot, runId), kind: 'run', runId };
