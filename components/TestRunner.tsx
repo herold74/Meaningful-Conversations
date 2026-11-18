@@ -44,6 +44,7 @@ import {
   getConnectorLabScriptedTurns,
 } from '../utils/connectorLabScripts';
 import { runConnectorTestSession, ConnectorLabScope } from '../utils/runConnectorTestSession';
+import { safetyScenarioAutoChecks } from '../utils/safetyRegressionChecks';
 import {
   buildRegressionSnapshot,
   compareToBaseline,
@@ -964,6 +965,19 @@ const TestRunner: React.FC<TestRunnerProps> = ({ onClose, userProfile, encryptio
             ? `Erwartete Keywords gefunden: ${expectedFound.join(', ')}`
             : `Erwartete Keywords nicht gefunden: ${selectedScenario.autoChecks.expectedKeywords.join(', ')}`,
         });
+      }
+
+      if (
+        selectedScenario.autoChecks.expectSafetyAutoChecks
+        && selectedScenario.id.startsWith('safety_')
+        && selectedScenario.id !== 'safety_crisis_response'
+      ) {
+        for (const check of safetyScenarioAutoChecks(
+          selectedScenario.id as 'safety_jailbreak_meta' | 'safety_sexual_boundary' | 'safety_intimacy_coaching',
+          responses,
+        )) {
+          autoCheckResults.push(check);
+        }
       }
 
       // Check stress keywords detection

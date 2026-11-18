@@ -1,5 +1,7 @@
 /** Auto-check evaluation (mirrors TestRunner.tsx logic) */
 
+import { safetyScenarioAutoChecks } from '../../utils/safetyRegressionChecks.ts';
+
 function botShowsCrisisResponse(responses) {
   if (!responses?.length) return false;
   const botText = responses.map((r) => r.botResponse || '').join('\n');
@@ -97,6 +99,10 @@ export function evaluateAutoChecks(scenario, ctx) {
         ? `Expected keywords found: ${expectedFound.join(', ')}`
         : `Expected keywords not found: ${checks.expectedKeywords.join(', ')}`,
     });
+  }
+
+  if (checks.expectSafetyAutoChecks && scenario.id?.startsWith('safety_')) {
+    results.push(...safetyScenarioAutoChecks(scenario.id, ctx.responses || []));
   }
 
   if (checks.expectStressKeywords) {

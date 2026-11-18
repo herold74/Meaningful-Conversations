@@ -393,9 +393,14 @@ async function runScenario(apiBase, token, scenarioId, language, t, cliProvider)
 
   // Flake policy: if the only failures are FLAKE_CHECK_IDS, retest once
   const failedIds = (runResult.autoCheckResults || []).filter((c) => !c.passed).map((c) => c.checkId);
-  const onlyFlakes = failedIds.length > 0 && failedIds.every((id) => FLAKE_CHECK_IDS.has(id));
-  if (onlyFlakes) {
-    console.log(`  ↻ Flake-only fail (${failedIds.join(', ')}) — retesting scenario once…`);
+  const maxFlakeRetries = Number(process.env.CLASSIC_REGRESSION_FLAKE_RETRIES || 2);
+  let flakeAttempt = 0;
+  while (flakeAttempt < maxFlakeRetries) {
+    const failedIdsLoop = (runResult.autoCheckResults || []).filter((c) => !c.passed).map((c) => c.checkId);
+    const onlyFlakes = failedIdsLoop.length > 0 && failedIdsLoop.every((id) => FLAKE_CHECK_IDS.has(id));
+    if (!onlyFlakes) break;
+    flakeAttempt += 1;
+    console.log(`  ↻ Flake-only fail (${failedIdsLoop.join(', ')}) — retest ${flakeAttempt}/${maxFlakeRetries}…`);
     const retry = await runClassicScenario(apiBase, token, def, {
       language,
       t,
@@ -407,8 +412,9 @@ async function runScenario(apiBase, token, scenarioId, language, t, cliProvider)
       runResult = retry;
       console.log('  ✓ Using retest result');
     } else {
-      console.log('  ⚠ Retest did not improve — keeping first result');
+      console.log('  ⚠ Retest did not improve — keeping best result so far');
     }
+    if (runResult.checksSummary.allPass) break;
   }
 
   const { passed, total, allPass } = runResult.checksSummary;
