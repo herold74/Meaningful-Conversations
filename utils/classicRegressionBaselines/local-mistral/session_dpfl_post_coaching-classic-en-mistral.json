@@ -1,7 +1,9 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-27T14:28:24.917Z",
+  "exportedAt": "2026-11-18T11:40:57.327Z",
   "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
   "scenarioId": "session_dpfl_post_coaching",
   "category": "session",
   "language": "en",
@@ -10,29 +12,32 @@
   "transcript": [
     {
       "user": "I value stability and careful planning, but I also crave more freedom and change in my career.",
-      "bot": "This tension between stability and freedom is a rich space for reflection.\n\nWhat makes this particular struggle feel urgent for you right now?",
+      "bot": "This tension between stability and freedom is something many face. What is this situation revealing to you about yourself?",
       "isDynamic": false,
-      "responseTimeMs": 1713,
-      "provider": "mistral"
+      "responseTimeMs": 1072,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
       "user": "I decided to talk to my mentor this week about a small experiment at work.",
-      "bot": "That sounds like a concrete step toward the change you're seeking.\n\nWhat would you like to have achieved or clarified by the end of our session today regarding this conversation with your mentor?",
+      "bot": "That’s a concrete step toward testing the waters. What would you like to have achieved, clarified, or decided by the end of our session today?",
       "isDynamic": false,
-      "responseTimeMs": 2497,
-      "provider": "mistral"
+      "responseTimeMs": 1125,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
       "user": "I'll meet my mentor on Friday and block one hour to outline a small pilot project.",
-      "bot": "So the goal for our session is to prepare for that Friday meeting by outlining a small pilot project.\n\nIs that correct?",
+      "bot": "So the goal for our session today is to prepare for that meeting: to outline a small pilot project and feel ready to discuss it with your mentor. Is that correct?",
       "isDynamic": false,
-      "responseTimeMs": 5432,
-      "provider": "mistral"
+      "responseTimeMs": 769,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     }
   ],
   "telemetrySummary": {
     "dpcInjectionPresent": true,
-    "dpcInjectionLength": 2271,
+    "dpcInjectionLength": 111,
     "dpcStrategiesUsed": [],
     "stressKeywordsDetected": false,
     "adaptiveWeighting": {
@@ -95,7 +100,7 @@
     }
   },
   "sessionAnalysis": {
-    "proposedUpdatesCount": 1,
+    "proposedUpdatesCount": 0,
     "nextStepsCount": 1,
     "hasNewFindings": true
   },
@@ -103,12 +108,17 @@
     {
       "checkId": "dpc_present",
       "passed": true,
-      "details": "DPC: 2271 chars"
+      "details": "DPC: 111 chars"
     },
     {
       "checkId": "dpc_length",
       "passed": true,
-      "details": "Length: 2271 / 100 required"
+      "details": "Length: 111 / 80 required"
+    },
+    {
+      "checkId": "dpc_length_max",
+      "passed": true,
+      "details": "Length: 111 (max 2200)"
     },
     {
       "checkId": "dpfl_cumulative_count",
@@ -117,8 +127,8 @@
     },
     {
       "checkId": "session_updates",
-      "passed": true,
-      "details": "1 session update(s)"
+      "passed": false,
+      "details": "No session updates in analysis"
     },
     {
       "checkId": "session_nextsteps",
@@ -133,19 +143,26 @@
   ],
   "checksSummary": {
     "passed": 6,
-    "total": 6,
-    "allPass": true,
-    "failedCheckIds": [],
+    "total": 7,
+    "allPass": false,
+    "failedCheckIds": [
+      "session_updates"
+    ],
     "checkResults": [
       {
         "checkId": "dpc_present",
         "passed": true,
-        "details": "DPC: 2271 chars"
+        "details": "DPC: 111 chars"
       },
       {
         "checkId": "dpc_length",
         "passed": true,
-        "details": "Length: 2271 / 100 required"
+        "details": "Length: 111 / 80 required"
+      },
+      {
+        "checkId": "dpc_length_max",
+        "passed": true,
+        "details": "Length: 111 (max 2200)"
       },
       {
         "checkId": "dpfl_cumulative_count",
@@ -154,8 +171,8 @@
       },
       {
         "checkId": "session_updates",
-        "passed": true,
-        "details": "1 session update(s)"
+        "passed": false,
+        "details": "No session updates in analysis"
       },
       {
         "checkId": "session_nextsteps",
@@ -170,7 +187,27 @@
     ]
   },
   "meta": {
-    "apiBase": "http://localhost:3001",
-    "suite": "regression"
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T11:32:52.513Z"
+    }
   }
 }

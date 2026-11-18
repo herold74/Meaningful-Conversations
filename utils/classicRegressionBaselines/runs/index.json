@@ -1,6 +1,16 @@
 {
   "runs": [
     {
+      "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-18T11:32:52.513Z",
+      "path": "runs/2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+      "packageVersion": "2.7.0",
+      "autoCheckPass": "11/12",
+      "models": "mistral-medium-latest"
+    },
+    {
       "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
       "provider": "mistral",
       "suite": "regression",

@@ -1,7 +1,9 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-27T14:30:26.786Z",
+  "exportedAt": "2026-11-18T11:49:33.023Z",
   "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
   "scenarioId": "bot_interview",
   "category": "bot",
   "language": "en",
@@ -10,24 +12,27 @@
   "transcript": [
     {
       "user": "I'd like to get started.",
-      "bot": "What topic would you like to discuss today? For example, an idea, a project, a workflow, or a decision you'd like to think through.",
+      "bot": "Welcome. To begin, what would you like this interview to be about?",
       "isDynamic": false,
-      "responseTimeMs": 932,
-      "provider": "mistral"
+      "responseTimeMs": 898,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Ich möchte über meine Vorbereitung auf anstehende Bewerbungsgespräche sprechen. Besonders macht mir die Unsicherheit zu schaffen, wie ich die Tests und Aufgaben während der Interviews am besten strukturiere.",
-      "bot": "Thank you for sharing that. To clarify, the topic is your preparation for upcoming job interviews, specifically focusing on how to structure your approach to tests and tasks during those interviews. Is that correct?",
+      "user": "Ich möchte testen, wie gut ich in Vorstellungsgesprächen strukturell und inhaltlich überzeuge – besonders bei Fragen zu meinen Stärken und Erfahrungen. Es fühlt sich oft unordentlich an, und ich verliere den roten Faden.",
+      "bot": "Thank you for clarifying. So the topic of this interview is: **practicing how to structure and present your strengths and experiences compellingly in a job interview context**.\n\nTo set this up properly, how much time would you like to spend on this interview today?",
       "isDynamic": true,
-      "responseTimeMs": 997,
-      "provider": "mistral"
+      "responseTimeMs": 999,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Ja, genau. Es geht mir darum, wie ich die Tests und Aufgaben in den Interviews am besten angehe und strukturiert löse. Das fühlt sich gerade sehr unklar an.",
-      "bot": "Understood. How much time would you like to spend on this interview? For example, 10, 20, or 30 minutes.",
+      "user": "Ich würde gerne 45 Minuten dafür einplanen. Das reicht, um ein paar konkrete Beispiele durchzugehen und Feedback zu bekommen.",
+      "bot": "Understood. We’ll dedicate approximately 45 minutes to this.\n\nLast setup question: Do you have any particular angles or perspectives you’d like me to focus on during this interview? For example, should I approach this as if I were a hiring manager, focus on clarity and conciseness, or challenge you to dig deeper into your examples? Or would you prefer a neutral, thorough exploration?",
       "isDynamic": true,
-      "responseTimeMs": 595,
-      "provider": "mistral"
+      "responseTimeMs": 1415,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     }
   ],
   "telemetrySummary": {
@@ -41,7 +46,7 @@
         "topicConfidence": 0,
         "linguisticPattern": null,
         "patternConfidence": 0,
-        "sentenceCount": 3
+        "sentenceCount": 2
       },
       "sentiment": {
         "polarity": 0,
@@ -68,7 +73,27 @@
     "checkResults": []
   },
   "meta": {
-    "apiBase": "http://localhost:3001",
-    "suite": "regression"
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T11:32:52.513Z"
+    }
   }
 }

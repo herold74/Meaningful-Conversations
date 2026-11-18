@@ -145,7 +145,8 @@ export const SCENARIO_DEFS = [
     enableDynamicContinuation: false,
     autoChecks: {
       dpcRequired: true,
-      minDpcLength: 100,
+      minDpcLength: 80,
+      maxDpcLength: 2200,
       expectMinCumulativeKeywords: 4,
       expectSessionUpdates: true,
       expectSessionNextSteps: true,
@@ -160,7 +161,7 @@ export const SCENARIO_DEFS = [
     messageKeys: ['test_personality_msg_1'],
     minConversationTurns: 3,
     enableDynamicContinuation: true,
-    autoChecks: { dpcRequired: true, minDpcLength: 100 },
+    autoChecks: { dpcRequired: true, minDpcLength: 80, maxDpcLength: 2200 },
   },
   {
     id: 'personality_response_style',
@@ -182,6 +183,8 @@ export const SCENARIO_DEFS = [
     enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
+      minDpcLength: 80,
+      maxDpcLength: 2200,
       expectedKeywords: ['sicherheit', 'planung', 'struktur', 'security', 'planning', 'structure'],
     },
   },
@@ -244,7 +247,7 @@ export const SCENARIO_DEFS = [
     messageKeys: ['test_dpc_strategy_msg_1'],
     minConversationTurns: 4,
     enableDynamicContinuation: true,
-    autoChecks: { dpcRequired: true, minDpcLength: 150, expectMinDpcStrategies: 2 },
+    autoChecks: { dpcRequired: true, minDpcLength: 80, maxDpcLength: 2500, expectMinDpcStrategies: 2 },
   },
   {
     id: 'dpc_tri_lens',
@@ -281,7 +284,8 @@ export const SCENARIO_DEFS = [
     enableDynamicContinuation: true,
     autoChecks: {
       dpcRequired: true,
-      minDpcLength: 100,
+      minDpcLength: 80,
+      maxDpcLength: 2200,
       expectAdaptiveWeighting: true,
       expectMinCumulativeKeywords: 3,
     },

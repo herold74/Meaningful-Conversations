@@ -44,6 +44,7 @@ import {
   enrichClassicOfflineComparison,
   FLAKE_CHECK_IDS,
   classifyFailedChecks,
+  environmentsComparable,
 } from './regression/providerGuard.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -292,7 +293,7 @@ function compareToBaseline(baseline, current) {
   };
 }
 
-function compareClassicOffline(baseline, current) {
+function compareClassicOffline(baseline, current, compareOptions = {}) {
   const baseChecks = baseline.checksSummary || {};
   const curChecks = current.checksSummary || {};
 
@@ -346,7 +347,7 @@ function compareClassicOffline(baseline, current) {
     deltas,
   };
 
-  return enrichClassicOfflineComparison(baseline, current, raw);
+  return enrichClassicOfflineComparison(baseline, current, raw, compareOptions);
 }
 
 function loadClassicSnapshot(dir, scenarioId, language, provider, { required = true } = {}) {
@@ -572,6 +573,12 @@ function runCompareOffline(args, { regression = false } = {}) {
     : null;
   const envWarnings = warnEnvironmentDrift(baselineManifest, currentManifest);
   for (const w of envWarnings) console.warn(`  ⚠ Environment: ${w}`);
+  const envComparable = environmentsComparable(baselineManifest, currentManifest);
+  if (!envComparable) {
+    console.warn('  ⚠ Environments not comparable — DPC length Δ ≥ 500 may count as structural drift (not noise).');
+  } else {
+    console.log('  Environment: comparable (DPC length deltas treated as telemetry noise).');
+  }
 
   const report = {
     comparedAt: new Date().toISOString(),
@@ -586,6 +593,7 @@ function runCompareOffline(args, { regression = false } = {}) {
     suite: args.suite,
     packageVersion: packageJson.version,
     environmentWarnings: envWarnings,
+    environmentsComparable: envComparable,
     results: [],
     totals: {
       structuralRegressions: 0,
@@ -612,9 +620,10 @@ function runCompareOffline(args, { regression = false } = {}) {
       report.results.push({ scenarioId, skipped: true, missing });
       continue;
     }
+    const compareOptions = { environmentsComparable: envComparable };
     const comparison = regression
       ? compareToBaseline(baseline, current)
-      : compareClassicOffline(baseline, current);
+      : compareClassicOffline(baseline, current, compareOptions);
 
     const classification = comparison.classification;
     const isStructural = regression

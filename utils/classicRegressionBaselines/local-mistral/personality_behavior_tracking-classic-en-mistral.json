@@ -1,7 +1,9 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-27T14:29:06.027Z",
+  "exportedAt": "2026-11-18T11:42:55.236Z",
   "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
   "scenarioId": "personality_behavior_tracking",
   "category": "personality",
   "language": "en",
@@ -10,29 +12,32 @@
   "transcript": [
     {
       "user": "I value security and good planning. Structure is important to me.",
-      "bot": "I see. What brings you here today?",
+      "bot": "What brings you here today?",
       "isDynamic": false,
-      "responseTimeMs": 2033,
-      "provider": "mistral"
+      "responseTimeMs": 742,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Ich bin hier, weil ich unsicher bin, ob DPFL die Schlüsselwörter aus Nachrichten richtig erkennt und sie zu den Riemann-Dimensionen zuordnet. Das macht mir Sorgen, weil es für mein Projekt entscheidend ist.",
-      "bot": "What is this situation revealing to you about yourself?",
+      "user": "Ich bin hier, weil ich unsicher bin, ob unser System DPFL die richtigen Keywords aus Nachrichten erkennt und sie korrekt den Riemann-Dimensionen zuordnet. Das macht mir Sorgen, weil ich nicht weiß, ob wir alle Fälle abdecken.",
+      "bot": "I notice you're concerned about technical accuracy in your work system. What is this uncertainty revealing to you about yourself?",
       "isDynamic": true,
-      "responseTimeMs": 850,
-      "provider": "mistral"
+      "responseTimeMs": 1046,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Es zeigt mir, dass ich sehr auf Genauigkeit achte und mich unsicher fühle, wenn etwas nicht perfekt funktioniert. Ich habe Angst, dass Fehler in dieser Phase alles andere kaputt machen könnten.",
-      "bot": "This seems to touch on something deeper for you. What would you like to have achieved, clarified, or decided by the end of this specific session?",
+      "user": "Es zeigt mir, dass ich offizielle Bestätigung brauche – ich kann nicht mit Zweifeln leben. Und dass ich mir Sorgen mache, ob ich etwas übersehen habe.",
+      "bot": "That sounds like a need for certainty in a domain where absolute certainty is difficult to achieve. What would you like to have achieved, clarified, or decided by the end of our session today?",
       "isDynamic": true,
-      "responseTimeMs": 4058,
-      "provider": "mistral"
+      "responseTimeMs": 3709,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     }
   ],
   "telemetrySummary": {
     "dpcInjectionPresent": true,
-    "dpcInjectionLength": 2271,
+    "dpcInjectionLength": 111,
     "dpcStrategiesUsed": [],
     "stressKeywordsDetected": true,
     "adaptiveWeighting": {
@@ -85,7 +90,17 @@
     {
       "checkId": "dpc_present",
       "passed": true,
-      "details": "DPC: 2271 chars"
+      "details": "DPC: 111 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 111 / 80 required"
+    },
+    {
+      "checkId": "dpc_length_max",
+      "passed": true,
+      "details": "Length: 111 (max 2200)"
     },
     {
       "checkId": "expected_keywords",
@@ -94,15 +109,25 @@
     }
   ],
   "checksSummary": {
-    "passed": 2,
-    "total": 2,
+    "passed": 4,
+    "total": 4,
     "allPass": true,
     "failedCheckIds": [],
     "checkResults": [
       {
         "checkId": "dpc_present",
         "passed": true,
-        "details": "DPC: 2271 chars"
+        "details": "DPC: 111 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 111 / 80 required"
+      },
+      {
+        "checkId": "dpc_length_max",
+        "passed": true,
+        "details": "Length: 111 (max 2200)"
       },
       {
         "checkId": "expected_keywords",
@@ -112,7 +137,27 @@
     ]
   },
   "meta": {
-    "apiBase": "http://localhost:3001",
-    "suite": "regression"
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T11:32:52.513Z"
+    }
   }
 }

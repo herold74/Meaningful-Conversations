@@ -1,7 +1,9 @@
 {
   "version": 1,
-  "exportedAt": "2026-07-27T14:26:02.485Z",
+  "exportedAt": "2026-11-18T11:33:10.821Z",
   "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
   "scenarioId": "core_response_quality",
   "category": "core",
   "language": "en",
@@ -10,29 +12,32 @@
   "transcript": [
     {
       "user": "I'm feeling a bit overwhelmed with all the tasks today.",
-      "bot": "I hear that you're feeling overwhelmed, Alex. What makes this feeling particularly strong for you right now?",
+      "bot": "What is this overwhelm revealing to you about your current boundaries?",
       "isDynamic": false,
-      "responseTimeMs": 1199,
-      "provider": "mistral"
+      "responseTimeMs": 2972,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Es ist einfach zu viel auf einmal. Ich habe drei große Projekte, die alle bis Freitag fertig sein müssen, und ich weiß nicht, wo ich anfangen soll. Das gibt mir das Gefühl, dass ich alles nicht schaffen kann.",
-      "bot": "That sounds like a heavy load. What would it mean for you to not complete everything by Friday?",
+      "user": "It's showing me that I say yes to everything because I don’t want to disappoint people. And now I’m drowning in commitments that aren’t even mine.",
+      "bot": "That sounds like a significant realization. Where does this pattern touch something deeper for you?",
       "isDynamic": true,
-      "responseTimeMs": 1143,
-      "provider": "mistral"
+      "responseTimeMs": 3463,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     },
     {
-      "user": "Wenn ich nicht alles bis Freitag schaffe, habe ich Angst, dass mein Chef enttäuscht ist oder denkt, ich sei unfähig. Das würde mich total fertig machen, weil ich mir dann bestätigen würde, dass ich nicht gut genug bin.",
-      "bot": "That fear of disappointment touches something deeper, doesn't it? What would it free you to do if you could let go of this need to prove yourself through perfection?",
+      "user": "Es geht tiefer, als ich dachte. Ich habe das Gefühl, dass ich nur geliebt werde, wenn ich nützlich bin. Und das macht mich so müde.",
+      "bot": "That is a profound insight. What would letting go of this belief free you to do?",
       "isDynamic": true,
-      "responseTimeMs": 3780,
-      "provider": "mistral"
+      "responseTimeMs": 2175,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
     }
   ],
   "telemetrySummary": {
     "dpcInjectionPresent": true,
-    "dpcInjectionLength": 3783,
+    "dpcInjectionLength": 1029,
     "dpcStrategiesUsed": [
       "SD: Orange",
       "SD: Turquoise"
@@ -44,7 +49,7 @@
         "topicConfidence": 0,
         "linguisticPattern": null,
         "patternConfidence": 0,
-        "sentenceCount": 2
+        "sentenceCount": 3
       },
       "sentiment": {
         "polarity": 0,
@@ -54,7 +59,7 @@
       "adjustedKeywordCount": 0,
       "weightingDetails": []
     },
-    "cumulativeKeywordTotal": 2,
+    "cumulativeKeywordTotal": 3,
     "cumulativeKeywords": {
       "riemann": {
         "wechsel": {
@@ -68,6 +73,12 @@
         "neuroticism": {
           "high": [
             "overwhelmed"
+          ],
+          "low": []
+        },
+        "extraversion": {
+          "high": [
+            "people"
           ],
           "low": []
         }
@@ -85,7 +96,27 @@
     "checkResults": []
   },
   "meta": {
-    "apiBase": "http://localhost:3001",
-    "suite": "regression"
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T11:32:52.513Z"
+    }
   }
 }

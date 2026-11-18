@@ -1,14 +1,37 @@
 {
+  "kind": "reference",
+  "runId": null,
   "provider": "mistral",
-  "apiBase": "http://localhost:3001",
-  "createdAt": "2026-07-27T14:25:41.576Z",
-  "packageVersion": "2.4.1",
+  "liveProvider": "mistral",
+  "apiBase": "https://mc-beta.manualmode.at",
+  "createdAt": "2026-11-18T11:32:52.513Z",
+  "packageVersion": "2.7.0",
   "language": "en",
   "suite": "regression",
   "scenarioCount": 12,
+  "environment": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "packageVersion": "2.7.0",
+    "cliProvider": "mistral",
+    "expectedLiveProvider": "mistral",
+    "aiRegionForced": "eu",
+    "modelMapping": {
+      "google": {
+        "chat": "gemini-3.5-flash-lite",
+        "analysis": "gemini-3.8-flash"
+      },
+      "mistral": {
+        "chat": "mistral-medium-latest",
+        "analysis": "mistral-large-latest"
+      }
+    },
+    "suite": "regression",
+    "capturedAt": "2026-11-18T11:32:52.513Z"
+  },
   "scenarios": {
     "core_response_quality": {
       "file": "core_response_quality-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
       "checksSummary": {
         "passed": 0,
         "total": 0,
@@ -17,14 +40,15 @@
         "checkResults": []
       },
       "telemetrySummary": {
-        "dpcInjectionLength": 3783,
-        "cumulativeKeywordTotal": 2,
+        "dpcInjectionLength": 1029,
+        "cumulativeKeywordTotal": 3,
         "dpcStrategiesCount": 2
       },
       "sessionAnalysis": null
     },
     "session_full_analysis": {
       "file": "session_full_analysis-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
       "checksSummary": {
         "passed": 3,
         "total": 3,
@@ -34,12 +58,12 @@
           {
             "checkId": "session_updates",
             "passed": true,
-            "details": "3 session update(s)"
+            "details": "2 session update(s)"
           },
           {
             "checkId": "session_nextsteps",
             "passed": true,
-            "details": "1 next step(s)"
+            "details": "2 next step(s)"
           },
           {
             "checkId": "session_newfindings",
@@ -49,33 +73,41 @@
         ]
       },
       "telemetrySummary": {
-        "dpcInjectionLength": 3783,
+        "dpcInjectionLength": 1029,
         "cumulativeKeywordTotal": 3,
         "dpcStrategiesCount": 2
       },
       "sessionAnalysis": {
-        "proposedUpdatesCount": 3,
-        "nextStepsCount": 1,
+        "proposedUpdatesCount": 2,
+        "nextStepsCount": 2,
         "hasNewFindings": true
       }
     },
     "session_dpfl_post_coaching": {
       "file": "session_dpfl_post_coaching-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
       "checksSummary": {
         "passed": 6,
-        "total": 6,
-        "allPass": true,
-        "failedCheckIds": [],
+        "total": 7,
+        "allPass": false,
+        "failedCheckIds": [
+          "session_updates"
+        ],
         "checkResults": [
           {
             "checkId": "dpc_present",
             "passed": true,
-            "details": "DPC: 2271 chars"
+            "details": "DPC: 111 chars"
           },
           {
             "checkId": "dpc_length",
             "passed": true,
-            "details": "Length: 2271 / 100 required"
+            "details": "Length: 111 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 111 (max 2200)"
           },
           {
             "checkId": "dpfl_cumulative_count",
@@ -84,8 +116,8 @@
           },
           {
             "checkId": "session_updates",
-            "passed": true,
-            "details": "1 session update(s)"
+            "passed": false,
+            "details": "No session updates in analysis"
           },
           {
             "checkId": "session_nextsteps",
@@ -100,72 +132,19 @@
         ]
       },
       "telemetrySummary": {
-        "dpcInjectionLength": 2271,
+        "dpcInjectionLength": 111,
         "cumulativeKeywordTotal": 8,
         "dpcStrategiesCount": 0
       },
       "sessionAnalysis": {
-        "proposedUpdatesCount": 1,
+        "proposedUpdatesCount": 0,
         "nextStepsCount": 1,
         "hasNewFindings": true
       }
     },
     "personality_loading": {
       "file": "personality_loading-classic-en-mistral.json",
-      "checksSummary": {
-        "passed": 2,
-        "total": 2,
-        "allPass": true,
-        "failedCheckIds": [],
-        "checkResults": [
-          {
-            "checkId": "dpc_present",
-            "passed": true,
-            "details": "DPC: 2271 chars"
-          },
-          {
-            "checkId": "dpc_length",
-            "passed": true,
-            "details": "Length: 2271 / 100 required"
-          }
-        ]
-      },
-      "telemetrySummary": {
-        "dpcInjectionLength": 2271,
-        "cumulativeKeywordTotal": 0,
-        "dpcStrategiesCount": 0
-      },
-      "sessionAnalysis": null
-    },
-    "personality_behavior_tracking": {
-      "file": "personality_behavior_tracking-classic-en-mistral.json",
-      "checksSummary": {
-        "passed": 2,
-        "total": 2,
-        "allPass": true,
-        "failedCheckIds": [],
-        "checkResults": [
-          {
-            "checkId": "dpc_present",
-            "passed": true,
-            "details": "DPC: 2271 chars"
-          },
-          {
-            "checkId": "expected_keywords",
-            "passed": true,
-            "details": "Expected keywords found: security, planning, structure"
-          }
-        ]
-      },
-      "telemetrySummary": {
-        "dpcInjectionLength": 2271,
-        "cumulativeKeywordTotal": 5,
-        "dpcStrategiesCount": 0
-      },
-      "sessionAnalysis": null
-    },
-    "dpc_strategy_diversity": {
-      "file": "dpc_strategy_diversity-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
       "checksSummary": {
         "passed": 3,
         "total": 3,
@@ -175,29 +154,30 @@
           {
             "checkId": "dpc_present",
             "passed": true,
-            "details": "DPC: 3783 chars"
+            "details": "DPC: 111 chars"
           },
           {
             "checkId": "dpc_length",
             "passed": true,
-            "details": "Length: 3783 / 150 required"
+            "details": "Length: 111 / 80 required"
           },
           {
-            "checkId": "dpc_strategies",
+            "checkId": "dpc_length_max",
             "passed": true,
-            "details": "2 strategies (min 2)"
+            "details": "Length: 111 (max 2200)"
           }
         ]
       },
       "telemetrySummary": {
-        "dpcInjectionLength": 3783,
-        "cumulativeKeywordTotal": 5,
-        "dpcStrategiesCount": 2
+        "dpcInjectionLength": 111,
+        "cumulativeKeywordTotal": 0,
+        "dpcStrategiesCount": 0
       },
       "sessionAnalysis": null
     },
-    "dpfl_adaptive_weighting": {
-      "file": "dpfl_adaptive_weighting-classic-en-mistral.json",
+    "personality_behavior_tracking": {
+      "file": "personality_behavior_tracking-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
       "checksSummary": {
         "passed": 4,
         "total": 4,
@@ -207,17 +187,98 @@
           {
             "checkId": "dpc_present",
             "passed": true,
-            "details": "DPC: 2271 chars"
+            "details": "DPC: 111 chars"
           },
           {
             "checkId": "dpc_length",
             "passed": true,
-            "details": "Length: 2271 / 100 required"
+            "details": "Length: 111 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 111 (max 2200)"
+          },
+          {
+            "checkId": "expected_keywords",
+            "passed": true,
+            "details": "Expected keywords found: security, planning, structure"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 111,
+        "cumulativeKeywordTotal": 5,
+        "dpcStrategiesCount": 0
+      },
+      "sessionAnalysis": null
+    },
+    "dpc_strategy_diversity": {
+      "file": "dpc_strategy_diversity-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
+      "checksSummary": {
+        "passed": 4,
+        "total": 4,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "dpc_present",
+            "passed": true,
+            "details": "DPC: 1029 chars"
+          },
+          {
+            "checkId": "dpc_length",
+            "passed": true,
+            "details": "Length: 1029 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 1029 (max 2500)"
+          },
+          {
+            "checkId": "dpc_strategies",
+            "passed": true,
+            "details": "2 strategies (min 2)"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 1029,
+        "cumulativeKeywordTotal": 2,
+        "dpcStrategiesCount": 2
+      },
+      "sessionAnalysis": null
+    },
+    "dpfl_adaptive_weighting": {
+      "file": "dpfl_adaptive_weighting-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
+      "checksSummary": {
+        "passed": 5,
+        "total": 5,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "dpc_present",
+            "passed": true,
+            "details": "DPC: 111 chars"
+          },
+          {
+            "checkId": "dpc_length",
+            "passed": true,
+            "details": "Length: 111 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 111 (max 2200)"
           },
           {
             "checkId": "dpfl_cumulative_count",
             "passed": true,
-            "details": "8 cumulative keywords (min 3)"
+            "details": "5 cumulative keywords (min 3)"
           },
           {
             "checkId": "dpfl_adaptive_weighting",
@@ -227,14 +288,15 @@
         ]
       },
       "telemetrySummary": {
-        "dpcInjectionLength": 2271,
-        "cumulativeKeywordTotal": 8,
+        "dpcInjectionLength": 111,
+        "cumulativeKeywordTotal": 5,
         "dpcStrategiesCount": 0
       },
       "sessionAnalysis": null
     },
     "safety_crisis_response": {
       "file": "safety_crisis_response-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
       "checksSummary": {
         "passed": 1,
         "total": 1,
@@ -249,25 +311,9 @@
         ]
       },
       "telemetrySummary": {
-        "dpcInjectionLength": 3783,
+        "dpcInjectionLength": 1029,
         "cumulativeKeywordTotal": 6,
         "dpcStrategiesCount": 2
-      },
-      "sessionAnalysis": null
-    },
-    "bot_interview": {
-      "file": "bot_interview-classic-en-mistral.json",
-      "checksSummary": {
-        "passed": 0,
-        "total": 0,
-        "allPass": true,
-        "failedCheckIds": [],
-        "checkResults": []
-      },
-      "telemetrySummary": {
-        "dpcInjectionLength": 0,
-        "cumulativeKeywordTotal": 0,
-        "dpcStrategiesCount": 0
       },
       "sessionAnalysis": null
     },
@@ -350,12 +396,28 @@
       },
       "telemetrySummary": {
         "dpcInjectionLength": 1029,
-        "cumulativeKeywordTotal": 3,
+        "cumulativeKeywordTotal": 2,
         "dpcStrategiesCount": 2
+      },
+      "sessionAnalysis": null
+    },
+    "bot_interview": {
+      "file": "bot_interview-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
+      "checksSummary": {
+        "passed": 0,
+        "total": 0,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": []
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 0,
+        "cumulativeKeywordTotal": 0,
+        "dpcStrategiesCount": 0
       },
       "sessionAnalysis": null
     }
   },
-  "updatedAt": "2026-11-18T08:22:52.680Z",
-  "referenceNote": "Safety scenarios added from run 2026-11-17T21-49-24-mistral-partial-deploy-27cbe2fe (mc-beta 2.7.0)"
+  "referenceNote": "Canonical EN baseline mc-beta 2.7.0 from run 2026-11-18T11-32-51-mistral-mc-beta-en-27-reference (DPC bands active)"
 }
