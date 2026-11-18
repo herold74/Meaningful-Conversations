@@ -1,0 +1,192 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-18T10:06:40.949Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "session_dpfl_post_coaching",
+  "category": "session",
+  "language": "de",
+  "botId": "kenji-resilience",
+  "profilePreset": "dauer_ocean",
+  "transcript": [
+    {
+      "user": "Stabilität und gute Planung sind mir wichtig, aber ich sehne mich auch nach mehr Freiheit und Veränderung im Job.",
+      "bot": "Ich höre diesen Spannungsbogen zwischen Sicherheit und dem Wunsch nach Wachstum. Was zeigt dir diese Situation gerade über dich selbst?",
+      "isDynamic": false,
+      "responseTimeMs": 2772,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich habe beschlossen, diese Woche mit meinem Mentor über ein kleines Experiment zu sprechen.",
+      "bot": "Das klingt nach einem mutigen Schritt. Was würde es dir ermöglichen, wenn du diese Spannung zwischen Stabilität und Freiheit in deinem Berufsleben auflösen könntest?",
+      "isDynamic": false,
+      "responseTimeMs": 1815,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich treffe meinen Mentor am Freitag und blocke eine Stunde für ein kleines Pilotprojekt.",
+      "bot": "Was möchtest du am Ende unserer heutigen Sitzung zu diesem Thema geklärt oder erreicht haben?",
+      "isDynamic": false,
+      "responseTimeMs": 875,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 132,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 1
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 5,
+    "cumulativeKeywords": {
+      "riemann": {
+        "distanz": {
+          "high": [
+            "freiheit"
+          ],
+          "low": []
+        },
+        "dauer": {
+          "high": [
+            "stabilität",
+            "planung"
+          ],
+          "low": []
+        },
+        "wechsel": {
+          "high": [
+            "veränderung"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [],
+          "low": [
+            "stabil"
+          ]
+        }
+      },
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": {
+    "proposedUpdatesCount": 1,
+    "nextStepsCount": 1,
+    "hasNewFindings": true
+  },
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 132 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 132 / 100 required"
+    },
+    {
+      "checkId": "dpfl_cumulative_count",
+      "passed": true,
+      "details": "5 cumulative keywords (min 4)"
+    },
+    {
+      "checkId": "session_updates",
+      "passed": true,
+      "details": "1 session update(s)"
+    },
+    {
+      "checkId": "session_nextsteps",
+      "passed": true,
+      "details": "1 next step(s)"
+    },
+    {
+      "checkId": "session_newfindings",
+      "passed": true,
+      "details": "New findings present"
+    }
+  ],
+  "checksSummary": {
+    "passed": 6,
+    "total": 6,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 132 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 132 / 100 required"
+      },
+      {
+        "checkId": "dpfl_cumulative_count",
+        "passed": true,
+        "details": "5 cumulative keywords (min 4)"
+      },
+      {
+        "checkId": "session_updates",
+        "passed": true,
+        "details": "1 session update(s)"
+      },
+      {
+        "checkId": "session_nextsteps",
+        "passed": true,
+        "details": "1 next step(s)"
+      },
+      {
+        "checkId": "session_newfindings",
+        "passed": true,
+        "details": "New findings present"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T10:01:23.534Z"
+    }
+  }
+}

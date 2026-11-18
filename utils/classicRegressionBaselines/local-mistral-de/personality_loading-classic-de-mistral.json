@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-18T10:07:38.573Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "personality_loading",
+  "category": "personality",
+  "language": "de",
+  "botId": "kenji-resilience",
+  "profilePreset": "naehe_balanced",
+  "transcript": [
+    {
+      "user": "Hallo, ich brauche Rat.",
+      "bot": "Was führt dich heute zu mir?",
+      "isDynamic": false,
+      "responseTimeMs": 988,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich fühle mich gerade sehr verloren und unsicher. Ich habe das Gefühl, dass ich in meinem Leben nicht vorankomme und weiß nicht, wie ich das ändern soll. Deshalb brauche ich deine Hilfe.",
+      "bot": "Das klingt nach einer tiefen Verunsicherung. Was zeigt dir diese Situation gerade über dich selbst?",
+      "isDynamic": true,
+      "responseTimeMs": 1306,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Das zeigt mir, dass ich vielleicht zu viel Druck auf mich selbst ausübe. Ich habe das Gefühl, ich ständig Fortschritte machen, aber eigentlich weiß ich gar nicht mehr, was ich wirklich will. Und das macht mich noch unsicherer.",
+      "bot": "Das ist ein wichtiger Punkt. Was würde es dir ermöglichen, wenn du diesen Druck loslassen könntest?",
+      "isDynamic": true,
+      "responseTimeMs": 837,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 132,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 3
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "desired_negative",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 3,
+      "weightingDetails": [
+        {
+          "keyword": "unsicher",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "druck",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "fortschritt",
+          "framework": "sd",
+          "dimension": "orange",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 5,
+    "cumulativeKeywords": {
+      "riemann": {},
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "unsicher",
+            "druck"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "purple": {
+          "high": [],
+          "low": [
+            "verloren"
+          ]
+        },
+        "orange": {
+          "high": [
+            "fortschritt"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 132 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 132 / 100 required"
+    }
+  ],
+  "checksSummary": {
+    "passed": 2,
+    "total": 2,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 132 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 132 / 100 required"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T10:01:23.534Z"
+    }
+  }
+}

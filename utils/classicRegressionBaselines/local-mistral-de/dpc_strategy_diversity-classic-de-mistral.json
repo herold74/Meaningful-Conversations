@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-18T10:09:42.592Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "dpc_strategy_diversity",
+  "category": "personality",
+  "language": "de",
+  "botId": "kenji-resilience",
+  "profilePreset": "tri_lens",
+  "transcript": [
+    {
+      "user": "Ich schwanke zwischen Sicherheit gehen und etwas Mutigem im Job wagen.",
+      "bot": "Das klingt nach einer spannenden Spannung, die dich gerade bewegt. Was würde es für dich bedeuten, wenn du dich für mehr Mut im Job entscheiden würdest?",
+      "isDynamic": false,
+      "responseTimeMs": 1131,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Wenn ich mich für mehr Mut entscheide, hätte ich das Gefühl, endlich ich selbst zu sein – nicht mehr die ganze Zeit abzuwägen, was die anderen denken. Gleichzeitig macht mir die Unsicherheit Angst, die damit kommt. Ich weiß nicht, ob ich das aushalten kann. Aber die Vorstellung, einfach mal zu wagen, gibt mir auch ein kleines Kribbeln im Bauch.",
+      "bot": "Das ist ein starker innerer Konflikt – zwischen dem Wunsch nach Authentizität und der Angst vor Unsicherheit. Wo spürst du diesen Konflikt am meisten in deinem Alltag?",
+      "isDynamic": true,
+      "responseTimeMs": 3393,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Am meisten spüre ich diesen Konflikt bei Entscheidungen, die andere sehen. Zum Beispiel, wenn ich im Job eine neue Idee einbringe oder mit Freunden etwas plane, das nicht \"sicher\" ist. Dann zögere ich oft so lange, bis ich mich selbst nicht mehr verstehe.",
+      "bot": "Das klingt, als würdest du dich in diesem Zögern manchmal verlieren. Was genau macht diese Unsicherheit so schwer auszuhalten?",
+      "isDynamic": true,
+      "responseTimeMs": 1113,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Es fühlt sich an wie ein Zerrissensein zwischen zwei Teilen in mir. Der eine Teil will endlich loslegen und das Risiko eingehen, der andere hat panische Angst, dass es schiefgeht und ich dann blamiert oder abgelehnt werde. Und diese innere Zerrissenheit macht mich so erschöpft.",
+      "bot": "Das ist eine tiefe Erschöpfung, die aus diesem inneren Kampf entsteht. Was wäre für dich heute das Wertvollste, das wir in dieser Sitzung klären könnten, um mit dieser Zerrissenheit umzugehen?",
+      "isDynamic": true,
+      "responseTimeMs": 1084,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 1121,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 3
+      },
+      "sentiment": {
+        "polarity": -1,
+        "emotionalContext": "desired_negative",
+        "isAmbiguous": false
+      },
+      "adjustedKeywordCount": 2,
+      "weightingDetails": [
+        {
+          "keyword": "erschöpft",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "angst",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "sicherheit"
+          ],
+          "low": [
+            "unsicherheit"
+          ]
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "unsicher",
+            "angst",
+            "erschöpft"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "red": {
+          "high": [
+            "mutig"
+          ],
+          "low": []
+        },
+        "beige": {
+          "high": [
+            "sicherheit"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 1121 chars"
+    },
+    {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 1121 / 150 required"
+    },
+    {
+      "checkId": "dpc_strategies",
+      "passed": true,
+      "details": "2 strategies (min 2)"
+    }
+  ],
+  "checksSummary": {
+    "passed": 3,
+    "total": 3,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 1121 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 1121 / 150 required"
+      },
+      {
+        "checkId": "dpc_strategies",
+        "passed": true,
+        "details": "2 strategies (min 2)"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T10:01:23.534Z"
+    }
+  }
+}

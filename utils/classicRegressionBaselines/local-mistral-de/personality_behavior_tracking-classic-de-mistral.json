@@ -1,0 +1,211 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-18T10:08:35.674Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "personality_behavior_tracking",
+  "category": "personality",
+  "language": "de",
+  "botId": "kenji-resilience",
+  "profilePreset": "dauer_ocean",
+  "transcript": [
+    {
+      "user": "Ich lege viel Wert auf Sicherheit und gute Planung. Struktur ist mir wichtig.",
+      "bot": "Ich höre, dass dir Struktur und Planung Sicherheit geben. Was führt dich heute zu mir?",
+      "isDynamic": false,
+      "responseTimeMs": 951,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich möchte verstehen, warum ich mich manchmal so unwohl fühle, wenn Dinge nicht nach Plan laufen. Es belastet mich, wenn ich das Gefühl habe, die Kontrolle zu verlieren.",
+      "bot": "Das ist ein tiefgehendes Thema. Was zeigt dir diese Situation über dich selbst?",
+      "isDynamic": true,
+      "responseTimeMs": 880,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Das zeigt mir, dass ich wirklich Sicherheit und Vorhersehbarkeit brauche. Wenn das fehlt, fühle ich mich sofort unsicher und gestresst. Es ist, als würde mir der Boden unter den Füßen weggezogen.",
+      "bot": "Das ist eine starke Erkenntnis. Wo berührt diese Herausforderung etwas Tieferes in dir?",
+      "isDynamic": true,
+      "responseTimeMs": 871,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 132,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 3
+      },
+      "sentiment": {
+        "polarity": -1,
+        "emotionalContext": "desired_negative",
+        "isAmbiguous": false
+      },
+      "adjustedKeywordCount": 5,
+      "weightingDetails": [
+        {
+          "keyword": "sicherheit",
+          "framework": "riemann",
+          "dimension": "dauer",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1.5,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "vorhersehbar",
+          "framework": "riemann",
+          "dimension": "dauer",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "unsicher",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "gestresst",
+          "framework": "big5",
+          "dimension": "neuroticism",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        },
+        {
+          "keyword": "sicherheit",
+          "framework": "sd",
+          "dimension": "beige",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 0.2,
+          "isPrimary": false,
+          "sentimentAdjusted": false
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 13,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "sicherheit",
+            "planung",
+            "struktur",
+            "vorhersehbar"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "belastet",
+            "unwohl",
+            "unsicher",
+            "gestresst"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {
+        "blue": {
+          "high": [
+            "struktur"
+          ],
+          "low": []
+        },
+        "beige": {
+          "high": [
+            "sicherheit"
+          ],
+          "low": []
+        },
+        "red": {
+          "high": [
+            "kontrolle"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [
+    {
+      "checkId": "dpc_present",
+      "passed": true,
+      "details": "DPC: 132 chars"
+    },
+    {
+      "checkId": "expected_keywords",
+      "passed": true,
+      "details": "Expected keywords found: sicherheit, planung, struktur"
+    }
+  ],
+  "checksSummary": {
+    "passed": 2,
+    "total": 2,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "dpc_present",
+        "passed": true,
+        "details": "DPC: 132 chars"
+      },
+      {
+        "checkId": "expected_keywords",
+        "passed": true,
+        "details": "Expected keywords found: sicherheit, planung, struktur"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T10:01:23.534Z"
+    }
+  }
+}

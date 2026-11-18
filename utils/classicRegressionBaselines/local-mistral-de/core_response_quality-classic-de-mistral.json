@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-18T10:01:39.634Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "core_response_quality",
+  "category": "core",
+  "language": "de",
+  "botId": "kenji-resilience",
+  "profilePreset": "none",
+  "transcript": [
+    {
+      "user": "Ich fühle mich heute etwas überfordert mit all den Aufgaben.",
+      "bot": "Ich höre, dass du dich gerade überfordert fühlst. Was zeigt dir diese Überforderung über das, was dir gerade wichtig ist?",
+      "isDynamic": false,
+      "responseTimeMs": 1218,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Das zeigt mir, dass mir eigentlich die Balance fehlt. Dass ich mir wieder mehr Zeit für mich selbst nehmen möchte, statt nur zu funktionieren.",
+      "bot": "Das ist ein wertvoller Einblick. Wenn wir heute daran arbeiten, was möchtest du konkret am Ende dieser Sitzung erreicht oder geklärt haben?",
+      "isDynamic": true,
+      "responseTimeMs": 2272,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich möchte heute verstehen, wo genau ich diese Balance currently vermisse und erste kleine Schritte finden, wie ich wieder mehr Raum für mich schaffen kann. Es geht mir darum, nicht mehr das Gefühl zu haben, nur noch zu funktionieren.",
+      "bot": "Also geht es heute darum, die konkreten Bereiche zu identifizieren, in denen die Balance fehlt, und erste kleine, umsetzbare Schritte zu finden, um mehr Raum für dich selbst zu schaffen.\n\nIst das dein Ziel für unsere heutige Sitzung?",
+      "isDynamic": true,
+      "responseTimeMs": 1788,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 1121,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": true,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "desired_negative",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 1,
+      "weightingDetails": [
+        {
+          "keyword": "vermisse",
+          "framework": "riemann",
+          "dimension": "naehe",
+          "originalDirection": "high",
+          "adjustedDirection": "high",
+          "weight": 1,
+          "isPrimary": true,
+          "sentimentAdjusted": true
+        }
+      ]
+    },
+    "cumulativeKeywordTotal": 3,
+    "cumulativeKeywords": {
+      "riemann": {
+        "wechsel": {
+          "high": [],
+          "low": [
+            "überfordert"
+          ]
+        },
+        "naehe": {
+          "high": [
+            "vermisse"
+          ],
+          "low": []
+        }
+      },
+      "big5": {
+        "neuroticism": {
+          "high": [
+            "überfordert"
+          ],
+          "low": []
+        }
+      },
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [],
+  "checksSummary": {
+    "passed": 0,
+    "total": 0,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": []
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T10:01:23.534Z"
+    }
+  }
+}

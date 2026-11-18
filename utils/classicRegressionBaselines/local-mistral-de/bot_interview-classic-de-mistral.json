@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-18T10:15:14.129Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "bot_interview",
+  "category": "bot",
+  "language": "de",
+  "botId": "gloria-interview",
+  "profilePreset": "none",
+  "transcript": [
+    {
+      "user": "Ich möchte gerne anfangen.",
+      "bot": "Wunderbar. Dann lass uns zunächst klären, worum es bei diesem Interview gehen soll. Welches Thema möchtest du erkunden?",
+      "isDynamic": false,
+      "responseTimeMs": 1357,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich möchte testen, ob das Interview-Format und die Struktur für mich als Coachee funktionieren – also ob ich mich dabei wohlfühle und ob es mir hilft, meine Gedanken klarer zu sortieren.",
+      "bot": "Verstanden. Dann ist das Thema also das Testen des Interview-Formats selbst.\n\nWie viel Zeit hast du für dieses Interview eingeplant?",
+      "isDynamic": true,
+      "responseTimeMs": 1075,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "Ich habe etwa 30-45 Minuten eingeplant. Mir ist wichtig, dass wir genug Zeit haben, um wirklich zu spüren, ob das Format für mich passt.",
+      "bot": "Gut, dann haben wir 30 bis 45 Minuten Zeit.\n\nGibt es besondere Perspektiven oder Blickwinkel, die du bei diesem Test berücksichtigt haben möchtest? Zum Beispiel: Soll ich gezielt auf Klarheit, Tiefe oder bestimmte Aspekte deiner Gedanken achten?",
+      "isDynamic": true,
+      "responseTimeMs": 1211,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": false,
+    "dpcInjectionLength": 0,
+    "dpcStrategiesUsed": [],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": "value",
+        "patternConfidence": 0.8,
+        "sentenceCount": 2
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 2,
+    "cumulativeKeywords": {
+      "riemann": {
+        "dauer": {
+          "high": [
+            "struktur"
+          ],
+          "low": []
+        }
+      },
+      "big5": {},
+      "spiralDynamics": {
+        "blue": {
+          "high": [
+            "struktur"
+          ],
+          "low": []
+        }
+      }
+    }
+  },
+  "sessionAnalysis": null,
+  "autoCheckResults": [],
+  "checksSummary": {
+    "passed": 0,
+    "total": 0,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": []
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "regression",
+    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "regression",
+      "capturedAt": "2026-11-18T10:01:23.534Z"
+    }
+  }
+}

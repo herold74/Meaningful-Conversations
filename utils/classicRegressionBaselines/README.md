@@ -17,8 +17,10 @@ Regression is intentionally **two steps** — test and compare never overwrite e
 
 ```
 utils/classicRegressionBaselines/
-  local-gemini/          ← canonical reference (update with --reference only)
+  local-gemini/          ← canonical EN reference (update with --reference only)
   local-mistral/
+  local-gemini-de/       ← canonical DE reference (`--language de --reference`)
+  local-mistral-de/
   runs/
     index.json           ← run registry (newest first)
     2026-07-27T15-19-00-gemini/
