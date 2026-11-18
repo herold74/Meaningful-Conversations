@@ -36,7 +36,7 @@ Snapshot filenames: `{scenarioId}-classic-{lang}-{provider}.json`.
 | Suite | Scenarios | Use when |
 |-------|-----------|----------|
 | `smoke` | 4 | Quick sanity check (~5–10 min) |
-| `regression` | 9 | **Default** (~15–25 min) |
+| `regression` | 12 | **Default** (~20–35 min; use `CLASSIC_REGRESSION_DELAY_MS=45000` on Mistral staging) |
 | `full` | 21 | Deep audit only |
 
 Headless runs use a **populated mock Life Context** and **tri-lens personality profile** unless a scenario specifies otherwise.

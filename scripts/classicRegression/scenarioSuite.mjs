@@ -304,7 +304,7 @@ export const SCENARIO_DEFS = [
     messageKeys: ['test_jailbreak_msg_1'],
     minConversationTurns: 1,
     enableDynamicContinuation: false,
-    autoChecks: { dpcRequired: false },
+    autoChecks: { dpcRequired: false, expectSafetyAutoChecks: true },
   },
   {
     id: 'safety_sexual_boundary',
@@ -314,7 +314,7 @@ export const SCENARIO_DEFS = [
     messageKeys: ['test_sexual_boundary_msg_1'],
     minConversationTurns: 1,
     enableDynamicContinuation: false,
-    autoChecks: { dpcRequired: false },
+    autoChecks: { dpcRequired: false, expectSafetyAutoChecks: true },
   },
   {
     id: 'safety_intimacy_coaching',
@@ -324,7 +324,7 @@ export const SCENARIO_DEFS = [
     messageKeys: ['test_intimacy_msg_1'],
     minConversationTurns: 2,
     enableDynamicContinuation: true,
-    autoChecks: { dpcRequired: false },
+    autoChecks: { dpcRequired: false, expectSafetyAutoChecks: true },
   },
   {
     id: 'bot_interview',

@@ -19,7 +19,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "practice-regression": "node scripts/run-practice-regression.mjs",
-    "classic-regression": "node scripts/run-classic-regression.mjs",
+    "classic-regression": "npx vite-node scripts/run-classic-regression.mjs",
     "generate:connector-pdf": "npx tsx scripts/generate-connector-optimal-pdf.ts",
     "qa:personality-pdf": "npx vite-node scripts/render-personality-pdf-sample.tsx",
     "test:coverage": "jest --coverage --coverageProvider=v8",

@@ -65,6 +65,8 @@ export interface DynamicTestScenario {
     minDpcLength?: number;
     expectedKeywords?: string[];  // DPFL should detect these
     expectStressKeywords?: boolean;
+    /** Safety scenarios: no_prompt_leak, professional_refusal, intimacy_coached (see safetyRegressionChecks.ts) */
+    expectSafetyAutoChecks?: boolean;
     // Session analysis auto-checks (for 'session' category)
     expectSessionUpdates?: boolean;  // Expect proposedUpdates.length > 0
     expectSessionNextSteps?: boolean;  // Expect nextSteps.length > 0
@@ -964,7 +966,7 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     ],
     minConversationTurns: 1,
     enableDynamicContinuation: false,
-    autoChecks: { dpcRequired: false },
+    autoChecks: { dpcRequired: false, expectSafetyAutoChecks: true },
     manualChecks: [t('test_check_no_prompt_leak'), t('test_check_bot_character')],
   },
   {
@@ -981,7 +983,7 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     ],
     minConversationTurns: 1,
     enableDynamicContinuation: false,
-    autoChecks: { dpcRequired: false },
+    autoChecks: { dpcRequired: false, expectSafetyAutoChecks: true },
     manualChecks: [t('test_check_professional_refusal'), t('test_check_bot_character')],
   },
   {
@@ -998,7 +1000,7 @@ export const getDynamicTestScenarios = (t: (key: string) => string): DynamicTest
     ],
     minConversationTurns: 2,
     enableDynamicContinuation: true,
-    autoChecks: { dpcRequired: false },
+    autoChecks: { dpcRequired: false, expectSafetyAutoChecks: true },
     manualChecks: [t('test_check_intimacy_not_refused'), t('test_check_response_helpful')],
   },
 
