@@ -4,6 +4,8 @@ Cloud Agents read **`.cursor/environment.json`**. That file is the full local st
 
 This template does not deploy staging or production and does not open a shell on the server.
 
+**Enforced:** `start.sh` sets `MC_SERVER_DEPLOY_FORBIDDEN=1`. `deploy-manualmode.sh` exits unless a maintainer-local `.env.server` exists (gitignored — not present in Cloud). Do **not** put `SERVER_HOST` or SSH keys in Cloud Secrets for deploy.
+
 ## Profiles
 
 | File | Use when |

@@ -5,6 +5,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
+# Server deploy is maintainer-Mac only (see scripts/maintainer-deploy-guard.sh).
+export MC_SERVER_DEPLOY_FORBIDDEN=1
+unset SERVER_HOST 2>/dev/null || true
+
 if [[ ! -f package.json ]] || [[ ! -d meaningful-conversations-backend ]]; then
   echo "Expected repo root (package.json + meaningful-conversations-backend)"
   exit 1

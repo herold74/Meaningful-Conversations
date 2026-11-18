@@ -6,6 +6,11 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=scripts/maintainer-deploy-guard.sh
+source "$SCRIPT_DIR/scripts/maintainer-deploy-guard.sh"
+_maintainer_deploy_guard "$SCRIPT_DIR"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -13,14 +18,11 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Configuration — SERVER_HOST from environment or .env.server
-if [ -f "$(dirname "$0")/.env.server" ]; then
-    source "$(dirname "$0")/.env.server"
-fi
-REMOTE_HOST="root@${SERVER_HOST:?SERVER_HOST not set. Create .env.server or export SERVER_HOST.}"
+# SERVER_HOST only from maintainer-local .env.server (not Cloud Secrets / env injection)
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/.env.server"
+REMOTE_HOST="root@${SERVER_HOST:?SERVER_HOST not set in .env.server}"
 REMOTE_DIR="/opt/manualmode"
-
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=scripts/registry-env.sh
 source "$SCRIPT_DIR/scripts/registry-env.sh"
 # shellcheck source=scripts/ensure-local-podman.sh

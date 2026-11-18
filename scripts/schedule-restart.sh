@@ -3,10 +3,12 @@
 # This script sets up the cron job on the manualmode server
 
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-if [ -f "$SCRIPT_DIR/.env.server" ]; then
-    source "$SCRIPT_DIR/.env.server"
-fi
-SERVER="root@${SERVER_HOST:?SERVER_HOST not set. Create .env.server or export SERVER_HOST.}"
+# shellcheck source=scripts/maintainer-deploy-guard.sh
+source "$SCRIPT_DIR/scripts/maintainer-deploy-guard.sh"
+_maintainer_deploy_guard "$SCRIPT_DIR"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/.env.server"
+SERVER="root@${SERVER_HOST:?SERVER_HOST not set in .env.server}"
 RESTART_TIME="06:00"
 
 echo "==========================================="

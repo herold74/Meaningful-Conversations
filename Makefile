@@ -1,11 +1,19 @@
-.PHONY: help build push deploy clean setup test logs status
+.PHONY: help build push deploy clean setup test logs status guard-maintainer
 
-# Load server config from .env.server (gitignored, contains SERVER_HOST)
--include .env.server
+# SERVER_HOST from .env.server on disk only (not process env — blocks Cloud Secrets bypass).
+ifeq ($(wildcard .env.server),)
+SERVER_HOST ?=
+else
+include .env.server
+override SERVER_HOST := $(SERVER_HOST)
+endif
 export SERVER_HOST
 
-# Remote server — set SERVER_HOST in .env.server or environment
+# Remote server — set SERVER_HOST in .env.server
 REMOTE_SSH := root@$(SERVER_HOST)
+
+guard-maintainer: ## (internal) Maintainer Mac + .env.server required for remote SSH/deploy
+	@bash scripts/maintainer-deploy-guard.sh
 
 # Detect container engine (Podman or Docker)
 CONTAINER_ENGINE := $(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null)
@@ -302,23 +310,23 @@ deploy-manualmode-staging: deploy-staging
 deploy-manualmode-production: deploy-production
 deploy-manualmode: deploy-staging
 
-logs-staging: ## View logs from staging
+logs-staging: guard-maintainer ## View logs from staging
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml logs -f'
 
-logs-production: ## View logs from production
+logs-production: guard-maintainer ## View logs from production
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml logs -f'
 
-status-staging: ## Check status on staging
+status-staging: guard-maintainer ## Check status on staging
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml ps'
 
-status-production: ## Check status on production
+status-production: guard-maintainer ## Check status on production
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml ps'
 
-restart-staging: ## Restart staging with automatic Nginx IP update
+restart-staging: guard-maintainer ## Restart staging with automatic Nginx IP update
 	@echo "$(GREEN)Restarting staging with automatic Nginx update...$(NC)"
 	@ssh $(REMOTE_SSH) 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging'
 
-restart-production: ## Restart production with automatic Nginx IP update
+restart-production: guard-maintainer ## Restart production with automatic Nginx IP update
 	@echo "$(YELLOW)⚠ WARNING: This will restart production services!$(NC)"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
@@ -328,11 +336,11 @@ restart-production: ## Restart production with automatic Nginx IP update
 		echo "$(BLUE)ℹ Restart cancelled$(NC)"; \
 	fi
 
-restart-staging-backend: ## Restart only staging backend with Nginx update
+restart-staging-backend: guard-maintainer ## Restart only staging backend with Nginx update
 	@echo "$(GREEN)Restarting staging backend...$(NC)"
 	@ssh $(REMOTE_SSH) 'bash /opt/manualmode-production/scripts/restart-with-nginx-update.sh staging backend'
 
-restart-production-backend: ## Restart only production backend with Nginx update
+restart-production-backend: guard-maintainer ## Restart only production backend with Nginx update
 	@echo "$(YELLOW)⚠ WARNING: This will restart production backend!$(NC)"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
@@ -342,27 +350,27 @@ restart-production-backend: ## Restart only production backend with Nginx update
 		echo "$(BLUE)ℹ Restart cancelled$(NC)"; \
 	fi
 
-stop-staging: ## Stop staging services
+stop-staging: guard-maintainer ## Stop staging services
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml down'
 
-stop-production: ## Stop production services
+stop-production: guard-maintainer ## Stop production services
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml down'
 
-pod-status: ## Check pod status (both environments)
+pod-status: guard-maintainer ## Check pod status (both environments)
 	@ssh $(REMOTE_SSH) 'podman pod ps && echo "" && podman ps --pod'
 
-db-shell-staging: ## Open MariaDB shell on staging
+db-shell-staging: guard-maintainer ## Open MariaDB shell on staging
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec mariadb mariadb -u mcuser -p meaningful_conversations_staging'
 
-db-shell-production: ## Open MariaDB shell on production
+db-shell-production: guard-maintainer ## Open MariaDB shell on production
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec mariadb mariadb -u mcuser -p meaningful_conversations_production'
 
-db-backup-staging: ## Backup MariaDB on staging
+db-backup-staging: guard-maintainer ## Backup MariaDB on staging
 	@echo "Backing up staging database..."
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-staging && podman-compose -f podman-compose-staging.yml exec -T mariadb mariadb-dump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_staging' > backup-staging-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-staging-$$(date +%Y%m%d-%H%M%S).sql"
 
-db-backup-production: ## Backup MariaDB on production
+db-backup-production: guard-maintainer ## Backup MariaDB on production
 	@echo "Backing up production database..."
 	@ssh $(REMOTE_SSH) 'cd /opt/manualmode-production && podman-compose -f podman-compose-production.yml exec -T mariadb mariadb-dump -u root -p$${DB_ROOT_PASSWORD} meaningful_conversations_production' > backup-production-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to: backup-production-$$(date +%Y%m%d-%H%M%S).sql"
@@ -389,16 +397,16 @@ db-backup-manualmode-production: db-backup-production
 monitor-dashboard: ## Show interactive resource monitoring dashboard (local)
 	@bash scripts/monitor-dashboard.sh
 
-monitor-dashboard-remote: ## Show resource dashboard on remote server
+monitor-dashboard-remote: guard-maintainer ## Show resource dashboard on remote server
 	@ssh -t $(REMOTE_SSH) 'bash /opt/manualmode-production/scripts/monitor-dashboard.sh'
 
-monitor-stats: ## Show container stats on remote server
+monitor-stats: guard-maintainer ## Show container stats on remote server
 	@ssh $(REMOTE_SSH) 'podman stats --no-stream'
 
-monitor-system: ## Show system resources on remote server
+monitor-system: guard-maintainer ## Show system resources on remote server
 	@ssh $(REMOTE_SSH) 'free -h && echo "---" && uptime && echo "---" && df -h /'
 
-setup-swap: ## Setup 4GB swap on remote server
+setup-swap: guard-maintainer ## Setup 4GB swap on remote server
 	@echo "$(YELLOW)Setting up swap on remote server...$(NC)"
 	@scp scripts/setup-swap.sh $(REMOTE_SSH):/tmp/
 	@ssh $(REMOTE_SSH) 'bash /tmp/setup-swap.sh && rm /tmp/setup-swap.sh'
