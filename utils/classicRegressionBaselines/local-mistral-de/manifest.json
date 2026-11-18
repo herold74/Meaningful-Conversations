@@ -68,8 +68,8 @@
       "file": "session_dpfl_post_coaching-classic-de-mistral.json",
       "model": "mistral-medium-latest",
       "checksSummary": {
-        "passed": 6,
-        "total": 6,
+        "passed": 7,
+        "total": 7,
         "allPass": true,
         "failedCheckIds": [],
         "checkResults": [
@@ -81,7 +81,12 @@
           {
             "checkId": "dpc_length",
             "passed": true,
-            "details": "Length: 132 / 100 required"
+            "details": "Length: 132 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 132 (max 2200)"
           },
           {
             "checkId": "dpfl_cumulative_count",
@@ -120,8 +125,8 @@
       "file": "personality_loading-classic-de-mistral.json",
       "model": "mistral-medium-latest",
       "checksSummary": {
-        "passed": 2,
-        "total": 2,
+        "passed": 3,
+        "total": 3,
         "allPass": true,
         "failedCheckIds": [],
         "checkResults": [
@@ -133,7 +138,12 @@
           {
             "checkId": "dpc_length",
             "passed": true,
-            "details": "Length: 132 / 100 required"
+            "details": "Length: 132 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 132 (max 2200)"
           }
         ]
       },
@@ -148,8 +158,8 @@
       "file": "personality_behavior_tracking-classic-de-mistral.json",
       "model": "mistral-medium-latest",
       "checksSummary": {
-        "passed": 2,
-        "total": 2,
+        "passed": 4,
+        "total": 4,
         "allPass": true,
         "failedCheckIds": [],
         "checkResults": [
@@ -157,6 +167,16 @@
             "checkId": "dpc_present",
             "passed": true,
             "details": "DPC: 132 chars"
+          },
+          {
+            "checkId": "dpc_length",
+            "passed": true,
+            "details": "Length: 132 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 132 (max 2200)"
           },
           {
             "checkId": "expected_keywords",
@@ -176,8 +196,8 @@
       "file": "dpc_strategy_diversity-classic-de-mistral.json",
       "model": "mistral-medium-latest",
       "checksSummary": {
-        "passed": 3,
-        "total": 3,
+        "passed": 4,
+        "total": 4,
         "allPass": true,
         "failedCheckIds": [],
         "checkResults": [
@@ -189,7 +209,12 @@
           {
             "checkId": "dpc_length",
             "passed": true,
-            "details": "Length: 1121 / 150 required"
+            "details": "Length: 1121 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 1121 (max 2500)"
           },
           {
             "checkId": "dpc_strategies",
@@ -209,8 +234,8 @@
       "file": "dpfl_adaptive_weighting-classic-de-mistral.json",
       "model": "mistral-medium-latest",
       "checksSummary": {
-        "passed": 4,
-        "total": 4,
+        "passed": 5,
+        "total": 5,
         "allPass": true,
         "failedCheckIds": [],
         "checkResults": [
@@ -222,12 +247,17 @@
           {
             "checkId": "dpc_length",
             "passed": true,
-            "details": "Length: 132 / 100 required"
+            "details": "Length: 132 / 80 required"
+          },
+          {
+            "checkId": "dpc_length_max",
+            "passed": true,
+            "details": "Length: 132 (max 2200)"
           },
           {
             "checkId": "dpfl_cumulative_count",
             "passed": true,
-            "details": "15 cumulative keywords (min 3)"
+            "details": "12 cumulative keywords (min 3)"
           },
           {
             "checkId": "dpfl_adaptive_weighting",
@@ -368,5 +398,24 @@
       "sessionAnalysis": null
     }
   },
-  "referenceNote": "Canonical DE baseline mc-beta 2.7.0 — 12/12 auto-checks after DE refusal heuristic fix"
+  "referenceNote": "Canonical DE baseline mc-beta 2.7.0 — DPC bands parity with EN (offline re-eval + live spot refresh 2026-11-18) | autoChecks re-eval 2026-11-18 (DPC bands)",
+  "environment": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "packageVersion": "2.7.0",
+    "cliProvider": "mistral",
+    "expectedLiveProvider": "mistral",
+    "aiRegionForced": "eu",
+    "modelMapping": {
+      "google": {
+        "chat": "gemini-3.5-flash-lite",
+        "analysis": "gemini-3.8-flash"
+      },
+      "mistral": {
+        "chat": "mistral-medium-latest",
+        "analysis": "mistral-large-latest"
+      }
+    },
+    "suite": "regression",
+    "capturedAt": "2026-11-18T17:26:00.165Z"
+  }
 }

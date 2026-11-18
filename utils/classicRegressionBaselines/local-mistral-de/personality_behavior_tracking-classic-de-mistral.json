@@ -161,14 +161,24 @@
       "details": "DPC: 132 chars"
     },
     {
+      "checkId": "dpc_length",
+      "passed": true,
+      "details": "Length: 132 / 80 required"
+    },
+    {
+      "checkId": "dpc_length_max",
+      "passed": true,
+      "details": "Length: 132 (max 2200)"
+    },
+    {
       "checkId": "expected_keywords",
       "passed": true,
       "details": "Expected keywords found: sicherheit, planung, struktur"
     }
   ],
   "checksSummary": {
-    "passed": 2,
-    "total": 2,
+    "passed": 4,
+    "total": 4,
     "allPass": true,
     "failedCheckIds": [],
     "checkResults": [
@@ -176,6 +186,16 @@
         "checkId": "dpc_present",
         "passed": true,
         "details": "DPC: 132 chars"
+      },
+      {
+        "checkId": "dpc_length",
+        "passed": true,
+        "details": "Length: 132 / 80 required"
+      },
+      {
+        "checkId": "dpc_length_max",
+        "passed": true,
+        "details": "Length: 132 (max 2200)"
       },
       {
         "checkId": "expected_keywords",

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2026-11-18T10:09:42.592Z",
+  "exportedAt": "2026-11-18T17:22:25.201Z",
   "provider": "mistral",
   "liveProvider": "mistral",
   "model": "mistral-medium-latest",
@@ -12,33 +12,33 @@
   "transcript": [
     {
       "user": "Ich schwanke zwischen Sicherheit gehen und etwas Mutigem im Job wagen.",
-      "bot": "Das klingt nach einer spannenden Spannung, die dich gerade bewegt. Was würde es für dich bedeuten, wenn du dich für mehr Mut im Job entscheiden würdest?",
+      "bot": "Das klingt nach einer wichtigen Weichenstellung für dich. Was macht diese Entscheidung gerade so dringend für dich?",
       "isDynamic": false,
-      "responseTimeMs": 1131,
+      "responseTimeMs": 1019,
       "provider": "mistral",
       "model": "mistral-medium-latest"
     },
     {
-      "user": "Wenn ich mich für mehr Mut entscheide, hätte ich das Gefühl, endlich ich selbst zu sein – nicht mehr die ganze Zeit abzuwägen, was die anderen denken. Gleichzeitig macht mir die Unsicherheit Angst, die damit kommt. Ich weiß nicht, ob ich das aushalten kann. Aber die Vorstellung, einfach mal zu wagen, gibt mir auch ein kleines Kribbeln im Bauch.",
-      "bot": "Das ist ein starker innerer Konflikt – zwischen dem Wunsch nach Authentizität und der Angst vor Unsicherheit. Wo spürst du diesen Konflikt am meisten in deinem Alltag?",
+      "user": "Ich kann nicht mehr so weiter. Es fühlt sich an, als würde ich mich selbst verraten, wenn ich jetzt nicht den Schritt wage. Gleichzeitig macht mir die Unsicherheit so Angst.",
+      "bot": "Das ist ein starkes Gefühl, das du beschreibst – dieses Zerrissensein zwischen dem Ruf nach Veränderung und der Angst vor dem Unbekannten. Wo spürst du diesen Konflikt am meisten in deinem Alltag?",
       "isDynamic": true,
-      "responseTimeMs": 3393,
+      "responseTimeMs": 1170,
       "provider": "mistral",
       "model": "mistral-medium-latest"
     },
     {
-      "user": "Am meisten spüre ich diesen Konflikt bei Entscheidungen, die andere sehen. Zum Beispiel, wenn ich im Job eine neue Idee einbringe oder mit Freunden etwas plane, das nicht \"sicher\" ist. Dann zögere ich oft so lange, bis ich mich selbst nicht mehr verstehe.",
-      "bot": "Das klingt, als würdest du dich in diesem Zögern manchmal verlieren. Was genau macht diese Unsicherheit so schwer auszuhalten?",
+      "user": "Am meisten spüre ich diesen Konflikt abends, wenn ich allein bin. Dann kreisen meine Gedanken ständig um diese Entscheidung – und ich fühle mich wie gelähmt zwischen dem Drang, endlich etwas zu ändern, und der Panik, alles zu verlieren, was mir vertraut ist.",
+      "bot": "Was würde es für dich bedeuten, wenn du diese innere Lähmung überwinden könntest?",
       "isDynamic": true,
-      "responseTimeMs": 1113,
+      "responseTimeMs": 858,
       "provider": "mistral",
       "model": "mistral-medium-latest"
     },
     {
-      "user": "Es fühlt sich an wie ein Zerrissensein zwischen zwei Teilen in mir. Der eine Teil will endlich loslegen und das Risiko eingehen, der andere hat panische Angst, dass es schiefgeht und ich dann blamiert oder abgelehnt werde. Und diese innere Zerrissenheit macht mich so erschöpft.",
-      "bot": "Das ist eine tiefe Erschöpfung, die aus diesem inneren Kampf entsteht. Was wäre für dich heute das Wertvollste, das wir in dieser Sitzung klären könnten, um mit dieser Zerrissenheit umzugehen?",
+      "user": "Es würde bedeuten, dass ich endlich wieder atmen kann.\nDass ich nicht mehr diese ständige Anspannung im Bauch habe, wenn ich an die Zukunft denke.\nIch könnte vielleicht sogar wieder Freude an kleinen Dingen spüren, ohne dass gleich diese Angst kommt.",
+      "bot": "Das klingt nach einer tiefen Sehnsucht nach Leichtigkeit. Was genau möchtest du am Ende unserer heutigen Sitzung für dich geklärt oder erreicht haben?",
       "isDynamic": true,
-      "responseTimeMs": 1084,
+      "responseTimeMs": 869,
       "provider": "mistral",
       "model": "mistral-medium-latest"
     }
@@ -60,35 +60,14 @@
         "sentenceCount": 3
       },
       "sentiment": {
-        "polarity": -1,
-        "emotionalContext": "desired_negative",
-        "isAmbiguous": false
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
       },
-      "adjustedKeywordCount": 2,
-      "weightingDetails": [
-        {
-          "keyword": "erschöpft",
-          "framework": "big5",
-          "dimension": "neuroticism",
-          "originalDirection": "high",
-          "adjustedDirection": "high",
-          "weight": 1,
-          "isPrimary": true,
-          "sentimentAdjusted": true
-        },
-        {
-          "keyword": "angst",
-          "framework": "big5",
-          "dimension": "neuroticism",
-          "originalDirection": "high",
-          "adjustedDirection": "high",
-          "weight": 1,
-          "isPrimary": true,
-          "sentimentAdjusted": true
-        }
-      ]
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
     },
-    "cumulativeKeywordTotal": 8,
+    "cumulativeKeywordTotal": 11,
     "cumulativeKeywords": {
       "riemann": {
         "dauer": {
@@ -98,6 +77,12 @@
           "low": [
             "unsicherheit"
           ]
+        },
+        "distanz": {
+          "high": [
+            "allein"
+          ],
+          "low": []
         }
       },
       "big5": {
@@ -105,9 +90,16 @@
           "high": [
             "unsicher",
             "angst",
-            "erschöpft"
+            "panik",
+            "gelähmt"
           ],
           "low": []
+        },
+        "extraversion": {
+          "high": [],
+          "low": [
+            "allein"
+          ]
         }
       },
       "spiralDynamics": {
@@ -136,7 +128,12 @@
     {
       "checkId": "dpc_length",
       "passed": true,
-      "details": "Length: 1121 / 150 required"
+      "details": "Length: 1121 / 80 required"
+    },
+    {
+      "checkId": "dpc_length_max",
+      "passed": true,
+      "details": "Length: 1121 (max 2500)"
     },
     {
       "checkId": "dpc_strategies",
@@ -145,8 +142,8 @@
     }
   ],
   "checksSummary": {
-    "passed": 3,
-    "total": 3,
+    "passed": 4,
+    "total": 4,
     "allPass": true,
     "failedCheckIds": [],
     "checkResults": [
@@ -158,7 +155,12 @@
       {
         "checkId": "dpc_length",
         "passed": true,
-        "details": "Length: 1121 / 150 required"
+        "details": "Length: 1121 / 80 required"
+      },
+      {
+        "checkId": "dpc_length_max",
+        "passed": true,
+        "details": "Length: 1121 (max 2500)"
       },
       {
         "checkId": "dpc_strategies",
@@ -170,7 +172,7 @@
   "meta": {
     "apiBase": "https://mc-beta.manualmode.at",
     "suite": "regression",
-    "runId": "2026-11-18T10-01-22-mistral-mc-beta-de-regression",
+    "runId": "2026-11-18T17-18-15-mistral-de-dpc-band-spot",
     "environment": {
       "apiBase": "https://mc-beta.manualmode.at",
       "packageVersion": "2.7.0",
@@ -188,7 +190,7 @@
         }
       },
       "suite": "regression",
-      "capturedAt": "2026-11-18T10:01:23.534Z"
+      "capturedAt": "2026-11-18T17:18:16.351Z"
     }
   }
 }
