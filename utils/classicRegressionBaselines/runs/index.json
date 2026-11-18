@@ -1,6 +1,46 @@
 {
   "runs": [
     {
+      "runId": "2026-11-17T21-49-24-mistral-partial-deploy-27cbe2fe",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-17T21:49:25.380Z",
+      "path": "runs/2026-11-17T21-49-24-mistral-partial-deploy-27cbe2fe",
+      "packageVersion": "2.7.0",
+      "autoCheckPass": "11/12",
+      "models": "mistral-medium-latest"
+    },
+    {
+      "runId": "2026-11-17T14-36-50-mistral-stress-pbt-34355ad9",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-17T14:36:52.333Z",
+      "path": "runs/2026-11-17T14-36-50-mistral-stress-pbt-34355ad9",
+      "packageVersion": "2.6.0",
+      "autoCheckPass": "1/1",
+      "models": "mistral-medium-latest"
+    },
+    {
+      "runId": "2026-11-17T09-30-28-mistral-dpc-compact-medium-2026-11-17",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-17T09:30:29.162Z",
+      "path": "runs/2026-11-17T09-30-28-mistral-dpc-compact-medium-2026-11-17",
+      "packageVersion": "2.6.0",
+      "autoCheckPass": "11/12",
+      "models": "mistral-medium-latest"
+    },
+    {
+      "runId": "2026-11-17T09-23-20-mistral-dpc-compact-medium-2026-11-17",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-17T09:23:21.663Z",
+      "path": "runs/2026-11-17T09-23-20-mistral-dpc-compact-medium-2026-11-17",
+      "packageVersion": "2.6.0",
+      "autoCheckPass": "11/12",
+      "models": "mistral-medium-latest"
+    },
+    {
       "runId": "2026-11-10T18-16-25-mistral-w3-mistral-session-full-retest",
       "provider": "mistral",
       "suite": "regression",
