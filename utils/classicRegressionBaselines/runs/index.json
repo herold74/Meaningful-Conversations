@@ -1,6 +1,16 @@
 {
   "runs": [
     {
+      "runId": "2026-11-18T17-18-15-mistral-de-dpc-band-spot",
+      "provider": "mistral",
+      "suite": "regression",
+      "createdAt": "2026-11-18T17:18:16.351Z",
+      "path": "runs/2026-11-18T17-18-15-mistral-de-dpc-band-spot",
+      "packageVersion": "2.7.0",
+      "autoCheckPass": "2/2",
+      "models": "mistral-medium-latest"
+    },
+    {
       "runId": "2026-11-18T11-32-51-mistral-mc-beta-en-27-reference",
       "provider": "mistral",
       "suite": "regression",

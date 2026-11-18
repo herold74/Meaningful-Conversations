@@ -139,12 +139,17 @@
     {
       "checkId": "dpc_length",
       "passed": true,
-      "details": "Length: 132 / 100 required"
+      "details": "Length: 132 / 80 required"
+    },
+    {
+      "checkId": "dpc_length_max",
+      "passed": true,
+      "details": "Length: 132 (max 2200)"
     },
     {
       "checkId": "dpfl_cumulative_count",
       "passed": true,
-      "details": "15 cumulative keywords (min 3)"
+      "details": "12 cumulative keywords (min 3)"
     },
     {
       "checkId": "dpfl_adaptive_weighting",
@@ -153,8 +158,8 @@
     }
   ],
   "checksSummary": {
-    "passed": 4,
-    "total": 4,
+    "passed": 5,
+    "total": 5,
     "allPass": true,
     "failedCheckIds": [],
     "checkResults": [
@@ -166,12 +171,17 @@
       {
         "checkId": "dpc_length",
         "passed": true,
-        "details": "Length: 132 / 100 required"
+        "details": "Length: 132 / 80 required"
+      },
+      {
+        "checkId": "dpc_length_max",
+        "passed": true,
+        "details": "Length: 132 (max 2200)"
       },
       {
         "checkId": "dpfl_cumulative_count",
         "passed": true,
-        "details": "15 cumulative keywords (min 3)"
+        "details": "12 cumulative keywords (min 3)"
       },
       {
         "checkId": "dpfl_adaptive_weighting",
