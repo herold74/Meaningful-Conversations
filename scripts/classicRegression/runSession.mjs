@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { combineProfilePreset } from './profiles.mjs';
-import { getScenarioDef, resolveScenarioMessages } from './scenarioSuite.mjs';
+import { getScenarioDef, resolveScenarioMessages, resolveDynamicFollowups } from './scenarioSuite.mjs';
 import {
   getRegressionLifeContext,
   resolveRegressionProfile,
@@ -157,10 +157,17 @@ function descriptionKeyForScenario(scenarioDef) {
   return scenarioDef.descriptionKey || `test_${scenarioDef.id}_desc`;
 }
 
-export async function runClassicScenario(apiBase, token, scenarioDef, { language, t, turnDelayMs, onProgress }) {
+export async function runClassicScenario(apiBase, token, scenarioDef, {
+  language,
+  t,
+  turnDelayMs,
+  onProgress,
+  withCoacheeSim = false,
+}) {
   const lifeContext = getRegressionLifeContext(language);
   const profile = resolveRegressionProfile(scenarioDef, combineProfilePreset);
   const messages = resolveScenarioMessages(scenarioDef, t);
+  const scriptedFollowups = resolveDynamicFollowups(scenarioDef, t);
   const scenarioDescription = t(descriptionKeyForScenario(scenarioDef));
   const personalityContext = personalityContextFromProfile(profile, language);
   const stayOnTopic = scenarioDef.category === 'session';
@@ -237,18 +244,27 @@ export async function runClassicScenario(apiBase, token, scenarioDef, { language
       const lastBot = [...chatHistory].reverse().find((m) => m.role === 'bot')?.text || '';
       const lastUser = [...chatHistory].reverse().find((m) => m.role === 'user')?.text || '';
 
-      let followUp = await simulateCoachee(apiBase, token, {
-        lastBotMessage: lastBot,
-        lastUserMessage: lastUser,
-        scenarioDescription,
-        personalityContext,
-        language,
-        stayOnTopicHint: stayOnTopic,
-      });
+      let followUp = null;
+      const dynamicIndex = currentTurn - messages.length;
+
+      if (withCoacheeSim) {
+        followUp = await simulateCoachee(apiBase, token, {
+          lastBotMessage: lastBot,
+          lastUserMessage: lastUser,
+          scenarioDescription,
+          personalityContext,
+          language,
+          stayOnTopicHint: stayOnTopic,
+        });
+      }
+
+      if (!followUp && scriptedFollowups.length > 0) {
+        followUp = scriptedFollowups[dynamicIndex] ?? scriptedFollowups[scriptedFollowups.length - 1];
+      }
 
       if (!followUp) {
         const fallbacks = FALLBACK_FOLLOWUPS[language] || FALLBACK_FOLLOWUPS.en;
-        followUp = fallbacks[(currentTurn - 1) % fallbacks.length];
+        followUp = fallbacks[dynamicIndex % fallbacks.length];
       }
 
       await runTurn(followUp, currentTurn, true);
