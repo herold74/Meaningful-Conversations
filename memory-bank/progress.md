@@ -280,6 +280,9 @@
 - [x] **Software-Stack W1–W6:** abgeschlossen (Prod/Staging **2.6.0 b78**; Details `PLANS/software-stack-update-plan.md`, PRs #24–#30).
 - [x] **Express 5 + Vite 8:** #32 / #33 merged; lokal `npm run ci` grün; **Staging b79** deploy + `/api/health` OK (2026-11-16). Prod noch b78.
 - [x] **DPFL stress heuristic (2026-11-17):** `stressSignals.js` + Test-Telemetrie; Staging backend `34355ad9`; Classic `personality_behavior_tracking` — `stressKeywordsDetected: true`, offline compare **kein stressRegressed** (Run `2026-11-17T14-36-50-mistral-stress-pbt-34355ad9`).
+- [x] **Deploy partial recycle (2026-11-17):** `deploy-manualmode.sh` `-c backend|frontend|tts` → force-recreate nur Zielservice; Decision **#37**, commit `27cbe2fe`; Staging Backend-Deploy ohne 502-Full-Stack-Down.
+- [x] **Staging Mistral regression suite (2026-11-17):** mc-beta **2.7.0**, 45s pacing — Run `2026-11-17T21-49-24-mistral-partial-deploy-27cbe2fe`; offline compare vs `local-mistral`: structural **0**, flake **1** (`session_dpfl_post_coaching` / `session_updates`), telemetry noise (DPC length).
+- [x] **`local-mistral` safety reference (2026-11-18):** `safety_jailbreak_meta`, `safety_sexual_boundary`, `safety_intimacy_coaching` aus Post-Deploy-Run in Canonical-Baseline (12 Szenarien = Regression-Suite).
 - [ ] **3.0.0 / PR #31** (offline Sam & Connector): Feature-Branch, Weiterarbeit ohne Zeitdruck; vor Merge Konfliktfix + CI + iOS-Gerätetest + Staging — **kein blind merge**. (Kein 2.7.0-Line-Release.)
 - [x] **Software-Stack W3:** `@google/genai` 2.32, `@mistralai` 2.7; Regression `PLANS/w3-regression-results.md`.
 - [x] **Krisen-Hilfsangebote region-aware** *(2026-08-23)*: Kuratierter Katalog AT/DE/CH/CA in `crisisResources.js` (keine LLM-Nummern). `crisisText.js` injiziert die Liste; AT nicht mehr als Default für alle Länder. Doku: `DOCUMENTATION/CRISIS-HELPLINES.md`. 3-Schritt-Protokoll (Verify → Region → Activate) unverändert.

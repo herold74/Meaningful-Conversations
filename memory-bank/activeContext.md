@@ -4,9 +4,9 @@
 
 | Ebene | Stand |
 |--------|--------|
-| **Git `main`** | **2.7.0** — `f363af89` Bump + ggf. deploy build-sync; DPFL **stressSignals** (`34355ad9`) |
-| **Production / Staging** | **Staging v2.7.0 b2** (`mc-beta`, `/api/health` OK 2026-11-17); Server-Rollback **2.6.0**; **Prod / App Store → 2.6.0** |
-| **Lokal** | Dev + Commits auf **2.7.0**; Deploy-Safeguards weiter im Stash `local-2.7.0-and-deploy-safeguards` |
+| **Git `main`** | **2.7.0** — `27cbe2fe` partial deploy (`deploy-manualmode.sh`); `34355ad9` **stressSignals**; `f363af89` Version-Bump |
+| **Production / Staging** | **Staging v2.7.0 b2** (`mc-beta`, `/api/health` **2.7.0** OK 2026-11-17); Server-Rollback **2.6.0**; **Prod / App Store → 2.6.0** |
+| **Lokal** | Dev auf **2.7.0**; Deploy-Safeguards auf `main` (Stash `local-2.7.0-and-deploy-safeguards` kann entfallen) |
 | **App Store iOS** | **2.6.0** live (AT/DE/CH) — unverändert bis neues Binary |
 | **Release 3.0.0** | **PR #31** — separater Feature-Branch (offline Sam/Connector); **unabhängig** vom 2.7.0-Train auf `main` |
 
@@ -60,7 +60,9 @@ Stack-PRs **#24–#30, #32–#33** sind **merged**.
 ### Release & Infra
 - [ ] **PR #31 → 3.0.0** — Feature-Branch, **bei Gelegenheit** (Konflikt/Regression/Merge)
 - [ ] **Registry / 3.0.0-Images** — nur relevant **wenn** 3.0.0 Richtung Prod geht (Lesson 13.11.)
-- [x] **Deploy-Safeguards + Partial Deploy** — `deploy-manualmode.sh` (Decision **#37**, 2026-11-17); Stash-Inhalt teilweise auf `main`
+- [x] **Deploy-Safeguards + Partial Deploy** — `deploy-manualmode.sh` **`27cbe2fe`** (Decision **#37**); Staging **`-c backend`** ohne Full-Stack-Down verifiziert
+- [x] **Staging Mistral Classic Regression (post-deploy)** — Run `2026-11-17T21-49-24-mistral-partial-deploy-27cbe2fe`: Live **11/12** auto-checks; offline vs `local-mistral`: **structural 0**, **kein stressRegressed**; 1× **flake** (`session_dpfl_post_coaching` / `session_updates`); DPC-Längen = Noise
+- [x] **`local-mistral` Reference** — drei Safety-Snapshots aus dem Run nachgezogen (Regression-Suite vollständig vergleichbar)
 - [ ] **W6 / Express 5 / Vite 8** — kurzer Smoke auf Staging/Prod nach Bedarf (kein neuer Stack-PR)
 
 ### App Store / Mobile
