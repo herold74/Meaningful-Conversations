@@ -36,6 +36,10 @@ The intellectual achievement of the publisher lies in defining and compiling the
 
 According to the rules and regulations of AI Studio this project is licensed under the Apache Licence 2.0
 
+## Repository scope
+
+This public repository contains **application source** and a **reference** deployment script (`deploy-manualmode.sh`) illustrating one possible rollout pattern. It does **not** include production runbooks, live environment state, incident forensics, or maintainer-specific operations. Clone and operate on your own infrastructure at your own responsibility.
+
 ## 🎨 Branding / White-Label
 
 This project supports full white-label rebranding via environment variables — no code changes required. All UI text, emails, PDFs, calendar events, and API routing read brand values from `VITE_BRAND_*` (frontend) and `BRAND_*` (backend) env vars. If no variables are set, the app uses its original "Meaningful Conversations / manualmode.at" branding.

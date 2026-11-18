@@ -150,6 +150,12 @@ DOCUMENTATION/VERGLEICH-SAM-GABRIELLE-VICTOR.md
 DOCUMENTATION/VERGLEICH-SAM-GABRIELLE-VICTOR.html
 DOCUMENTATION/print/
 
+# Maintainer operational IP (not for public clone — see DOCUMENTATION/MAINTAINER-OPS/ locally)
+DOCUMENTATION/MAINTAINER-OPS/
+DOCUMENTATION/PRODUCTION-PROMOTE-VS-RESTART.md
+server-scripts/cron.d/
+memory-bank/
+
 # Operational & Infrastructure Documentation (sensitive)
 MONITORING-GUIDE.md
 INCIDENT-REPORT-*.md

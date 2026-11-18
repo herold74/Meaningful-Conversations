@@ -48,7 +48,6 @@ Located in `.cursor/skills/meaningful-conversations/`:
 - **CHANGELOG.md** - Version history and release notes index
 - **LOCAL-DEV-SETUP.md** - **⭐ Complete setup guide from scratch**
 - **TROUBLESHOOTING-INDEX.md** - **⭐ Quick reference for common issues** (includes **Security & npm audit**, e.g. accepted PM2 advisory → `memory-bank/systemPatterns.md` §8)
-- **PRODUCTION-PROMOTE-VS-RESTART.md** - **⭐ Agents: HITL prod promote vs same-version restart (Decision #38)** — in public repo
 - **DEPLOYMENT-CHECKLIST.md** - **⭐ MANDATORY deployment procedures (production/staging)** — maintainer-local (gitignored)
 - **LOCAL-DEV-MIGRATIONS.md** - **⭐ Local database migration guide & troubleshooting**
 
