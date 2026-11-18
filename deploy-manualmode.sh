@@ -36,10 +36,9 @@ REGISTRY_URL="${REGISTRY_URL:-localhost}"
 REGISTRY_LOGIN_USER="${REGISTRY_LOGIN_USER:-gherold}"
 REGISTRY_IMAGE_PREFIX="${REGISTRY_IMAGE_PREFIX:-gherold/meaningful-conversations}"
 
-# Version from package.json (SINGLE SOURCE OF TRUTH)
-# IMPORTANT: Do NOT add VERSION to .env files - it will be ignored!
-# The version is always read from package.json and explicitly set on the server.
-VERSION=$(grep -m1 '"version"' package.json | awk -F'"' '{print $4}')
+# Version: staging deploys use package.json; production promote uses live staging containers (Decision #38).
+PACKAGE_VERSION=$(grep -m1 '"version"' package.json | awk -F'"' '{print $4}')
+VERSION="$PACKAGE_VERSION"
 
 # Parse arguments
 ENVIRONMENT="staging"  # default to staging
@@ -48,6 +47,7 @@ SKIP_BUILD=false
 SKIP_PUSH=false
 DRY_RUN=false
 USE_REGISTRY=true      # Default to using registry
+PROMOTE_STAGING_TO_PRODUCTION=false
 
 show_help() {
     echo -e "${GREEN}Manualmode Server Deployment for Meaningful Conversations${NC}"
@@ -61,13 +61,16 @@ show_help() {
     echo "  -s, --skip-build      Skip building images (use existing)"
     echo "  -p, --skip-push       Skip pushing to registry (deploy existing)"
     echo "  -d, --dry-run         Show what would be deployed without doing it"
-    echo "  -v, --version VER     Use specific version tag (default: from package.json)"
+    echo "  -v, --version VER     Use specific version tag (staging only; default: package.json)"
+    echo "  --promote-staging-to-production"
+    echo "                      Required for production: promote healthy mc-beta containers to mc-app"
     echo "  -h, --help            Show this help"
     echo ""
     echo "Examples:"
     echo "  ${BLUE}./deploy-manualmode.sh${NC}                    # Build & deploy app to staging (re-tags TTS, no rebuild)"
     echo "  ${BLUE}./deploy-manualmode.sh -c all${NC}             # Full rebuild incl. TTS (only when tts-service/ changed)"
-    echo "  ${BLUE}./deploy-manualmode.sh -e production${NC}      # Deploy staging images to production (no rebuild)"
+    echo "  ${BLUE}./deploy-manualmode.sh -e production --promote-staging-to-production${NC}"
+    echo "                      # Owner-initiated: live staging images → production (no rebuild)"
     echo "  ${BLUE}./deploy-manualmode.sh --server root@1.2.3.4${NC}  # Deploy to different server"
     echo ""
     echo "Production deploys skip building and pushing — they pull the pre-built"
@@ -110,6 +113,10 @@ while [[ $# -gt 0 ]]; do
             VERSION="$2"
             shift 2
             ;;
+        --promote-staging-to-production)
+            PROMOTE_STAGING_TO_PRODUCTION=true
+            shift
+            ;;
         -h|--help)
             show_help
             exit 0
@@ -128,11 +135,76 @@ if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "production" ]]; then
     exit 1
 fi
 
-# Production: never rebuild — always use pre-built staging images from registry
+# Production: never rebuild — promote live staging images (HITL + server inspect, Decision #38)
 if [[ "$ENVIRONMENT" == "production" ]]; then
     SKIP_BUILD=true
     SKIP_PUSH=true
-    echo -e "${YELLOW}Production: skipping build & push (using pre-built staging images from registry)${NC}"
+    if [[ "$PROMOTE_STAGING_TO_PRODUCTION" != true ]]; then
+        echo -e "${RED}Error: Production deploy requires --promote-staging-to-production.${NC}"
+        echo "Production only runs when you explicitly request it. It promotes the"
+        echo "currently running, healthy staging containers to mc-app — not package.json."
+        echo ""
+        echo "  ./deploy-manualmode.sh -e production --promote-staging-to-production"
+        exit 1
+    fi
+    echo -e "${YELLOW}Production: skipping build & push (promote live staging → production)${NC}"
+fi
+
+resolve_live_staging_version() {
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "$PACKAGE_VERSION"
+        return 0
+    fi
+    echo -e "${YELLOW}Inspecting live staging containers on server...${NC}" >&2
+    local resolved
+    resolved=$(ssh "$REMOTE_HOST" 'bash -s' <<'REMOTE'
+set -e
+fe=meaningful-conversations-frontend-staging
+be=meaningful-conversations-backend-staging
+tts=meaningful-conversations-tts-staging
+tag_of() {
+    podman inspect "$1" --format '{{.ImageName}}' 2>/dev/null | awk -F: '{print $NF}'
+}
+for c in "$fe" "$be" "$tts"; do
+    running=$(podman inspect "$c" --format '{{.State.Running}}' 2>/dev/null || echo "false")
+    if [[ "$running" != "true" ]]; then
+        echo "ERROR: $c is not running" >&2
+        exit 1
+    fi
+    health=$(podman inspect "$c" --format '{{.State.Health.Status}}' 2>/dev/null || echo "unknown")
+    if [[ "$health" != "healthy" ]]; then
+        echo "ERROR: $c health=$health (staging must be healthy before production promote)" >&2
+        exit 1
+    fi
+done
+fe_tag=$(tag_of "$fe")
+be_tag=$(tag_of "$be")
+tts_tag=$(tag_of "$tts")
+if [[ -z "$fe_tag" || -z "$be_tag" || -z "$tts_tag" ]]; then
+    echo "ERROR: could not read staging image tags" >&2
+    exit 1
+fi
+if [[ "$fe_tag" != "$be_tag" || "$fe_tag" != "$tts_tag" ]]; then
+    echo "ERROR: staging image tag mismatch (fe=$fe_tag be=$be_tag tts=$tts_tag)" >&2
+    exit 1
+fi
+printf '%s' "$fe_tag"
+REMOTE
+) || return 1
+    if [[ -z "$resolved" ]]; then
+        echo -e "${RED}ERROR: empty staging version from server${NC}" >&2
+        return 1
+    fi
+    echo -e "${GREEN}✓ Live staging version for promote: $resolved${NC}" >&2
+    printf '%s' "$resolved"
+}
+
+if [[ "$ENVIRONMENT" == "production" ]]; then
+    LIVE_STAGING_VERSION=$(resolve_live_staging_version) || exit 1
+    if [[ "$PACKAGE_VERSION" != "$LIVE_STAGING_VERSION" ]]; then
+        echo -e "${BLUE}Promote:${NC} staging live $LIVE_STAGING_VERSION (repo package.json: $PACKAGE_VERSION)"
+    fi
+    VERSION="$LIVE_STAGING_VERSION"
 fi
 
 # Validate component

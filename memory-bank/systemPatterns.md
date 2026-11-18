@@ -259,6 +259,13 @@ The project follows a **Monorepo** structure containing a Single Page Applicatio
 - **Watchdog / deploy:** Do not `compose up` down the stack when target images are missing (403/404); prefer restoring `.accepted-release`. Deploy script must not tear down prod while images are absent. **Lesson:** failed `VERSION=2.7.0` deploy ≠ Release **3.0.0** (PR #31).
 - **Cron:** Scheduled Monday production pull **disabled** until release process is safe. **Reference:** `activeContext.md` incident 2026-11-13; hardened scripts may live in local stash until committed.
 
+### 38. Production promote vs restart (2026-11-18)
+- **Promote (new release):** **HITL only** — `./deploy-manualmode.sh -e production --promote-staging-to-production`. Version from **live healthy staging** on the server. **No** automated prod promote (no cron `deploy-manualmode`, no `-e production` without the flag). One-off times OK when the owner explicitly runs that command.
+- **Restart (same release):** Reboot, `compose down/up`, `full-restart-scheduled.sh production`, env reload — **allowed**; must **not** pull staging. Before prod recycle, pin `.env` `VERSION` to **running** FE/BE/TTS tags or `.accepted-release` (`scripts/full-restart-scheduled.sh`).
+- **Cron:** No **scheduled** production full-restart in `/etc/cron.d/` (staging example only). Manual/owner-invoked prod restart is fine.
+- **Agents:** Cursor hook **denies** `-e production` without `--promote-staging-to-production`; with the flag, **ask**.
+- **Reference:** `DOCUMENTATION/PRODUCTION-PROMOTE-VS-RESTART.md`, `deploy-manualmode.sh`, `.cursor/rules/production-promote-vs-restart.mdc` (local); incident 2026-11-18 in `activeContext.md`.
+
 ### 37. Partial staging deploys without full stack down (2026-11-17)
 - **Decision:** Remote `-c backend` / `-c frontend` / `-c tts` use **`podman-compose up -d --force-recreate <service>`** only — **no** `compose down` for the whole stack (MariaDB/frontend/TTS stay up → fewer nginx IP drifts and regression 502s).
 - **Full recycle:** `-c app` / `-c all` still `down` + `up -d`.

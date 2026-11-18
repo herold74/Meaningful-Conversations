@@ -46,6 +46,50 @@ else
     DOMAIN="mc-beta.manualmode.at"
 fi
 
+# Decision #38: restart ≠ deploy. Production recycle must not promote staging;
+# pin VERSION to what is already live (or last .accepted-release) before compose down/up.
+pin_production_version_for_restart() {
+    if [[ "$ENVIRONMENT" != "production" ]]; then
+        return 0
+    fi
+    cd "$COMPOSE_PATH"
+    local fe_tag be_tag tts_tag ver=""
+    fe_tag=$(podman inspect meaningful-conversations-frontend-production --format '{{.ImageName}}' 2>/dev/null | awk -F: '{print $NF}' || true)
+    be_tag=$(podman inspect meaningful-conversations-backend-production --format '{{.ImageName}}' 2>/dev/null | awk -F: '{print $NF}' || true)
+    tts_tag=$(podman inspect meaningful-conversations-tts-production --format '{{.ImageName}}' 2>/dev/null | awk -F: '{print $NF}' || true)
+
+    if [[ -n "$fe_tag" && -n "$be_tag" ]]; then
+        if [[ "$fe_tag" != "$be_tag" ]]; then
+            log "${RED}❌ ERROR: production FE ($fe_tag) != BE ($be_tag) — fix before restart${NC}"
+            exit 1
+        fi
+        if [[ -n "$tts_tag" && "$fe_tag" != "$tts_tag" ]]; then
+            log "${RED}❌ ERROR: production TTS ($tts_tag) != app ($fe_tag) — fix before restart${NC}"
+            exit 1
+        fi
+        ver="$fe_tag"
+        log "   Using live container tags: VERSION=$ver"
+    elif [[ -f .accepted-release ]]; then
+        ver=$(grep -m1 '^VERSION=' .accepted-release | cut -d= -f2- | tr -d '\r')
+        log "   Containers not running — using .accepted-release VERSION=$ver"
+    else
+        log "${RED}❌ ERROR: cannot determine production VERSION (no running app containers, no .accepted-release)${NC}"
+        exit 1
+    fi
+
+    if [[ -z "$ver" ]]; then
+        log "${RED}❌ ERROR: empty production VERSION${NC}"
+        exit 1
+    fi
+    if [[ ! -f .env ]]; then
+        log "${RED}❌ ERROR: missing $COMPOSE_PATH/.env${NC}"
+        exit 1
+    fi
+    sed -i '/^VERSION=/d' .env
+    echo "VERSION=$ver" >> .env
+    log "${GREEN}✓ Pinned .env VERSION=$ver (restart only — no staging promote)${NC}"
+}
+
 # Create log directory if not exists
 mkdir -p "$LOG_DIR"
 
@@ -87,6 +131,8 @@ fi
 
 log "${GREEN}✓ Pre-flight checks passed${NC}"
 log ""
+
+pin_production_version_for_restart
 
 # Step 2: Backup check
 log "${YELLOW}📦 Step 2: Verifying recent backup exists...${NC}"

@@ -1,0 +1,5 @@
+# Meaningful Conversations — scheduled full restart (staging only)
+# No automatic production full-restart lines here (Decision #38). Promote = deploy-manualmode.sh --promote-staging-to-production; manual prod restart is OK.
+#
+# Example one-off staging restart (owner sets date/time explicitly):
+# 0 5 28 11 * root /bin/bash /opt/manualmode-staging/scripts/full-restart-scheduled.sh staging >> /var/log/meaningful-conversations/cron-restart.log 2>&1

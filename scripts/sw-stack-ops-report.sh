@@ -192,7 +192,7 @@ check_deploy_parity() {
   if [[ -n "$prod_line" && -n "$staging_line" && "$prod_line" != "$staging_line" ]]; then
     SUMMARY_PARITY="DRIFT PWA $prod_line ≠ $staging_line"
     bump_status WARN
-    add_action "WARN" "Staging voraus (normal während Soak)" "Nach Go: ./deploy-manualmode.sh -e production"
+    add_action "WARN" "Staging voraus (normal während Soak)" "Nach Go: ./deploy-manualmode.sh -e production --promote-staging-to-production"
   else
     SUMMARY_PARITY="OK ($prod_line)"
   fi

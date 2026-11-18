@@ -19,6 +19,12 @@
 
 set -e
 
+# Decision #38: no standalone/scheduled production deploy — owner uses deploy-manualmode.
+echo "ERROR: scripts/deploy-production-scheduled.sh is disabled." >&2
+echo "Use: ./deploy-manualmode.sh -e production --promote-staging-to-production" >&2
+echo "One-off times: schedule that exact command when you explicitly request it." >&2
+exit 1
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'

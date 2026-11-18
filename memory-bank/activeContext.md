@@ -1,18 +1,29 @@
 # Active Context
 
-## Current Status (2026-11-17)
+## Current Status (2026-11-18)
 
 | Ebene | Stand |
 |--------|--------|
 | **Git `main`** | **2.7.0** — `27cbe2fe` partial deploy (`deploy-manualmode.sh`); `34355ad9` **stressSignals**; `f363af89` Version-Bump |
-| **Production / Staging** | **Staging v2.7.0 b2** (`mc-beta`, `/api/health` **2.7.0** OK 2026-11-17); Server-Rollback **2.6.0**; **Prod / App Store → 2.6.0** |
+| **Production / Staging** | **Beide v2.7.0 b2** (mc-app + mc-beta, SSH-verifiziert 2026-11-18 Abend). Server-Rollback-Images **2.6.0** + `.previous-version` **2.6.0**. **App Store iOS** weiter **2.6.0**. |
 | **Lokal** | Dev auf **2.7.0**; Deploy-Safeguards auf `main` (Stash `local-2.7.0-and-deploy-safeguards` kann entfallen) |
 | **App Store iOS** | **2.6.0** live (AT/DE/CH) — unverändert bis neues Binary |
 | **Release 3.0.0** | **PR #31** — separater Feature-Branch (offline Sam/Connector); **unabhängig** vom 2.7.0-Train auf `main` |
 
-**Standing rule:** Kein Staging-Login / E2EE-Wartung ohne explizite Bitte. Prod-Deploy nur auf ausdrückliche Freigabe (Decision **#34** nach 13.11.-Outage).
+**Standing rule:** Kein Staging-Login / E2EE-Wartung ohne explizite Bitte. **Prod-Promote nur HITL:** `--promote-staging-to-production` (Decision **#38**). **Restart/Reboot** = gleiche Prod-Version (`.accepted-release` / laufende Images), kein Staging-Promote.
 
 **Ops:** Täglich `server-ops-report.sh`; Freitag 20:00 `sw-stack-ops-report.sh` (Paket-Tabelle + QA-Skala).
+
+---
+
+## Production-Incident (2026-11-18) — unautorisierter 2.7.0-Rollout
+
+- **Zeitpunkt:** 2026-11-18 **04:00 UTC** (= 05:00 Vienna) — bis **03:59 UTC** lief Prod noch **2.6.0** (Journal).
+- **Mechanismus:** `./deploy-manualmode.sh -e production` — `/tmp/remote-deploy.sh` (mtime 04:00), `.accepted-release` `ACCEPTED_AT=2026-11-18T04:01:07Z`, Image-Pulls `…:2.7.0` (IDs = accepted-release).
+- **Quelle:** SSH **root** von **46.125.163.99** (parallele Sessions 04:00:05–14) — **nicht** Server-Cron (Montags-Prod-Pull aus; `full-restart-scheduled` nur **28.11.** 05:00, letzter Lauf 2025-11-28).
+- **Vorgeschichte:** `/opt/manualmode-production/.env` enthält `VERSION=2.7.0` seit **13.11.** Outage-Backup — Container blieben bis 18.11. auf **2.6.0**; jeder volle Recycle hätte 2.7.0 gezogen.
+- **Chat d9d212e8 (17.–18.11.):** nur **staging**-Deploys — **kein** dokumentiertes Prod-Deploy; Ursache vermutlich anderer Agent/Terminal/Automation auf dem Mac.
+- **Nächster Schritt (nur mit Freigabe):** Prod-Rollback **2.6.0** + `.env` VERSION pinnen; technische Prod-Gates im Deploy-Skript.
 
 ---
 
