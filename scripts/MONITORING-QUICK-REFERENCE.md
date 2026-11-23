@@ -84,7 +84,7 @@ systemctl start mc-stack-watchdog.service
 journalctl -u mc-stack-watchdog.service -n 30 --no-pager
 ```
 
-Detects **zombie backends** (container running but unhealthy or `:8080` refused), **recreates backend**, then **updates nginx IPs**. Service timeout: **600s**.
+Detects **zombie backends** (container running but unhealthy or `:8080` refused), **nginx upstream drift** (backend **or frontend** Pod IP ≠ nginx `proxy_pass`), and **502 on site root** while API may still be 200. Then **updates nginx IPs** and/or **recreates backend**. Timer: **~3 min** (no change). Service timeout: **600s**.
 
 ### Container neu starten
 ```bash

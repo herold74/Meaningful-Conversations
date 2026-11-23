@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Ensure MC Podman stacks (production + staging) are running and serving traffic.
-# Detects "zombie" backends (container running but :8080 refused / unhealthy).
+# Detects zombie backends and nginx upstream drift (backend or frontend IP stale vs podman).
 # Uses flock to avoid overlapping with podman-compose-boot or manual compose.
 #
 # Install: /usr/local/bin/mc-stack-watchdog.sh
@@ -83,6 +83,80 @@ app_tier_ok() {
   return 0
 }
 
+env_val() {
+  local file="$1" key="$2"
+  grep -m1 "^${key}=" "$file" 2>/dev/null | cut -d= -f2- | tr -d '"' | tr -d '\r'
+}
+
+app_image_ref() {
+  local env="$1" role="$2"
+  local file="/opt/manualmode-${env}/.env"
+  local version registry prefix
+  version=$(env_val "$file" VERSION)
+  registry=$(env_val "$file" REGISTRY_URL)
+  prefix=$(env_val "$file" REGISTRY_IMAGE_PREFIX)
+  registry=${registry:-localhost}
+  prefix=${prefix:-gherold/meaningful-conversations}
+  version=${version:-latest}
+  echo "${registry}/${prefix}/meaningful-conversations-${role}:${version}"
+}
+
+app_images_present() {
+  local env="$1"
+  podman image exists "$(app_image_ref "$env" frontend)" 2>/dev/null \
+    && podman image exists "$(app_image_ref "$env" backend)" 2>/dev/null
+}
+
+restore_accepted_release() {
+  local env="$1"
+  local file="/opt/manualmode-${env}/.accepted-release"
+  local envfile="/opt/manualmode-${env}/.env"
+  [[ "$env" == "production" ]] || return 1
+  [[ -f "$file" && -f "$envfile" ]] || return 1
+  local version cur fe_id be_id
+  version=$(env_val "$file" VERSION)
+  fe_id=$(env_val "$file" FRONTEND_ID)
+  be_id=$(env_val "$file" BACKEND_ID)
+  [[ -n "$version" && -n "$fe_id" && -n "$be_id" ]] || return 1
+  cur=$(env_val "$envfile" VERSION)
+  if [[ "$cur" != "$version" ]]; then
+    sed -i '/^VERSION=/d' "$envfile"
+    echo "VERSION=$version" >> "$envfile"
+    log "Production VERSION ${cur:-empty} -> $version (.accepted-release)"
+  fi
+  local fe_ref be_ref
+  fe_ref=$(app_image_ref "$env" frontend)
+  be_ref=$(app_image_ref "$env" backend)
+  if ! podman image exists "$fe_ref" 2>/dev/null; then
+    podman image exists "$fe_id" 2>/dev/null || return 1
+    podman tag "$fe_id" "$fe_ref"
+    log "Re-tagged accepted frontend as $fe_ref"
+  fi
+  if ! podman image exists "$be_ref" 2>/dev/null; then
+    podman image exists "$be_id" 2>/dev/null || return 1
+    podman tag "$be_id" "$be_ref"
+    log "Re-tagged accepted backend as $be_ref"
+  fi
+  app_images_present "$env"
+}
+
+# Do not compose-up a VERSION whose frontend/backend images are missing.
+# That pull hangs and leaves production down. Production falls back to the
+# last accepted release instead of the branch version.
+ensure_repair_images() {
+  local env="$1"
+  if app_images_present "$env"; then
+    return 0
+  fi
+  log "WARN: frontend/backend image for current VERSION missing ($env)"
+  if restore_accepted_release "$env"; then
+    log "Using accepted production release"
+    return 0
+  fi
+  log "ERROR: refusing to start containers ($env); app images are absent"
+  return 1
+}
+
 repair_stack() {
   local env="$1"
   local dir="/opt/manualmode-${env}"
@@ -91,6 +165,7 @@ repair_stack() {
     log "WARN: missing $compose"
     return 1
   fi
+  ensure_repair_images "$env" || return 1
   log "Repair: podman-compose up -d ($env)"
   (cd "$dir" && podman-compose -f "podman-compose-${env}.yml" up -d >>"$LOG_FILE" 2>&1) || {
     log "WARN: compose up failed for $env"
@@ -109,6 +184,7 @@ repair_backend() {
     return 1
   fi
   log "Repair: recreate backend ($env)"
+  ensure_repair_images "$env" || return 1
   (cd "$dir" && podman-compose -f "podman-compose-${env}.yml" up -d --force-recreate backend >>"$LOG_FILE" 2>&1) || true
   sleep 5
   if app_tier_ok "$env"; then
@@ -153,13 +229,32 @@ nginx_backend_ip_mismatch() {
   [[ -n "$upstream" && "$ip" != "$upstream" ]]
 }
 
+nginx_frontend_ip_mismatch() {
+  local env="$1"
+  local conf="/etc/nginx/conf.d/${env}-meaningful-conversations.conf"
+  local frontend="meaningful-conversations-frontend-${env}"
+  local ip upstream
+  [[ -f "$conf" ]] || return 1
+  ip=$(container_ip "$frontend")
+  [[ -z "$ip" ]] && return 1
+  upstream=$(grep 'proxy_pass http://' "$conf" 2>/dev/null | sed -n 's|.*http://\([0-9.]*\):3000.*|\1|p' | head -1)
+  [[ -n "$upstream" && "$ip" != "$upstream" ]]
+}
+
+nginx_proxy_ip_mismatch() {
+  local env="$1"
+  nginx_backend_ip_mismatch "$env" && return 0
+  nginx_frontend_ip_mismatch "$env" && return 0
+  return 1
+}
+
 handle_public_api() {
   local env="$1" url="$2"
   if public_health_ok "$url"; then
     return 0
   fi
   log "WARN: public API health not 200 ($env) HTTP $(http_code "$url")"
-  if app_tier_ok "$env" || nginx_backend_ip_mismatch "$env"; then
+  if app_tier_ok "$env" || nginx_proxy_ip_mismatch "$env"; then
     log "INFO: backend local OK or nginx IP mismatch ($env) — refresh nginx only"
     update_nginx
     if public_health_ok "$url"; then
@@ -179,6 +274,21 @@ handle_public_api() {
     update_nginx
   fi
   public_health_ok "$url"
+}
+
+handle_public_site() {
+  local env="$1" base_url="$2"
+  if public_health_ok "$base_url"; then
+    return 0
+  fi
+  log "WARN: public site root not 200 ($env) HTTP $(http_code "$base_url")"
+  if app_tier_ok "$env" || nginx_proxy_ip_mismatch "$env"; then
+    log "INFO: app tier OK or nginx IP mismatch ($env) — refresh nginx for site root"
+    update_nginx
+    public_health_ok "$base_url"
+    return $?
+  fi
+  return 1
 }
 
 update_nginx() {
@@ -201,18 +311,26 @@ for env in production staging; do
     repair_backend "$env" && repaired=true
     wait_app_tier "$env" || true
     update_nginx
-  elif nginx_backend_ip_mismatch "$env"; then
-    log "WARN: nginx backend IP mismatch ($env)"
+  elif nginx_proxy_ip_mismatch "$env"; then
+    if nginx_frontend_ip_mismatch "$env"; then
+      log "WARN: nginx frontend IP mismatch ($env)"
+    else
+      log "WARN: nginx backend IP mismatch ($env)"
+    fi
     update_nginx
   fi
 done
 
 handle_public_api production "https://mc-app.manualmode.at/api/health" || true
 handle_public_api staging "https://mc-beta.manualmode.at/api/health" || true
+handle_public_site production "https://mc-app.manualmode.at/" || true
+handle_public_site staging "https://mc-beta.manualmode.at/" || true
 
 if stack_containers_running production && stack_containers_running staging \
   && public_health_ok "https://mc-app.manualmode.at/api/health" \
-  && public_health_ok "https://mc-beta.manualmode.at/api/health"; then
+  && public_health_ok "https://mc-beta.manualmode.at/api/health" \
+  && public_health_ok "https://mc-app.manualmode.at/" \
+  && public_health_ok "https://mc-beta.manualmode.at/"; then
   exit 0
 fi
 
