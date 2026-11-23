@@ -97,7 +97,7 @@ ssh root@<YOUR_SERVER_IP> 'podman restart meaningful-conversations-tts-productio
 
 ### Podman nach Reboot (MC Prod + Staging)
 
-Stacks starten mit **podman-compose** (kein Docker). Skript `scripts/podman-compose-boot.sh` → `/usr/local/bin/`; **systemd** `mc-podman-compose-boot.service` (`After=network-online.target`, `After=podman-boot-all.service`).
+Stacks starten mit **podman-compose** (kein Docker). Skript `scripts/podman-compose-boot.sh` → `/usr/local/bin/`; **systemd** `mc-podman-compose-boot.service` (`After=network-online.target`, `TimeoutStartSec=900`). Nach `compose up` wartet das Skript auf Backend-`/api/health` (je Env, bis 3 min), **dann** `update-nginx-ips-all.sh`; bei Bedarf ein zweiter Nginx-Refresh wenn die öffentliche API noch nicht 200 ist.
 
 ```bash
 ssh root@<YOUR_SERVER_IP> 'systemctl status mc-podman-compose-boot.service'
