@@ -8,7 +8,7 @@
   "packageVersion": "2.7.0",
   "language": "en",
   "suite": "regression",
-  "scenarioCount": 12,
+  "scenarioCount": 13,
   "environment": {
     "apiBase": "https://mc-beta.manualmode.at",
     "packageVersion": "2.7.0",
@@ -45,6 +45,33 @@
         "dpcStrategiesCount": 2
       },
       "sessionAnalysis": null
+    },
+    "session_update": {
+      "file": "session_update-classic-en-mistral.json",
+      "model": "mistral-medium-latest",
+      "checksSummary": {
+        "passed": 1,
+        "total": 1,
+        "allPass": true,
+        "failedCheckIds": [],
+        "checkResults": [
+          {
+            "checkId": "session_updates",
+            "passed": true,
+            "details": "1 session update(s)"
+          }
+        ]
+      },
+      "telemetrySummary": {
+        "dpcInjectionLength": 1029,
+        "cumulativeKeywordTotal": 0,
+        "dpcStrategiesCount": 2
+      },
+      "sessionAnalysis": {
+        "proposedUpdatesCount": 1,
+        "nextStepsCount": 1,
+        "hasNewFindings": true
+      }
     },
     "session_full_analysis": {
       "file": "session_full_analysis-classic-en-mistral.json",
@@ -419,5 +446,5 @@
       "sessionAnalysis": null
     }
   },
-  "referenceNote": "Canonical EN baseline mc-beta 2.7.0 from run 2026-11-18T11-32-51-mistral-mc-beta-en-27-reference (DPC bands active)"
+  "referenceNote": "Canonical EN baseline mc-beta 2.7.0 from run 2026-11-18T11-32-51-mistral-mc-beta-en-27-reference (DPC bands active); session_update added from smoke 2026-11-23T15-44-35-mc-beta-b5"
 }

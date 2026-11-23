@@ -369,7 +369,7 @@ export function resolveScenarioMessages(def, t) {
 /** Scripted coachee lines for headless regression without simulate-coachee API */
 export function resolveDynamicFollowups(def, t) {
   const keys = def.dynamicFollowupKeys || [];
-  return keys.map((key) => t(key)).filter((text) => text && text !== key);
+  return keys.map((key) => t(key)).filter((text, i) => text && text !== keys[i]);
 }
 
 export function estimateScenarioApiCalls(def, { withCoacheeSim = false } = {}) {

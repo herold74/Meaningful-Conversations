@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "exportedAt": "2026-11-23T15:47:18.875Z",
+  "provider": "mistral",
+  "liveProvider": "mistral",
+  "model": "mistral-medium-latest",
+  "scenarioId": "session_update",
+  "category": "session",
+  "language": "en",
+  "botId": "kenji-resilience",
+  "profilePreset": "tri_lens",
+  "transcript": [
+    {
+      "user": "I've decided to meditate in the morning instead of scrolling on my phone.",
+      "bot": "What brings you to explore this change now?",
+      "isDynamic": false,
+      "responseTimeMs": 2027,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "This has already helped me a lot this week.",
+      "bot": "How does this new practice connect with what matters most to you?",
+      "isDynamic": false,
+      "responseTimeMs": 2475,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    },
+    {
+      "user": "I'll commit to meditating every weekday morning before opening my phone, starting tomorrow.",
+      "bot": "That’s a clear intention. To make our time together as productive as possible, what would you like to have achieved, clarified, or decided by the end of this specific session?",
+      "isDynamic": false,
+      "responseTimeMs": 1873,
+      "provider": "mistral",
+      "model": "mistral-medium-latest"
+    }
+  ],
+  "telemetrySummary": {
+    "dpcInjectionPresent": true,
+    "dpcInjectionLength": 1029,
+    "dpcStrategiesUsed": [
+      "SD: Orange",
+      "SD: Turquoise"
+    ],
+    "stressKeywordsDetected": false,
+    "adaptiveWeighting": {
+      "context": {
+        "topic": null,
+        "topicConfidence": 0,
+        "linguisticPattern": null,
+        "patternConfidence": 0,
+        "sentenceCount": 1
+      },
+      "sentiment": {
+        "polarity": 0,
+        "emotionalContext": "neutral",
+        "isAmbiguous": true
+      },
+      "adjustedKeywordCount": 0,
+      "weightingDetails": []
+    },
+    "cumulativeKeywordTotal": 0,
+    "cumulativeKeywords": {
+      "riemann": {},
+      "big5": {},
+      "spiralDynamics": {}
+    }
+  },
+  "sessionAnalysis": {
+    "proposedUpdatesCount": 1,
+    "nextStepsCount": 1,
+    "hasNewFindings": true
+  },
+  "autoCheckResults": [
+    {
+      "checkId": "session_updates",
+      "passed": true,
+      "details": "1 session update(s)"
+    }
+  ],
+  "checksSummary": {
+    "passed": 1,
+    "total": 1,
+    "allPass": true,
+    "failedCheckIds": [],
+    "checkResults": [
+      {
+        "checkId": "session_updates",
+        "passed": true,
+        "details": "1 session update(s)"
+      }
+    ]
+  },
+  "meta": {
+    "apiBase": "https://mc-beta.manualmode.at",
+    "suite": "smoke",
+    "runId": "2026-11-23T15-44-35-mistral-smoke-20261123T164433-mc-beta-b5",
+    "environment": {
+      "apiBase": "https://mc-beta.manualmode.at",
+      "packageVersion": "2.7.0",
+      "cliProvider": "mistral",
+      "expectedLiveProvider": "mistral",
+      "aiRegionForced": "eu",
+      "modelMapping": {
+        "google": {
+          "chat": "gemini-3.5-flash-lite",
+          "analysis": "gemini-3.8-flash"
+        },
+        "mistral": {
+          "chat": "mistral-medium-latest",
+          "analysis": "mistral-large-latest"
+        }
+      },
+      "suite": "smoke",
+      "capturedAt": "2026-11-23T15:44:36.080Z"
+    }
+  }
+}
