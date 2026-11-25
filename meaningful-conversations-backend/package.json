@@ -45,6 +45,7 @@
   "license": "ISC",
   "overrides": {
     "glob": "^10.5.0",
-    "minimatch": "^11.0.1"
+    "minimatch": "^11.0.1",
+    "effect": "^3.22.5"
   }
 }

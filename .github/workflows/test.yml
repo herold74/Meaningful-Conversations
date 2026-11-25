@@ -45,11 +45,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Gate: runtime deps (deploy surface). Full tree must also have zero high (effect override on prisma CLI chain).
+      - run: npm audit --audit-level=high --omit=dev
       - run: npm audit --audit-level=high
       - name: Backend audit
         working-directory: meaningful-conversations-backend
         run: |
           npm ci
+          npm audit --audit-level=high --omit=dev
           npm audit --audit-level=high
 
   locale-parity:
