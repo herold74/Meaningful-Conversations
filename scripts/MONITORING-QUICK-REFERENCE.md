@@ -73,6 +73,22 @@ make setup-swap-manualmode
 make stop-manualmode-staging
 ```
 
+### MC stack health probe (observe, every 10 min)
+
+Läuft **auf dem Server** (nicht am Mac): prüft Prod/Staging **öffentliche API + Root**, **lokales Backend :8080**, **nginx `proxy_pass` vs. Pod-IP**, Podman-Health. Schreibt nur Log — **kein** Deploy/Promote.
+
+```bash
+# Maintainer (einmalig aus Repo-Root):
+./scripts/install-mc-health-probe-cron.sh
+
+# Server:
+tail -30 /var/log/mc-stack-health-probe.log
+cat /etc/cron.d/mc-stack-health-probe
+/usr/local/bin/mc-stack-health-probe.sh && echo OK || echo FAIL
+```
+
+Zeilen `ALERT` / `TRANSITION: OK -> FAIL` / `RECOVERED` bei Zustandswechsel. Cron: `CRON_TZ=Europe/Vienna`, **alle 10 Min**, `flock` gegen Overlap mit Watchdog.
+
 ### MC stack watchdog (auto-heal)
 ```bash
 # Timer (every ~3 min)
@@ -158,6 +174,7 @@ Log: `/var/log/mc-ops-report.log` (Zeitstempel **UTC**, Server `timedatectl`; Cr
 | **06:00** | täglich | DB-Backup | `backup-databases.sh` → `/var/log/meaningful-conversations-backup.log` |
 | **07:00** | Mo | Schema-Drift (MC only) | `scripts/check-schema-drift.sh` → `/usr/local/bin/` · `/var/log/schema-drift.log` |
 | **07:15** | Mo | DNF/Update-Check | `scripts/check-updates.sh` → `/var/log/update-check.log` |
+| ***/10** | täglich | Stack-Probe | `/usr/local/bin/mc-stack-health-probe.sh` → `/var/log/mc-stack-health-probe.log` (nginx/API-Drift; siehe oben) |
 | **07:30** | täglich | Ops-Report | `/usr/local/bin/server-ops-report.sh` (strukturierte Mail: Gesamtstatus / HANDLUNG / KURZÜBERSICHT) |
 | **07:45** | Mo | Ops Wochen-OK-Mail | `server-ops-report.sh --weekly-summary` |
 | **08:30** | Mo | Production-Pull | `/root/deploy-mc-production.sh` → `/tmp/mc-deploy-production.log` |
