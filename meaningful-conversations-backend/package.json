@@ -32,7 +32,7 @@
     "marked": "^18.2.0",
     "multer": "^2.0.2",
     "node-mailjet": "^6.0.5",
-    "pdfkit": "^0.17.2",
+    "pdfkit": "^0.21.0",
     "pm2": "^7.0.3"
   },
   "devDependencies": {
