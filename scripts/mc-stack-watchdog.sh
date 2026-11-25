@@ -183,22 +183,17 @@ repair_backend() {
     log "WARN: missing $compose"
     return 1
   fi
-  log "Repair: recreate backend ($env)"
+  # Pod stacks (x-podman pod + depends_on mariadb): --force-recreate backend wedges
+  # conmon and leaves zombie DB/backend containers — use stop/rm + up only.
   ensure_repair_images "$env" || return 1
-  (cd "$dir" && podman-compose -f "podman-compose-${env}.yml" up -d --force-recreate backend >>"$LOG_FILE" 2>&1) || true
-  sleep 5
-  if app_tier_ok "$env"; then
-    return 0
-  fi
   log "Repair: stop/rm $cname then compose up backend ($env)"
-  podman stop -t 15 "$cname" >>"$LOG_FILE" 2>&1 || true
+  podman stop -t 30 "$cname" >>"$LOG_FILE" 2>&1 || true
   podman rm -f "$cname" >>"$LOG_FILE" 2>&1 || true
   (cd "$dir" && podman-compose -f "podman-compose-${env}.yml" up -d backend >>"$LOG_FILE" 2>&1) || {
-    log "WARN: backend recreate failed for $env"
+    log "WARN: backend repair failed for $env"
     return 1
   }
-  sleep 8
-  app_tier_ok "$env"
+  wait_app_tier "$env"
 }
 
 public_health_ok() {
@@ -308,6 +303,13 @@ for env in production staging; do
     repair_stack "$env" && repaired=true
   elif ! app_tier_ok "$env"; then
     log "WARN: app tier unhealthy ($env) — backend local health or podman health failed"
+    if nginx_proxy_ip_mismatch "$env"; then
+      log "INFO: nginx upstream drift ($env) — refresh before backend repair"
+      update_nginx
+      if app_tier_ok "$env"; then
+        continue
+      fi
+    fi
     repair_backend "$env" && repaired=true
     wait_app_tier "$env" || true
     update_nginx
