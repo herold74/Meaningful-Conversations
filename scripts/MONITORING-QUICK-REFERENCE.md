@@ -87,7 +87,9 @@ cat /etc/cron.d/mc-stack-health-probe
 /usr/local/bin/mc-stack-health-probe.sh && echo OK || echo FAIL
 ```
 
-Zeilen `ALERT` / `TRANSITION: OK -> FAIL` / `RECOVERED` bei Zustandswechsel. Cron: `CRON_TZ=Europe/Vienna`, **alle 10 Min**, `flock` gegen Overlap mit Watchdog.
+Zeilen `ALERT` / `TRANSITION: OK -> FAIL` / `RECOVERED` bei Zustandswechsel. **Prod-Mail (urgent):** bei Production-Ausfall sofort + max. 1×/h Erinnerung solange down; Recovery-Mail bei OK. Empfänger: `/root/.mc-ops-report.env` → `MC_PROBE_ALERT_EMAIL` (optional) oder `MC_OPS_REPORT_EMAIL`. Test: `/usr/local/bin/mc-stack-health-probe.sh --test-mail`
+
+Cron: `CRON_TZ=Europe/Vienna`, **alle 10 Min**, `flock` gegen Overlap mit Watchdog.
 
 ### MC stack watchdog (auto-heal)
 ```bash
